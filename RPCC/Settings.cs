@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Xml.Linq;
 
 namespace RPCC
@@ -11,137 +12,219 @@ namespace RPCC
         /// </summary>
 
         #region Analysis and Plotting
+
         /// <summary>
         ///     Настройки анализа и построения изображения.
         /// </summary>
-
-        private double lowerBrightnessSd;
-        private double upperBrightnessSd;
-        private int apertureRadius;
-        private int annulusInnerRadius;
-        private int annulusOuterRadius;
+        
+        private double _lowerBrightnessSd;
+        private double _upperBrightnessSd;
+        private int _apertureRadius;
+        private int _annulusInnerRadius;
+        private int _annulusOuterRadius;
 
         public double LowerBrightnessSd
         {
-            get { return lowerBrightnessSd; }
+            get => _lowerBrightnessSd;
             set
             {
-                if (value > 0.0)
-                {
-                    lowerBrightnessSd = value;
-                }
-                else
-                {
-                    throw new ArgumentException("Lower brightness SD must be greater than 0.0");
-                }
+                if (value > 0.0) _lowerBrightnessSd = value;
+                else throw new ArgumentException("Lower brightness SD must be greater than 0.0");
             }
         }
+
         public double UpperBrightnessSd
         {
-            get { return upperBrightnessSd; }
+            get => _upperBrightnessSd;
             set
             {
-                if (value > 0.0)
-                {
-                    upperBrightnessSd = value;
-                }
-                else
-                {
-                    throw new ArgumentException("Upper brightness SD must be greater than 0.0");
-                }
+                if (value > 0.0) _upperBrightnessSd = value;
+                else throw new ArgumentException("Upper brightness SD must be greater than 0.0");
             }
         }
+
         public int ApertureRadius
         {
-            get { return apertureRadius; }
+            get => _apertureRadius;
             set
             {
-                if (value > 0)
-                {
-                    apertureRadius = value;
-                }
-                else
-                {
-                    throw new ArgumentException("Aperture radius must be greater than 0");
-                }
+                if (value > 0) _apertureRadius = value;
+                else throw new ArgumentException("Aperture radius must be greater than 0");
             }
         }
+
         public int AnnulusInnerRadius
         {
-            get { return annulusInnerRadius; }
+            get => _annulusInnerRadius;
             set
             {
                 // HACK: Stricter condition may be used - if (value > ApertureRadius)
-                if (value > 0)
-                {
-                    annulusInnerRadius = value;
-                }
-                else
-                {
-                    throw new ArgumentException("Annulus inner radius must be greater than 0");
-                }
+                if (value > 0) _annulusInnerRadius = value;
+                else throw new ArgumentException("Annulus inner radius must be greater than 0");
             }
         }
+
         public int AnnulusOuterRadius
         {
-            get { return annulusOuterRadius; }
+            get => _annulusOuterRadius;
             set
             {
-                if (value > annulusInnerRadius)
-                {
-                    annulusOuterRadius = value;
-                }
-                else
-                {
-                    throw new ArgumentException("Annulus outer radius must be greater than its inner radius ");
-                }
+                if (value > _annulusInnerRadius) _annulusOuterRadius = value;
+                else throw new ArgumentException("Annulus outer radius must be greater than its inner radius ");
+            }
+        }
+
+        #endregion
+
+        #region Cameras
+        /// <summary>
+        ///     Настройки камер.
+        /// </summary>
+
+        private string _snCamG;
+        private string _snCamR;
+        private string _snCamI;
+        private int _numFlushes;
+        private double _camTemp;
+        private int _camBin;
+        // HACK: Try cameras and implement like normal human being would do
+        internal List<string> camRoModes = new List<string>();
+        private int _camRoModeIndex;
+
+        public string SnCamG
+        {
+            get => _snCamG;
+            set
+            {
+                _snCamG = value;
+            }
+        }
+
+        public string SnCamR
+        {
+            get => _snCamR;
+            set
+            {
+                _snCamR = value;
+            }
+        }
+
+        public string SnCamI
+        {
+            get => _snCamI;
+            set
+            {
+                _snCamI = value;
+            }
+        }
+
+        public int NumFlushes
+        {
+            get => _numFlushes;
+            set
+            {
+                if (value >= 0 && value <= 16) _numFlushes = value;
+                else throw new ArgumentException("Number of flushes must be set in range from 0 to 16");
+            }
+        }
+
+        public double CamTemp
+        {
+            get => _camTemp;
+            set
+            {
+                if (value >= -55.0 && value <= 45.0) _camTemp = value;
+                else throw new ArgumentException("Camera temperature must be set in range from -55 to +45 degrees Celsius");
+            }
+        }
+
+        public int CamBin
+        {
+            get => _camBin;
+            set
+            {
+                if (value >= 1 && value <= 16) _camBin = value;
+                else throw new ArgumentException("Camera bin factor must be set in range from 1 to 16");
+            }
+        }
+
+        public int CamRoModeIndex
+        {
+            get => _camRoModeIndex;
+            set
+            {
+                if (value >= 0) _camRoModeIndex = value;
+                else throw new ArgumentException("Camera mode index can't be less than zero");
             }
         }
         #endregion
 
         #region ConfigIO
+
         internal void LoadXmlConfig(string fileName)
         {
             // FIXME: Handle error when attempting to access unexisting node
             // Apparently, using LINQ to XML was a mistake. JSON or simple hand-made .txt parser would be more convenient
-            XDocument config = XDocument.Load(fileName);
+            var config = XDocument.Load(fileName);
 
-            LowerBrightnessSd = (double)config.Root.Element("analysis_and_plotting").Element("lowerBrightnessSd");
-            UpperBrightnessSd = (double)config.Root.Element("analysis_and_plotting").Element("upperBrightnessSd");
-            ApertureRadius = (int)config.Root.Element("analysis_and_plotting").Element("apertureRadius");
-            AnnulusInnerRadius = (int)config.Root.Element("analysis_and_plotting").Element("annulusInnerRadius");
-            AnnulusOuterRadius = (int)config.Root.Element("analysis_and_plotting").Element("annulusOuterRadius");
+            LowerBrightnessSd = (double)config.Root.Element("image_analysis").Element("lowerBrightnessSd");
+            UpperBrightnessSd = (double)config.Root.Element("image_analysis").Element("upperBrightnessSd");
+            ApertureRadius = (int)config.Root.Element("image_analysis").Element("apertureRadius");
+            AnnulusInnerRadius = (int)config.Root.Element("image_analysis").Element("annulusInnerRadius");
+            AnnulusOuterRadius = (int)config.Root.Element("image_analysis").Element("annulusOuterRadius");
+            SnCamG = (string)config.Root.Element("cameras").Element("snCamG");
+            SnCamR = (string)config.Root.Element("cameras").Element("snCamR");
+            SnCamI = (string)config.Root.Element("cameras").Element("snCamI");
+            NumFlushes = (int)config.Root.Element("cameras").Element("numFlushes");
+            CamTemp = (double)config.Root.Element("cameras").Element("camTemp");
+            CamBin = (int)config.Root.Element("cameras").Element("camBin");
+            CamRoModeIndex = (int)config.Root.Element("cameras").Element("camRoModeIndex");
         }
 
         internal void SaveXmlConfig(string fileName)
         {
-            XDocument config = new XDocument(new XElement("settings",
-                new XElement("analysis_and_plotting",
+            var config = new XDocument(new XElement("settings",
+                new XElement("image_analysis",
                     new XElement("lowerBrightnessSd", LowerBrightnessSd),
                     new XElement("upperBrightnessSd", UpperBrightnessSd),
                     new XElement("apertureRadius", ApertureRadius),
                     new XElement("annulusInnerRadius", AnnulusInnerRadius),
-                    new XElement("annulusOuterRadius", AnnulusOuterRadius)
-                    )
-                ));
+                    new XElement("annulusOuterRadius", AnnulusOuterRadius)),
+                new XElement("cameras",
+                    new XElement("snCamG", SnCamG),
+                    new XElement("snCamR", SnCamR),
+                    new XElement("snCamI", SnCamI),
+                    new XElement("numFlushes", NumFlushes),
+                    new XElement("camTemp", CamTemp),
+                    new XElement("camBin", CamBin),
+                    new XElement("camRoModeIndex", CamRoModeIndex))
+            ));
 
             config.Save(fileName);
         }
 
         internal void RestoreDefaultXmlConfig()
         {
-            XDocument config = new XDocument(new XElement("settings",
-                new XElement("analysis_and_plotting",
+            var config = new XDocument(new XElement("settings",
+                new XElement("image_analysis",
                     new XElement("lowerBrightnessSd", 1.0),
                     new XElement("upperBrightnessSd", 2.0),
                     new XElement("apertureRadius", 6),
                     new XElement("annulusInnerRadius", 10),
-                    new XElement("annulusOuterRadius", 15)
-                    )
-                ));
+                    new XElement("annulusOuterRadius", 15)),
+                new XElement("cameras",
+                    new XElement("snCamG", "ML0892515"),
+                    new XElement("snCamR", "ML0882515"),
+                    new XElement("snCamI", "ML0742515"),
+                    new XElement("numFlushes", 5),
+                    new XElement("camTemp", -5.0),
+                    new XElement("camBin", 3),
+                    new XElement("camRoModeIndex", 1))
+            ));
 
             config.Save("SettingsDefault.xml");
         }
+
         #endregion
     }
 }

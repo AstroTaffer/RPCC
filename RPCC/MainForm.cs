@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Windows.Forms;
 using System.Drawing;
-
+using System.Drawing.Imaging;
+using System.IO;
+using System.Text;
+using System.Windows.Forms;
+using System.Threading.Tasks;
 using FliProCameraLib;
-
-using nom.tam.fits;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrayNotify;
 
 namespace RPCC
 {
@@ -16,152 +16,240 @@ namespace RPCC
         ///     Обработка команд пользователя с помощью вызова готовых функций.
         /// </summary>
 
+        internal ushort[][] currentImage;
+            // HACK: Check for memory leak and refreshing error - if occurs, try use this variable as a reference to another
+
+        internal bool isCurrentImageLoaded;
+            // FIXME: If new image is loaded, flag must be reset to false and imageBox must be tuned accordingly
+        internal bool isZoomModeActivated;
+
+        internal readonly Logger logger;
         internal Settings settings;
-        // HACK: Check for memory leak and refreshing error - if occurs, try use this variable as a reference to another
-        internal ushort[][] currentImage = null;
-        internal bool isCurrentImageLoaded = false;
-        // FIXME: If new image is loaded, flag must be reset to false and imageBox must be tuned accordingly
-        internal bool isZoomModeActivated = false;
+
+        private CameraControl _cameraControl;
+        private CameraFocus _focus;
+        
 
         public MainForm()
         {
             InitializeComponent();
+
             timerClock.Enabled = true;
-            AddLogEntry("Application launched");
+            comboBoxImgType.SelectedIndex = 0;
+
+            logger = new Logger(listBoxLogs);
+            logger.AddLogEntry("Application launched");
 
             settings = new Settings();
             try
             {
                 settings.LoadXmlConfig("SettingsDefault.xml");
-                AddLogEntry("Default config loaded succesfully");
+                logger.AddLogEntry("Default config loaded succesfully");
             }
-            catch (System.IO.FileNotFoundException)
+            catch (FileNotFoundException)
             {
-                AddLogEntry("WARNING Default config file not found");
+                logger.AddLogEntry("WARNING Default config file not found");
             }
+
+            _cameraControl = new CameraControl(logger, settings);
+            _focus = new CameraFocus(logger);
+            // _rpccSocketClient= new RpccSocketClient(logger);
+        }
+
+        #region General
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            timerClock.Stop();
+            _cameraControl.DisconnectCameras();
+            // _rpccSocketClient.DisconnectAll();
         }
 
         private void TimerClock_Tick(object sender, EventArgs e)
         {
-            tSStatusClock.Text = DateTime.UtcNow.ToString("yyyy-MM-ddTHH-mm-ss.fff");
+            tSStatusClock.Text = "UTC: " + DateTime.UtcNow.ToString("yyyy-MM-ddTHH-mm-ss.fff");
+
+            _cameraControl.GetStatus();
+            switch (_cameraControl.cameras.Length)
+            {
+                case 3:
+                    labelCam3CcdTemp.Text = $"CCD Temp: {_cameraControl.cameras[2].ccdTemp}";
+                    labelCam3BaseTemp.Text = $"Base Temp: {_cameraControl.cameras[2].baseTemp}";
+                    labelCam3CoolerPwr.Text = $"Cooler Power: {_cameraControl.cameras[2].coolerPwr} %";
+                    labelCam3Status.Text = $"Status: {_cameraControl.cameras[2].status}";
+                    labelCam3RemTime.Text = $"Remaining: {_cameraControl.cameras[2].remTime / 1000}";
+                    goto case 2;
+                case 2:
+                    labelCam2CcdTemp.Text = $"CCD Temp: {_cameraControl.cameras[1].ccdTemp}";
+                    labelCam2BaseTemp.Text = $"Base Temp: {_cameraControl.cameras[1].baseTemp}";
+                    labelCam2CoolerPwr.Text = $"Cooler Power: {_cameraControl.cameras[1].coolerPwr} %";
+                    labelCam2Status.Text = $"Status: {_cameraControl.cameras[1].status}";
+                    labelCam2RemTime.Text = $"Remaining: {_cameraControl.cameras[1].remTime / 1000}";
+                    goto case 1;
+                case 1:
+                    labelCam1CcdTemp.Text = $"CCD Temp: {_cameraControl.cameras[0].ccdTemp}";
+                    labelCam1BaseTemp.Text = $"Base Temp: {_cameraControl.cameras[0].baseTemp}";
+                    labelCam1CoolerPwr.Text = $"Cooler Power: {_cameraControl.cameras[0].coolerPwr}  %";
+                    labelCam1Status.Text = $"Status: {_cameraControl.cameras[0].status}";
+                    labelCam1RemTime.Text = $"Remaining: {_cameraControl.cameras[0].remTime / 1000}";
+                    break;
+            }
+
+            int idleCamNum = 0;
+            for (int i = 0; i < _cameraControl.cameras.Length; i++)
+            {
+                if (_cameraControl.cameras[i].status == "IDLE")
+                {
+                    idleCamNum++;
+                    if (_cameraControl.cameras[i].isExposing)
+                    {
+                        // Data ready
+                        // move to separate thread?
+                        // TODO: ReadCamera->/PlotFits/->SaveFits (split process into 3 functions)
+                        _cameraControl.cameras[i].isExposing = false;
+                    }
+                }
+            }
+
+            if (idleCamNum == _cameraControl.cameras.Length)
+            {
+                if (_cameraControl.task.framesNum > 1)
+                {
+                    _cameraControl.task.framesNum--;
+                    numericUpDownSequence.Value = _cameraControl.task.framesNum;
+                    _cameraControl.StartExposure();
+                }
+                else if (!buttonSurveyStart.Enabled)
+                {
+                    buttonSurveyStart.Enabled = true;
+                    comboBoxImgType.Enabled = true;
+                    numericUpDownSequence.Enabled = true;
+                    numericUpDownExpTime.Enabled = true;
+                    updateCamerasSettingsToolStripMenuItem.Enabled = true;
+                }
+            }
         }
+        #endregion
+
+        #region Launch
+        private void FindCamerasToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _cameraControl.LaunchCameras();
+
+            switch (_cameraControl.cameras.Length)
+            {
+                case 3:
+                    groupBoxCam3.Enabled = true;
+                    radioButtonViewCam3.Enabled = true;
+                    labelCam3Model.Text = $"Model: {_cameraControl.cameras[2].modelName}";
+                    labelCam3Sn.Text = $"Serial Num: {_cameraControl.cameras[2].serialNumber}";
+                    labelCam3Filter.Text = $"Filter: {_cameraControl.cameras[2].filter}";
+                    goto case 2;
+                case 2:
+                    groupBoxCam2.Enabled = true;
+                    radioButtonViewCam2.Enabled = true;
+                    labelCam2Model.Text = $"Model: {_cameraControl.cameras[1].modelName}";
+                    labelCam2Sn.Text = $"Serial Num: {_cameraControl.cameras[1].serialNumber}";
+                    labelCam2Filter.Text = $"Filter: {_cameraControl.cameras[1].filter}";
+                    goto case 1;
+                case 1:
+                    groupBoxCam1.Enabled = true;
+                    radioButtonViewCam1.Enabled = true;
+                    labelCam1Model.Text = $"Model: {_cameraControl.cameras[0].modelName}";
+                    labelCam1Sn.Text = $"Serial Num: {_cameraControl.cameras[0].serialNumber}";
+                    labelCam1Filter.Text = $"Filter: {_cameraControl.cameras[0].filter}";
+                    break;
+            }
+        }
+
+        private void FocusToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var focusForm = new FocusForm();
+            focusForm.Show();
+        }
+        #endregion
 
         #region Logs
-        private void AddLogEntry(string entry)
-        {
-            if (listBoxLogs.Items.Count >= 1024)
-            {
-                SaveLogs();
-                listBoxLogs.Items.Clear();
-                listBoxLogs.Items.Insert(0, $"{DateTime.UtcNow:G} Logs have been saved and cleaned");
-            }
-            listBoxLogs.Items.Insert(0, $"{DateTime.UtcNow:G} {entry}");
-        }
-
-        private void SaveLogs()
-        {
-            string logsFilePath = $"Logs {DateTime.UtcNow.ToString("yyyy-MM-ddTHH-mm-ss")}.txt";
-            System.IO.StreamWriter sw = new System.IO.StreamWriter(logsFilePath);
-            foreach (string item in listBoxLogs.Items)
-            {
-                sw.WriteLine(item);
-            }
-            sw.Close();
-        }
 
         private void ButtonLogsClear_Click(object sender, EventArgs e)
         {
-            listBoxLogs.Items.Clear();
-            AddLogEntry("Logs have been cleaned");
+            logger.ClearLogs();
+            logger.AddLogEntry("Logs have been cleaned");
         }
 
         private void ButtonLogsSave_Click(object sender, EventArgs e)
         {
-            SaveLogs();
-            AddLogEntry("Logs have been saved");
+            logger.SaveLogs();
+            logger.AddLogEntry("Logs have been saved");
         }
+
         #endregion
 
         #region Images Plotting
+
         private void PlotFitsImage(GeneralImageStat gStat)
         {
             pictureBoxFits.Image = null;
             pictureBoxProfile.Image = null;
 
-            double lowerBrightnessBorder = gStat.mean - settings.LowerBrightnessSd * gStat.sd;
-            if (lowerBrightnessBorder < gStat.min)
-            {
-                lowerBrightnessBorder = gStat.min;
-            }
+            var lowerBrightnessBorder = gStat.mean - settings.LowerBrightnessSd * gStat.sd;
+            if (lowerBrightnessBorder < gStat.min) lowerBrightnessBorder = gStat.min;
 
-            double upperBrightnessBorder = gStat.mean + settings.UpperBrightnessSd * gStat.sd;
-            if (upperBrightnessBorder > gStat.max)
-            {
-                upperBrightnessBorder = gStat.max;
-            }
+            var upperBrightnessBorder = gStat.mean + settings.UpperBrightnessSd * gStat.sd;
+            if (upperBrightnessBorder > gStat.max) upperBrightnessBorder = gStat.max;
 
             upperBrightnessBorder -= lowerBrightnessBorder;
-            double colorScale = 255 / upperBrightnessBorder;
+            var colorScale = 255 / upperBrightnessBorder;
 
-            Bitmap bitmapFits = new Bitmap(currentImage.Length, currentImage[0].Length, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+            var bitmapFits = new Bitmap(currentImage.Length, currentImage[0].Length, PixelFormat.Format24bppRgb);
 
             int pixelColor;
             for (ushort i = 0; i < currentImage.Length; i++)
+            for (ushort j = 0; j < currentImage[i].Length; j++)
             {
-                for (ushort j = 0; j < currentImage[i].Length; j++)
-                {
-                    pixelColor = (int)((currentImage[i][j] - lowerBrightnessBorder) * colorScale);
-                    if (pixelColor < 0)
-                    {
-                        pixelColor = 0;
-                    }
-                    if (pixelColor > 255)
-                    {
-                        pixelColor = 255;
-                    }
-                    bitmapFits.SetPixel(j, i, Color.FromArgb(pixelColor, pixelColor, pixelColor));
-                }
+                pixelColor = (int) ((currentImage[i][j] - lowerBrightnessBorder) * colorScale);
+                if (pixelColor < 0) pixelColor = 0;
+                if (pixelColor > 255) pixelColor = 255;
+                bitmapFits.SetPixel(j, i, Color.FromArgb(pixelColor, pixelColor, pixelColor));
             }
 
             pictureBoxFits.Image = bitmapFits;
-            isCurrentImageLoaded = true;
         }
 
         private void PlotProfileImage(ref Settings settings, ProfileImageStat pStat, ushort[][] image)
         {
             // TODO: Find out why does it have to be calculated this specific way
             // TODO: Add profile image scaling and placing parameters
-            Bitmap bitmapProfile = new Bitmap(pictureBoxProfile.Width, pictureBoxProfile.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+            var bitmapProfile =
+                new Bitmap(pictureBoxProfile.Width, pictureBoxProfile.Height, PixelFormat.Format24bppRgb);
 
             double pixelFlux;
             double pixelRadius;
             int pixelBitmapXCoordinate;
             int pixelBitmapYCoordinate;
-            double bitmapScaleX = pictureBoxProfile.Width / (settings.AnnulusOuterRadius * Math.Sqrt(2));
-            double bitmapScaleY = (pictureBoxProfile.Height * 0.9) / (pStat.maxValue - pStat.background);
-            for (int i = 0; i < image.Length; i++)
-                for (int j = 0; j < image[i].Length; j++)
-                {
-                    pixelFlux = image[i][j] - pStat.background;
-                    pixelBitmapYCoordinate = pictureBoxProfile.Height -
-                        (int)Math.Round(pictureBoxProfile.Height * 0.05 + pixelFlux * bitmapScaleY);
-                    
-                    pixelRadius = Math.Sqrt(Math.Pow((i - pStat.centroidYCoordinate), 2) + Math.Pow(j - pStat.centroidXCoordinate, 2));
-                    pixelBitmapXCoordinate = (int)Math.Round(pixelRadius * bitmapScaleX);
+            var bitmapScaleX = pictureBoxProfile.Width / (settings.AnnulusOuterRadius * Math.Sqrt(2));
+            var bitmapScaleY = pictureBoxProfile.Height * 0.9 / (pStat.maxValue - pStat.background);
+            for (var i = 0; i < image.Length; i++)
+            for (var j = 0; j < image[i].Length; j++)
+            {
+                pixelFlux = image[i][j] - pStat.background;
+                pixelBitmapYCoordinate = pictureBoxProfile.Height -
+                                         (int) Math.Round(pictureBoxProfile.Height * 0.05 + pixelFlux * bitmapScaleY);
 
-                    if (pixelBitmapXCoordinate >= 0 &&
-                        pixelBitmapXCoordinate < pictureBoxProfile.Width &&
-                        pixelBitmapYCoordinate >= 0 &&
-                        pixelBitmapYCoordinate < pictureBoxProfile.Height)
-                    {
-                        bitmapProfile.SetPixel(pixelBitmapXCoordinate, pixelBitmapYCoordinate,
-                            Color.FromArgb(255, 255, 255));
-                    }
-                }
+                pixelRadius = Math.Sqrt(Math.Pow(i - pStat.centroidYCoordinate, 2) +
+                                        Math.Pow(j - pStat.centroidXCoordinate, 2));
+                pixelBitmapXCoordinate = (int) Math.Round(pixelRadius * bitmapScaleX);
 
-            int apertureBitmapXCoordinate = (int)Math.Round(settings.ApertureRadius * bitmapScaleX);
-            int annulusInnerRadiusBitmapXCoordinate = (int)Math.Round(settings.AnnulusInnerRadius * bitmapScaleX);
-            for (int i = 0; i < pictureBoxProfile.Height; i++)
+                if (pixelBitmapXCoordinate >= 0 &&
+                    pixelBitmapXCoordinate < pictureBoxProfile.Width &&
+                    pixelBitmapYCoordinate >= 0 &&
+                    pixelBitmapYCoordinate < pictureBoxProfile.Height)
+                    bitmapProfile.SetPixel(pixelBitmapXCoordinate, pixelBitmapYCoordinate,
+                        Color.FromArgb(255, 255, 255));
+            }
+
+            var apertureBitmapXCoordinate = (int) Math.Round(settings.ApertureRadius * bitmapScaleX);
+            var annulusInnerRadiusBitmapXCoordinate = (int) Math.Round(settings.AnnulusInnerRadius * bitmapScaleX);
+            for (var i = 0; i < pictureBoxProfile.Height; i++)
             {
                 bitmapProfile.SetPixel(apertureBitmapXCoordinate, i, Color.FromArgb(255, 0, 0));
                 bitmapProfile.SetPixel(annulusInnerRadiusBitmapXCoordinate, i, Color.FromArgb(0, 0, 255));
@@ -192,71 +280,108 @@ namespace RPCC
                 {
                     pictureBoxProfile.Image = null;
 
-                    int xCoordinate = (int)((double)e.X / pictureBoxFits.Width * currentImage[0].Length);
-                    int yCoordinate = (int)((double)e.Y / pictureBoxFits.Height * currentImage.Length);
-                    AddLogEntry($"Pixel ({xCoordinate}, {yCoordinate}) selected");
+                    var xCoordinate = (int) ((double) e.X / pictureBoxFits.Width * currentImage[0].Length);
+                    var yCoordinate = (int) ((double) e.Y / pictureBoxFits.Height * currentImage.Length);
+                    logger.AddLogEntry($"Pixel ({xCoordinate}, {yCoordinate}) selected");
 
-                    if ((xCoordinate - settings.AnnulusOuterRadius) < 0 ||
-                        (xCoordinate + settings.AnnulusOuterRadius) > (currentImage[0].Length - 1) ||
-                        (yCoordinate - settings.AnnulusOuterRadius) < 0 ||
-                        (yCoordinate + settings.AnnulusOuterRadius) > (currentImage.Length - 1))
+                    if (xCoordinate - settings.AnnulusOuterRadius < 0 ||
+                        xCoordinate + settings.AnnulusOuterRadius > currentImage[0].Length - 1 ||
+                        yCoordinate - settings.AnnulusOuterRadius < 0 ||
+                        yCoordinate + settings.AnnulusOuterRadius > currentImage.Length - 1)
                     {
-                        AddLogEntry("WARNING Pixel is too close to the frame borders");
+                        logger.AddLogEntry("WARNING Pixel is too close to the frame borders");
                     }
                     else
                     {
-                        ushort[][] subProfileImage = new ushort[2 * settings.AnnulusOuterRadius + 1][];
-                        for (int i = 0; i < subProfileImage.Length; i++)
+                        var subProfileImage = new ushort[2 * settings.AnnulusOuterRadius + 1][];
+                        for (var i = 0; i < subProfileImage.Length; i++)
                         {
                             subProfileImage[i] = new ushort[2 * settings.AnnulusOuterRadius + 1];
-                            for (int j = 0; j < subProfileImage[i].Length; j++)
-                            {
-                                subProfileImage[i][j] = 
+                            for (var j = 0; j < subProfileImage[i].Length; j++)
+                                subProfileImage[i][j] =
                                     currentImage[yCoordinate - settings.AnnulusOuterRadius + i]
-                                    [xCoordinate - settings.AnnulusOuterRadius + j];
-                            }
+                                        [xCoordinate - settings.AnnulusOuterRadius + j];
                         }
 
-                        ProfileImageStat localStat = new ProfileImageStat(subProfileImage, ref settings);
-                        AddLogEntry($"Maximum: {localStat.maxValue} " +
-                            $"({localStat.maxXCoordinate + xCoordinate - settings.AnnulusOuterRadius}, " +
-                            $"{localStat.maxYCoordinate + yCoordinate - settings.AnnulusOuterRadius})");
-                        AddLogEntry($"Background: {localStat.background:0.#}");
-                        AddLogEntry($"Centroid: ({localStat.centroidXCoordinate + xCoordinate - settings.AnnulusOuterRadius:0.#}, " +
+                        var localStat = new ProfileImageStat(subProfileImage, ref settings);
+                        logger.AddLogEntry($"Maximum: {localStat.maxValue} " +
+                                    $"({localStat.maxXCoordinate + xCoordinate - settings.AnnulusOuterRadius}, " +
+                                    $"{localStat.maxYCoordinate + yCoordinate - settings.AnnulusOuterRadius})");
+                        logger.AddLogEntry($"Background: {localStat.background:0.#}");
+                        logger.AddLogEntry(
+                            $"Centroid: ({localStat.centroidXCoordinate + xCoordinate - settings.AnnulusOuterRadius:0.#}, " +
                             $"{localStat.centroidYCoordinate + yCoordinate - settings.AnnulusOuterRadius:0.#})");
-                        AddLogEntry($"SNR: {localStat.snr:0.#}");
-                        AddLogEntry($"FWHM: {localStat.fwhm:0.##}");
+                        logger.AddLogEntry($"SNR: {localStat.snr:0.#}");
+                        logger.AddLogEntry($"FWHM: {localStat.fwhm:0.##}");
                         PlotProfileImage(ref settings, localStat, subProfileImage);
-                        AddLogEntry("Profile picture plotted succesfully");
+                        logger.AddLogEntry("Profile picture plotted succesfully");
                     }
                 }
-
             }
             else
             {
-                AddLogEntry("WARNING Image not loaded");
+                logger.AddLogEntry("WARNING Image not loaded");
             }
+        }
+
+        #endregion
+
+        #region Survey
+        private void ButtonSurveyStart_Click(object sender, EventArgs e)
+        {
+            _cameraControl.task.framesNum = (int)numericUpDownSequence.Value;
+            _cameraControl.task.framesType = comboBoxImgType.Text;
+            if (_cameraControl.task.framesType == "Bias") _cameraControl.task.framesExpTime = 0;
+            else _cameraControl.task.framesExpTime = (int)numericUpDownExpTime.Value * 1000;
+            
+            if (radioButtonViewCam1.Checked) _cameraControl.task.viewCamIndex = 0;
+            else if (radioButtonViewCam2.Checked) _cameraControl.task.viewCamIndex = 1;
+            else if (radioButtonViewCam3.Checked) _cameraControl.task.viewCamIndex = 2;
+
+            _cameraControl.SetSurveySettings();
+            _cameraControl.StartExposure();
+
+            buttonSurveyStart.Enabled = false;
+            comboBoxImgType.Enabled = false;
+            numericUpDownSequence.Enabled = false;
+            numericUpDownExpTime.Enabled = false;
+            updateCamerasSettingsToolStripMenuItem.Enabled = false;
+        }
+
+        private void ButtonSurveyStop_Click(object sender, EventArgs e)
+        {
+            _cameraControl.CancelSurvey();
+            _cameraControl.task.framesNum = 1;
+            numericUpDownSequence.Value = 1;
+
+            buttonSurveyStart.Enabled = true;
+            comboBoxImgType.Enabled = true;
+            numericUpDownSequence.Enabled = true;
+            numericUpDownExpTime.Enabled = true;
+            updateCamerasSettingsToolStripMenuItem.Enabled = true;
         }
         #endregion
 
         #region Options
+
         private void SettingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            // TODO: Think of a way to restrict user acess to settings when busy to prevent potential bugs
-            SettingsForm settingsForm = new SettingsForm(ref settings);
+            var settingsForm = new SettingsForm(settings);
             settingsForm.ShowDialog();
-            if (settingsForm.DialogResult == DialogResult.OK)
-            {
-                AddLogEntry("Settings changed succesfully");
-            }
+            if (settingsForm.DialogResult == DialogResult.OK) logger.AddLogEntry("Settings changed succesfully");
         }
-        
+
+        private void UpdateCameraSettingsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _cameraControl.UpdateSettings();
+        }
+
         private void LoadConfigToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (openFileDialogConfig.ShowDialog() == DialogResult.OK)
             {
                 settings.LoadXmlConfig(openFileDialogConfig.FileName);
-                AddLogEntry($"Config file {saveFileDialogConfig.FileName} loaded succesfully");
+                logger.AddLogEntry($"Config file {saveFileDialogConfig.FileName} loaded succesfully");
             }
         }
 
@@ -265,80 +390,51 @@ namespace RPCC
             if (saveFileDialogConfig.ShowDialog() == DialogResult.OK)
             {
                 settings.SaveXmlConfig(saveFileDialogConfig.FileName);
-                AddLogEntry($"Config file {saveFileDialogConfig.FileName} saved succesfully");
+                logger.AddLogEntry($"Config file {saveFileDialogConfig.FileName} saved succesfully");
             }
         }
+
         #endregion
 
         #region Debug Menu
-        private void AddTestLogEntryToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            AddLogEntry("Two things fill the mind with ever new and increasing admiration and awe, " +
-                "the more often and steadily we reflect upon them: " +
-                "the starry heavens above me and the moral law within me");
-        }
 
         private void TestDLLlibrariesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Fits templateFits = new Fits("TemplateHeader.fits");
-            Header templateHeader = templateFits.GetHDU(0).Header;
-            AddLogEntry($"Template DATE-OBS: {templateHeader.GetStringValue("DATE-OBS")}");
-            templateFits.Close();
+            var templateFits = new RpccFits("TemplateHeader.fits");
+            var templateHeader = templateFits.header;
+            logger.AddLogEntry($"Template DATE-OBS: {templateHeader.GetStringValue("DATE-OBS")}");
 
-            System.Text.StringBuilder libVer = new System.Text.StringBuilder(128);
-            IntPtr len = new IntPtr(128);
-            int errorLastFliCmd = NativeMethods.FLIGetLibVersion(libVer, len);
+            var libVer = new StringBuilder(128);
+            var len = new IntPtr(128);
+            var errorLastFliCmd = NativeMethods.FLIGetLibVersion(libVer, len);
             if (errorLastFliCmd == 0)
-            {
-                AddLogEntry(libVer.ToString());
-            }
+                logger.AddLogEntry(libVer.ToString());
             else
-            {
-                AddLogEntry("WARNING Unable to retrieve FLI library version");
-            }
+                logger.AddLogEntry("WARNING Unable to retrieve FLI library version");
         }
 
-        private void LoadTestImageToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void LoadTestImageToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Fits testFits = new Fits("TestImage.fits");
-            ImageHDU testHdu = (ImageHDU)testFits.ReadHDU();
-            Array[] testImageRaw = (Array[])testHdu.Kernel;
-            testFits.Close();
-            
-            int imgHeight = testImageRaw.Length;
-            int imgWidth = testImageRaw[0].Length;
-            currentImage = new ushort[imgHeight][];
-            for (int i=0; i < imgHeight; i++)
-            {
-                currentImage[i] = new ushort[imgHeight];
-                for (int j=0; j < imgWidth; j++)
-                {
-                    // HACK: Why is this needed and how does it work?
-                    int buffData = short.MaxValue + (short)testImageRaw[i].GetValue(j) + 1;
-                    currentImage[i][j] = (ushort)buffData;
-                }
-            }
-            AddLogEntry("Test image loaded succesfully");
+            var testFits = new RpccFits("TestImage.fits");
+            currentImage = testFits.data;
+            isCurrentImageLoaded = true;
+            logger.AddLogEntry("Test image loaded succesfully");
 
-            GeneralImageStat testStat = new GeneralImageStat(currentImage);
-            AddLogEntry($"Minimum: {testStat.min}");
-            AddLogEntry($"Maximum: {testStat.max}");
-            AddLogEntry($"Mean: {testStat.mean:0.##}");
-            AddLogEntry($"SD: {testStat.sd:0.##}");
+            var testStat = new GeneralImageStat(currentImage);
+            logger.AddLogEntry($"Minimum: {testStat.min}");
+            logger.AddLogEntry($"Maximum: {testStat.max}");
+            logger.AddLogEntry($"Mean: {testStat.mean:0.##}");
+            logger.AddLogEntry($"SD: {testStat.sd:0.##}");
 
-            PlotFitsImage(testStat);
-            AddLogEntry("Test image plotted succesfully");
+            await Task.Run(() => PlotFitsImage(testStat));
+            logger.AddLogEntry("Test image plotted succesfully");
         }
 
         private void RestoreDefaultConfigFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
             settings.RestoreDefaultXmlConfig();
-            AddLogEntry("Default config file restored succesfully");
+            logger.AddLogEntry("Default config file restored succesfully");
         }
         #endregion
     }
 }
-
-/*
- Добавить считывание координат курсора "на лету" при наведении на pictureBoxFits
- */
