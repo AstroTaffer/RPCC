@@ -1,40 +1,35 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace RPCC
 {
     internal class CameraFocus
     {
-        private const double _maxEll = 0.25;
-        private const int _minStars = 10;
+        private const int maxFocBadFrames = 5;
+        private const int maxFocCycles = 15;
+
+        /// <summary>
+        ///     Функции фокусировки камеры.
+        /// </summary>
         private readonly SerialFocus _serialFocus = new SerialFocus();
-        public double ell;
+
+        private readonly Logger log;
 
         // переменные фокусировки
         public double focus_pos;
         public int framesAfterRunFocus;
 
-        // переменные кадра
-        public double FWHM;
-        public double FWHM_Best;
-
-        // числа в конфиг
-        private double FWHM_FOCUSED = 3.0;
-        private double FWHM_GOOD = 3.2;
         public bool initPhoto;
-
-        private readonly Logger logger;
-        public double stars_num;
+        public bool isFocused;
         public bool stopAll;
 
         // флаги работы камер
         public bool stopSurvey;
 
-        /// <summary>
-        ///     Функции фокусировки камеры.
-        /// </summary>
         public CameraFocus(Logger logger)
         {
-            this.logger = logger;
+            log = logger;   
         }
 
         public bool InitPhoto => initPhoto;
@@ -44,6 +39,177 @@ namespace RPCC
         public bool Init()
         {
             return _serialFocus.Init();
+        }
+
+        public bool AutoFocus()
+        {
+            //Обнуляем значение переменной ручной остановки фокуса.
+            var stopFocus = false;
+            var exit = false; // exit flag
+            var counter = 0; // focus cycles counter
+            // var focBadFrames = 0; // bad focus frames
+            var frames = new List<AnalysisImageForFocus>();
+            var z = _serialFocus.currentPosition;
+            var zs = new List<int> {z};  //список позиций фокусировщика 
+            const int n = 20;  //количество точек для построения кривой фокусировки
+            const int shift = 150;
+            double rKron = 0;  //радиус крона
+
+            // Reconfigure(); //TODO проверка камер
+
+            //check photometer status after reconfigure
+            if (!initPhoto)
+            {
+                //TODO флаг проверки работы камеры?
+                log.AddLogEntry("FOCUS: InitPhoto=false, exit.");
+                return false;
+            }
+
+            Repoint4Focus(); // Перенаводимся в зенит для фокусировки
+
+            do
+            {
+                log.AddLogEntry("FOCUS: Focus module is started");
+                if (counter == 0)
+                {
+                    frames.Add(new AnalysisImageForFocus(getImForFocus(z), rKron)); //делаем снимок
+                    var lastIndex = frames.Count - 1;
+                    if (!frames[lastIndex].CheckStarsNum())
+                    {
+                        //мало звезд - игнорируем, скорее всего облако. Но может в диком дефокусе!
+                        //TODO check clouds
+                        frames.RemoveAt(lastIndex);
+                        continue;
+                    }
+
+                    if (frames[lastIndex].CheckFocused())
+                    {
+                        focus_pos = z;
+                        isFocused = true;
+                        log.AddLogEntry("FOCUS: already focused");
+                        break;
+                        // изображение сфокусировано, выходим из цикла
+                    }
+
+                    rKron = frames[lastIndex].RKron;
+                    _serialFocus
+                        .FRun_To(-3000); //переводим фокусер в крайнее положение, чтобы равномерно пройтись по диапазону 
+                }
+
+                counter++;
+
+                for (var i = 0; i < n; i++) // Сделать N-1 снимков с малой экспозицией для
+                    // разных положений фокуса z, распределенных по
+                    // всему диапазону значений, найти центроиды звезд
+                {
+                    z = _serialFocus.currentPosition;
+                    zs.Add(z);
+                    frames.Add(new AnalysisImageForFocus(getImForFocus(z), rKron));
+                    _serialFocus.FRun_To(shift);
+                }
+
+                //Для каждого кадра находим среднее значение HFD
+                var hfds = frames.Select(frame => frame.MeanHfd).ToList();
+
+                double[] par = {-100, 5, 1500, -2};
+                var epsx = 0.000001;
+                var maxits = 0;
+                int info;
+                alglib.lsfitstate state;
+                alglib.lsfitreport rep;
+
+                var rows = zs.Count;
+                var columns = 1;
+                var zsArray = new double[rows, columns];
+                for (var i = 0; i < rows; i++) zsArray[i, 0] = zs[i];
+                var zaArr = new double[rows, columns];
+                for (var i = 0; i < rows; i++) zaArr[i, 0] = new[] {zsArray[i, 0]}[0];
+
+                //
+                // Fitting without weights
+                //
+                alglib.lsfitcreatefgh(zaArr, hfds.ToArray(), par, out state);
+                alglib.lsfitsetcond(state, epsx, maxits);
+                alglib.lsfitfit(state, Hyperbola, Hyper_grad, Hyper_hess, null, null);
+                alglib.lsfitresults(state, out info, out par, out rep);
+                // Console.WriteLine("{0}", info); // EXPECTED: 2
+                // Console.WriteLine("{0}", alglib.ap.format(par, 1));  //нужен второй параметр
+                // Console.ReadLine();
+
+                var newFocus = (int) par[2] - _serialFocus.currentPosition;
+                var testShot = new AnalysisImageForFocus(getImForFocus(newFocus, true), rKron);
+
+                if (testShot.CheckFocused()) stopFocus = true;
+                /*
+                 * todo минимально необходимый алгоритм. Потом при необходимости дополнить
+                 */
+            } while (!stopSurvey && !stopAll && !stopFocus && !exit);
+
+            return true;
+        }
+
+        private static void Hyperbola(double[] x, double[] z, ref double func, object o)
+        {
+            func = x[1] * H(x, z[0]) + x[3];
+        }
+
+        private static double H(double[] x, double z)
+        {
+            return Math.Sqrt(1 + Math.Pow(z - x[2], 2) / Math.Pow(x[0], 2));
+        }
+
+        private static void Hyper_grad(double[] x, double[] z, ref double func, double[] grad, object o)
+        {
+            var h = H(x, z[0]);
+            func = x[1] * h + x[3];
+            // grad[0] = x[2] * (x[0] - x[3]) / (Math.Pow(x[1], 2) * h);
+            grad[0] = -x[1] * Math.Pow(z[0] - x[2], 2) / (Math.Pow(x[0], 3) * h);
+            grad[1] = h;
+            grad[2] = -grad[0];
+            grad[3] = 1;
+        }
+
+        private static void Hyper_hess(double[] x, double[] z, ref double func, double[] grad, double[,] hess, object o)
+        {
+            var h = H(x, z[0]);
+            func = x[2] * h + x[4];
+            // grad[0] = x[2] * (x[0] - x[3]) / (Math.Pow(x[1], 2) * h);
+            grad[0] = -x[1] * Math.Pow(z[0] - x[2], 2) / (Math.Pow(x[0], 3) * h);
+            grad[1] = h;
+            grad[2] = -grad[0];
+            grad[3] = 1;
+
+            // hess[0, 0] =
+            //     x[2] * (Math.Pow(x[1], -2) - Math.Pow(x[0] - x[3], 2) / (Math.Pow(x[1], 4) * Math.Pow(h, 2))) / h;
+            // hess[0, 1] = -(2 * x[2] * (x[0] - x[3]) / (Math.Pow(x[1], 3) * h)) +
+            //              x[2] * Math.Pow(x[0] - x[3], 3) / (Math.Pow(x[1], 5) * Math.Pow(h, 3));
+            // hess[1, 0] = hess[0, 1];
+            // hess[0, 2] = (x[0] - x[3]) / (Math.Pow(x[1], 2) * h);
+            // hess[2, 0] = hess[0, 2];
+            // hess[0, 3] = -(x[2] / (Math.Pow(x[1], 2) * h)) +
+            //              x[2] * Math.Pow(x[0] - x[3], 2) / Math.Pow(x[1], 4) * Math.Pow(h, 3);
+            // hess[3, 0] = hess[0, 3];
+            // hess[0, 4] = 0;
+            // hess[4, 0] = 0;
+            hess[0, 0] = 3 * x[1] * Math.Pow(z[0] - x[2], 2) / Math.Pow(x[0], 4) * h -
+                         x[1] * Math.Pow(z[0] - x[2], 4) / (Math.Pow(x[0], 6) * Math.Pow(h, 3));
+            hess[0, 1] = -(Math.Pow(z[0] - x[2], 2) / (Math.Pow(x[0], 3) * h));
+            hess[1, 0] = hess[0, 1];
+            hess[0, 2] = 2 * x[1] * (z[0] - x[2]) / (Math.Pow(x[0], 3) * h) -
+                         x[1] * Math.Pow(z[0] - x[2], 3) / (Math.Pow(x[0], 5) * Math.Pow(h, 3));
+            hess[2, 0] = hess[0, 2];
+            hess[0, 3] = 0;
+            hess[3, 0] = 0;
+            hess[1, 1] = 0;
+            hess[1, 2] = -((z[0] - x[2]) / (Math.Pow(x[0], 2) * h));
+            hess[2, 1] = hess[1, 2];
+            hess[1, 3] = 0;
+            hess[3, 1] = 0;
+            hess[2, 2] = x[1] / (Math.Pow(z[1], 2) * h) -
+                         x[1] * Math.Pow(z[0] - x[2], 2) / (Math.Pow(x[0], 4) * Math.Pow(h, 3));
+            hess[2, 3] = 0;
+            hess[3, 2] = 0;
+            hess[3, 3] = 0;
         }
 
         private bool Repoint4Focus()
@@ -58,287 +224,21 @@ namespace RPCC
             // return success;
         }
 
-        /*
-        если фокусировка в зените - перенаводимся, ждем окончания процедуры!
-        необходимость фокусировки каждой камеры задается отдельно переменными GoFocus_Х, они же флаги для выхода из цикла (если обе false)
-        но снимаем всегда двумя камерами - контроль вытянутости и кол-ва звезд!
-
-        функция обнуляет глобальную переменную Frames_after_RunFocus и обновляет поля в структуре Tube_FWHM {double FWHM; double Ell; int NStar; int FocPosition; double Best; int Bad_Frames;}
-        ~90 шагов на 1 пикс FWHM
-        PV ошибка измерения FWHM ~0.5пикселя
-
-        ДОБАВИТЬ КО ВСЕМ РЕТУРНАМ УСТАНОВКУ параметров Tube_FWHM!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        это почти делает setFWHM
-        */
-        public bool AutoFocus(string Where, bool GoFocus)
+        private GetDataFromFITS getImForFocus(int z, bool check = false)
         {
-            logger.AddLogEntry("FOCUS: Focus module is started");
-            //Обнуляем значение переменной ручной остановки фокуса.
-            var stopFocus = false;
-            Reconfigure(); //TODO проверка камер
-
-            //check photometer status after reconfigure
-
-            if (!initPhoto)
-            {
-                //TODO флаг проверки работы камеры?
-                logger.AddLogEntry("FOCUS: InitPhoto=false, exit.");
-                FWHM_Best = 0;
-                return false;
-            }
-
-
-            if (Where == "Zenith") Repoint4Focus(); //Перенаводимся в зенит для фокусировки
-
-            /*
-                дуем на 500 шагов к середине диапазона фокусировки (+ для H и C, - для всех остальных)
-                проверяем FWHM, если меньше 8, то рассчитываем сдвиг в ту же сторону еще на 70*(8-FWHM)
-                проверяем, если FWHM не около 8, то что-то с фотометром. (контроль положения)
-                теперь точно в дефокусе и точно знаем где фокус (в - для H и C, в + для всех остальных)
-                контролируем кол-во плохих кадров, общее число циклов, сумму сдвигов
-                как избежать повторного сдвига при перезапуске фокусировки?
-                если что-то пошло не так при фокусировке => возвращаем фокус обратно!
-            */
-            var shift = -300; //set default defocus shift
-            logger.AddLogEntry("FOCUS: Defocus is started");
-            var focCycles = 0; //focus cycles counter
-            var focBadFrames = 0; //bad focus frames
-            var exit = false; //exit flag
-            var zenithFlag = 0; //zenith flag
-            var sumShift = 0; //accumulate shifts 
-            const int maxFocBadFrames = 5;
-            const int maxFocCycles = 15;
-            do
-            {
-                //сдвигаем в самом начале и если последнее измерение было хорошим, пропускаем если измерение было плохим
-                if (focBadFrames == 0)
-                {
-                    _serialFocus.FRun_To(shift);
-                    sumShift += shift;
-                    logger.AddLogEntry("FOCUS: SumShift=" + sumShift);
-                    focCycles++;
-                }
-
-                //get frames and set new fwhm
-                if (!RunFocusImaging())
-                {
-                    logger.AddLogEntry("FWHM information is not available, return focus and exit");
-                    _serialFocus.FRun_To(-1 * sumShift);
-                    return false;
-                }
-
-                //проверяем валидность измерений (кол-во звезд, вытянутость), счетчик плохих кадров + или 0.
-                if (!CheckImageQuality())
-                {
-                    focBadFrames++;
-                    //если плохих >=Max_Foc_Bad_Frames => репойнт в зенит и рестарт процедуры, но без первого сдвига.
-                    if (focBadFrames >= maxFocBadFrames)
-                    {
-                        if (zenithFlag > 0)
-                        {
-                            logger.AddLogEntry("FOCUS: Bad frames limit at Zenith, exit");
-                            exit = true;
-                            continue;
-                        }
-
-                        logger.AddLogEntry("FOCUS: Bad frames limit, repoint to Zenith");
-                        Repoint4Focus();
-                        zenithFlag += 1;
-                        focBadFrames = 0;
-                        focCycles = 0;
-                        if (GoFocus && shift != 0) shift /= Math.Abs(shift); //сохраняем знак сдвига
-                        logger.AddLogEntry("FOCUS: Restart focus at Zenith");
-                    }
-                    else
-                    {
-                        logger.AddLogEntry("FOCUS: Bad frames, zenith_flag another cycle");
-                    }
-
-                    continue; //еще раз к началу цикла
-                }
-
-                //проверяем FWHM, если меньше 8, то рассчитываем сдвиг в ту же сторону еще на 90*(8-FWHM)
-                if (GoFocus && FWHM < 6.0 && shift != 0)
-                    shift = (int) (shift / Math.Abs(shift) * 90 * (6.0 - FWHM));
-                else
-                    shift = 0;
-
-                if (focCycles >= 5) exit = true;
-                if (focBadFrames >= maxFocBadFrames) exit = true;
-                if (sumShift > 1000) exit = true;
-                if (shift == 0) exit = true;
-            } while (!stopSurvey && !stopAll && !stopFocus && !exit);
-
-            //вышли из цикла
-            if (stopSurvey || stopAll || stopFocus)
-            {
-                logger.AddLogEntry("FOCUS: aborted, return focus and exit");
-                _serialFocus.FRun_To(-1 * sumShift);
-                FWHM_Best = 0;
-                return false;
-            }
-
-            //много плохих кадров
-            if (focBadFrames >= maxFocBadFrames)
-            {
-                logger.AddLogEntry("FOCUS: can't defocus, bad frames limit, return focus and exit");
-                _serialFocus.FRun_To(-1 * sumShift);
-                FWHM_Best = 0;
-                return false;
-            }
-
-            //после трех попыток дефокуса
-            if (FWHM < 6.0 && GoFocus)
-            {
-                logger.AddLogEntry("FOCUS: can't defocus after 3 iterations, return focus and exit");
-                _serialFocus.FRun_To(-1 * sumShift);
-                FWHM_Best = 0;
-                return false; //что-то сломалось, выходим
-            }
-
-            //теперь точно в дефокусе и точно знаем где фокус
-            //начинаем движение в сторону фокуса
-            focCycles = 0;
-            focBadFrames = 0;
-            shift = 1;
-            var oldFwhm = FWHM;
-            zenithFlag = 0;
-            do
-            {
-                logger.AddLogEntry("Focus cycle #" + focCycles);
-                if (focBadFrames == 0)
-                {
-                    //сдвиг считаем как 45*(FWHM-1.5), тогда должны дойти до фокуса за 4-5 шагов.
-                    if (GoFocus) shift = (int)(shift / Math.Abs(shift) * 45 * (FWHM - 1.5));
-                    _serialFocus.FRun_To(shift);
-                    sumShift += shift;
-                    logger.AddLogEntry("FOCUS: SumShift=" + sumShift);
-                    focCycles++;
-                }
-
-                if (!RunFocusImaging())
-                {
-                    logger.AddLogEntry("FWHM information is not available, return focus and exit");
-                    _serialFocus.FRun_To(-1 * sumShift);
-                    FWHM_Best = 0;
-                    return false;
-                }
-
-                //проверяем валидность измерений (кол-во звезд, вытянутость в двух трубах), счетчик плохих кадров+ или 0.
-                if (!CheckImageQuality())
-                {
-                    focBadFrames++;
-                    //если плохих >=Max_Foc_Bad_Frames => репойнт в зенит.
-                    if (focBadFrames >= maxFocBadFrames)
-                    {
-                        if (zenithFlag > 0)
-                        {
-                            logger.AddLogEntry("FOCUS: Bad frames limit at Zenith, exit");
-                            continue;
-                        }
-
-                        logger.AddLogEntry("FOCUS: Bad frames limit, repoint to Zenith");
-                        zenithFlag += 1;
-                        Repoint4Focus();
-                        focBadFrames = 0;
-                        focCycles = 0;
-                        logger.AddLogEntry("FOCUS: Restart focus at Zenith");
-                    }
-                    else
-                    {
-                        logger.AddLogEntry("FOCUS: Bad frames, zenith_flag another cycle");
-                    }
-
-                    continue; //еще раз к началу цикла
-                }
-
-                focBadFrames = 0;
-
-                //выходим из цикла когда ((FWHM<2.2) или (ухудшается FWHM) или измение FWHM<0.2)
-                logger.AddLogEntry("check\n");
-
-                if (FWHM < 2.2 || !GoFocus || oldFwhm < FWHM ||
-                    Math.Abs(oldFwhm - FWHM) < 0.2)
-                {
-                    logger.AddLogEntry("Focus ok\n");
-                    GoFocus = false;
-                }
-
-                if (FWHM < 2.2) logger.AddLogEntry("FWHM < 2.2\n");
-                if (GoFocus) logger.AddLogEntry("GoFocus=true\n");
-                if (oldFwhm < FWHM) logger.AddLogEntry("Old_FWHM_W < West_FWHM.FWHM\n");
-                if (Math.Abs(oldFwhm - FWHM) < 0.2) logger.AddLogEntry("Math.Abs(Old_FWHM_W - West_FWHM.FWHM)<0.2\n");
-
-                oldFwhm = FWHM;
-            } while (!stopSurvey && !stopAll && !stopFocus && focCycles < maxFocCycles &&
-                     focBadFrames < maxFocBadFrames && GoFocus);
-
-            if (focCycles < maxFocCycles) logger.AddLogEntry("Foc_Cycles<Max_Foc_Cycles\n");
-            if (focBadFrames < maxFocBadFrames) logger.AddLogEntry("Foc_Bad_Frames<Max_Foc_Bad_Frames\n");
-
-            //вышли из цикла
-            if (stopSurvey || stopAll || stopFocus)
-            {
-                logger.AddLogEntry("FOCUS: aborted, return focus and exit");
-                _serialFocus.FRun_To(-1 * sumShift);
-                FWHM_Best = 0;
-                return false;
-            }
-
-            //после много попыток дефокуса
-            if (focCycles >= maxFocCycles)
-            {
-                logger.AddLogEntry("FOCUS: Max cycles reached, return focus and exit");
-                _serialFocus.FRun_To(-1 * sumShift);
-                FWHM_Best = 0;
-                return false;
-            }
-
-            if (focBadFrames >= maxFocBadFrames)
-            {
-                logger.AddLogEntry("FOCUS: Bad frames limit, return focus and exit");
-                _serialFocus.FRun_To(-1 * sumShift);
-                FWHM_Best = 0;
-                return false;
-            }
-
-            FWHM_Best = FWHM;
-            framesAfterRunFocus = 0;
-            return true;
-        }
-
-        private void Reconfigure()
-        {
-            /*
-             * Эта штука должна проверять состояние камер и прочей железяки,
-             * вызывается из соответствующего места, здесь это просто затычка
-             */
-            throw new NotImplementedException();
-        }
-
-        private bool RunFocusImaging()
-        {
+            _serialFocus.FRun_To(z);
             // TODO get im
-            throw new NotImplementedException();
+            // return new double[2048, 2048];
+            return new GetDataFromFITS("path", check);
         }
 
-        private bool CheckImageQuality()
-        {
-            if (FWHM > _maxEll)
-            {
-                //поехали обе трубы, игнорируем
-                logger.AddLogEntry("Images stretched.");
-                return false;
-            }
-
-            if (stars_num < _minStars)
-            {
-                //мало звезд на обоих кадрах, игнорируем, скорее всего облако. Но может обе в диком дефокусе !
-                logger.AddLogEntry("Few stars on both images.");
-                return false;
-            }
-            logger.AddLogEntry("Focus images ok!.");
-            return true;
-        }
+        // private void Reconfigure()
+        // {
+        //     /*
+        //      * Эта штука должна проверять состояние камер и прочей железяки,
+        //      * вызывается из соответствующего места, здесь это просто затычка
+        //      */
+        //     throw new NotImplementedException();
+        // }
     }
 }

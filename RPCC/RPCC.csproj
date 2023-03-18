@@ -76,11 +76,21 @@
     <ApplicationIcon>FliLogoMod.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="alglib.net, Version=3.19.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\alglib.net.3.19.0\lib\net45\alglib.net.dll</HintPath>
+    </Reference>
     <Reference Include="CSharpFITS_v1.1, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\CSharpFITS.1.1\lib\Net20\CSharpFITS_v1.1.dll</HintPath>
     </Reference>
+    <Reference Include="MathNet.Numerics, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MathNet.Numerics.5.0.0\lib\net461\MathNet.Numerics.dll</HintPath>
+    </Reference>
+    <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.ValueTuple, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.4.0\lib\net461\System.ValueTuple.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -92,6 +102,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AnalysisImageForFocus.cs" />
     <Compile Include="CameraControl.cs" />
     <Compile Include="CameraFocus.cs" />
     <Compile Include="FitsAnalysis.cs" />
@@ -102,6 +113,7 @@
     <Compile Include="FocusForm.Designer.cs">
       <DependentUpon>FocusForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="GetDataFromFITS.cs" />
     <Compile Include="LibFliNative.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="MainForm.cs">

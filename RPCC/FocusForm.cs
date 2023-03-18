@@ -10,7 +10,9 @@ namespace RPCC
     {
         private static readonly Timer FocusTimer = new Timer();
         private readonly SerialFocus _serialFocus = new SerialFocus();
+
         private int _counter;
+
         // private CameraFocus _focus = new CameraFocus();
         private int _fPos;
 
@@ -74,8 +76,11 @@ namespace RPCC
 
         private void GetData()
         {
-            const int waitTime = 50;
+            const int waitTime = 1000;
             _serialFocus.Write2Serial("2gcp");
+            _serialFocus.Write2Serial("2gsf");
+            _serialFocus.Write2Serial("2gss");
+            _serialFocus.Write2Serial("2ges");
             Thread.Sleep(waitTime);
         }
 
