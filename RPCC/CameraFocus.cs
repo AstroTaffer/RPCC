@@ -6,7 +6,7 @@ namespace RPCC
 {
     internal class CameraFocus
     {
-        private const int maxFocBadFrames = 5;
+        // private const int maxFocBadFrames = 5;
         private const int maxFocCycles = 15;
 
         /// <summary>
@@ -45,14 +45,14 @@ namespace RPCC
         {
             //Обнуляем значение переменной ручной остановки фокуса.
             var stopFocus = false;
-            var exit = false; // exit flag
+            // var exit = false; // exit flag
             var counter = 0; // focus cycles counter
             // var focBadFrames = 0; // bad focus frames
             var frames = new List<AnalysisImageForFocus>();
             var z = _serialFocus.currentPosition;
             var zs = new List<int> {z};  //список позиций фокусировщика 
             const int n = 20;  //количество точек для построения кривой фокусировки
-            const int shift = 150;
+            const int shift = 150; //шаг по фокусу
             double rKron = 0;  //радиус крона
 
             // Reconfigure(); //TODO проверка камер
@@ -61,7 +61,7 @@ namespace RPCC
             if (!initPhoto)
             {
                 //TODO флаг проверки работы камеры?
-                log.AddLogEntry("FOCUS: InitPhoto=false, exit.");
+                log.AddLogEntry("FOCUS: InitPhoto=false, exit");
                 return false;
             }
 
@@ -72,7 +72,7 @@ namespace RPCC
                 log.AddLogEntry("FOCUS: Focus module is started");
                 if (counter == 0)
                 {
-                    frames.Add(new AnalysisImageForFocus(getImForFocus(z), rKron)); //делаем снимок
+                    frames.Add(new AnalysisImageForFocus(GetImForFocus(z, true), rKron)); //делаем снимок
                     var lastIndex = frames.Count - 1;
                     if (!frames[lastIndex].CheckStarsNum())
                     {
@@ -94,6 +94,13 @@ namespace RPCC
                     rKron = frames[lastIndex].RKron;
                     _serialFocus
                         .FRun_To(-3000); //переводим фокусер в крайнее положение, чтобы равномерно пройтись по диапазону 
+                    log.AddLogEntry(@"FOCUS: move to -3000");
+                }
+
+                if (counter > maxFocCycles)
+                {
+                    log.AddLogEntry("FOCUS: got max iterations, exit.");
+                    return false;
                 }
 
                 counter++;
@@ -104,15 +111,16 @@ namespace RPCC
                 {
                     z = _serialFocus.currentPosition;
                     zs.Add(z);
-                    frames.Add(new AnalysisImageForFocus(getImForFocus(z), rKron));
+                    frames.Add(new AnalysisImageForFocus(GetImForFocus(z), rKron));
                     _serialFocus.FRun_To(shift);
                 }
 
+                log.AddLogEntry(@"FOCUS: get list of mean HFD");
                 //Для каждого кадра находим среднее значение HFD
                 var hfds = frames.Select(frame => frame.MeanHfd).ToList();
 
-                double[] par = {-100, 5, 1500, -2};
-                var epsx = 0.000001;
+                double[] par = {-100, 5, 1500, -2};  //априорные параметры гиперболы
+                var epsx = 1e-6;
                 var maxits = 0;
                 int info;
                 alglib.lsfitstate state;
@@ -128,22 +136,30 @@ namespace RPCC
                 //
                 // Fitting without weights
                 //
+                log.AddLogEntry(@"FOCUS: start fitting");
                 alglib.lsfitcreatefgh(zaArr, hfds.ToArray(), par, out state);
                 alglib.lsfitsetcond(state, epsx, maxits);
                 alglib.lsfitfit(state, Hyperbola, Hyper_grad, Hyper_hess, null, null);
                 alglib.lsfitresults(state, out info, out par, out rep);
+                log.AddLogEntry(@"FOCUS: minimum position " + alglib.ap.format(par, 1));
                 // Console.WriteLine("{0}", info); // EXPECTED: 2
                 // Console.WriteLine("{0}", alglib.ap.format(par, 1));  //нужен второй параметр
                 // Console.ReadLine();
 
                 var newFocus = (int) par[2] - _serialFocus.currentPosition;
-                var testShot = new AnalysisImageForFocus(getImForFocus(newFocus, true), rKron);
+                var testShot = new AnalysisImageForFocus(GetImForFocus(newFocus, true), rKron);
 
-                if (testShot.CheckFocused()) stopFocus = true;
+                if (testShot.CheckFocused())
+                {
+                    stopFocus = true;
+                    log.AddLogEntry("FOCUS: image is in focus");
+                }
+
+                frames.Select(f => f.GetDataFromFits.DelOutputs());
                 /*
                  * todo минимально необходимый алгоритм. Потом при необходимости дополнить
                  */
-            } while (!stopSurvey && !stopAll && !stopFocus && !exit);
+            } while (!stopSurvey && !stopAll && !stopFocus);
 
             return true;
         }
@@ -224,12 +240,12 @@ namespace RPCC
             // return success;
         }
 
-        private GetDataFromFITS getImForFocus(int z, bool check = false)
+        private GetDataFromFits GetImForFocus(int z, bool check = false)
         {
             _serialFocus.FRun_To(z);
             // TODO get im
             // return new double[2048, 2048];
-            return new GetDataFromFITS("path", check);
+            return new GetDataFromFits("path", check, log);
         }
 
         // private void Reconfigure()

@@ -4,7 +4,7 @@ using System.Windows.Forms;
 
 namespace RPCC
 {
-    internal class Logger
+    public class Logger
     {
         private readonly ListBox _logBox;
 

@@ -3,16 +3,19 @@ using nom.tam.fits;
 
 namespace RPCC
 {
-    internal class RpccFits
+    public class ReadFitsFile
     {
-        internal ushort[][] data;
+        private Header header;
+        private ushort[,] data;
+        private string path;
 
-        internal Header header;
-        // TODO: To completely remove the stutter, think of a way to async reading a fits file
+        public string Path => path;
+        public Header Header => header;
+        public ushort[,] Data => data;
 
-        // Create RpccFits by reading an existing FITS file
-        internal RpccFits(string fitsFileName)
+        public ReadFitsFile(string fitsFileName)
         {
+            path = fitsFileName;
             var fitsFile = new Fits(fitsFileName);
             var fitsHdu = (ImageHDU) fitsFile.ReadHDU();
             header = fitsHdu.Header;
@@ -21,15 +24,14 @@ namespace RPCC
 
             var dataHeight = fitsDataRaw.Length;
             var dataWidth = fitsDataRaw[0].Length;
-            data = new ushort[dataHeight][];
+            data = new ushort[dataHeight, dataHeight];
             for (var i = 0; i < dataHeight; i++)
             {
-                data[i] = new ushort[dataWidth];
                 for (var j = 0; j < dataWidth; j++)
                 {
                     // HACK: Why is this needed and how does it work?
                     var buff = short.MaxValue + (short) fitsDataRaw[i].GetValue(j) + 1;
-                    data[i][j] = (ushort) buff;
+                    data[i, j] = (ushort) buff;
                 }
             }
         }

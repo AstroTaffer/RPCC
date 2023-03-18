@@ -7,7 +7,7 @@ namespace RPCC
 {
     public class AnalysisImageForFocus
     {
-        private const double _maxEll = 0.25;
+        // private const double _maxEll = 0.25;
         private const int MinStars = 20;
 
         // переменные кадра
@@ -15,14 +15,15 @@ namespace RPCC
         private const double FwhmFocused = 3.0;
 
         // числа в конфиг
-        private const double FwhmGood = 3.2;
-        private GetDataFromFITS g;
+        // private const double FwhmGood = 3.2;
 
-        public AnalysisImageForFocus(GetDataFromFITS getDataFromFits, double rKron)
+        public GetDataFromFits GetDataFromFits { get; }
+
+        public AnalysisImageForFocus(GetDataFromFits getDataFromFits, double rKron)
         {
-            g = getDataFromFits;
-            var img = g.GetImage();
-            StarsNum = g.GetStarsNum();
+            GetDataFromFits = getDataFromFits;
+            var img = GetDataFromFits.GetImage();
+            StarsNum = GetDataFromFits.GetStarsNum();
             
             
             var oneDimBackgroundArray = new double[img.Length];
@@ -34,7 +35,7 @@ namespace RPCC
                 index++;
             }
 
-            var centroids = g.GetStarsCentroids();
+            var centroids = GetDataFromFits.GetStarsCentroids();
 
             var sigma = oneDimBackgroundArray.StandardDeviation();
             var background = oneDimBackgroundArray.Median();
@@ -122,11 +123,11 @@ namespace RPCC
 
         public double RKron { get; }
 
-        public double Ell { get; }
+        // public double Ell { get; }
 
         public double StarsNum { get; }
 
-        public bool IsGoodImg { get; }
+        // public bool IsGoodImg { get; }
 
         public double MeanHfd { get; }
         
@@ -169,7 +170,7 @@ namespace RPCC
         
         public bool CheckFocused()
         {
-            return g.GetMeanFwhm() < FwhmFocused;
+            return GetDataFromFits.GetMeanFwhm() < FwhmFocused;
         }
     }
 }
