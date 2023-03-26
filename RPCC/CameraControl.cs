@@ -200,7 +200,7 @@ namespace RPCC
                     }
                     imageAreaRelativeLrPoint[0] = imageAreaAbsolute[0] + (imageAreaAbsolute[2] - imageAreaAbsolute[0]) / settings.CamBin;
                     imageAreaRelativeLrPoint[1] = imageAreaAbsolute[1] + (imageAreaAbsolute[3] - imageAreaAbsolute[1]) / settings.CamBin;
-                    // TODO: In future we may need to use img_height and img_width
+                    // TODO: In future we may need to use imgHeight and imgWidth
                 }
                 errorLastFliCmd = NativeMethods.FLISetVBin(cameras[i].handle, settings.CamBin);
                 if (errorLastFliCmd != 0) logger.AddLogEntry($"WARNING Unable to set camera {i + 1} vbin");
@@ -220,6 +220,7 @@ namespace RPCC
                         if (errorLastFliCmd == 0)
                         {
                             settings.camRoModes.Add(readoutMode.ToString());
+                            modeIndex++;
                         }
                         else
                         {
@@ -301,7 +302,7 @@ namespace RPCC
                 {
                     imageAreaRelativeLrPoint[0] = imageAreaAbsolute[0] + (imageAreaAbsolute[2] - imageAreaAbsolute[0]) / settings.CamBin;
                     imageAreaRelativeLrPoint[1] = imageAreaAbsolute[1] + (imageAreaAbsolute[3] - imageAreaAbsolute[1]) / settings.CamBin;
-                    // TODO: In future we may need to use img_height and img_width
+                    // TODO: In future we may need to use imgHeight and imgWidth
                 }
                 errorLastFliCmd = NativeMethods.FLISetVBin(cameras[i].handle, settings.CamBin);
                 if (errorLastFliCmd != 0) logger.AddLogEntry($"WARNING Unable to set camera {i + 1} vbin");
@@ -399,6 +400,35 @@ namespace RPCC
                     cameras[task.viewCamIndex].isExposing = true;
                     break;
             }
+        }
+
+        internal RpccFits ReadImage(CameraDevice cam)
+        {
+            RpccFits imageFits = new RpccFits();
+
+            int imageWidth = (imageAreaAbsolute[2] - imageAreaAbsolute[0]) / settings.CamBin;
+            int imageHeight = (imageAreaAbsolute[3] - imageAreaAbsolute[1]) / settings.CamBin;
+            imageFits.data = new ushort[imageHeight][];
+
+            // TODO: There is an FLIGrabFrame command. Would be nice to try it out.
+            for (int i = 0; i < imageHeight; i++)
+            {
+                imageFits.data[i] = new ushort[imageWidth];
+                ReadImageRow(cam, imageFits.data[i]);
+            }
+
+            return imageFits;
+        }
+
+        // HACK: This is an improvisation. I had to do it because eliotg's DllImport of this function
+        // differs from NativeMethods'. If any trouble caused, use eliotg's solution.
+        private void ReadImageRow(CameraDevice cam, ushort[] buff)
+        {
+            int errorLastFliCmd;
+            IntPtr buffWidth = new IntPtr(buff.Length);
+            
+            errorLastFliCmd = NativeMethods.FLIGrabRow(cam.handle, buff, buffWidth);
+            if (errorLastFliCmd != 0) logger.AddLogEntry($"ERROR Unable to read frame row from {cam.serialNumber} camera");
         }
 
         internal void CancelSurvey()

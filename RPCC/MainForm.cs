@@ -17,7 +17,9 @@ namespace RPCC
         /// </summary>
 
         internal ushort[][] currentImage;
-            // HACK: Check for memory leak and refreshing error - if occurs, try use this variable as a reference to another
+        // HACK: Check for memory leak and refreshing error - if occurs, try use this variable as a reference to another
+        internal GeneralImageStat currentImageGStat;
+        private int _idleCamNum;
 
         internal bool isCurrentImageLoaded;
             // FIXME: If new image is loaded, flag must be reset to false and imageBox must be tuned accordingly
@@ -94,23 +96,35 @@ namespace RPCC
                     break;
             }
 
-            int idleCamNum = 0;
+            _idleCamNum = 0;
             for (int i = 0; i < _cameraControl.cameras.Length; i++)
             {
                 if (_cameraControl.cameras[i].status == "IDLE")
                 {
-                    idleCamNum++;
+                    _idleCamNum++;
                     if (_cameraControl.cameras[i].isExposing)
                     {
-                        // Data ready
-                        // move to separate thread?
-                        // TODO: ReadCamera->/PlotFits/->SaveFits (split process into 3 functions)
+                        // Image ready
+
+                        // TODO: Move to separate thread
+                        RpccFits imageFits = _cameraControl.ReadImage(_cameraControl.cameras[i]);
+
+                        // SaveFits
+
+                        if (i == _cameraControl.task.viewCamIndex)
+                        {
+                            isCurrentImageLoaded = false;
+                            currentImage = imageFits.data;
+                            PlotFitsImage();
+                            isCurrentImageLoaded = true;
+                        }
+                        
                         _cameraControl.cameras[i].isExposing = false;
                     }
                 }
             }
 
-            if (idleCamNum == _cameraControl.cameras.Length)
+            if (_idleCamNum == _cameraControl.cameras.Length)
             {
                 if (_cameraControl.task.framesNum > 1)
                 {
@@ -186,16 +200,16 @@ namespace RPCC
 
         #region Images Plotting
 
-        private void PlotFitsImage(GeneralImageStat gStat)
+        private void PlotFitsImage()
         {
             pictureBoxFits.Image = null;
             pictureBoxProfile.Image = null;
 
-            var lowerBrightnessBorder = gStat.mean - settings.LowerBrightnessSd * gStat.sd;
-            if (lowerBrightnessBorder < gStat.min) lowerBrightnessBorder = gStat.min;
+            var lowerBrightnessBorder = currentImageGStat.mean - settings.LowerBrightnessSd * currentImageGStat.sd;
+            if (lowerBrightnessBorder < currentImageGStat.min) lowerBrightnessBorder = currentImageGStat.min;
 
-            var upperBrightnessBorder = gStat.mean + settings.UpperBrightnessSd * gStat.sd;
-            if (upperBrightnessBorder > gStat.max) upperBrightnessBorder = gStat.max;
+            var upperBrightnessBorder = currentImageGStat.mean + settings.UpperBrightnessSd * currentImageGStat.sd;
+            if (upperBrightnessBorder > currentImageGStat.max) upperBrightnessBorder = currentImageGStat.max;
 
             upperBrightnessBorder -= lowerBrightnessBorder;
             var colorScale = 255 / upperBrightnessBorder;
@@ -217,8 +231,10 @@ namespace RPCC
 
         private void PlotProfileImage(ref Settings settings, ProfileImageStat pStat, ushort[][] image)
         {
-            // TODO: Find out why does it have to be calculated this specific way
-            // TODO: Add profile image scaling and placing parameters
+            // It calculates scaling and placing parameters in a rather non-obvious way
+            // But it seems harmless. If you don't have anything better to do,
+            // You can tidy it up and create appropriate settings variables
+
             var bitmapProfile =
                 new Bitmap(pictureBoxProfile.Width, pictureBoxProfile.Height, PixelFormat.Format24bppRgb);
 
@@ -314,7 +330,7 @@ namespace RPCC
                         logger.AddLogEntry($"SNR: {localStat.snr:0.#}");
                         logger.AddLogEntry($"FWHM: {localStat.fwhm:0.##}");
                         PlotProfileImage(ref settings, localStat, subProfileImage);
-                        logger.AddLogEntry("Profile picture plotted succesfully");
+                        logger.AddLogEntry("Profile image plotted succesfully");
                     }
                 }
             }
@@ -329,6 +345,12 @@ namespace RPCC
         #region Survey
         private void ButtonSurveyStart_Click(object sender, EventArgs e)
         {
+            buttonSurveyStart.Enabled = false;
+            comboBoxImgType.Enabled = false;
+            numericUpDownSequence.Enabled = false;
+            numericUpDownExpTime.Enabled = false;
+            updateCamerasSettingsToolStripMenuItem.Enabled = false;
+
             _cameraControl.task.framesNum = (int)numericUpDownSequence.Value;
             _cameraControl.task.framesType = comboBoxImgType.Text;
             if (_cameraControl.task.framesType == "Bias") _cameraControl.task.framesExpTime = 0;
@@ -340,12 +362,6 @@ namespace RPCC
 
             _cameraControl.SetSurveySettings();
             _cameraControl.StartExposure();
-
-            buttonSurveyStart.Enabled = false;
-            comboBoxImgType.Enabled = false;
-            numericUpDownSequence.Enabled = false;
-            numericUpDownExpTime.Enabled = false;
-            updateCamerasSettingsToolStripMenuItem.Enabled = false;
         }
 
         private void ButtonSurveyStop_Click(object sender, EventArgs e)
@@ -415,18 +431,18 @@ namespace RPCC
 
         private async void LoadTestImageToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            isCurrentImageLoaded = false;
             var testFits = new RpccFits("TestImage.fits");
             currentImage = testFits.data;
+
+            currentImageGStat = new GeneralImageStat(currentImage);
+            logger.AddLogEntry($"Minimum: {currentImageGStat.min}");
+            logger.AddLogEntry($"Maximum: {currentImageGStat.max}");
+            logger.AddLogEntry($"Mean: {currentImageGStat.mean:0.##}");
+            logger.AddLogEntry($"SD: {currentImageGStat.sd:0.##}");
+
+            await Task.Run(() => PlotFitsImage());
             isCurrentImageLoaded = true;
-            logger.AddLogEntry("Test image loaded succesfully");
-
-            var testStat = new GeneralImageStat(currentImage);
-            logger.AddLogEntry($"Minimum: {testStat.min}");
-            logger.AddLogEntry($"Maximum: {testStat.max}");
-            logger.AddLogEntry($"Mean: {testStat.mean:0.##}");
-            logger.AddLogEntry($"SD: {testStat.sd:0.##}");
-
-            await Task.Run(() => PlotFitsImage(testStat));
             logger.AddLogEntry("Test image plotted succesfully");
         }
 

@@ -33,5 +33,11 @@ namespace RPCC
                 }
             }
         }
+
+        // Create new empty RpccFits
+        internal RpccFits()
+        {
+
+        }
     }
 }

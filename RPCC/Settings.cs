@@ -4,6 +4,7 @@ using System.Xml.Linq;
 
 namespace RPCC
 {
+    // TODO: Instead of throwing exceptions it may be better to display error provider message box
     internal class Settings
     {
         /// <summary>

@@ -469,7 +469,7 @@ namespace FliProCameraLib
 
         //-------------------------------------------
         /// <summary>
-        ///     Retrieve the next available image frame rowfrom the specified camera
+        ///     Retrieve the next available image frame row from the specified camera
         /// </summary>
         [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIGrabRow(

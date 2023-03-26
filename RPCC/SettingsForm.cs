@@ -52,8 +52,6 @@ namespace RPCC
 
         private void ButtonAccept_Click(object sender, EventArgs e)
         {
-            // TODO: Instead of throwing exceptions it may be better to display error provider message box
-
             #region Image Analysis
             _settings.LowerBrightnessSd = double.Parse(textBoxLowerBrightnessSd.Text);
             _settings.UpperBrightnessSd = double.Parse(textBoxUpperBrightnessSd.Text);

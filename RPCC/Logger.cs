@@ -27,7 +27,7 @@ namespace RPCC
 
         internal void SaveLogs()
         {
-            var logsFilePath = $"Logs {DateTime.UtcNow.ToString("yyyy-MM-ddTHH-mm-ss")}.txt";
+            var logsFilePath = $"Logs {DateTime.UtcNow:yyyy-MM-ddTHH-mm-ss}.txt";
             var sw = new StreamWriter(logsFilePath);
             foreach (string item in _logBox.Items) sw.WriteLine(item);
             sw.Close();
