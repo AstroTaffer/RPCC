@@ -269,7 +269,7 @@ namespace RPCC
             var fwhms = frames.Select(frame => frame.Fwhm).ToList();
             var zs = frames.Select(frame => frame.GetDataFromFits.Focus).ToList();
             
-            var newFocus = Curve_fitting(zs, fwhms);
+            var newFocus = Curve_fitting(zs, fwhms, zs[fwhms.IndexOf(fwhms.Min())]);
             
             if (newFocus > 6000)
             {
@@ -309,8 +309,9 @@ namespace RPCC
             fwhms = frames.Select(frame => frame.Fwhm).ToList();
             zs = frames.Select(frame => frame.GetDataFromFits.Focus).ToList();
             
-            frames.Select(frame => frame.GetDataFromFits.DelOutputs());
-            newFocus = Curve_fitting(zs, fwhms);
+            frames.Select(frame => frame.GetDataFromFits.DelOutputs()); // удаляем все лишние файлы
+            
+            newFocus = Curve_fitting(zs, fwhms, zs[fwhms.IndexOf(fwhms.Min())]); // строим кривую фокусировки и фитируем ее гиперболой
             if (newFocus > 6000)
             {
                 _serialFocus.FRun_To(startFocusPos - _serialFocus.currentPosition);
@@ -335,7 +336,7 @@ namespace RPCC
             return false;
         }
 
-        private int Curve_fitting(IReadOnlyList<int> zs, List<double> fwhms)
+        private int Curve_fitting(IReadOnlyList<int> zs, List<double> fwhms, double minC=-203.950)
         {
             var rows = zs.Count;
             var columns = 1;    
@@ -344,7 +345,7 @@ namespace RPCC
             var zaArr = new double[rows, columns];
             for (var i = 0; i < rows; i++) zaArr[i, 0] = new[] {zsArray[i, 0]}[0];
                     
-            double[] par = {305.559,5.033,-203.950,-1.947};  //априорные параметры гиперболы
+            double[] par = {305.559,5.033, minC,-1.947};  //априорные параметры гиперболы
             var epsx = 1e-6;
             var maxits = 0;
             int info;
