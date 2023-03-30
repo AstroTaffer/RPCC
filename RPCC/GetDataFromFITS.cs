@@ -13,30 +13,47 @@ namespace RPCC
 {
     public class GetDataFromFits
     {
-        private readonly string _path2Fits;
+        // private readonly string _path2Fits;
         private readonly string _path2Cat;
-        private const int NumBestStars = 20;
+        // private const int NumBestStars = 30;
         private List<List<double>> _sortTable;
-        private readonly bool _check;
         private readonly Logger _log;
-        public GetDataFromFits(string path2Fits, bool check, Logger logger)    
+        // private string Fil { get; }
+        // private readonly ushort[,] _img;
+        public bool Status { get; }
+        public int Focus { get; }
+
+        // private readonly Logger _log;
+        public GetDataFromFits(string path2Fits, Logger log, bool s)
         {
-            /*check определяет является ли кадр фокусировочным или кадром проверки качества фокусировки*/
-            _log = logger;
-            _path2Fits = path2Fits;
-            var outputFile = path2Fits.Replace("fits", "cat");
+            _log = log;
+            Status = s;
+            var outputFile = path2Fits.Replace("fit", "cat");
             _path2Cat = outputFile;
-            _check = check;
-            Sex(path2Fits, outputFile);
+            var fits = new ReadFitsFile(path2Fits);
+            // _img = fits.Data;
+            Focus = fits.Header.GetIntValue("FOCUS");
+            // Fil = fits.Header.GetStringValue("FILTER");
+            if (!File.Exists(outputFile))
+            {
+                Sex(path2Fits, outputFile);
+            }
             GetTable(); 
         }
-        
-        private void Sex(string inputFile, string outputFile)
+
+        // public string Fil { get; }
+
+        public GetDataFromFits(bool s)
+        {
+            Status = s;
+        }
+
+        private static void Sex(string inputFile, string outputFile)
         {   
             var cwd = Directory.GetCurrentDirectory();
             var sex = cwd + @"\Sex\Extract.exe ";
             var dSex = " -c " + cwd + @"\Sex\default.sex" ;
-            var dPar = " -PARAMETERS_NAME " + cwd + (_check ? @"\Sex\default_a.par" : @"\Sex\default.par");
+            var dPar = " -PARAMETERS_NAME " + cwd + @"\Sex\default.par";
             var dFilt = " -FILTER_NAME " + cwd + @"\Sex\tophat_2.5_3x3.conv";
             var nnw = " -STARNNW_NAME " + cwd + @"\Sex\default.nnw";
     
@@ -53,11 +70,7 @@ namespace RPCC
             };
 
             var process = Process.Start(processStartInfo);
-            if (process == null) return;
-            process.WaitForExit();
-            
-            if (process.ExitCode != 0 || !File.Exists(outputFile))
-                _log.AddLogEntry(@"GetDataFromFITS: Error sextractor in file " + _path2Fits);
+            process?.WaitForExit();
         }
 
         private void GetTable()
@@ -73,20 +86,17 @@ namespace RPCC
             {
                 var line = reader.ReadLine();
                 if (line?[0] == '#') continue;
-                var row = new List<double>(line?.Split(' ').Where(t => t.Length >= 1).Select(Convert.ToDouble));
+                var row = line?.Split(' ').Where(t => t.Length >= 1).Select(Convert.ToDouble).ToList();
                 table.Add(row);
             }
 
             // Закрываем файл
             reader.Close();
-            
+
             //сортируем по потоку
-            _sortTable = Transpose(new List<List<double>>(table
-                .OrderBy(t => _check ? t[2]: t[5]))
-                .GetRange(0, NumBestStars));
+            _sortTable = Transpose(table.OrderByDescending(t => t[3]).ToList());
             
-            // Console.ReadLine();
-            // return sortTable;
+            
         }
         
         private static List<List<T>> Transpose<T>(List<List<T>> matrix)
@@ -112,21 +122,17 @@ namespace RPCC
             try
             {
                 // Check if file exists with its full path    
-                if (File.Exists(_path2Cat))    
-                {    
-                    // If file found, delete it    
-                    File.Delete(_path2Cat);    
-                    // Console.WriteLine("File deleted.");
-                    return true;
-                }
-                _log.AddLogEntry(@"GetDataFromFITS: File not found: "); 
-                return false;
+                if (!File.Exists(_path2Cat)) return false;
+                // If file found, delete it    
+                File.Delete(_path2Cat);    
+                // Console.WriteLine("File deleted.");
+                return true;
+                // _log.AddLogEntry(@"GetDataFromFITS: File not found: "); 
                 // Console.WriteLine("File not found");
             }    
             catch (IOException ioExp)    
-            {    
-                // Console.WriteLine(ioExp.Message);
-                _log.AddLogEntry(@"GetDataFromFITS: " + ioExp.Message); 
+            {
+                _log.AddLogEntry(@"GetDataFromFITS delete outputs error: " + ioExp.Message); 
                 return false;
             }   
         }
@@ -135,23 +141,28 @@ namespace RPCC
         {
             return _sortTable[0].Count;
         }
-
-        public ushort[,] GetImage()
+    
+        public double GetEllipticity()
         {
-            return new ReadFitsFile(_path2Fits).Data;
+            return _sortTable[1].Median();
         }
 
-        public List<double[]> GetStarsCentroids()
-        {
-            var centroids = Enumerable.Range(0, NumBestStars)
-                .Select(i => new[]{ _sortTable[0][i], _sortTable[1][i] })
-                .ToList();
-            return centroids;
-        }
+        // public ushort[,] GetImage()
+        // {
+        //     return _img;
+        // }
 
-        public double GetMeanFwhm()
+        // public List<double[]> GetStarsCentroids()
+        // {
+        //     var centroids = Enumerable.Range(0, NumBestStars)
+        //         .Select(i => new[]{ _sortTable[0][i], _sortTable[1][i] })
+        //         .ToList();
+        //     return centroids;
+        // }
+
+        public double GetMedianFwhm()
         {
-            return _check ? 0.0 : _sortTable[2].Mean();
+            return _sortTable[0].Median();
         }
     }
 }
