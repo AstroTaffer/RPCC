@@ -22,14 +22,14 @@ namespace RPCC
         private int _idleCamNum;
 
         internal bool isCurrentImageLoaded;
-            // FIXME: If new image is loaded, flag must be reset to false and imageBox must be tuned accordingly
+        // FIXME: If new image is loaded, flag must be reset to false and imageBox must be tuned accordingly
         internal bool isZoomModeActivated;
 
         internal readonly Logger logger;
         internal Settings settings;
 
         private CameraControl _cameraControl;
-        private CameraFocus _focus;
+        private CameraFocus _cameraFocus;
         
 
         public MainForm()
@@ -46,7 +46,7 @@ namespace RPCC
             try
             {
                 settings.LoadXmlConfig("SettingsDefault.xml");
-                logger.AddLogEntry("Default config loaded succesfully");
+                logger.AddLogEntry("Default config loaded successfully");
             }
             catch (FileNotFoundException)
             {
@@ -54,7 +54,12 @@ namespace RPCC
             }
 
             _cameraControl = new CameraControl(logger, settings);
-            _focus = new CameraFocus(logger);
+            _cameraFocus = new CameraFocus(logger);
+            
+            // if (!_cameraFocus.Init())  
+            //     if (MessageBox.Show(@"Can't open Focus serial port", @"OK", MessageBoxButtons.OK) == DialogResult.OK)
+            //         Environment.Exit(1);
+
             // _rpccSocketClient= new RpccSocketClient(logger);
         }
 
@@ -63,36 +68,37 @@ namespace RPCC
         {
             timerClock.Stop();
             _cameraControl.DisconnectCameras();
+            _cameraFocus.SerialFocus.Close_Port();
             // _rpccSocketClient.DisconnectAll();
         }
 
         private void TimerClock_Tick(object sender, EventArgs e)
         {
-            tSStatusClock.Text = "UTC: " + DateTime.UtcNow.ToString("yyyy-MM-ddTHH-mm-ss.fff");
+            tSStatusClock.Text = @"UTC: " + DateTime.UtcNow.ToString("yyyy-MM-ddTHH-mm-ss.fff");
 
             _cameraControl.GetStatus();
             switch (_cameraControl.cameras.Length)
             {
                 case 3:
-                    labelCam3CcdTemp.Text = $"CCD Temp: {_cameraControl.cameras[2].ccdTemp}";
-                    labelCam3BaseTemp.Text = $"Base Temp: {_cameraControl.cameras[2].baseTemp}";
-                    labelCam3CoolerPwr.Text = $"Cooler Power: {_cameraControl.cameras[2].coolerPwr} %";
-                    labelCam3Status.Text = $"Status: {_cameraControl.cameras[2].status}";
-                    labelCam3RemTime.Text = $"Remaining: {_cameraControl.cameras[2].remTime / 1000}";
+                    labelCam3CcdTemp.Text = $@"CCD Temp: {_cameraControl.cameras[2].ccdTemp}";
+                    labelCam3BaseTemp.Text = $@"Base Temp: {_cameraControl.cameras[2].baseTemp}";
+                    labelCam3CoolerPwr.Text = $@"Cooler Power: {_cameraControl.cameras[2].coolerPwr} %";
+                    labelCam3Status.Text = $@"Status: {_cameraControl.cameras[2].status}";
+                    labelCam3RemTime.Text = $@"Remaining: {_cameraControl.cameras[2].remTime / 1000}";
                     goto case 2;
                 case 2:
-                    labelCam2CcdTemp.Text = $"CCD Temp: {_cameraControl.cameras[1].ccdTemp}";
-                    labelCam2BaseTemp.Text = $"Base Temp: {_cameraControl.cameras[1].baseTemp}";
-                    labelCam2CoolerPwr.Text = $"Cooler Power: {_cameraControl.cameras[1].coolerPwr} %";
-                    labelCam2Status.Text = $"Status: {_cameraControl.cameras[1].status}";
-                    labelCam2RemTime.Text = $"Remaining: {_cameraControl.cameras[1].remTime / 1000}";
+                    labelCam2CcdTemp.Text = $@"CCD Temp: {_cameraControl.cameras[1].ccdTemp}";
+                    labelCam2BaseTemp.Text = $@"Base Temp: {_cameraControl.cameras[1].baseTemp}";
+                    labelCam2CoolerPwr.Text = $@"Cooler Power: {_cameraControl.cameras[1].coolerPwr} %";
+                    labelCam2Status.Text = $@"Status: {_cameraControl.cameras[1].status}";
+                    labelCam2RemTime.Text = $@"Remaining: {_cameraControl.cameras[1].remTime / 1000}";
                     goto case 1;
                 case 1:
-                    labelCam1CcdTemp.Text = $"CCD Temp: {_cameraControl.cameras[0].ccdTemp}";
-                    labelCam1BaseTemp.Text = $"Base Temp: {_cameraControl.cameras[0].baseTemp}";
-                    labelCam1CoolerPwr.Text = $"Cooler Power: {_cameraControl.cameras[0].coolerPwr}  %";
-                    labelCam1Status.Text = $"Status: {_cameraControl.cameras[0].status}";
-                    labelCam1RemTime.Text = $"Remaining: {_cameraControl.cameras[0].remTime / 1000}";
+                    labelCam1CcdTemp.Text = $@"CCD Temp: {_cameraControl.cameras[0].ccdTemp}";
+                    labelCam1BaseTemp.Text = $@"Base Temp: {_cameraControl.cameras[0].baseTemp}";
+                    labelCam1CoolerPwr.Text = $@"Cooler Power: {_cameraControl.cameras[0].coolerPwr}  %";
+                    labelCam1Status.Text = $@"Status: {_cameraControl.cameras[0].status}";
+                    labelCam1RemTime.Text = $@"Remaining: {_cameraControl.cameras[0].remTime / 1000}";
                     break;
             }
 
@@ -119,6 +125,8 @@ namespace RPCC
                             isCurrentImageLoaded = true;
                         }
                         
+                        // TODO: AUTOFOCUS, check quality
+                        // _cameraFocus.AutoFocus();
                         _cameraControl.cameras[i].isExposing = false;
                     }
                 }
@@ -154,30 +162,30 @@ namespace RPCC
                 case 3:
                     groupBoxCam3.Enabled = true;
                     radioButtonViewCam3.Enabled = true;
-                    labelCam3Model.Text = $"Model: {_cameraControl.cameras[2].modelName}";
-                    labelCam3Sn.Text = $"Serial Num: {_cameraControl.cameras[2].serialNumber}";
-                    labelCam3Filter.Text = $"Filter: {_cameraControl.cameras[2].filter}";
+                    labelCam3Model.Text = $@"Model: {_cameraControl.cameras[2].modelName}";
+                    labelCam3Sn.Text = $@"Serial Num: {_cameraControl.cameras[2].serialNumber}";
+                    labelCam3Filter.Text = $@"Filter: {_cameraControl.cameras[2].filter}";
                     goto case 2;
                 case 2:
                     groupBoxCam2.Enabled = true;
                     radioButtonViewCam2.Enabled = true;
-                    labelCam2Model.Text = $"Model: {_cameraControl.cameras[1].modelName}";
-                    labelCam2Sn.Text = $"Serial Num: {_cameraControl.cameras[1].serialNumber}";
-                    labelCam2Filter.Text = $"Filter: {_cameraControl.cameras[1].filter}";
+                    labelCam2Model.Text = $@"Model: {_cameraControl.cameras[1].modelName}";
+                    labelCam2Sn.Text = $@"Serial Num: {_cameraControl.cameras[1].serialNumber}";
+                    labelCam2Filter.Text = $@"Filter: {_cameraControl.cameras[1].filter}";
                     goto case 1;
                 case 1:
                     groupBoxCam1.Enabled = true;
                     radioButtonViewCam1.Enabled = true;
-                    labelCam1Model.Text = $"Model: {_cameraControl.cameras[0].modelName}";
-                    labelCam1Sn.Text = $"Serial Num: {_cameraControl.cameras[0].serialNumber}";
-                    labelCam1Filter.Text = $"Filter: {_cameraControl.cameras[0].filter}";
+                    labelCam1Model.Text = $@"Model: {_cameraControl.cameras[0].modelName}";
+                    labelCam1Sn.Text = $@"Serial Num: {_cameraControl.cameras[0].serialNumber}";
+                    labelCam1Filter.Text = $@"Filter: {_cameraControl.cameras[0].filter}";
                     break;
             }
         }
 
         private void FocusToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var focusForm = new FocusForm();
+            var focusForm = new FocusForm(_cameraFocus);
             focusForm.Show();
         }
         #endregion
@@ -330,7 +338,7 @@ namespace RPCC
                         logger.AddLogEntry($"SNR: {localStat.snr:0.#}");
                         logger.AddLogEntry($"FWHM: {localStat.fwhm:0.##}");
                         PlotProfileImage(ref settings, localStat, subProfileImage);
-                        logger.AddLogEntry("Profile image plotted succesfully");
+                        logger.AddLogEntry("Profile image plotted successfully");
                     }
                 }
             }
@@ -384,7 +392,7 @@ namespace RPCC
         {
             var settingsForm = new SettingsForm(settings);
             settingsForm.ShowDialog();
-            if (settingsForm.DialogResult == DialogResult.OK) logger.AddLogEntry("Settings changed succesfully");
+            if (settingsForm.DialogResult == DialogResult.OK) logger.AddLogEntry("Settings changed successfully");
         }
 
         private void UpdateCameraSettingsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -397,7 +405,7 @@ namespace RPCC
             if (openFileDialogConfig.ShowDialog() == DialogResult.OK)
             {
                 settings.LoadXmlConfig(openFileDialogConfig.FileName);
-                logger.AddLogEntry($"Config file {saveFileDialogConfig.FileName} loaded succesfully");
+                logger.AddLogEntry($"Config file {saveFileDialogConfig.FileName} loaded successfully");
             }
         }
 
@@ -406,7 +414,7 @@ namespace RPCC
             if (saveFileDialogConfig.ShowDialog() == DialogResult.OK)
             {
                 settings.SaveXmlConfig(saveFileDialogConfig.FileName);
-                logger.AddLogEntry($"Config file {saveFileDialogConfig.FileName} saved succesfully");
+                logger.AddLogEntry($"Config file {saveFileDialogConfig.FileName} saved successfully");
             }
         }
 
@@ -443,13 +451,13 @@ namespace RPCC
 
             await Task.Run(() => PlotFitsImage());
             isCurrentImageLoaded = true;
-            logger.AddLogEntry("Test image plotted succesfully");
+            logger.AddLogEntry("Test image plotted successfully");
         }
 
         private void RestoreDefaultConfigFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
             settings.RestoreDefaultXmlConfig();
-            logger.AddLogEntry("Default config file restored succesfully");
+            logger.AddLogEntry("Default config file restored successfully");
         }
         #endregion
     }

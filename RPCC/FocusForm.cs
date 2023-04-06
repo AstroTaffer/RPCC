@@ -9,20 +9,22 @@ namespace RPCC
     public partial class FocusForm : Form
     {
         private static readonly Timer FocusTimer = new Timer();
-        private readonly SerialFocus _serialFocus = new SerialFocus();
+        private readonly CameraFocus _cameraFocus;
 
-        private int _counter;
-
-        // private CameraFocus _focus = new CameraFocus();
-        private int _fPos;
-
-        public FocusForm()
+        public FocusForm(CameraFocus cameraFocus)
         {
             InitializeComponent();
             //create timer for focus loop
             FocusTimer.Elapsed += OnTimedEvent_Clock;
             FocusTimer.Interval = 5000;
             FocusTimer.Start();
+            _cameraFocus = cameraFocus;
+        }
+    
+        private void FocusForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            _cameraFocus.DeFocus = 0;
+            _cameraFocus.IsZenith = false;
         }
 
         private void OnTimedEvent_Clock(object sender, ElapsedEventArgs e)
@@ -31,88 +33,82 @@ namespace RPCC
             getFocus.Start();
         }
 
-        private void Focus_Form_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            _serialFocus.Close_Port();
-        }
-
         private void Run_slow_numericUpDown_ValueChanged(object sender, EventArgs e)
         {
-            _serialFocus.SRun_To((int) Run_slow_numericUpDown.Value);
+            _cameraFocus.SerialFocus.SRun_To((int) Run_slow_numericUpDown.Value);
         }
 
         private void Run_fast_numericUpDown_ValueChanged(object sender, EventArgs e)
         {
-            _serialFocus.FRun_To((int) Run_fast_numericUpDown.Value);
-        }
-
-        private void timer1_Tick(object sender, EventArgs e)
-        {
-            _counter++;
-            if (_counter < 15) return;
-            _counter = 0;
-            SetFocus();
-        }
-
-        private void SetFocus()
-        {
-            _fPos = _serialFocus.currentPosition;
-
-            void Action()
-            {
-                Focus_pos_label.Text = @"Focus position: " + _fPos;
-            }
-
-            if (InvokeRequired)
-                Invoke((Action) Action);
-            else
-                Action();
-
-            if (checkBox_AutoFocus.Checked)
-            {
-                // TODO AUTOFOCUS
-            }
+            _cameraFocus.SerialFocus.FRun_To((int) Run_fast_numericUpDown.Value);
         }
 
         private void GetData()
         {
-            const int waitTime = 1000;
-            _serialFocus.Write2Serial("2gcp");
-            _serialFocus.Write2Serial("2gsf");
-            _serialFocus.Write2Serial("2gss");
-            _serialFocus.Write2Serial("2ges");
+            const int waitTime = 500;
+            _cameraFocus.SerialFocus.UpdateData();
             Thread.Sleep(waitTime);
+            numericUpDown_setF.Invoke((MethodInvoker) delegate
+            {
+                numericUpDown_setF.Value = _cameraFocus.SerialFocus.SpeedFast;
+            });
+            numericUpDown_setS.Invoke((MethodInvoker) delegate
+            {
+                numericUpDown_setS.Value = _cameraFocus.SerialFocus.SpeedSlow;
+            });
+            Focus_pos_label.Invoke((MethodInvoker) delegate
+            {
+                Focus_pos_label.Text = $@"Focus position: {_cameraFocus.SerialFocus.CurrentPosition}";
+            });
+            // endswitch.Text = "Endswitch: " + _cameraFocus.SerialFocus.Switches? "" : ""; TODO ENDSWITCH
         }
 
         private void button_stop_Click(object sender, EventArgs e)
         {
-            _serialFocus.Stop();
+            _cameraFocus.SerialFocus.Stop();
         }
 
         private void numericUpDown_setF_ValueChanged(object sender, EventArgs e)
         {
-            _serialFocus.Set_Speed_Fast((int) numericUpDown_setF.Value);
+            _cameraFocus.SerialFocus.Set_Speed_Fast((int) numericUpDown_setF.Value);
         }
 
         private void numericUpDown_setS_ValueChanged(object sender, EventArgs e)
         {
-            _serialFocus.Set_Speed_Slow((int) numericUpDown_setS.Value);
+            _cameraFocus.SerialFocus.Set_Speed_Slow((int) numericUpDown_setS.Value);
         }
 
         private void numericUpDown_setZero_ValueChanged(object sender, EventArgs e)
         {
-            _serialFocus.Set_Zero((int) numericUpDown_setZero.Value);
+            _cameraFocus.SerialFocus.Set_Zero((int) numericUpDown_setZero.Value);
         }
 
         private void checkBox_AutoFocus_CheckedChanged(object sender, EventArgs e)
         {
-            var isEnabled = !checkBox_AutoFocus.Checked;
-            numericUpDown_setF.Enabled = isEnabled;
-            numericUpDown_setS.Enabled = isEnabled;
-            numericUpDown_setZero.Enabled = isEnabled;
-            Run_fast_numericUpDown.Enabled = isEnabled;
-            Run_slow_numericUpDown.Enabled = isEnabled;
+            var isEnabled = checkBox_AutoFocus.Checked;
+
+            //Settings
+            numericUpDown_setF.Enabled = !isEnabled;
+            numericUpDown_setS.Enabled = !isEnabled;
+            numericUpDown_setZero.Enabled = !isEnabled;
+            Run_fast_numericUpDown.Enabled = !isEnabled;
+            Run_slow_numericUpDown.Enabled = !isEnabled;
+
+            //AutoFocus
             button_stop.Enabled = isEnabled;
+            numericUpDown_setDefoc.Enabled = isEnabled;
+            checkBox_goZenith.Enabled = isEnabled;
+            _cameraFocus.isAutoFocus = isEnabled;
+        }
+
+        private void checkBox_goZenith_CheckedChanged(object sender, EventArgs e)
+        {
+            _cameraFocus.IsZenith = checkBox_goZenith.Checked;
+        }
+
+        private void numericUpDown_setDefoc_ValueChanged(object sender, EventArgs e)
+        {
+            _cameraFocus.DeFocus = (int)numericUpDown_setDefoc.Value;
         }
     }
 }
