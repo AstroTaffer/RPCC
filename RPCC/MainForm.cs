@@ -36,6 +36,7 @@ namespace RPCC
         private RpccSocketClient domeSocket;
         private RpccSocketClient donutsSocket;
 
+        private DataCollector _dataCollector;
 
         public MainForm()
         {
@@ -60,12 +61,18 @@ namespace RPCC
             
             StartDonutsPy();
 
+            // Hardware controls
             _cameraControl = new CameraControl(logger, settings);
             _cameraFocus = new CameraFocus(logger);
 
+            // MeteoDome connect
             domeSocket = new RpccSocketClient(logger, "dom");
             domeSocket.Connect();
+            _dataCollector = new DataCollector(domeSocket);
+            
+            // Donuts
             donutsSocket = new RpccSocketClient(logger, "don");
+
 
             // if (!_cameraFocus.Init())  
             //     if (MessageBox.Show(@"Can't open Focus serial port", @"OK", MessageBoxButtons.OK) == DialogResult.OK)
@@ -98,10 +105,11 @@ namespace RPCC
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             timerClock.Stop();
-            _cameraControl.DisconnectCameras();
-            _cameraFocus.SerialFocus.Close_Port();
             domeSocket.DisconnectAll();
             donutsSocket.DisconnectAll();
+            _dataCollector.Dispose();
+            _cameraControl.DisconnectCameras();
+            _cameraFocus.SerialFocus.Close_Port();
         }
 
         private void TimerClock_Tick(object sender, EventArgs e)

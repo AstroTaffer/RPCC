@@ -5,7 +5,7 @@ using System.Text;
 
 namespace RPCC
 {
-    internal class RpccSocketClient
+    public class RpccSocketClient
     {
         private readonly Logger _logger;
         private IPEndPoint _endPoint;
@@ -17,7 +17,7 @@ namespace RPCC
         private readonly bool _don;
         private bool _donRef;
         
-        internal RpccSocketClient(Logger logger, string program)
+        public RpccSocketClient(Logger logger, string program)
         {
             _logger = logger;
             if (program == "Dome" || program == "dome" || program == "dom")

@@ -105,6 +105,7 @@
     <Compile Include="AnalysisImageForFocus.cs" />
     <Compile Include="CameraControl.cs" />
     <Compile Include="CameraFocus.cs" />
+    <Compile Include="DataCollector.cs" />
     <Compile Include="FitsAnalysis.cs" />
     <Compile Include="FitsIO.cs" />
     <Compile Include="FocusForm.cs">
