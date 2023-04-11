@@ -74,10 +74,11 @@ namespace RPCC
 
         private static void StartDonutsPy()
         {
+            var cwd = Directory.GetCurrentDirectory();
             var start = new ProcessStartInfo
             {
-                FileName = @"DONUTS.py", //cmd is full path to python.exe
-                // start.Arguments = args;//args is path to .py file and any cmd line args
+                FileName = @"C:\Users\Nikita\AppData\Local\Programs\Python\Python310\python.exe", //cmd is full path to python.exe
+                Arguments = cwd + @"\DONUTS.py", //args is path to .py file and any cmd line args
                 UseShellExecute = false,
                 RedirectStandardOutput = true
             };
