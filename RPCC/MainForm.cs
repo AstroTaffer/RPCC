@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -15,22 +16,26 @@ namespace RPCC
         ///     Логика работы основной формы программы.
         ///     Обработка команд пользователя с помощью вызова готовых функций.
         /// </summary>
+        private ushort[][] currentImage;
 
-        internal ushort[][] currentImage;
         // HACK: Check for memory leak and refreshing error - if occurs, try use this variable as a reference to another
-        internal GeneralImageStat currentImageGStat;
+        private GeneralImageStat currentImageGStat;
         private int _idleCamNum;
 
-        internal bool isCurrentImageLoaded;
+        private bool isCurrentImageLoaded;
+        
         // FIXME: If new image is loaded, flag must be reset to false and imageBox must be tuned accordingly
-        internal bool isZoomModeActivated;
+        private bool isZoomModeActivated;
 
-        internal readonly Logger logger;
-        internal Settings settings;
+        private readonly Logger logger;
+        private Settings settings;
 
         private CameraControl _cameraControl;
         private CameraFocus _cameraFocus;
-        
+
+        private RpccSocketClient domeSocket;
+        private RpccSocketClient donutsSocket;
+
 
         public MainForm()
         {
@@ -52,24 +57,50 @@ namespace RPCC
             {
                 logger.AddLogEntry("WARNING Default config file not found");
             }
+            
+            StartDonutsPy();
 
             _cameraControl = new CameraControl(logger, settings);
             _cameraFocus = new CameraFocus(logger);
-            
+
+            domeSocket = new RpccSocketClient(logger, "dom");
+            domeSocket.Connect();
+            donutsSocket = new RpccSocketClient(logger, "don");
+
             // if (!_cameraFocus.Init())  
             //     if (MessageBox.Show(@"Can't open Focus serial port", @"OK", MessageBoxButtons.OK) == DialogResult.OK)
             //         Environment.Exit(1);
+        }
 
-            // _rpccSocketClient= new RpccSocketClient(logger);
+        private static void StartDonutsPy()
+        {
+            var start = new ProcessStartInfo
+            {
+                FileName = @"DONUTS.py", //cmd is full path to python.exe
+                // start.Arguments = args;//args is path to .py file and any cmd line args
+                UseShellExecute = false,
+                RedirectStandardOutput = true
+            };
+            using(var process = Process.Start(start))
+            {
+                if (process == null) return;
+                using (var reader = process.StandardOutput)
+                {
+                    var result = reader.ReadToEnd();
+                    Console.Write(result);
+                }
+            }
         }
 
         #region General
+
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             timerClock.Stop();
             _cameraControl.DisconnectCameras();
             _cameraFocus.SerialFocus.Close_Port();
-            // _rpccSocketClient.DisconnectAll();
+            domeSocket.DisconnectAll();
+            donutsSocket.DisconnectAll();
         }
 
         private void TimerClock_Tick(object sender, EventArgs e)
@@ -124,7 +155,7 @@ namespace RPCC
                             PlotFitsImage();
                             isCurrentImageLoaded = true;
                         }
-                        
+
                         // TODO: AUTOFOCUS, check quality
                         // _cameraFocus.AutoFocus();
                         _cameraControl.cameras[i].isExposing = false;
@@ -150,9 +181,11 @@ namespace RPCC
                 }
             }
         }
+
         #endregion
 
         #region Launch
+
         private void FindCamerasToolStripMenuItem_Click(object sender, EventArgs e)
         {
             _cameraControl.LaunchCameras();
@@ -188,6 +221,7 @@ namespace RPCC
             var focusForm = new FocusForm(_cameraFocus);
             focusForm.Show();
         }
+
         #endregion
 
         #region Logs
@@ -329,8 +363,8 @@ namespace RPCC
 
                         var localStat = new ProfileImageStat(subProfileImage, ref settings);
                         logger.AddLogEntry($"Maximum: {localStat.maxValue} " +
-                                    $"({localStat.maxXCoordinate + xCoordinate - settings.AnnulusOuterRadius}, " +
-                                    $"{localStat.maxYCoordinate + yCoordinate - settings.AnnulusOuterRadius})");
+                                           $"({localStat.maxXCoordinate + xCoordinate - settings.AnnulusOuterRadius}, " +
+                                           $"{localStat.maxYCoordinate + yCoordinate - settings.AnnulusOuterRadius})");
                         logger.AddLogEntry($"Background: {localStat.background:0.#}");
                         logger.AddLogEntry(
                             $"Centroid: ({localStat.centroidXCoordinate + xCoordinate - settings.AnnulusOuterRadius:0.#}, " +
@@ -351,6 +385,7 @@ namespace RPCC
         #endregion
 
         #region Survey
+
         private void ButtonSurveyStart_Click(object sender, EventArgs e)
         {
             buttonSurveyStart.Enabled = false;
@@ -359,11 +394,11 @@ namespace RPCC
             numericUpDownExpTime.Enabled = false;
             updateCamerasSettingsToolStripMenuItem.Enabled = false;
 
-            _cameraControl.task.framesNum = (int)numericUpDownSequence.Value;
+            _cameraControl.task.framesNum = (int) numericUpDownSequence.Value;
             _cameraControl.task.framesType = comboBoxImgType.Text;
             if (_cameraControl.task.framesType == "Bias") _cameraControl.task.framesExpTime = 0;
-            else _cameraControl.task.framesExpTime = (int)numericUpDownExpTime.Value * 1000;
-            
+            else _cameraControl.task.framesExpTime = (int) numericUpDownExpTime.Value * 1000;
+
             if (radioButtonViewCam1.Checked) _cameraControl.task.viewCamIndex = 0;
             else if (radioButtonViewCam2.Checked) _cameraControl.task.viewCamIndex = 1;
             else if (radioButtonViewCam3.Checked) _cameraControl.task.viewCamIndex = 2;
@@ -384,6 +419,7 @@ namespace RPCC
             numericUpDownExpTime.Enabled = true;
             updateCamerasSettingsToolStripMenuItem.Enabled = true;
         }
+
         #endregion
 
         #region Options
@@ -459,6 +495,15 @@ namespace RPCC
             settings.RestoreDefaultXmlConfig();
             logger.AddLogEntry("Default config file restored successfully");
         }
+
         #endregion
+
+        private void reconnectSocketsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            domeSocket.DisconnectAll();
+            donutsSocket.DisconnectAll();
+            domeSocket.Connect();
+            donutsSocket.Connect();
+        }
     }
 }
