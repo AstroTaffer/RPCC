@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Xml.Linq;
 
 namespace RPCC
@@ -160,6 +161,25 @@ namespace RPCC
         }
         #endregion
 
+        #region Survey
+        /// <summary>
+        ///     Настройки съёмки.
+        /// </summary>
+
+        private string _outImgsFolder;
+
+        public string OutImgsFolder
+        {
+            get => _outImgsFolder;
+            set
+            {
+                if (Directory.Exists(value)) _outImgsFolder = value;
+                else throw new ArgumentException("Selected output images folder does not exists");
+                // Alternative - if (!Exists) CreateDirectory
+            }
+        }
+        #endregion
+
         #region ConfigIO
 
         internal void LoadXmlConfig(string fileName)
@@ -173,6 +193,7 @@ namespace RPCC
             ApertureRadius = (int)config.Root.Element("image_analysis").Element("apertureRadius");
             AnnulusInnerRadius = (int)config.Root.Element("image_analysis").Element("annulusInnerRadius");
             AnnulusOuterRadius = (int)config.Root.Element("image_analysis").Element("annulusOuterRadius");
+
             SnCamG = (string)config.Root.Element("cameras").Element("snCamG");
             SnCamR = (string)config.Root.Element("cameras").Element("snCamR");
             SnCamI = (string)config.Root.Element("cameras").Element("snCamI");
@@ -180,6 +201,8 @@ namespace RPCC
             CamTemp = (double)config.Root.Element("cameras").Element("camTemp");
             CamBin = (int)config.Root.Element("cameras").Element("camBin");
             CamRoModeIndex = (int)config.Root.Element("cameras").Element("camRoModeIndex");
+
+            OutImgsFolder = (string)config.Root.Element("survey").Element("outImgsFolder");
         }
 
         internal void SaveXmlConfig(string fileName)
@@ -191,6 +214,7 @@ namespace RPCC
                     new XElement("apertureRadius", ApertureRadius),
                     new XElement("annulusInnerRadius", AnnulusInnerRadius),
                     new XElement("annulusOuterRadius", AnnulusOuterRadius)),
+                
                 new XElement("cameras",
                     new XElement("snCamG", SnCamG),
                     new XElement("snCamR", SnCamR),
@@ -198,7 +222,10 @@ namespace RPCC
                     new XElement("numFlushes", NumFlushes),
                     new XElement("camTemp", CamTemp),
                     new XElement("camBin", CamBin),
-                    new XElement("camRoModeIndex", CamRoModeIndex))
+                    new XElement("camRoModeIndex", CamRoModeIndex)),
+                
+                new XElement("survey",
+                    new XElement("outImgsFolder", OutImgsFolder))
             ));
 
             config.Save(fileName);
@@ -213,6 +240,7 @@ namespace RPCC
                     new XElement("apertureRadius", 6),
                     new XElement("annulusInnerRadius", 10),
                     new XElement("annulusOuterRadius", 15)),
+                
                 new XElement("cameras",
                     new XElement("snCamG", "ML0892515"),
                     new XElement("snCamR", "ML0882515"),
@@ -220,7 +248,10 @@ namespace RPCC
                     new XElement("numFlushes", 5),
                     new XElement("camTemp", -5.0),
                     new XElement("camBin", 3),
-                    new XElement("camRoModeIndex", 1))
+                    new XElement("camRoModeIndex", 1)),
+                
+                new XElement("survey",
+                    new XElement("outImgsFolder", Directory.GetCurrentDirectory()))
             ));
 
             config.Save("SettingsDefault.xml");

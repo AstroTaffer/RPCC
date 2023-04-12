@@ -37,13 +37,16 @@ namespace RPCC
             {
                 comboBoxReadout.SelectedIndex = -1;
             }
-            
+            #endregion
+
+            #region Survey
+            folderBrowserDialogSetFolder.SelectedPath = _settings.OutImgsFolder;
+            labelOutFolder.Text = _settings.OutImgsFolder;
             #endregion
         }
 
 
         #region Buttons
-
         private void ButtonCancel_Click(object sender, EventArgs e)
         {
             DialogResult = DialogResult.Cancel;
@@ -70,10 +73,22 @@ namespace RPCC
             if (comboBoxReadout.SelectedIndex > -1) _settings.CamRoModeIndex = comboBoxReadout.SelectedIndex;
             #endregion
 
+            #region Survey
+            _settings.OutImgsFolder = folderBrowserDialogSetFolder.SelectedPath;
+            #endregion
+
             DialogResult = DialogResult.OK;
             Close();
         }
 
+        private void ButtonSetFolder_Click(object sender, EventArgs e)
+        {
+            if (folderBrowserDialogSetFolder.ShowDialog() == DialogResult.OK)
+            {
+                labelOutFolder.Text = folderBrowserDialogSetFolder.SelectedPath;
+            }
+        }
         #endregion
+
     }
 }

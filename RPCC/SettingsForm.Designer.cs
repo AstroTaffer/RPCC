@@ -42,6 +42,8 @@
             this.textBoxLowerBrightnessSd = new System.Windows.Forms.TextBox();
             this.labelLowerBrightnessSd = new System.Windows.Forms.Label();
             this.tabPageCameras = new System.Windows.Forms.TabPage();
+            this.comboBoxReadout = new System.Windows.Forms.ComboBox();
+            this.labelReadout = new System.Windows.Forms.Label();
             this.numericUpDownBin = new System.Windows.Forms.NumericUpDown();
             this.labelBin = new System.Windows.Forms.Label();
             this.comboBoxTemp = new System.Windows.Forms.ComboBox();
@@ -54,10 +56,13 @@
             this.labelrCamSn = new System.Windows.Forms.Label();
             this.textBoxgCamSn = new System.Windows.Forms.TextBox();
             this.labelgCamSn = new System.Windows.Forms.Label();
+            this.tabPageSurvey = new System.Windows.Forms.TabPage();
+            this.labelOutFolder = new System.Windows.Forms.Label();
+            this.buttonSetFolder = new System.Windows.Forms.Button();
+            this.labelOutImgsFolder = new System.Windows.Forms.Label();
             this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonAccept = new System.Windows.Forms.Button();
-            this.labelReadout = new System.Windows.Forms.Label();
-            this.comboBoxReadout = new System.Windows.Forms.ComboBox();
+            this.folderBrowserDialogSetFolder = new System.Windows.Forms.FolderBrowserDialog();
             this.tabControlSettings.SuspendLayout();
             this.tabPageImageAnalysis.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownAnnulusOuterRadius)).BeginInit();
@@ -66,12 +71,14 @@
             this.tabPageCameras.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownBin)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownNumFlushes)).BeginInit();
+            this.tabPageSurvey.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControlSettings
             // 
             this.tabControlSettings.Controls.Add(this.tabPageImageAnalysis);
             this.tabControlSettings.Controls.Add(this.tabPageCameras);
+            this.tabControlSettings.Controls.Add(this.tabPageSurvey);
             this.tabControlSettings.Dock = System.Windows.Forms.DockStyle.Top;
             this.tabControlSettings.Location = new System.Drawing.Point(0, 0);
             this.tabControlSettings.Name = "tabControlSettings";
@@ -218,6 +225,24 @@
             this.tabPageCameras.TabIndex = 1;
             this.tabPageCameras.Text = "Cameras";
             // 
+            // comboBoxReadout
+            // 
+            this.comboBoxReadout.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxReadout.FormattingEnabled = true;
+            this.comboBoxReadout.Location = new System.Drawing.Point(183, 294);
+            this.comboBoxReadout.Name = "comboBoxReadout";
+            this.comboBoxReadout.Size = new System.Drawing.Size(100, 21);
+            this.comboBoxReadout.TabIndex = 13;
+            // 
+            // labelReadout
+            // 
+            this.labelReadout.AutoSize = true;
+            this.labelReadout.Location = new System.Drawing.Point(6, 294);
+            this.labelReadout.Name = "labelReadout";
+            this.labelReadout.Size = new System.Drawing.Size(78, 13);
+            this.labelReadout.TabIndex = 12;
+            this.labelReadout.Text = "Readout Mode";
+            // 
             // numericUpDownBin
             // 
             this.numericUpDownBin.Location = new System.Drawing.Point(233, 249);
@@ -348,6 +373,46 @@
             this.labelgCamSn.TabIndex = 0;
             this.labelgCamSn.Text = "\"g\" camera serial number";
             // 
+            // tabPageSurvey
+            // 
+            this.tabPageSurvey.BackColor = System.Drawing.SystemColors.Control;
+            this.tabPageSurvey.Controls.Add(this.labelOutFolder);
+            this.tabPageSurvey.Controls.Add(this.buttonSetFolder);
+            this.tabPageSurvey.Controls.Add(this.labelOutImgsFolder);
+            this.tabPageSurvey.Location = new System.Drawing.Point(4, 22);
+            this.tabPageSurvey.Name = "tabPageSurvey";
+            this.tabPageSurvey.Size = new System.Drawing.Size(291, 342);
+            this.tabPageSurvey.TabIndex = 2;
+            this.tabPageSurvey.Text = "Survey";
+            // 
+            // labelOutFolder
+            // 
+            this.labelOutFolder.AutoEllipsis = true;
+            this.labelOutFolder.Location = new System.Drawing.Point(6, 45);
+            this.labelOutFolder.Name = "labelOutFolder";
+            this.labelOutFolder.Size = new System.Drawing.Size(277, 13);
+            this.labelOutFolder.TabIndex = 2;
+            this.labelOutFolder.Text = "OUTPUT IMAGES FOLDER OUTPUT IMAGES FOLDER";
+            // 
+            // buttonSetFolder
+            // 
+            this.buttonSetFolder.Location = new System.Drawing.Point(208, 19);
+            this.buttonSetFolder.Name = "buttonSetFolder";
+            this.buttonSetFolder.Size = new System.Drawing.Size(75, 23);
+            this.buttonSetFolder.TabIndex = 1;
+            this.buttonSetFolder.Text = "Set folder";
+            this.buttonSetFolder.UseVisualStyleBackColor = true;
+            this.buttonSetFolder.Click += new System.EventHandler(this.ButtonSetFolder_Click);
+            // 
+            // labelOutImgsFolder
+            // 
+            this.labelOutImgsFolder.AutoSize = true;
+            this.labelOutImgsFolder.Location = new System.Drawing.Point(6, 24);
+            this.labelOutImgsFolder.Name = "labelOutImgsFolder";
+            this.labelOutImgsFolder.Size = new System.Drawing.Size(104, 13);
+            this.labelOutImgsFolder.TabIndex = 0;
+            this.labelOutImgsFolder.Text = "Output images folder";
+            // 
             // buttonCancel
             // 
             this.buttonCancel.Anchor = System.Windows.Forms.AnchorStyles.Right;
@@ -371,23 +436,9 @@
             this.buttonAccept.UseVisualStyleBackColor = true;
             this.buttonAccept.Click += new System.EventHandler(this.ButtonAccept_Click);
             // 
-            // labelReadout
+            // folderBrowserDialogSetFolder
             // 
-            this.labelReadout.AutoSize = true;
-            this.labelReadout.Location = new System.Drawing.Point(6, 294);
-            this.labelReadout.Name = "labelReadout";
-            this.labelReadout.Size = new System.Drawing.Size(78, 13);
-            this.labelReadout.TabIndex = 12;
-            this.labelReadout.Text = "Readout Mode";
-            // 
-            // comboBoxReadout
-            // 
-            this.comboBoxReadout.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBoxReadout.FormattingEnabled = true;
-            this.comboBoxReadout.Location = new System.Drawing.Point(183, 294);
-            this.comboBoxReadout.Name = "comboBoxReadout";
-            this.comboBoxReadout.Size = new System.Drawing.Size(100, 21);
-            this.comboBoxReadout.TabIndex = 13;
+            this.folderBrowserDialogSetFolder.RootFolder = System.Environment.SpecialFolder.MyComputer;
             // 
             // SettingsForm
             // 
@@ -415,6 +466,8 @@
             this.tabPageCameras.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownBin)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownNumFlushes)).EndInit();
+            this.tabPageSurvey.ResumeLayout(false);
+            this.tabPageSurvey.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -450,5 +503,10 @@
         private System.Windows.Forms.Label labelBin;
         private System.Windows.Forms.ComboBox comboBoxReadout;
         private System.Windows.Forms.Label labelReadout;
+        private System.Windows.Forms.TabPage tabPageSurvey;
+        private System.Windows.Forms.Label labelOutImgsFolder;
+        private System.Windows.Forms.FolderBrowserDialog folderBrowserDialogSetFolder;
+        private System.Windows.Forms.Button buttonSetFolder;
+        private System.Windows.Forms.Label labelOutFolder;
     }
 }

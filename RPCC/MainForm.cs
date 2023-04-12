@@ -24,7 +24,6 @@ namespace RPCC
 
         private bool isCurrentImageLoaded;
         
-        // FIXME: If new image is loaded, flag must be reset to false and imageBox must be tuned accordingly
         private bool isZoomModeActivated;
 
         private readonly Logger logger;
@@ -52,7 +51,7 @@ namespace RPCC
             try
             {
                 settings.LoadXmlConfig("SettingsDefault.xml");
-                logger.AddLogEntry("Default config loaded successfully");
+                logger.AddLogEntry("Default config loaded");
             }
             catch (FileNotFoundException)
             {
@@ -60,9 +59,9 @@ namespace RPCC
             }
             
             // Donuts
-            StartDonutsPy();
-            donutsSocket = new RpccSocketClient(logger, "don");
-            donutsSocket.Connect();
+            // StartDonutsPy();
+            // donutsSocket = new RpccSocketClient(logger, "don");
+            // donutsSocket.Connect();
             
 
             // Hardware controls
@@ -70,37 +69,24 @@ namespace RPCC
             _cameraFocus = new CameraFocus(logger);
 
             // MeteoDome connect
-            domeSocket = new RpccSocketClient(logger, "dom");
-            domeSocket.Connect();
-            _dataCollector = new DataCollector(domeSocket, logger);
+            //domeSocket = new RpccSocketClient(logger, "dom");
+            //domeSocket.Connect();
+            //_dataCollector = new DataCollector(domeSocket, logger);
 
             // if (!_cameraFocus.Init())  
             //     if (MessageBox.Show(@"Can't open Focus serial port", @"OK", MessageBoxButtons.OK) == DialogResult.OK)
             //         Environment.Exit(1);
         }
 
-        private static void StartDonutsPy()
-        {
-            var cwd = Directory.GetCurrentDirectory();
-            var start = new ProcessStartInfo
-            {
-                FileName = @"C:\Users\Nikita\AppData\Local\Programs\Python\Python310\python.exe", //cmd is full path to python.exe
-                Arguments = cwd + @"\DONUTS.py", //args is path to .py file and any cmd line args
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                CreateNoWindow = true
-            };
-            Process.Start(start);
-        }
 
         #region General
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             timerClock.Stop();
-            domeSocket.DisconnectAll();
-            donutsSocket.DisconnectAll();
-            DataCollector.Dispose();
+            // domeSocket.DisconnectAll();
+            // donutsSocket.DisconnectAll();
+            // DataCollector.Dispose();
             _cameraControl.DisconnectCameras();
             _cameraFocus.SerialFocus.Close_Port();
         }
@@ -148,12 +134,18 @@ namespace RPCC
                         // TODO: Move to separate thread
                         RpccFits imageFits = _cameraControl.ReadImage(_cameraControl.cameras[i]);
 
-                        // SaveFits
+                        imageFits.SaveFitsFile(settings, _cameraControl, i);
 
                         if (i == _cameraControl.task.viewCamIndex)
                         {
                             isCurrentImageLoaded = false;
                             currentImage = imageFits.data;
+                            currentImageGStat = new GeneralImageStat(currentImage);
+                            // TODO: Too much logs - get rid of them or write stats to labels
+                            logger.AddLogEntry($"Minimum: {currentImageGStat.min}");
+                            logger.AddLogEntry($"Maximum: {currentImageGStat.max}");
+                            logger.AddLogEntry($"Mean: {currentImageGStat.mean:0.##}");
+                            logger.AddLogEntry($"SD: {currentImageGStat.sd:0.##}");
                             PlotFitsImage();
                             isCurrentImageLoaded = true;
                         }
@@ -180,13 +172,14 @@ namespace RPCC
                     numericUpDownSequence.Enabled = true;
                     numericUpDownExpTime.Enabled = true;
                     updateCamerasSettingsToolStripMenuItem.Enabled = true;
+                    logger.AddLogEntry("Survey finished");
                 }
             }
         }
 
         #endregion
 
-        #region Launch
+        #region Launch Menu
 
         private void FindCamerasToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -222,6 +215,29 @@ namespace RPCC
         {
             var focusForm = new FocusForm(_cameraFocus);
             focusForm.Show();
+        }
+
+        private void ReconnectSocketsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            logger.AddLogEntry("Reconnect to servers");
+            domeSocket.DisconnectAll();
+            donutsSocket.DisconnectAll();
+            domeSocket.Connect();
+            donutsSocket.Connect();
+        }
+
+        private static void StartDonutsPy()
+        {
+            var cwd = Directory.GetCurrentDirectory();
+            var start = new ProcessStartInfo
+            {
+                FileName = @"python.exe", //cmd is full path to python.exe
+                Arguments = cwd + @"\DONUTS.py", //args is path to .py file and any cmd line args
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true
+            };
+            Process.Start(start);
         }
 
         #endregion
@@ -374,7 +390,7 @@ namespace RPCC
                         logger.AddLogEntry($"SNR: {localStat.snr:0.#}");
                         logger.AddLogEntry($"FWHM: {localStat.fwhm:0.##}");
                         PlotProfileImage(ref settings, localStat, subProfileImage);
-                        logger.AddLogEntry("Profile image plotted successfully");
+                        logger.AddLogEntry("Profile image plotted");
                     }
                 }
             }
@@ -407,6 +423,8 @@ namespace RPCC
 
             _cameraControl.SetSurveySettings();
             _cameraControl.StartExposure();
+            logger.AddLogEntry($"Survey started - {_cameraControl.task.framesNum} {_cameraControl.task.framesType}" +
+                $"frames with exposure of {_cameraControl.task.framesExpTime} seconds");
         }
 
         private void ButtonSurveyStop_Click(object sender, EventArgs e)
@@ -420,6 +438,7 @@ namespace RPCC
             numericUpDownSequence.Enabled = true;
             numericUpDownExpTime.Enabled = true;
             updateCamerasSettingsToolStripMenuItem.Enabled = true;
+            logger.AddLogEntry("Survey cancelled");
         }
 
         #endregion
@@ -430,7 +449,7 @@ namespace RPCC
         {
             var settingsForm = new SettingsForm(settings);
             settingsForm.ShowDialog();
-            if (settingsForm.DialogResult == DialogResult.OK) logger.AddLogEntry("Settings changed successfully");
+            if (settingsForm.DialogResult == DialogResult.OK) logger.AddLogEntry("Settings changed");
         }
 
         private void UpdateCameraSettingsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -443,7 +462,7 @@ namespace RPCC
             if (openFileDialogConfig.ShowDialog() == DialogResult.OK)
             {
                 settings.LoadXmlConfig(openFileDialogConfig.FileName);
-                logger.AddLogEntry($"Config file {saveFileDialogConfig.FileName} loaded successfully");
+                logger.AddLogEntry($"Config file {saveFileDialogConfig.FileName} loaded");
             }
         }
 
@@ -452,7 +471,7 @@ namespace RPCC
             if (saveFileDialogConfig.ShowDialog() == DialogResult.OK)
             {
                 settings.SaveXmlConfig(saveFileDialogConfig.FileName);
-                logger.AddLogEntry($"Config file {saveFileDialogConfig.FileName} saved successfully");
+                logger.AddLogEntry($"Config file {saveFileDialogConfig.FileName} saved");
             }
         }
 
@@ -462,9 +481,9 @@ namespace RPCC
 
         private void TestDLLlibrariesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var templateFits = new RpccFits("TemplateHeader.fits");
-            var templateHeader = templateFits.header;
-            logger.AddLogEntry($"Template DATE-OBS: {templateHeader.GetStringValue("DATE-OBS")}");
+            var testFits = new RpccFits("TestImage.fits");
+            var testHeader = testFits.header;
+            logger.AddLogEntry($"Template DATE-OBS: {testHeader.GetStringValue("DATE-OBS")}");
 
             var libVer = new StringBuilder(128);
             var len = new IntPtr(128);
@@ -489,27 +508,16 @@ namespace RPCC
 
             await Task.Run(() => PlotFitsImage());
             isCurrentImageLoaded = true;
-            logger.AddLogEntry("Test image plotted successfully");
+            logger.AddLogEntry("Test image plotted");
         }
 
         private void RestoreDefaultConfigFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
             settings.RestoreDefaultXmlConfig();
-            logger.AddLogEntry("Default config file restored successfully");
+            logger.AddLogEntry("Default config file restored");
         }
 
-        #endregion
-
-        private void reconnectSocketsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            logger.AddLogEntry("Reconnect to servers");
-            domeSocket.DisconnectAll();
-            donutsSocket.DisconnectAll();
-            domeSocket.Connect();
-            donutsSocket.Connect();
-        }
-
-        private void socketToolStripMenuItem_Click(object sender, EventArgs e)
+        private void SocketToolStripMenuItem_Click(object sender, EventArgs e)
         {
             logger.AddLogEntry("Test donuts");
             var cwd = Directory.GetCurrentDirectory();
@@ -519,6 +527,10 @@ namespace RPCC
             donutsSocket.DonutSetRef(cwd + refFile);
             var outPut = donutsSocket.DonutGetShift(cwd + testFile);
             logger.AddLogEntry("shifts = " + outPut[0] + "x " + outPut[1] + "y ");
+
         }
+
+        #endregion
+
     }
 }

@@ -42,7 +42,6 @@
             this.loadConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.reconnectSocketsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.socketToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.debugToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.testDLLlibrariesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loadTestImageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -97,24 +96,27 @@
             this.labelExpTime = new System.Windows.Forms.Label();
             this.comboBoxImgType = new System.Windows.Forms.ComboBox();
             this.labelImgType = new System.Windows.Forms.Label();
+            this.testDonToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.reconnectSocketsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip.SuspendLayout();
             this.menuStrip.SuspendLayout();
             this.groupBoxLogs.SuspendLayout();
             this.panelFitsImage.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize) (this.pictureBoxFits)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxFits)).BeginInit();
             this.groupBoxImageAnalysis.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize) (this.pictureBoxProfile)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxProfile)).BeginInit();
             this.groupBoxCam1.SuspendLayout();
             this.groupBoxCam2.SuspendLayout();
             this.groupBoxCam3.SuspendLayout();
             this.groupBoxSurvey.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownSequence)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownExpTime)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownSequence)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownExpTime)).BeginInit();
             this.SuspendLayout();
             // 
             // statusStrip
             // 
-            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {this.tSStatusClock});
+            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tSStatusClock});
             this.statusStrip.Location = new System.Drawing.Point(0, 509);
             this.statusStrip.Name = "statusStrip";
             this.statusStrip.Size = new System.Drawing.Size(1140, 22);
@@ -130,7 +132,10 @@
             // 
             // menuStrip
             // 
-            this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {this.launchToolStripMenuItem, this.optionsToolStripMenuItem, this.debugToolStripMenuItem});
+            this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.launchToolStripMenuItem,
+            this.optionsToolStripMenuItem,
+            this.debugToolStripMenuItem});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
             this.menuStrip.Size = new System.Drawing.Size(1140, 24);
@@ -139,7 +144,10 @@
             // 
             // launchToolStripMenuItem
             // 
-            this.launchToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.findCamerasToolStripMenuItem, this.focusToolStripMenuItem});
+            this.launchToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.findCamerasToolStripMenuItem,
+            this.focusToolStripMenuItem,
+            this.reconnectSocketsToolStripMenuItem1});
             this.launchToolStripMenuItem.Name = "launchToolStripMenuItem";
             this.launchToolStripMenuItem.Size = new System.Drawing.Size(58, 20);
             this.launchToolStripMenuItem.Text = "Launch";
@@ -147,20 +155,25 @@
             // findCamerasToolStripMenuItem
             // 
             this.findCamerasToolStripMenuItem.Name = "findCamerasToolStripMenuItem";
-            this.findCamerasToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+            this.findCamerasToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.findCamerasToolStripMenuItem.Text = "Find cameras";
             this.findCamerasToolStripMenuItem.Click += new System.EventHandler(this.FindCamerasToolStripMenuItem_Click);
             // 
             // focusToolStripMenuItem
             // 
             this.focusToolStripMenuItem.Name = "focusToolStripMenuItem";
-            this.focusToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+            this.focusToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.focusToolStripMenuItem.Text = "Focus";
             this.focusToolStripMenuItem.Click += new System.EventHandler(this.FocusToolStripMenuItem_Click);
             // 
             // optionsToolStripMenuItem
             // 
-            this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.settingsToolStripMenuItem, this.updateCamerasSettingsToolStripMenuItem, this.loadConfigToolStripMenuItem, this.saveConfigToolStripMenuItem, this.reconnectSocketsToolStripMenuItem, this.socketToolStripMenuItem});
+            this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.settingsToolStripMenuItem,
+            this.updateCamerasSettingsToolStripMenuItem,
+            this.loadConfigToolStripMenuItem,
+            this.saveConfigToolStripMenuItem,
+            this.reconnectSocketsToolStripMenuItem});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             this.optionsToolStripMenuItem.Text = "Options";
@@ -198,18 +211,15 @@
             this.reconnectSocketsToolStripMenuItem.Name = "reconnectSocketsToolStripMenuItem";
             this.reconnectSocketsToolStripMenuItem.Size = new System.Drawing.Size(203, 22);
             this.reconnectSocketsToolStripMenuItem.Text = "Reconnect sockets";
-            this.reconnectSocketsToolStripMenuItem.Click += new System.EventHandler(this.reconnectSocketsToolStripMenuItem_Click);
-            // 
-            // socketToolStripMenuItem
-            // 
-            this.socketToolStripMenuItem.Name = "socketToolStripMenuItem";
-            this.socketToolStripMenuItem.Size = new System.Drawing.Size(203, 22);
-            this.socketToolStripMenuItem.Text = "Test Don";
-            this.socketToolStripMenuItem.Click += new System.EventHandler(this.socketToolStripMenuItem_Click);
+            this.reconnectSocketsToolStripMenuItem.Click += new System.EventHandler(this.ReconnectSocketsToolStripMenuItem_Click);
             // 
             // debugToolStripMenuItem
             // 
-            this.debugToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.testDLLlibrariesToolStripMenuItem, this.loadTestImageToolStripMenuItem, this.restoreDefaultConfigFileToolStripMenuItem});
+            this.debugToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.testDLLlibrariesToolStripMenuItem,
+            this.loadTestImageToolStripMenuItem,
+            this.restoreDefaultConfigFileToolStripMenuItem,
+            this.testDonToolStripMenuItem});
             this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
             this.debugToolStripMenuItem.Size = new System.Drawing.Size(54, 20);
             this.debugToolStripMenuItem.Text = "Debug";
@@ -249,7 +259,7 @@
             // 
             // buttonLogsSave
             // 
-            this.buttonLogsSave.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonLogsSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonLogsSave.Location = new System.Drawing.Point(224, 448);
             this.buttonLogsSave.Name = "buttonLogsSave";
             this.buttonLogsSave.Size = new System.Drawing.Size(100, 23);
@@ -260,7 +270,7 @@
             // 
             // buttonLogsClear
             // 
-            this.buttonLogsClear.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.buttonLogsClear.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.buttonLogsClear.Location = new System.Drawing.Point(4, 448);
             this.buttonLogsClear.Name = "buttonLogsClear";
             this.buttonLogsClear.Size = new System.Drawing.Size(100, 23);
@@ -683,11 +693,19 @@
             // numericUpDownSequence
             // 
             this.numericUpDownSequence.Location = new System.Drawing.Point(107, 80);
-            this.numericUpDownSequence.Minimum = new decimal(new int[] {1, 0, 0, 0});
+            this.numericUpDownSequence.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
             this.numericUpDownSequence.Name = "numericUpDownSequence";
             this.numericUpDownSequence.Size = new System.Drawing.Size(65, 20);
             this.numericUpDownSequence.TabIndex = 5;
-            this.numericUpDownSequence.Value = new decimal(new int[] {1, 0, 0, 0});
+            this.numericUpDownSequence.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
             // 
             // labelSequence
             // 
@@ -718,7 +736,12 @@
             // 
             this.comboBoxImgType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxImgType.FormattingEnabled = true;
-            this.comboBoxImgType.Items.AddRange(new object[] {"Object", "Bias", "Dark", "Flat", "Test"});
+            this.comboBoxImgType.Items.AddRange(new object[] {
+            "Object",
+            "Bias",
+            "Dark",
+            "Flat",
+            "Test"});
             this.comboBoxImgType.Location = new System.Drawing.Point(107, 17);
             this.comboBoxImgType.Name = "comboBoxImgType";
             this.comboBoxImgType.Size = new System.Drawing.Size(65, 21);
@@ -732,6 +755,20 @@
             this.labelImgType.Size = new System.Drawing.Size(66, 13);
             this.labelImgType.TabIndex = 0;
             this.labelImgType.Text = "Image Type:";
+            // 
+            // testDonToolStripMenuItem
+            // 
+            this.testDonToolStripMenuItem.Name = "testDonToolStripMenuItem";
+            this.testDonToolStripMenuItem.Size = new System.Drawing.Size(209, 22);
+            this.testDonToolStripMenuItem.Text = "Test Don";
+            this.testDonToolStripMenuItem.Click += new System.EventHandler(this.SocketToolStripMenuItem_Click);
+            // 
+            // reconnectSocketsToolStripMenuItem1
+            // 
+            this.reconnectSocketsToolStripMenuItem1.Name = "reconnectSocketsToolStripMenuItem1";
+            this.reconnectSocketsToolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
+            this.reconnectSocketsToolStripMenuItem1.Text = "Reconnect sockets";
+            this.reconnectSocketsToolStripMenuItem1.Click += new System.EventHandler(this.ReconnectSocketsToolStripMenuItem_Click);
             // 
             // MainForm
             // 
@@ -747,7 +784,7 @@
             this.Controls.Add(this.statusStrip);
             this.Controls.Add(this.menuStrip);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip;
             this.MaximizeBox = false;
             this.Name = "MainForm";
@@ -759,9 +796,9 @@
             this.menuStrip.PerformLayout();
             this.groupBoxLogs.ResumeLayout(false);
             this.panelFitsImage.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize) (this.pictureBoxFits)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxFits)).EndInit();
             this.groupBoxImageAnalysis.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize) (this.pictureBoxProfile)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxProfile)).EndInit();
             this.groupBoxCam1.ResumeLayout(false);
             this.groupBoxCam1.PerformLayout();
             this.groupBoxCam2.ResumeLayout(false);
@@ -770,13 +807,12 @@
             this.groupBoxCam3.PerformLayout();
             this.groupBoxSurvey.ResumeLayout(false);
             this.groupBoxSurvey.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownSequence)).EndInit();
-            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownExpTime)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownSequence)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownExpTime)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
-        }
 
-        private System.Windows.Forms.ToolStripMenuItem socketToolStripMenuItem;
+        }
 
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
 
@@ -848,6 +884,8 @@
         private System.Windows.Forms.Button buttonSurveyStart;
         private System.Windows.Forms.ComboBox comboBoxImgType;
         private System.Windows.Forms.ToolStripMenuItem reconnectSocketsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem testDonToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem reconnectSocketsToolStripMenuItem1;
     }
 }
 
