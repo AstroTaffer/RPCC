@@ -22,7 +22,18 @@ namespace RPCC
                 _logBox.Items.Insert(0, $"{DateTime.UtcNow:G} Logs have been saved and cleaned");
             }
 
-            _logBox.Items.Insert(0, $"{DateTime.UtcNow:G} {entry}");
+            try
+            {
+                _logBox.Items.Insert(0, $"{DateTime.UtcNow:G} {entry}");
+            }
+            catch (Exception e)
+            {
+                _logBox.Invoke((MethodInvoker) delegate
+                {
+                    _logBox.Items.Insert(0, $"{DateTime.UtcNow:G} {entry}");
+                });
+            }
+            
         }
 
         internal void SaveLogs()
