@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -11,6 +13,8 @@ namespace RPCC
         private IPEndPoint _endPoint;
         private TcpClient _client;
         private NetworkStream _stream;
+        private StreamReader _reader;
+        private StreamWriter _writer;
         private const int PortDome = 8085;
         private const int PortDon = 3030;
         private readonly bool _dome;
@@ -36,13 +40,16 @@ namespace RPCC
 
         public bool Connect()
         {
+            _client = new TcpClient();
             if (_dome)
             {
                 _endPoint = new IPEndPoint(IPAddress.Loopback, PortDome);  // получаем адреса для запуска сокета
             }
             else if (_don)
             {
-                _endPoint = new IPEndPoint(IPAddress.Loopback, PortDon);
+                IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
+                IPAddress ipAddress = ipHostInfo.AddressList[2];
+                _endPoint = new IPEndPoint(ipAddress, PortDon);
             }
             else
             {
@@ -51,8 +58,16 @@ namespace RPCC
             }
             try
             {
-                _client = new TcpClient(_endPoint);
-                _stream = _client.GetStream();
+                _client.Connect(_endPoint);
+                if (_client.Connected)
+                {
+                    _stream = _client.GetStream();
+                    _reader = new StreamReader(_stream);
+                    _writer = new StreamWriter(_stream);
+                    _writer.AutoFlush = true;
+                    _logger.AddLogEntry($"Connected to {_client.Client.RemoteEndPoint}");
+                    return true;
+                }
             }
             catch (SocketException ex)
             {
@@ -60,7 +75,8 @@ namespace RPCC
                 _logger.AddLogEntry($"Socket error: unable to connect to {(_dome ? "MeteoDome" : "DONUTS script")}");
             }
 
-            return _client.Connected;
+            return false;
+            // return _client.Connected;
         }
 
         /**
@@ -91,19 +107,19 @@ namespace RPCC
             }
             try
             {
-                // var message = "get sky";
-                var data = Encoding.Unicode.GetBytes(msg);
-                _stream.WriteAsync(data, 0, data.Length);
-                
+
+                _writer.WriteLine(msg);
+
                 // получаем ответ
-                data = new byte[256]; // буфер для ответа
-                _stream.ReadAsync(data, 0, data.Length);
-                var response = Encoding.UTF8.GetString(data);
-                if (string.IsNullOrEmpty(response))
+                
+                var data = _reader.ReadLine();
+                // _logger.AddLogEntry(data);
+                // var response = Encoding.UTF8.GetString(data);
+                if (string.IsNullOrEmpty(data))
                 {
                     _logger.AddLogEntry("Socket dome error: len(response)=0");
                 }
-                return response;
+                return data;
             }
             catch (SocketException ex)
             {
@@ -129,9 +145,9 @@ namespace RPCC
             try
             {
                 var lenBytes = Encoding.UTF8.GetBytes(refPath.Length.ToString());
-                _stream.WriteAsync(lenBytes, 0, lenBytes.Length);
+                _stream.Write(lenBytes, 0, lenBytes.Length);
                 var pathBytes = Encoding.UTF8.GetBytes(refPath);
-                _stream.WriteAsync(pathBytes, 0, pathBytes.Length);
+                _stream.Write(pathBytes, 0, pathBytes.Length);
             }
             catch (SocketException ex)
             {
@@ -164,8 +180,8 @@ namespace RPCC
             try
             {
                 var pathBytes = Encoding.UTF8.GetBytes(path);
-                _stream.WriteAsync(pathBytes, 0, pathBytes.Length);
-                _stream.ReadAsync(data, 0, data.Length);
+                _stream.Write(pathBytes, 0, pathBytes.Length);
+                _stream.Read(data, 0, data.Length);
             }
             catch (SocketException ex)
             {
@@ -189,8 +205,27 @@ namespace RPCC
 
         internal void DisconnectAll()
         {
-            _stream.Close();
-            _client.Close();
+            try
+            {
+                if (_dome)
+                {
+                    _writer.WriteLine("stop");  //hack tcpclient problem
+                }
+
+                if (_don)
+                {
+                    _stream.Write(Encoding.UTF8.GetBytes("0"), 0, Encoding.UTF8.GetBytes("0").Length);
+                }
+                 // _stream.Close();
+                 // _client.Close();
+                 _client.Dispose();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                // throw;
+            }
+           
         }
     }
 }

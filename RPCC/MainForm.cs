@@ -59,7 +59,11 @@ namespace RPCC
                 logger.AddLogEntry("WARNING Default config file not found");
             }
             
+            // Donuts
             StartDonutsPy();
+            donutsSocket = new RpccSocketClient(logger, "don");
+            donutsSocket.Connect();
+            
 
             // Hardware controls
             _cameraControl = new CameraControl(logger, settings);
@@ -68,11 +72,7 @@ namespace RPCC
             // MeteoDome connect
             domeSocket = new RpccSocketClient(logger, "dom");
             domeSocket.Connect();
-            _dataCollector = new DataCollector(domeSocket);
-            
-            // Donuts
-            donutsSocket = new RpccSocketClient(logger, "don");
-
+            _dataCollector = new DataCollector(domeSocket, logger);
 
             // if (!_cameraFocus.Init())  
             //     if (MessageBox.Show(@"Can't open Focus serial port", @"OK", MessageBoxButtons.OK) == DialogResult.OK)
@@ -87,17 +87,10 @@ namespace RPCC
                 FileName = @"C:\Users\Nikita\AppData\Local\Programs\Python\Python310\python.exe", //cmd is full path to python.exe
                 Arguments = cwd + @"\DONUTS.py", //args is path to .py file and any cmd line args
                 UseShellExecute = false,
-                RedirectStandardOutput = true
+                RedirectStandardOutput = true,
+                CreateNoWindow = true
             };
-            using(var process = Process.Start(start))
-            {
-                if (process == null) return;
-                using (var reader = process.StandardOutput)
-                {
-                    var result = reader.ReadToEnd();
-                    Console.Write(result);
-                }
-            }
+            Process.Start(start);
         }
 
         #region General
@@ -107,7 +100,7 @@ namespace RPCC
             timerClock.Stop();
             domeSocket.DisconnectAll();
             donutsSocket.DisconnectAll();
-            _dataCollector.Dispose();
+            DataCollector.Dispose();
             _cameraControl.DisconnectCameras();
             _cameraFocus.SerialFocus.Close_Port();
         }
@@ -509,10 +502,23 @@ namespace RPCC
 
         private void reconnectSocketsToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            logger.AddLogEntry("Reconnect to servers");
             domeSocket.DisconnectAll();
             donutsSocket.DisconnectAll();
             domeSocket.Connect();
             donutsSocket.Connect();
+        }
+
+        private void socketToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            logger.AddLogEntry("Test donuts");
+            var cwd = Directory.GetCurrentDirectory();
+            const string refFile = "\\2023-04-07T17-56-16.918_EAST_V.fits";
+            const string testFile = "\\2023-04-07T18-00-24.167_EAST_V.fits";
+
+            donutsSocket.DonutSetRef(cwd + refFile);
+            var outPut = donutsSocket.DonutGetShift(cwd + testFile);
+            logger.AddLogEntry("shifts = " + outPut[0] + "x " + outPut[1] + "y ");
         }
     }
 }

@@ -26,7 +26,7 @@ namespace RPCC
             {
                 _logBox.Items.Insert(0, $"{DateTime.UtcNow:G} {entry}");
             }
-            catch (Exception e)
+            catch
             {
                 _logBox.Invoke((MethodInvoker) delegate
                 {

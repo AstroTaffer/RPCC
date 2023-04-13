@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 using System.Timers;
 
 namespace RPCC
@@ -10,22 +11,24 @@ namespace RPCC
          */
         private RpccSocketClient _socketClient;
         private static readonly Timer MeteoTimer = new Timer(); //clock timer and status check timer
+        private Logger _logger;
+        
         //Data
+        public string Sky { get; set; }
+        public string SkyStd { get;set; }
+        public string Extinction { get;set; }
+        public string ExtinctionStd { get;set; }
+        public string Seeing { get;set; }
+        public string SeeingExtinction { get;set; }
+        public string Wind { get;set; }
+        public string Sun { get; set;}
+        public string Obs { get; set;}
+        public string Flat { get; set;}
 
-        public float Sky { get; set; }
-        public float SkyStd { get;set; }
-        public float Extinction { get;set; }
-        public float ExtinctionStd { get;set; }
-        public float Seeing { get;set; }
-        public float SeeingExtinction { get;set; }
-        public float Wind { get;set; }
-        public float Sun { get; set;}
-        public bool Obs { get; set;}
-        public bool Flat { get; set;}
-
-        public DataCollector(RpccSocketClient rpccSocketClient)
+        public DataCollector(RpccSocketClient rpccSocketClient, Logger logger)
         {
             _socketClient = rpccSocketClient;
+            _logger = logger;
             
             //create timer for main loop
             MeteoTimer.Elapsed += OnTimedEvent_Clock;
@@ -37,23 +40,45 @@ namespace RPCC
         private void OnTimedEvent_Clock(object sender, ElapsedEventArgs e)
         {
             UpdateData();
+            // _logger.AddLogEntry($"Sky: {Sky}");
+            // _logger.AddLogEntry($"Flat: {Flat}");
         }
 
         private void UpdateData()
         {
-            Sky = float.Parse(_socketClient.DomeGetData("sky"), CultureInfo.InvariantCulture.NumberFormat);
-            SkyStd = float.Parse(_socketClient.DomeGetData("sky std"), CultureInfo.InvariantCulture.NumberFormat);
-            Extinction = float.Parse(_socketClient.DomeGetData("extinction"), CultureInfo.InvariantCulture.NumberFormat);
-            ExtinctionStd = float.Parse(_socketClient.DomeGetData("extinction std"), CultureInfo.InvariantCulture.NumberFormat);
-            Seeing = float.Parse(_socketClient.DomeGetData("seeing"), CultureInfo.InvariantCulture.NumberFormat);
-            SeeingExtinction = float.Parse(_socketClient.DomeGetData("seeing_extinction"), CultureInfo.InvariantCulture.NumberFormat);
-            Wind = float.Parse(_socketClient.DomeGetData("wind"), CultureInfo.InvariantCulture.NumberFormat);
-            Sun = float.Parse(_socketClient.DomeGetData("sun"), CultureInfo.InvariantCulture.NumberFormat);
-            Obs = bool.Parse(_socketClient.DomeGetData("obs"));
-            Flat = bool.Parse(_socketClient.DomeGetData("flat"));
+            // var buf = "";
+            Sky = _socketClient.DomeGetData("sky");
+             // = float.Parse(buf, CultureInfo.InvariantCulture.NumberFormat);
+             SkyStd = _socketClient.DomeGetData("sky std");
+             // = float.Parse(buf, CultureInfo.InvariantCulture.NumberFormat);
+             Extinction = _socketClient.DomeGetData("extinction");
+            // Extinction = float.Parse(buf, CultureInfo.InvariantCulture.NumberFormat);
+            ExtinctionStd = _socketClient.DomeGetData("extinction std");
+             // = float.Parse(buf, CultureInfo.InvariantCulture.NumberFormat);
+             Seeing = _socketClient.DomeGetData("seeing");
+             // = float.Parse(buf, CultureInfo.InvariantCulture.NumberFormat);
+
+            try
+            {
+                SeeingExtinction = _socketClient.DomeGetData("seeing_extinction");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                // throw;
+            }
+
+            Wind = _socketClient.DomeGetData("wind");
+             // = float.Parse(buf, CultureInfo.InvariantCulture.NumberFormat);
+             Sun = _socketClient.DomeGetData("sun");
+             // = float.Parse(buf, CultureInfo.InvariantCulture.NumberFormat);
+             Obs = _socketClient.DomeGetData("obs");
+             // = bool.Parse(buf);
+             Flat = _socketClient.DomeGetData("flat");
+             // = bool.Parse(buf);
         }
 
-        public void Dispose()
+        public static void Dispose()
         {
             MeteoTimer.Dispose();
         }

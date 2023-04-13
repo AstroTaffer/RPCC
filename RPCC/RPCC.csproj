@@ -175,6 +175,15 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="DONUTS.py">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <Content Include="2023-04-07T17-56-16.918_EAST_V.fits">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="2023-04-07T18-00-24.167_EAST_V.fits">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="FliLogoMod.ico" />
     <Content Include="libfli.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
