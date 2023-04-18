@@ -1,7 +1,7 @@
 ﻿using System;
 using nom.tam.fits;
 
-namespace RPCC
+namespace RPCC.Cams
 {
     public class ReadFitsFile
     {

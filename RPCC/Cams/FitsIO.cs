@@ -2,8 +2,9 @@
 using System.IO;
 using nom.tam.fits;
 using nom.tam.util;
+using RPCC.Utils;
 
-namespace RPCC
+namespace RPCC.Cams
 {
     internal class RpccFits
     {

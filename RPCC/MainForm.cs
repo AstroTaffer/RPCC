@@ -6,7 +6,9 @@ using System.IO;
 using System.Text;
 using System.Windows.Forms;
 using System.Threading.Tasks;
-using FliProCameraLib;
+using RPCC.Cams;
+using RPCC.Focus;
+using RPCC.Utils;
 
 namespace RPCC
 {

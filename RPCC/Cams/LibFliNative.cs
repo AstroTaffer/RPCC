@@ -21,7 +21,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace FliProCameraLib
+namespace RPCC.Cams
 {
     internal static class NativeMethods
     {

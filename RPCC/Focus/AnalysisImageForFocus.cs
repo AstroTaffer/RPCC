@@ -1,4 +1,6 @@
-﻿namespace RPCC
+﻿using RPCC.Utils;
+
+namespace RPCC.Focus
 {
     public class AnalysisImageForFocus
     {

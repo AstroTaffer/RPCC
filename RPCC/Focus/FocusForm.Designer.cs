@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace RPCC
+namespace RPCC.Focus
 {
     partial class FocusForm
     {

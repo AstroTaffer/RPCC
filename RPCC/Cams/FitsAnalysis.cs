@@ -1,6 +1,7 @@
 ﻿using System;
+using RPCC.Utils;
 
-namespace RPCC
+namespace RPCC.Cams
 {
     internal class GeneralImageStat
     {

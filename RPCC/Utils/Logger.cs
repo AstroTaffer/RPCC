@@ -2,7 +2,7 @@
 using System.IO;
 using System.Windows.Forms;
 
-namespace RPCC
+namespace RPCC.Utils
 {
     public class Logger
     {

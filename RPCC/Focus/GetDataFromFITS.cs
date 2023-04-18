@@ -4,12 +4,14 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using MathNet.Numerics.Statistics;
+using RPCC.Cams;
+using RPCC.Utils;
 
 
 /*
  * фалик чтобы вытащить из фитса центроиды, фвхм, эллиптичность
  */
-namespace RPCC
+namespace RPCC.Focus
 {
     public class GetDataFromFits
     {

@@ -5,7 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-namespace RPCC
+namespace RPCC.Utils
 {
     public class RpccSocketClient
     {

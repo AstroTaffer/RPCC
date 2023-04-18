@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml.Linq;
 
-namespace RPCC
+namespace RPCC.Utils
 {
     // TODO: Instead of throwing exceptions it may be better to display error provider message box
     internal class Settings

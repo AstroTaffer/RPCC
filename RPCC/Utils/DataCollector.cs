@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Globalization;
 using System.Timers;
 
-namespace RPCC
+namespace RPCC.Utils
 {
     public class DataCollector
     {

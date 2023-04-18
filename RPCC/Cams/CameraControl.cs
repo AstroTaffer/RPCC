@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
+using RPCC.Utils;
 
-using FliProCameraLib;
-
-namespace RPCC
+namespace RPCC.Cams
 {
     internal class CameraDevice
     {

@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using RPCC.Utils;
 
-namespace RPCC
+namespace RPCC.Focus
 {
     public class CameraFocus
     {

@@ -4,7 +4,7 @@ using System.Timers;
 using System.Windows.Forms;
 using Timer = System.Timers.Timer;
 
-namespace RPCC
+namespace RPCC.Focus
 {
     public partial class FocusForm : Form
     {

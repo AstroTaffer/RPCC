@@ -3,8 +3,9 @@ using System.Collections;
 using System.IO.Ports;
 using System.Linq;
 using System.Timers;
+using RPCC.Utils;
 
-namespace RPCC
+namespace RPCC.Focus
 
 {
     public class SerialFocus

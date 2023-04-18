@@ -102,21 +102,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AnalysisImageForFocus.cs" />
-    <Compile Include="CameraControl.cs" />
-    <Compile Include="CameraFocus.cs" />
-    <Compile Include="DataCollector.cs" />
-    <Compile Include="FitsAnalysis.cs" />
-    <Compile Include="FitsIO.cs" />
-    <Compile Include="FocusForm.cs">
+    <Compile Include="Cams\CameraControl.cs" />
+    <Compile Include="Cams\FitsAnalysis.cs" />
+    <Compile Include="Cams\FitsIO.cs" />
+    <Compile Include="Cams\LibFliNative.cs" />
+    <Compile Include="Cams\ReadFitsFile.cs" />
+    <Compile Include="Focus\AnalysisImageForFocus.cs" />
+    <Compile Include="Focus\CameraFocus.cs" />
+    <Compile Include="Focus\FocusForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FocusForm.Designer.cs">
+    <Compile Include="Focus\FocusForm.Designer.cs">
       <DependentUpon>FocusForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="GetDataFromFITS.cs" />
-    <Compile Include="LibFliNative.cs" />
-    <Compile Include="Logger.cs" />
+    <Compile Include="Focus\GetDataFromFITS.cs" />
+    <Compile Include="Focus\SerialFocus.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -125,17 +125,17 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ReadFitsFile.cs" />
-    <Compile Include="SerialFocus.cs" />
-    <Compile Include="Settings.cs" />
     <Compile Include="SettingsForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="SettingsForm.Designer.cs">
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Sockets.cs" />
-    <EmbeddedResource Include="FocusForm.resx">
+    <Compile Include="Utils\DataCollector.cs" />
+    <Compile Include="Utils\Logger.cs" />
+    <Compile Include="Utils\Settings.cs" />
+    <Compile Include="Utils\Sockets.cs" />
+    <EmbeddedResource Include="Focus\FocusForm.resx">
       <DependentUpon>FocusForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
@@ -154,6 +154,12 @@
     <EmbeddedResource Include="SettingsForm.resx">
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include="Cams\TestImage.fits">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Guid\DONUTS.py">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -164,26 +170,110 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <None Include="TestImage.fits">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="DONUTS.py">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <Content Include="2023-04-07T17-56-16.918_EAST_V.fits">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="2023-04-07T18-00-24.167_EAST_V.fits">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="Cams\libfli.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="FliLogoMod.ico" />
-    <Content Include="libfli.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <Content Include="Focus\Sex\block_3x3.conv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Focus\Sex\default.nnw">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Focus\Sex\default.par">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Focus\Sex\default.sex">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Focus\Sex\default_a.par">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Focus\Sex\default_a.sex">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Focus\Sex\Extract.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Focus\Sex\Extract.exe~">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Focus\Sex\FWHM_Sex_Meter.py">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Focus\Sex\gauss3.con">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Focus\Sex\gauss_1.5_3x3.conv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Focus\Sex\gauss_2.0_3x3.conv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Focus\Sex\gauss_2.0_5x5.conv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Focus\Sex\gauss_2.5_5x5.conv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Focus\Sex\gauss_3.0_5x5.conv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Focus\Sex\gauss_3.0_7x7.conv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Focus\Sex\gauss_4.0_7x7.conv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Focus\Sex\gauss_5.0_9x9.conv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Focus\Sex\mexhat_1.5_5x5.conv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Focus\Sex\mexhat_2.0_7x7.conv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Focus\Sex\mexhat_2.5_7x7.conv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Focus\Sex\mexhat_3.0_9x9.conv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Focus\Sex\mexhat_4.0_9x9.conv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Focus\Sex\mexhat_5.0_11x11.conv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Focus\Sex\tophat_1.5_3x3.conv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Focus\Sex\tophat_2.0_3x3.conv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Focus\Sex\tophat_2.5_3x3.conv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Focus\Sex\tophat_3.0_3x3.conv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Focus\Sex\tophat_4.0_5x5.conv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Focus\Sex\tophat_5.0_5x5.conv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Guid\2023-04-07T17-56-16.918_EAST_V.fits">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Guid\2023-04-07T18-00-24.167_EAST_V.fits">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
