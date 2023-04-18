@@ -1,4 +1,4 @@
-﻿namespace RPCC
+﻿namespace RPCC.Utils
 {
     partial class SettingsForm
     {

@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
-using RPCC.Utils;
 
-namespace RPCC
+namespace RPCC.Utils
 {
     public partial class SettingsForm : Form
     {
