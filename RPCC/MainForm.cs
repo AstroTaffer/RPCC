@@ -233,8 +233,8 @@ namespace RPCC
             var cwd = Directory.GetCurrentDirectory();
             var start = new ProcessStartInfo
             {
-                FileName = @"python.exe", //cmd is full path to python.exe
-                Arguments = cwd + @"\DONUTS.py", //args is path to .py file and any cmd line args
+                FileName = "python.exe", //cmd is full path to python.exe
+                Arguments = cwd + ".\\Guid\\DONUTS.py", //args is path to .py file and any cmd line args
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 CreateNoWindow = true
@@ -483,7 +483,7 @@ namespace RPCC
 
         private void TestDLLlibrariesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var testFits = new RpccFits("TestImage.fits");
+            var testFits = new RpccFits(".\\Cams\\TestImage.fits");
             var testHeader = testFits.header;
             logger.AddLogEntry($"Template DATE-OBS: {testHeader.GetStringValue("DATE-OBS")}");
 
@@ -499,7 +499,7 @@ namespace RPCC
         private async void LoadTestImageToolStripMenuItem_Click(object sender, EventArgs e)
         {
             isCurrentImageLoaded = false;
-            var testFits = new RpccFits("TestImage.fits");
+            var testFits = new RpccFits(".\\Cams\\TestImage.fits");
             currentImage = testFits.data;
 
             currentImageGStat = new GeneralImageStat(currentImage);
@@ -523,8 +523,8 @@ namespace RPCC
         {
             logger.AddLogEntry("Test donuts");
             var cwd = Directory.GetCurrentDirectory();
-            const string refFile = "\\2023-04-07T17-56-16.918_EAST_V.fits";
-            const string testFile = "\\2023-04-07T18-00-24.167_EAST_V.fits";
+            const string refFile = ".\\Guid\\2023-04-07T17-56-16.918_EAST_V.fits";
+            const string testFile = "\\Guid\\2023-04-07T18-00-24.167_EAST_V.fits";
 
             donutsSocket.DonutSetRef(cwd + refFile);
             var outPut = donutsSocket.DonutGetShift(cwd + testFile);

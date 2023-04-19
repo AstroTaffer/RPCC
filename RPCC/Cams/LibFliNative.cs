@@ -54,7 +54,7 @@ namespace RPCC.Cams
         /// </summary>
         [SuppressMessage("Microsoft.Globalization", "CA2101:SpecifyMarshalingForPInvokeStringArguments",
             MessageId = "0")]
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIGetLibVersion(
             [MarshalAs(UnmanagedType.LPStr)] StringBuilder ver,
             IntPtr len); // NOTE: size_t is marshalled as IntPtr
@@ -65,7 +65,7 @@ namespace RPCC.Cams
         /// </summary>
         [SuppressMessage("Microsoft.Globalization", "CA2101:SpecifyMarshalingForPInvokeStringArguments",
             MessageId = "0")]
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLISetDebugLevel(
             [MarshalAs(UnmanagedType.LPStr)] string host,
             int level);
@@ -75,7 +75,7 @@ namespace RPCC.Cams
         /// </summary>
         [SuppressMessage("Microsoft.Globalization", "CA2101:SpecifyMarshalingForPInvokeStringArguments",
             MessageId = "1")]
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         internal static extern void FLIDebug(
             int level,
             [MarshalAs(UnmanagedType.LPStr)] string message);
@@ -90,7 +90,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Retrieve the list of available devices
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIList(
             int domain,
             out IntPtr names); // NOTE: char*** (pointer to array of strings) is marshalled as IntPtr
@@ -99,7 +99,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Free a previously generated device list
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIFreeList(
             IntPtr names); // NOTE char** (array of strings) - how many
 
@@ -109,7 +109,7 @@ namespace RPCC.Cams
         /// </summary>
         [SuppressMessage("Microsoft.Globalization", "CA2101:SpecifyMarshalingForPInvokeStringArguments",
             MessageId = "1")]
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIOpen(
             out int dev,
             [MarshalAs(UnmanagedType.LPStr)] string name,
@@ -119,7 +119,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Close the handle to the specified FLI device
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIClose(
             int dev);
 
@@ -136,7 +136,7 @@ namespace RPCC.Cams
         /// </summary>
         [SuppressMessage("Microsoft.Globalization", "CA2101:SpecifyMarshalingForPInvokeStringArguments",
             MessageId = "1")]
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIGetModel(
             int dev,
             [MarshalAs(UnmanagedType.LPStr)] StringBuilder model,
@@ -149,7 +149,7 @@ namespace RPCC.Cams
         /// </summary>
         [SuppressMessage("Microsoft.Globalization", "CA2101:SpecifyMarshalingForPInvokeStringArguments",
             MessageId = "1")]
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIGetSerialString(
             int dev,
             [MarshalAs(UnmanagedType.LPStr)] StringBuilder serial,
@@ -159,7 +159,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Get the pixel dimensions for the specified camera
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIGetPixelSize(
             int dev,
             out double pixel_x,
@@ -169,7 +169,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Get the hardware revision for the specified device
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIGetHWRevision(
             int dev,
             out int hwrev);
@@ -178,7 +178,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Get firmware revisiion for specified camera
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIGetFWRevision(
             int dev,
             out uint fwrev);
@@ -187,7 +187,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Get the total area of the image array for the specified camera
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIGetArrayArea(
             int dev,
             out int ul_x,
@@ -199,7 +199,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Get the visible area of the image array for the specified camera
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIGetVisibleArea(
             int dev,
             out int ul_x,
@@ -211,7 +211,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Get the current cooler power for the specified camera
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIGetCoolerPower(
             int dev,
             out double power);
@@ -220,7 +220,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Get the color pattern for the specified camera
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIGetCameraColorPattern(
             int dev,
             out int pattern);
@@ -235,7 +235,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Set the exposure time for the specified camera
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLISetExposureTime(
             int dev,
             int exptime);
@@ -244,7 +244,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Set the active image area for the specified camera
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLISetImageArea(
             int dev,
             int ul_x,
@@ -257,7 +257,7 @@ namespace RPCC.Cams
         ///     Set the horizontal bin factor for the specified camera
         ///     (valid range is 1-16)
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLISetHBin(
             int dev,
             int hbin);
@@ -267,7 +267,7 @@ namespace RPCC.Cams
         ///     Set the vertical bin factor for the specified camera
         ///     (valid range is 1-16)
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLISetVBin(
             int dev,
             int vbin);
@@ -276,7 +276,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Set the frame type for the specified camera
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLISetFrameType(
             int dev,
             int frametype);
@@ -285,7 +285,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Set the target temperature (deg C) for the specified camera
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLISetTemperature(
             int dev,
             double temperature);
@@ -294,7 +294,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Get the current temperature for the specified camera
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIGetTemperature(
             int dev,
             out double temperature);
@@ -303,7 +303,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Retrieves the specified temperature from a device
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIReadTemperature(
             int dev,
             int channel,
@@ -313,7 +313,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Set the number of times the image array is flushed before exposing a frame
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLISetNFlushes(
             int dev,
             int nflushes);
@@ -322,7 +322,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Set the gray-scale bit depth of the specified camera
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLISetBitDepth(
             int dev,
             int bitdepth);
@@ -331,7 +331,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Get the mode of the specified camera
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIGetCameraMode(
             int dev,
             out int mode_index);
@@ -343,7 +343,7 @@ namespace RPCC.Cams
         /// </summary>
         [SuppressMessage("Microsoft.Globalization", "CA2101:SpecifyMarshalingForPInvokeStringArguments",
             MessageId = "2")]
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIGetCameraModeString(
             int dev,
             int mode_index,
@@ -354,7 +354,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Set the mode for the specified camera
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLISetCameraMode(
             int dev,
             int mode_index);
@@ -363,7 +363,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Set the time delay and integration for the specified camera
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLISetTDI(
             int dev,
             int tdi_rate,
@@ -373,7 +373,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Set the fan speed for the specified camera
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLISetFanSpeed(
             int dev,
             int fan_speed);
@@ -381,7 +381,7 @@ namespace RPCC.Cams
         //-------------------------------------------
         /// <summary>
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIEnableVerticalTable(
             int dev,
             int width,
@@ -391,7 +391,7 @@ namespace RPCC.Cams
         //-------------------------------------------
         /// <summary>
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLISetVerticalTableEntry(
             int dev,
             int index,
@@ -402,7 +402,7 @@ namespace RPCC.Cams
         //-------------------------------------------
         /// <summary>
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIGetVerticalTableEntry(
             int dev,
             int index,
@@ -413,7 +413,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Retrieve the Thumbnail from the camera
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIReadThumbnail(
             int dev,
             long length,
@@ -422,7 +422,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Write the Thumbnail to the camera
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIWriteThumbnail(
             int dev,
             long length,
@@ -438,7 +438,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Locks the specified device for exclusive access
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLILockDevice(
             int dev);
 
@@ -446,7 +446,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Unlock the specified device
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIUnlockDevice(
             int dev);
 
@@ -454,7 +454,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Cancel an exposure in progress by closing the shutter
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLICancelExposure(
             int dev);
 
@@ -462,7 +462,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Get remaining exposure time (mSec) for specified camera
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIGetExposureStatus(
             int dev,
             out int timeleft);
@@ -471,7 +471,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Retrieve the next available image frame row from the specified camera
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIGrabRow(
             int dev,
             ushort[] buff,
@@ -481,7 +481,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Expose a frame according to current settings
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIExposeFrame(
             int dev);
 
@@ -489,7 +489,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Flush row(s) on the specified camera
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIFlushRow(
             int dev,
             int rows,
@@ -499,7 +499,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Control the camera shutter operation
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIControlShutter(
             int dev,
             int shutter);
@@ -508,7 +508,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Enables background flushing on the image array
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIControlBackgroundFlush(
             int dev,
             int bgflush);
@@ -517,7 +517,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Retrieve a full image frame from the specified camera
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIGrabFrame(
             int dev,
             IntPtr pBuff,
@@ -528,7 +528,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Start video mode for the specified camera
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIStartVideoMode(
             int dev);
 
@@ -536,7 +536,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Stop video mode on specified camera
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIStopVideoMode(
             int dev);
 
@@ -545,7 +545,7 @@ namespace RPCC.Cams
         ///     Retrieve a video frame from the specified camera
         ///     Prior to call, buff length be >= size
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIGrabVideoFrame(
             int dev,
             ushort[] buff,
@@ -555,7 +555,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     end the exposure on the specified camera and begin immediate image transfer
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIEndExposure(
             int dev);
 
@@ -563,7 +563,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Trigger an exposure that is awaiting an external trigger
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLITriggerExposure(
             int dev);
 
@@ -571,7 +571,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Get current status of specified camera
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIGetDeviceStatus(
             int dev,
             out int status);
@@ -586,7 +586,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Configures the camera I/O port
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIConfigureIOPort(
             int dev,
             int ioportset);
@@ -595,7 +595,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Read the I/O port on the specified camera
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIReadIOPort(
             int dev,
             out int ioportset);
@@ -604,7 +604,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Write the I/O port on the specified camera
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIWriteIOPort(
             int dev,
             int ioportset);
@@ -613,7 +613,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Get the dimensions of the next exposure for the specified camera
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIGetReadoutDimensions(
             int dev,
             out int width,
@@ -633,7 +633,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Send a Raw packet
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLICmdSendRaw(
             int dev,
             byte[] Data,
@@ -643,7 +643,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Send a Rww packet, Receive response
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLICmdSendRecvRaw(
             int dev,
             byte[] TxData,
@@ -654,7 +654,7 @@ namespace RPCC.Cams
         //-------------------------------------------
         /// <summary>
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLISetDAC(
             int dev,
             uint dacset);
@@ -662,7 +662,7 @@ namespace RPCC.Cams
         //-------------------------------------------
         /// <summary>
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIUsbBulkIO(
             int dev,
             int ep,
@@ -673,7 +673,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Read data from the camera EEPROM
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIReadUserEEPROM(
             int dev,
             int loc,
@@ -685,7 +685,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Write data to the camera EEPROM
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIWriteUserEEPROM(
             int dev,
             int loc,
@@ -704,7 +704,7 @@ namespace RPCC.Cams
         ///     Get name of the specified filter
         ///     Prior to call, name capacity must be >= len
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIGetFilterName(
             int dev,
             int filter,
@@ -715,7 +715,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Get the active filter wheel for the specified device
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIGetActiveWheel(
             int dev,
             out int wheel);
@@ -724,7 +724,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Sets the active filter wheel
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLISetActiveWheel(
             int dev,
             int wheel);
@@ -733,7 +733,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Set movement speed for the specified high speed filter wheel
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLISetWheelSpeed(
             int dev,
             int speed);
@@ -742,7 +742,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Resets the specified high speed filter wheel
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIResetHSFilterWheel(
             int dev);
 
@@ -750,7 +750,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Get the sequence programming status for specifed filter wheel
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIGetSequenceProgramming(
             int dev,
             out int enabled);
@@ -759,7 +759,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Start sequence programming mode for the specified filter wheel device
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIStartSequenceProgramming(
             int dev);
 
@@ -767,7 +767,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Ends sequence programming mode for the specified high speed filter wheel device
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIEndSequenceProgramming(
             int dev);
 
@@ -775,7 +775,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Set the filter position for the specified filter wheel
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLISetFilterPos(
             int dev, int filter);
 
@@ -783,7 +783,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Get the current position for the specified filter
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIGetFilterPos(
             int dev,
             out int filter);
@@ -792,7 +792,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Get number of filters for specified filter wheel
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIGetFilterCount(
             int dev,
             out int filter);
@@ -801,7 +801,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Move the specified focuser or filter wheel in blocking mode
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIStepMotor(
             int dev,
             int steps);
@@ -810,7 +810,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Move the specified focuser or filter wheel in non-blocking mode
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIStepMotorAsync(
             int dev,
             int steps);
@@ -819,7 +819,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Get the stepper motor position for the specified filter wheel or focuser device
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIGetStepperPosition(
             int dev,
             out int position);
@@ -828,7 +828,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Get the number of motor steps remaining for the specified filter wheel or focuser device
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIGetStepsRemaining(
             int dev,
             out int steps);
@@ -837,7 +837,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Get the maximum extent for the specified focuser
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIGetFocuserExtent(
             int dev,
             out int extent);
@@ -846,7 +846,7 @@ namespace RPCC.Cams
         /// <summary>
         ///     Home the specified focuser or filter wheel device
         /// </summary>
-        [DllImport("libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+        [DllImport(".\\Cams\\libfli.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
         internal static extern int FLIHomeDevice(
             int dev);
 

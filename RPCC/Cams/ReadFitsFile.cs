@@ -27,7 +27,7 @@ namespace RPCC.Cams
             {
                 for (var j = 0; j < dataWidth; j++)
                 {
-                    // HACK: Why is this needed and how does it work?
+                    // Convert ushort (used in LibFli and RpccFits) to short (used in nom.tam.fits)
                     var buff = short.MaxValue + (short) fitsDataRaw[i].GetValue(j) + 1;
                     Data[i, j] = (ushort) buff;
                 }

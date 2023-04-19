@@ -179,94 +179,91 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="FliLogoMod.ico" />
-    <Content Include="Focus\Sex\block_3x3.conv">
+    <Content Include="Sex\block_3x3.conv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Focus\Sex\default.nnw">
+    <Content Include="Sex\default.nnw">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Focus\Sex\default.par">
+    <Content Include="Sex\default.par">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Focus\Sex\default.sex">
+    <Content Include="Sex\default.sex">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Focus\Sex\default_a.par">
+    <Content Include="Sex\default_a.par">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Focus\Sex\default_a.sex">
+    <Content Include="Sex\default_a.sex">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Focus\Sex\Extract.exe">
+    <Content Include="Sex\Extract.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Focus\Sex\Extract.exe~">
+    <Content Include="Sex\Extract.exe~">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Focus\Sex\FWHM_Sex_Meter.py">
+    <Content Include="Sex\gauss3.con">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Focus\Sex\gauss3.con">
+    <Content Include="Sex\gauss_1.5_3x3.conv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Focus\Sex\gauss_1.5_3x3.conv">
+    <Content Include="Sex\gauss_2.0_3x3.conv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Focus\Sex\gauss_2.0_3x3.conv">
+    <Content Include="Sex\gauss_2.0_5x5.conv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Focus\Sex\gauss_2.0_5x5.conv">
+    <Content Include="Sex\gauss_2.5_5x5.conv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Focus\Sex\gauss_2.5_5x5.conv">
+    <Content Include="Sex\gauss_3.0_5x5.conv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Focus\Sex\gauss_3.0_5x5.conv">
+    <Content Include="Sex\gauss_3.0_7x7.conv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Focus\Sex\gauss_3.0_7x7.conv">
+    <Content Include="Sex\gauss_4.0_7x7.conv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Focus\Sex\gauss_4.0_7x7.conv">
+    <Content Include="Sex\gauss_5.0_9x9.conv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Focus\Sex\gauss_5.0_9x9.conv">
+    <Content Include="Sex\mexhat_1.5_5x5.conv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Focus\Sex\mexhat_1.5_5x5.conv">
+    <Content Include="Sex\mexhat_2.0_7x7.conv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Focus\Sex\mexhat_2.0_7x7.conv">
+    <Content Include="Sex\mexhat_2.5_7x7.conv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Focus\Sex\mexhat_2.5_7x7.conv">
+    <Content Include="Sex\mexhat_3.0_9x9.conv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Focus\Sex\mexhat_3.0_9x9.conv">
+    <Content Include="Sex\mexhat_4.0_9x9.conv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Focus\Sex\mexhat_4.0_9x9.conv">
+    <Content Include="Sex\mexhat_5.0_11x11.conv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Focus\Sex\mexhat_5.0_11x11.conv">
+    <Content Include="Sex\tophat_1.5_3x3.conv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Focus\Sex\tophat_1.5_3x3.conv">
+    <Content Include="Sex\tophat_2.0_3x3.conv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Focus\Sex\tophat_2.0_3x3.conv">
+    <Content Include="Sex\tophat_2.5_3x3.conv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Focus\Sex\tophat_2.5_3x3.conv">
+    <Content Include="Sex\tophat_3.0_3x3.conv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Focus\Sex\tophat_3.0_3x3.conv">
+    <Content Include="Sex\tophat_4.0_5x5.conv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Focus\Sex\tophat_4.0_5x5.conv">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Focus\Sex\tophat_5.0_5x5.conv">
+    <Content Include="Sex\tophat_5.0_5x5.conv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Guid\2023-04-07T17-56-16.918_EAST_V.fits">
