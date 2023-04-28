@@ -51,7 +51,7 @@ namespace RPCC.Focus
             var frames = new List<AnalysisImageForFocus>();
             var startFocusPos = SerialFocus.CurrentPosition;
             const int n = 10; //количество точек для построения кривой фокусировки
-            var shift = 300; //шаг по фокусу
+            var shift = -300; //шаг по фокусу
             var sumShift = 0;
             var zenithFlag = 0;
             var exit = false;
@@ -66,19 +66,30 @@ namespace RPCC.Focus
                 return false;
             }
 
-            if (IsZenith) Repoint4Focus(); //Перенаводимся в зенит для фокусировки
+            if (IsZenith) {
+                Repoint4Focus(); //Перенаводимся в зенит для фокусировки\
+                zenithFlag = 1;
+            }
 
             do
             {
                 //сдвигаем в самом начале и если последнее измерение было хорошим, пропускаем если измерение было плохим
                 if (focBadFrames == 0)
                 {
-                    frames.Add(new AnalysisImageForFocus(GetImForFocus(shift), _log));
                     sumShift += shift;
                     _log.AddLogEntry("FOCUS: SumShift=" + sumShift);
                     focCycles++;
                 }
-
+                
+                frames.Add(new AnalysisImageForFocus(GetImForFocus(shift), _log));
+                if (!frames.Last().GetDataFromFits.Status)
+                {
+                    _log.AddLogEntry("FOCUS: FWHM information is not available, return focus and exit");
+                    SerialFocus.FRun_To(-1*sumShift);
+                    FwhmBest = 0;
+                    return false;
+                }
+                
                 //проверяем валидность измерений (кол-во звезд, вытянутость), счетчик плохих кадров + или 0.
                 if (!frames.Last().CheckImageQuality())
                 {
@@ -98,7 +109,7 @@ namespace RPCC.Focus
                         zenithFlag += 1;
                         focBadFrames = 0;
                         focCycles = 0;
-                        if (goFocus && shift != 0) shift /= Math.Abs(shift); //сохраняем знак сдвига
+                        // if (goFocus && shift != 0) shift /= Math.Abs(shift); //сохраняем знак сдвига
                         _log.AddLogEntry("FOCUS: Restart focus at Zenith");
                     }
                     else
@@ -109,12 +120,12 @@ namespace RPCC.Focus
                     continue; //еще раз к началу цикла
                 }
 
-                //проверяем FWHM, если меньше 8, то рассчитываем сдвиг в ту же сторону еще на 90*(8-FWHM)
+                //проверяем FWHM, если меньше 6, то рассчитываем сдвиг в ту же сторону еще на 90*(6-FWHM)
                 if (goFocus && frames.Last().Fwhm < 6.0 && shift != 0)
                     shift = (int) (shift / Math.Abs(shift) * 90 * (6.0 - frames.Last().Fwhm));
                 else
                     shift = 0;
-
+                
                 if (focCycles >= MaxFocCycles) exit = true;
                 if (focBadFrames >= MaxFocBadFrames) exit = true;
                 if (sumShift > MaxSumShifts) exit = true;
@@ -165,7 +176,6 @@ namespace RPCC.Focus
                     //сдвиг считаем как 45*(FWHM-1.5), тогда должны дойти до фокуса за 4-5 шагов.
                     if (goFocus) shift = (int) (shift / Math.Abs(shift) * 45 * (fwhm - 1.5));
                     frames.Add(new AnalysisImageForFocus(GetImForFocus(shift), _log));
-                    // _serialFocus.FRun_To(shift);
 
                     sumShift += shift;
                     _log.AddLogEntry("FOCUS: SumShift=" + sumShift);
