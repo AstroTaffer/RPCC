@@ -48,5 +48,10 @@ namespace RPCC.Utils
         {
             _logBox.Items.Clear();
         }
+
+        internal void CopyLogItem()
+        {
+            if (_logBox.SelectedItems.Count > 0) Clipboard.SetText(_logBox.SelectedItem.ToString());
+        }
     }
 }

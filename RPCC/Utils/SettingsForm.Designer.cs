@@ -65,12 +65,12 @@
             this.folderBrowserDialogSetFolder = new System.Windows.Forms.FolderBrowserDialog();
             this.tabControlSettings.SuspendLayout();
             this.tabPageImageAnalysis.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownAnnulusOuterRadius)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownAnnulusInnerRadius)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownApertureRadius)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownAnnulusOuterRadius)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownAnnulusInnerRadius)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownApertureRadius)).BeginInit();
             this.tabPageCameras.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownBin)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownNumFlushes)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownBin)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownNumFlushes)).BeginInit();
             this.tabPageSurvey.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -109,7 +109,11 @@
             // numericUpDownAnnulusOuterRadius
             // 
             this.numericUpDownAnnulusOuterRadius.Location = new System.Drawing.Point(234, 192);
-            this.numericUpDownAnnulusOuterRadius.Maximum = new decimal(new int[] {2048, 0, 0, 0});
+            this.numericUpDownAnnulusOuterRadius.Maximum = new decimal(new int[] {
+            2048,
+            0,
+            0,
+            0});
             this.numericUpDownAnnulusOuterRadius.Name = "numericUpDownAnnulusOuterRadius";
             this.numericUpDownAnnulusOuterRadius.Size = new System.Drawing.Size(49, 20);
             this.numericUpDownAnnulusOuterRadius.TabIndex = 9;
@@ -117,7 +121,11 @@
             // numericUpDownAnnulusInnerRadius
             // 
             this.numericUpDownAnnulusInnerRadius.Location = new System.Drawing.Point(234, 151);
-            this.numericUpDownAnnulusInnerRadius.Maximum = new decimal(new int[] {2048, 0, 0, 0});
+            this.numericUpDownAnnulusInnerRadius.Maximum = new decimal(new int[] {
+            2048,
+            0,
+            0,
+            0});
             this.numericUpDownAnnulusInnerRadius.Name = "numericUpDownAnnulusInnerRadius";
             this.numericUpDownAnnulusInnerRadius.Size = new System.Drawing.Size(49, 20);
             this.numericUpDownAnnulusInnerRadius.TabIndex = 8;
@@ -125,7 +133,11 @@
             // numericUpDownApertureRadius
             // 
             this.numericUpDownApertureRadius.Location = new System.Drawing.Point(234, 112);
-            this.numericUpDownApertureRadius.Maximum = new decimal(new int[] {2048, 0, 0, 0});
+            this.numericUpDownApertureRadius.Maximum = new decimal(new int[] {
+            2048,
+            0,
+            0,
+            0});
             this.numericUpDownApertureRadius.Name = "numericUpDownApertureRadius";
             this.numericUpDownApertureRadius.Size = new System.Drawing.Size(49, 20);
             this.numericUpDownApertureRadius.TabIndex = 7;
@@ -217,6 +229,9 @@
             // 
             this.comboBoxReadout.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxReadout.FormattingEnabled = true;
+            this.comboBoxReadout.Items.AddRange(new object[] {
+            "2.0 MHz",
+            "500KHz"});
             this.comboBoxReadout.Location = new System.Drawing.Point(183, 294);
             this.comboBoxReadout.Name = "comboBoxReadout";
             this.comboBoxReadout.Size = new System.Drawing.Size(100, 21);
@@ -234,12 +249,24 @@
             // numericUpDownBin
             // 
             this.numericUpDownBin.Location = new System.Drawing.Point(233, 249);
-            this.numericUpDownBin.Maximum = new decimal(new int[] {16, 0, 0, 0});
-            this.numericUpDownBin.Minimum = new decimal(new int[] {1, 0, 0, 0});
+            this.numericUpDownBin.Maximum = new decimal(new int[] {
+            16,
+            0,
+            0,
+            0});
+            this.numericUpDownBin.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
             this.numericUpDownBin.Name = "numericUpDownBin";
             this.numericUpDownBin.Size = new System.Drawing.Size(50, 20);
             this.numericUpDownBin.TabIndex = 11;
-            this.numericUpDownBin.Value = new decimal(new int[] {1, 0, 0, 0});
+            this.numericUpDownBin.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
             // 
             // labelBin
             // 
@@ -253,7 +280,19 @@
             // comboBoxTemp
             // 
             this.comboBoxTemp.FormattingEnabled = true;
-            this.comboBoxTemp.Items.AddRange(new object[] {"0", "-5", "-10", "-15", "-20", "-25", "-30", "-35", "-40", "-45", "-50", "-55"});
+            this.comboBoxTemp.Items.AddRange(new object[] {
+            "0",
+            "-5",
+            "-10",
+            "-15",
+            "-20",
+            "-25",
+            "-30",
+            "-35",
+            "-40",
+            "-45",
+            "-50",
+            "-55"});
             this.comboBoxTemp.Location = new System.Drawing.Point(233, 204);
             this.comboBoxTemp.Name = "comboBoxTemp";
             this.comboBoxTemp.Size = new System.Drawing.Size(50, 21);
@@ -271,7 +310,11 @@
             // numericUpDownNumFlushes
             // 
             this.numericUpDownNumFlushes.Location = new System.Drawing.Point(233, 159);
-            this.numericUpDownNumFlushes.Maximum = new decimal(new int[] {16, 0, 0, 0});
+            this.numericUpDownNumFlushes.Maximum = new decimal(new int[] {
+            16,
+            0,
+            0,
+            0});
             this.numericUpDownNumFlushes.Name = "numericUpDownNumFlushes";
             this.numericUpDownNumFlushes.Size = new System.Drawing.Size(50, 20);
             this.numericUpDownNumFlushes.TabIndex = 7;
@@ -412,22 +455,23 @@
             this.Controls.Add(this.tabControlSettings);
             this.Controls.Add(this.buttonAccept);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "SettingsForm";
             this.Text = "Settings";
             this.tabControlSettings.ResumeLayout(false);
             this.tabPageImageAnalysis.ResumeLayout(false);
             this.tabPageImageAnalysis.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownAnnulusOuterRadius)).EndInit();
-            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownAnnulusInnerRadius)).EndInit();
-            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownApertureRadius)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownAnnulusOuterRadius)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownAnnulusInnerRadius)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownApertureRadius)).EndInit();
             this.tabPageCameras.ResumeLayout(false);
             this.tabPageCameras.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownBin)).EndInit();
-            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownNumFlushes)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownBin)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownNumFlushes)).EndInit();
             this.tabPageSurvey.ResumeLayout(false);
             this.tabPageSurvey.PerformLayout();
             this.ResumeLayout(false);
+
         }
 
         #endregion

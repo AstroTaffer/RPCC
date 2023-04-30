@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Windows.Forms;
 
 namespace RPCC.Utils
@@ -27,16 +28,7 @@ namespace RPCC.Utils
             numericUpDownNumFlushes.Value = _settings.NumFlushes;
             comboBoxTemp.Text = _settings.CamTemp.ToString();
             numericUpDownBin.Value = _settings.CamBin;
-            // HACK: Check for correct data display and value reading
-            comboBoxReadout.DataSource = _settings.camRoModes;
-            try
-            {
-                comboBoxReadout.SelectedIndex = _settings.CamRoModeIndex;
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                comboBoxReadout.SelectedIndex = -1;
-            }
+            comboBoxReadout.SelectedItem = _settings.CamRoMode;
             #endregion
 
             #region Survey
@@ -55,9 +47,26 @@ namespace RPCC.Utils
 
         private void ButtonAccept_Click(object sender, EventArgs e)
         {
+            CultureInfo ruCulture = new CultureInfo("ru-RU");
+            CultureInfo usCulture = new CultureInfo ("en-US");
+
             #region Image Analysis
-            _settings.LowerBrightnessSd = double.Parse(textBoxLowerBrightnessSd.Text);
-            _settings.UpperBrightnessSd = double.Parse(textBoxUpperBrightnessSd.Text);
+            try
+            {
+                _settings.LowerBrightnessSd = double.Parse(textBoxLowerBrightnessSd.Text, ruCulture);
+            }
+            catch (FormatException)
+            {
+                _settings.LowerBrightnessSd = double.Parse(textBoxLowerBrightnessSd.Text, usCulture);
+            }
+            try
+            {
+                _settings.UpperBrightnessSd = double.Parse(textBoxUpperBrightnessSd.Text, ruCulture);
+            }
+            catch (FormatException)
+            {
+                _settings.UpperBrightnessSd = double.Parse(textBoxUpperBrightnessSd.Text, usCulture);
+            }
             _settings.ApertureRadius = (int)numericUpDownApertureRadius.Value;
             _settings.AnnulusInnerRadius = (int)numericUpDownAnnulusInnerRadius.Value;
             _settings.AnnulusOuterRadius = (int)numericUpDownAnnulusOuterRadius.Value;
@@ -68,9 +77,16 @@ namespace RPCC.Utils
             _settings.SnCamR = textBoxrCamSn.Text;
             _settings.SnCamI = textBoxiCamSn.Text;
             _settings.NumFlushes = (int)numericUpDownNumFlushes.Value;
-            _settings.CamTemp = double.Parse(comboBoxTemp.Text);
+            try
+            {
+                _settings.CamTemp = double.Parse(comboBoxTemp.Text, ruCulture);
+            }
+            catch (FormatException)
+            {
+                _settings.CamTemp = double.Parse(comboBoxTemp.Text, usCulture);
+            }
             _settings.CamBin = (int)numericUpDownBin.Value;
-            if (comboBoxReadout.SelectedIndex > -1) _settings.CamRoModeIndex = comboBoxReadout.SelectedIndex;
+            _settings.CamRoMode = (string)comboBoxReadout.SelectedItem;
             #endregion
 
             #region Survey

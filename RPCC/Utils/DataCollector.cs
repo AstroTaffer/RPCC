@@ -13,16 +13,17 @@ namespace RPCC.Utils
         private Logger _logger;
         
         //Data
-        public string Sky { get; set; }
-        public string SkyStd { get;set; }
-        public string Extinction { get;set; }
-        public string ExtinctionStd { get;set; }
-        public string Seeing { get;set; }
-        public string SeeingExtinction { get;set; }
-        public string Wind { get;set; }
-        public string Sun { get; set;}
-        public string Obs { get; set;}
-        public string Flat { get; set;}
+        // TODO: Add pre-defiened values
+        public double Sky { get; set; }
+        public double SkyStd { get;set; }
+        public double Extinction { get;set; }
+        public double ExtinctionStd { get;set; }
+        public double Seeing { get;set; }
+        public double SeeingExtinction { get;set; }
+        public double Wind { get;set; }
+        public double Sun { get; set;}
+        public bool Obs { get; set;}
+        public bool Flat { get; set;}
 
         public DataCollector(RpccSocketClient rpccSocketClient, Logger logger)
         {
@@ -46,20 +47,20 @@ namespace RPCC.Utils
         private void UpdateData()
         {
             // var buf = "";
-            Sky = _socketClient.DomeGetData("sky");
-             // = float.Parse(buf, CultureInfo.InvariantCulture.NumberFormat);
-             SkyStd = _socketClient.DomeGetData("sky std");
-             // = float.Parse(buf, CultureInfo.InvariantCulture.NumberFormat);
-             Extinction = _socketClient.DomeGetData("extinction");
+            Sky = double.Parse(_socketClient.DomeGetData("sky"));
+            // = float.Parse(buf, CultureInfo.InvariantCulture.NumberFormat);
+            SkyStd = double.Parse(_socketClient.DomeGetData("sky std"));
+            // = float.Parse(buf, CultureInfo.InvariantCulture.NumberFormat);
+            Extinction = double.Parse(_socketClient.DomeGetData("extinction"));
             // Extinction = float.Parse(buf, CultureInfo.InvariantCulture.NumberFormat);
-            ExtinctionStd = _socketClient.DomeGetData("extinction std");
-             // = float.Parse(buf, CultureInfo.InvariantCulture.NumberFormat);
-             Seeing = _socketClient.DomeGetData("seeing");
-             // = float.Parse(buf, CultureInfo.InvariantCulture.NumberFormat);
+            ExtinctionStd = double.Parse(_socketClient.DomeGetData("extinction std"));
+            // = float.Parse(buf, CultureInfo.InvariantCulture.NumberFormat);
+            Seeing = double.Parse(_socketClient.DomeGetData("seeing"));
+            // = float.Parse(buf, CultureInfo.InvariantCulture.NumberFormat);
 
             try
             {
-                SeeingExtinction = _socketClient.DomeGetData("seeing_extinction");
+                SeeingExtinction = double.Parse(_socketClient.DomeGetData("seeing_extinction"));
             }
             catch (Exception e)
             {
@@ -67,14 +68,14 @@ namespace RPCC.Utils
                 // throw;
             }
 
-            Wind = _socketClient.DomeGetData("wind");
-             // = float.Parse(buf, CultureInfo.InvariantCulture.NumberFormat);
-             Sun = _socketClient.DomeGetData("sun");
-             // = float.Parse(buf, CultureInfo.InvariantCulture.NumberFormat);
-             Obs = _socketClient.DomeGetData("obs");
-             // = bool.Parse(buf);
-             Flat = _socketClient.DomeGetData("flat");
-             // = bool.Parse(buf);
+            Wind = double.Parse(_socketClient.DomeGetData("wind"));
+            // = float.Parse(buf, CultureInfo.InvariantCulture.NumberFormat);
+            Sun = double.Parse(_socketClient.DomeGetData("sun"));
+            // = float.Parse(buf, CultureInfo.InvariantCulture.NumberFormat);
+            Obs = bool.Parse(_socketClient.DomeGetData("obs"));
+            // = bool.Parse(buf);
+            Flat = bool.Parse(_socketClient.DomeGetData("flat"));
+            // = bool.Parse(buf);
         }
 
         public static void Dispose()

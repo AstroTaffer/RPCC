@@ -25,8 +25,8 @@ namespace RPCC.Cams
 {
     internal static class NativeMethods
     {
-        // for 2.0.0.0
-        // used with 2.0.3 x86
+        // This version of NativeMethods is designed for libfli.dll 2.0.0.0
+        // RPCC uses libfli.dll 2.0.4 x86
         //**************************************************************
 
         #region Constants and Type definitions

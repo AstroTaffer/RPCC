@@ -36,7 +36,7 @@ namespace RPCC
         // private RpccSocketClient domeSocket;
         // private RpccSocketClient donutsSocket;
 
-        // private DataCollector _dataCollector;
+        private DataCollector _dataCollector;
 
         public MainForm()
         {
@@ -73,9 +73,12 @@ namespace RPCC
             // domeSocket.Connect();
             // _dataCollector = new DataCollector(domeSocket, _logger);
 
-            if (!_cameraFocus.Init())  
-                if (MessageBox.Show(@"Can't open Focus serial port", @"OK", MessageBoxButtons.OK) == DialogResult.OK)
-                    Environment.Exit(1);
+            // HACK: For the love of god stop exiting the program when something is not connected!
+            // Call FindFocusToolStripMenuItem_Click
+
+            //if (!_cameraFocus.Init())  
+            //    if (MessageBox.Show(@"Can't open Focus serial port", @"OK", MessageBoxButtons.OK) == DialogResult.OK)
+            //        Environment.Exit(1);
         }
 
 
@@ -134,7 +137,7 @@ namespace RPCC
                         // TODO: Move to separate thread
                         RpccFits imageFits = _cameraControl.ReadImage(_cameraControl.cameras[i]);
 
-                        imageFits.SaveFitsFile(_settings, _cameraControl, i);
+                        imageFits.SaveFitsFile(_settings, _cameraControl, _dataCollector, i);
 
                         if (i == _cameraControl.task.viewCamIndex)
                         {
@@ -211,12 +214,20 @@ namespace RPCC
             }
         }
 
+        private void FindFocusToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // HACK: Can serial port be opened again if it has been closed? Check and implement properly
+            //       This function must work properly when called more than once
+            //       Watch out! SerialFocus.Init() keeps adding functions on ComTimer.Elapsed every time it is called!
+
+            //_cameraFocus.SerialFocus.Close_Port();
+            //_cameraFocus.Init();
+        }
         private void FocusToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var focusForm = new FocusForm(_cameraFocus);
             focusForm.Show();
         }
-
         private void ReconnectSocketsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // _logger.AddLogEntry("Reconnect to servers");
@@ -254,6 +265,12 @@ namespace RPCC
         {
             _logger.SaveLogs();
             _logger.AddLogEntry("Logs have been saved");
+        }
+
+        private void ListBoxLogs_DoubleClick(object sender, EventArgs e)
+        {
+            // TODO: Nice idea, but nothing points to this feature. Implement in a less obscure way.
+            _logger.CopyLogItem();
         }
 
         #endregion
@@ -430,6 +447,7 @@ namespace RPCC
         private void ButtonSurveyStop_Click(object sender, EventArgs e)
         {
             _cameraControl.CancelSurvey();
+            _logger.AddLogEntry($"Survey cancelled, {_cameraControl.task.framesNum} {(_cameraControl.task.framesNum == 1 ? "frame" : "frames")} skipped");
             _cameraControl.task.framesNum = 1;
             numericUpDownSequence.Value = 1;
 
@@ -438,7 +456,6 @@ namespace RPCC
             numericUpDownSequence.Enabled = true;
             numericUpDownExpTime.Enabled = true;
             updateCamerasSettingsToolStripMenuItem.Enabled = true;
-            _logger.AddLogEntry("Survey cancelled");
         }
 
         #endregion
@@ -531,6 +548,5 @@ namespace RPCC
         }
 
         #endregion
-
     }
 }

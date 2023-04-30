@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using nom.tam.fits;
 using nom.tam.util;
@@ -13,8 +14,8 @@ namespace RPCC.Cams
         internal Header header;
         // TODO: When reading and saving image from camera RpccFits.header will always be empty
         // Because right now there is no use in creating one
-
         // TODO: To completely remove the stutter, think of a way to async reading a fits file
+
         // Create RpccFits by reading an existing FITS file
         internal RpccFits(string fitsFileName)
         {
@@ -45,13 +46,13 @@ namespace RPCC.Cams
 
         }
 
-        internal void SaveFitsFile(Settings settings, CameraControl camCtrl, int camNum)
+        internal void SaveFitsFile(Settings settings, CameraControl camCtrl, DataCollector dataCollector, int camNum)
         {
             short[][] convertedData = new short[data.Length][];
             for (var i = 0; i < convertedData.Length; i++)
             {
                 convertedData[i] = new short[data[i].Length];
-                for (var j = 0;j < convertedData[i].Length; j++)
+                for (var j = 0; j < convertedData[i].Length; j++)
                 {
                     // Convert ushort (used in LibFli and RpccFits) to short (used in nom.tam.fits)
                     convertedData[i][j] = (short)(data[i][j] - short.MaxValue - 1);
@@ -62,13 +63,16 @@ namespace RPCC.Cams
             newFits.AddHDU(FitsFactory.HDUFactory(convertedData));
             Header newHeader = ((ImageHDU)newFits.GetHDU(0)).Header;
 
+            // When filling in header keys with Add function, CSharpFITS tends to shuffle keys.
+            // Though it can be fixed, I can't think of a simple and clean way to do so.
+            // Therefore, it's a feature now.
             Cursor newCursor = newHeader.GetCursor();
             newCursor.Key = "END";
 
             newCursor.Add(new HeaderCard("COMMENT",
                 "FITS(Flexible Image Transport System) format defined in Astronomy and", false));
             newCursor.Add(new HeaderCard("COMMENT",
-                "Astrophysics Supplement Series v44 / p363, v44 / p371, v73 / p359, v73 / p365.", false));
+                "Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.", false));
 
             // Survey keywords
             newCursor.Add(new HeaderCard("DATE-OBS",
@@ -108,13 +112,13 @@ namespace RPCC.Cams
                 "heatsink temperature [C]"));
             newCursor.Add(new HeaderCard("COOLPOWR", camCtrl.cameras[camNum].coolerPwr,
                 "cooler power [%]"));
-            switch (settings.CamRoModeIndex) // TODO: Implement properly after testing camera readout modes
+            switch (settings.CamRoMode)
             {
-                case 0: // 2.0MHz
+                case "2.0MHz":
                     newCursor.Add(new HeaderCard("RATE", 2000.0, "horizontal readout rate [kPix/sec]"));
                     newCursor.Add(new HeaderCard("RDNOISE", 14.0, "datasheet readnoise [e]"));
                     break;
-                case 1: // 500KHz
+                case "500KHz":
                     newCursor.Add(new HeaderCard("RATE", 500.0, "horizontal readout rate [kPix/sec]"));
                     newCursor.Add(new HeaderCard("RDNOISE", 9.0, "datasheet readnoise [e]"));
                     break;
@@ -136,7 +140,78 @@ namespace RPCC.Cams
             newCursor.Add(new HeaderCard("LATDEG", 57.036537, "observatory latitude [deg]"));
             newCursor.Add(new HeaderCard("ALTITUDE", 290.0, "observatory altitude [meters above SL]"));
 
-            string outDirectory = $"{settings.OutImgsFolder}\\{camCtrl.cameras[camNum].filter}";
+            // Weather keywords
+            // TODO: Implement or discard the rest of the keywords
+            // Grab Nabat by neck and review this section (and DataCollector) together
+            switch (dataCollector.Sky)
+            {
+                case -1.0:
+                    // Disconnected
+                    goto case 0.0;
+                case 0.0:
+                    // Old data
+                    newCursor.Add(new HeaderCard("SKY-TEMP", "UNKNOWN", "sky temperature from MLX-90614 sensor [deg]"));
+                    break;
+                default:
+                    newCursor.Add(new HeaderCard("SKY-TEMP", dataCollector.Sky, "sky temperature from MLX-90614 sensor [deg]"));
+                    break;
+            }
+            //SkyStd  SKY-STD
+            switch (dataCollector.Extinction)
+            {
+                case -1.0:
+                    // Disconnected
+                    goto case 0.0;
+                case 0.0:
+                    // Old data
+                    newCursor.Add(new HeaderCard("EXTINCT", "UNKNOWN", "relative extinction [Vmag]"));
+                    break;
+                default:
+                    newCursor.Add(new HeaderCard("EXTINCT", dataCollector.Extinction, "relative extinction [Vmag]"));
+                    break;
+            }
+            //ExtinctionStd
+            switch (dataCollector.Seeing)
+            {
+                case -1.0:
+                    // Disconnected
+                    goto case 0.0;
+                case 0.0:
+                    // Old data
+                    newCursor.Add(new HeaderCard("SEEING", "UNKNOWN", "seeing [arcsec]"));
+                    break;
+                default:
+                    newCursor.Add(new HeaderCard("SEEING", dataCollector.Seeing, "seeing [arcsec]"));
+                    break;
+            }
+            //SeeingExtinction
+            switch (dataCollector.Wind)
+            {
+                case -1.0:
+                    // Disconnected
+                    goto case 100;
+                case 100.0:
+                    // Old data
+                    newCursor.Add(new HeaderCard("WIND", "UNKNOWN", "wind speed [m/s]"));
+                    break;
+                default:
+                    newCursor.Add(new HeaderCard("WIND", dataCollector.Wind, "wind speed [m/s]"));
+                    break;
+            }
+            newCursor.Add(new HeaderCard("SUN-ZD", dataCollector.Sun, "Sun zenith distance"));
+
+            string outDirectory;
+            switch (camCtrl.cameras[camNum].filter)
+            {
+                case "UNKNOWN":
+                    outDirectory = $"{settings.OutImgsFolder}\\{camCtrl.cameras[camNum].filter}-" +
+                    $"{camCtrl.cameras[camNum].serialNumber}";
+                    break;
+                default:
+                    outDirectory = $"{settings.OutImgsFolder}\\{camCtrl.cameras[camNum].filter}";
+                    break;
+            }
+            
             if (!Directory.Exists(outDirectory)) Directory.CreateDirectory(outDirectory);
             string outName;
             switch (camCtrl.task.framesType)
@@ -154,6 +229,8 @@ namespace RPCC.Cams
             BufferedDataStream outStream = new BufferedDataStream(new FileStream($"{outDirectory}\\" +
                 $"{outName}", FileMode.Create));
             newFits.Write(outStream);
+            // FIXME: Suddenly caught a bug in next line - said something like "can't access closed file".
+            // Check it and, if needed, remove the next two lines.
             outStream.Flush();
             outStream.Close();
         }

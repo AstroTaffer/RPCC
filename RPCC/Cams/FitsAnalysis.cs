@@ -63,8 +63,6 @@ namespace RPCC.Cams
 
         internal ProfileImageStat(ushort[][] image, ref Settings settings)
         {
-            // TODO: Number of variables can be reduced as well as number of nested cycles
-
             maxValue = int.MinValue;
             for (var i = 0; i < image.Length; i++)
             for (var j = 0; j < image[i].Length; j++)

@@ -89,9 +89,7 @@ namespace RPCC.Utils
         private int _numFlushes;
         private double _camTemp;
         private int _camBin;
-        // HACK: Try cameras and implement like normal human being would do
-        internal List<string> camRoModes = new List<string>();
-        private int _camRoModeIndex;
+        private string _camRoMode;
 
         public string SnCamG
         {
@@ -150,13 +148,13 @@ namespace RPCC.Utils
             }
         }
 
-        public int CamRoModeIndex
+        public string CamRoMode
         {
-            get => _camRoModeIndex;
+            get => _camRoMode;
             set
             {
-                if (value >= 0) _camRoModeIndex = value;
-                else throw new ArgumentException("Camera mode index can't be less than zero");
+                if (value == "2.0 MHz" || value == "500KHz") _camRoMode = value;
+                else throw new ArgumentException("Camera mode must be set to \"2.0 MHz\" or \"500KHz\"");
             }
         }
         #endregion
@@ -200,7 +198,7 @@ namespace RPCC.Utils
             NumFlushes = (int)config.Root.Element("cameras").Element("numFlushes");
             CamTemp = (double)config.Root.Element("cameras").Element("camTemp");
             CamBin = (int)config.Root.Element("cameras").Element("camBin");
-            CamRoModeIndex = (int)config.Root.Element("cameras").Element("camRoModeIndex");
+            CamRoMode = (string)config.Root.Element("cameras").Element("сamRoMode");
 
             OutImgsFolder = (string)config.Root.Element("survey").Element("outImgsFolder");
         }
@@ -222,7 +220,7 @@ namespace RPCC.Utils
                     new XElement("numFlushes", NumFlushes),
                     new XElement("camTemp", CamTemp),
                     new XElement("camBin", CamBin),
-                    new XElement("camRoModeIndex", CamRoModeIndex)),
+                    new XElement("camRoMode", CamRoMode)),
                 
                 new XElement("survey",
                     new XElement("outImgsFolder", OutImgsFolder))
@@ -248,7 +246,7 @@ namespace RPCC.Utils
                     new XElement("numFlushes", 5),
                     new XElement("camTemp", -5.0),
                     new XElement("camBin", 3),
-                    new XElement("camRoModeIndex", 1)),
+                    new XElement("сamRoMode", "500KHz")),
                 
                 new XElement("survey",
                     new XElement("outImgsFolder", Directory.GetCurrentDirectory()))
