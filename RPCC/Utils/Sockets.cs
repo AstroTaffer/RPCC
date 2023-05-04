@@ -48,8 +48,9 @@ namespace RPCC.Utils
             else if (_don)
             {
                 IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
-                IPAddress ipAddress = ipHostInfo.AddressList[2];
+                IPAddress ipAddress = ipHostInfo.AddressList[1];  //2
                 _endPoint = new IPEndPoint(ipAddress, PortDon);
+                // _endPoint = new IPEndPoint(IPAddress, PortDon);
             }
             else
             {

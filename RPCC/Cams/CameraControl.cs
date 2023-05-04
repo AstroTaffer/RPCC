@@ -50,7 +50,7 @@ namespace RPCC.Cams
             this.logger = logger;
             this.settings = settings;
             task = new CameraTask();
-            cameras = new CameraDevice[0];
+            cameras = Array.Empty<CameraDevice>();
         }
 
         internal void LaunchCameras()
@@ -59,12 +59,14 @@ namespace RPCC.Cams
 
             DeviceName[] camerasNames = EnumerateCameras(camDomain);
 
-            cameras = new CameraDevice[cameras.Length];
+            cameras = new CameraDevice[camerasNames.Length];
             for (int i = 0; i < cameras.Length; i++)
             {
-                cameras[i].fileName = camerasNames[i].FileName;
-                // HACK: Check if this really a viable model name
-                cameras[i].modelName = camerasNames[i].ModelName;
+                cameras[i] = new CameraDevice
+                {
+                    fileName = camerasNames[i].FileName,
+                    modelName = camerasNames[i].ModelName
+                };
             }
             logger.AddLogEntry($"{cameras.Length} cameras found");
 
@@ -146,7 +148,9 @@ namespace RPCC.Cams
                 }
                 else cameras[i].serialNumber = camSn.ToString();
 
-                if (cameras[i].serialNumber == settings.SnCamG) cameras[i].filter = "g";
+                // HACK: Quick solution --- implement properly later
+                if (cameras[i].serialNumber == "ML0882515") cameras[i].filter = "TestCam";
+                else if (cameras[i].serialNumber == settings.SnCamG) cameras[i].filter = "g";
                 else if (cameras[i].serialNumber == settings.SnCamR) cameras[i].filter = "r";
                 else if (cameras[i].serialNumber == settings.SnCamI) cameras[i].filter = "i";
                 else
@@ -167,8 +171,7 @@ namespace RPCC.Cams
                 // 1 = FLI_MODE_16BIT
                 errorLastFliCmd = NativeMethods.FLISetBitDepth(cameras[i].handle, 1);
                 if (errorLastFliCmd != 0) logger.AddLogEntry($"WARNING Unable to set camera {i + 1} bit depth");
-
-                // FIXME: Do our cameras support background flush?
+                
                 // 0x0001 = FLI_BGFLUSH_START
                 errorLastFliCmd = NativeMethods.FLIControlBackgroundFlush(cameras[i].handle, 0x0001);
                 if (errorLastFliCmd != 0) logger.AddLogEntry($"WARNING Unable to turn on camera {i + 1} background flush");
@@ -361,10 +364,13 @@ namespace RPCC.Cams
                     goto case "Object";
                 case "Test":
                     // 0 = FLI_FRAME_TYPE_NORMAL
-                    errorLastFliCmd = NativeMethods.FLISetFrameType(cameras[task.viewCamIndex].handle, 0);
-                    if (errorLastFliCmd != 0) logger.AddLogEntry($"WARNING Unable to set camera {task.viewCamIndex + 1} frame type");
-                    errorLastFliCmd = NativeMethods.FLISetExposureTime(cameras[task.viewCamIndex].handle, task.framesExpTime);
-                    if (errorLastFliCmd != 0) logger.AddLogEntry($"WARNING Unable to set camera {task.viewCamIndex + 1} exposure time");
+                    if (cameras.Length > 0)
+                    {
+                        errorLastFliCmd = NativeMethods.FLISetFrameType(cameras[task.viewCamIndex].handle, 0);
+                        if (errorLastFliCmd != 0) logger.AddLogEntry($"WARNING Unable to set camera {task.viewCamIndex + 1} frame type");
+                        errorLastFliCmd = NativeMethods.FLISetExposureTime(cameras[task.viewCamIndex].handle, task.framesExpTime);
+                        if (errorLastFliCmd != 0) logger.AddLogEntry($"WARNING Unable to set camera {task.viewCamIndex + 1} exposure time");
+                    }
                     break;
             }
         }
@@ -392,11 +398,14 @@ namespace RPCC.Cams
                 case "Flat":
                     goto case "Object";
                 case "Test":
-                    errorLastFliCmd = NativeMethods.FLIExposeFrame(cameras[task.viewCamIndex].handle);
-                    // Getting time just after exposure start, for better accuracy
-                    cameras[task.viewCamIndex].expStartDt = DateTime.UtcNow;
-                    if (errorLastFliCmd != 0) logger.AddLogEntry($"WARNING Unable to start camera {task.viewCamIndex + 1} exposure");
-                    cameras[task.viewCamIndex].isExposing = true;
+                    if (cameras.Length > 0)
+                    {
+                        errorLastFliCmd = NativeMethods.FLIExposeFrame(cameras[task.viewCamIndex].handle);
+                        // Getting time just after exposure start, for better accuracy
+                        cameras[task.viewCamIndex].expStartDt = DateTime.UtcNow;
+                        if (errorLastFliCmd != 0) logger.AddLogEntry($"WARNING Unable to start camera {task.viewCamIndex + 1} exposure");
+                        cameras[task.viewCamIndex].isExposing = true;
+                    }
                     break;
             }
         }

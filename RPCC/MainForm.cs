@@ -18,18 +18,17 @@ namespace RPCC
         ///     Логика работы основной формы программы.
         ///     Обработка команд пользователя с помощью вызова готовых функций.
         /// </summary>
-        private ushort[][] currentImage;
-
-        // HACK: Check for memory leak and refreshing error - if occurs, try use this variable as a reference to another
-        private GeneralImageStat currentImageGStat;
+        private ushort[][] _currentImage;
+        
+        private GeneralImageStat _currentImageGStat;
         private int _idleCamNum;
 
-        private bool isCurrentImageLoaded;
+        private bool _isCurrentImageLoaded;
         
-        private bool isZoomModeActivated;
+        private bool _isZoomModeActivated;
 
-        private readonly Logger logger;
-        private Settings settings;
+        private readonly Logger _logger;
+        private Settings _settings;
 
         private CameraControl _cameraControl;
         private CameraFocus _cameraFocus;
@@ -46,34 +45,33 @@ namespace RPCC
             timerClock.Enabled = true;
             comboBoxImgType.SelectedIndex = 0;
 
-            logger = new Logger(listBoxLogs);
-            logger.AddLogEntry("Application launched");
+            _logger = new Logger(listBoxLogs);
+            _logger.AddLogEntry("Application launched");
 
-            settings = new Settings();
+            _settings = new Settings();
             try
             {
-                settings.LoadXmlConfig("SettingsDefault.xml");
-                logger.AddLogEntry("Default config loaded");
+                _settings.LoadXmlConfig("SettingsDefault.xml");
+                _logger.AddLogEntry("Default config loaded");
             }
             catch (FileNotFoundException)
             {
-                logger.AddLogEntry("WARNING Default config file not found");
+                _logger.AddLogEntry("WARNING Default config file not found");
             }
             
-            // Donuts
+            // // Donuts
             // StartDonutsPy();
             // donutsSocket = new RpccSocketClient(logger, "don");
             // donutsSocket.Connect();
-            
 
             // Hardware controls
-            _cameraControl = new CameraControl(logger, settings);
-            _cameraFocus = new CameraFocus(logger);
+            _cameraControl = new CameraControl(_logger, _settings);
+            _cameraFocus = new CameraFocus(_logger);
 
             // MeteoDome connect
-            //domeSocket = new RpccSocketClient(logger, "dom");
-            //domeSocket.Connect();
-            //_dataCollector = new DataCollector(domeSocket, logger);
+            domeSocket = new RpccSocketClient(_logger, "dom");
+            domeSocket.Connect();
+            _dataCollector = new DataCollector(domeSocket, _logger);
 
             // if (!_cameraFocus.Init())  
             //     if (MessageBox.Show(@"Can't open Focus serial port", @"OK", MessageBoxButtons.OK) == DialogResult.OK)
@@ -86,7 +84,7 @@ namespace RPCC
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             timerClock.Stop();
-            // domeSocket.DisconnectAll();
+            domeSocket.DisconnectAll();
             // donutsSocket.DisconnectAll();
             // DataCollector.Dispose();
             _cameraControl.DisconnectCameras();
@@ -136,20 +134,20 @@ namespace RPCC
                         // TODO: Move to separate thread
                         RpccFits imageFits = _cameraControl.ReadImage(_cameraControl.cameras[i]);
 
-                        imageFits.SaveFitsFile(settings, _cameraControl, i);
+                        imageFits.SaveFitsFile(_settings, _cameraControl, i);
 
                         if (i == _cameraControl.task.viewCamIndex)
                         {
-                            isCurrentImageLoaded = false;
-                            currentImage = imageFits.data;
-                            currentImageGStat = new GeneralImageStat(currentImage);
+                            _isCurrentImageLoaded = false;
+                            _currentImage = imageFits.data;
+                            _currentImageGStat = new GeneralImageStat(_currentImage);
                             // TODO: Too much logs - get rid of them or write stats to labels
-                            logger.AddLogEntry($"Minimum: {currentImageGStat.min}");
-                            logger.AddLogEntry($"Maximum: {currentImageGStat.max}");
-                            logger.AddLogEntry($"Mean: {currentImageGStat.mean:0.##}");
-                            logger.AddLogEntry($"SD: {currentImageGStat.sd:0.##}");
+                            _logger.AddLogEntry($"Minimum: {_currentImageGStat.min}");
+                            _logger.AddLogEntry($"Maximum: {_currentImageGStat.max}");
+                            _logger.AddLogEntry($"Mean: {_currentImageGStat.mean:0.##}");
+                            _logger.AddLogEntry($"SD: {_currentImageGStat.sd:0.##}");
                             PlotFitsImage();
-                            isCurrentImageLoaded = true;
+                            _isCurrentImageLoaded = true;
                         }
 
                         // TODO: AUTOFOCUS, check quality
@@ -174,7 +172,7 @@ namespace RPCC
                     numericUpDownSequence.Enabled = true;
                     numericUpDownExpTime.Enabled = true;
                     updateCamerasSettingsToolStripMenuItem.Enabled = true;
-                    logger.AddLogEntry("Survey finished");
+                    _logger.AddLogEntry("Survey finished");
                 }
             }
         }
@@ -221,11 +219,11 @@ namespace RPCC
 
         private void ReconnectSocketsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            logger.AddLogEntry("Reconnect to servers");
+            _logger.AddLogEntry("Reconnect to servers");
             domeSocket.DisconnectAll();
-            donutsSocket.DisconnectAll();
+            // donutsSocket.DisconnectAll();
             domeSocket.Connect();
-            donutsSocket.Connect();
+            // donutsSocket.Connect();
         }
 
         private static void StartDonutsPy()
@@ -234,7 +232,7 @@ namespace RPCC
             var start = new ProcessStartInfo
             {
                 FileName = "python.exe", //cmd is full path to python.exe
-                Arguments = cwd + ".\\Guid\\DONUTS.py", //args is path to .py file and any cmd line args
+                Arguments = cwd + "\\Guid\\DONUTS.py", //args is path to .py file and any cmd line args
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 CreateNoWindow = true
@@ -248,14 +246,14 @@ namespace RPCC
 
         private void ButtonLogsClear_Click(object sender, EventArgs e)
         {
-            logger.ClearLogs();
-            logger.AddLogEntry("Logs have been cleaned");
+            _logger.ClearLogs();
+            _logger.AddLogEntry("Logs have been cleaned");
         }
 
         private void ButtonLogsSave_Click(object sender, EventArgs e)
         {
-            logger.SaveLogs();
-            logger.AddLogEntry("Logs have been saved");
+            _logger.SaveLogs();
+            _logger.AddLogEntry("Logs have been saved");
         }
 
         #endregion
@@ -267,22 +265,22 @@ namespace RPCC
             pictureBoxFits.Image = null;
             pictureBoxProfile.Image = null;
 
-            var lowerBrightnessBorder = currentImageGStat.mean - settings.LowerBrightnessSd * currentImageGStat.sd;
-            if (lowerBrightnessBorder < currentImageGStat.min) lowerBrightnessBorder = currentImageGStat.min;
+            var lowerBrightnessBorder = _currentImageGStat.mean - _settings.LowerBrightnessSd * _currentImageGStat.sd;
+            if (lowerBrightnessBorder < _currentImageGStat.min) lowerBrightnessBorder = _currentImageGStat.min;
 
-            var upperBrightnessBorder = currentImageGStat.mean + settings.UpperBrightnessSd * currentImageGStat.sd;
-            if (upperBrightnessBorder > currentImageGStat.max) upperBrightnessBorder = currentImageGStat.max;
+            var upperBrightnessBorder = _currentImageGStat.mean + _settings.UpperBrightnessSd * _currentImageGStat.sd;
+            if (upperBrightnessBorder > _currentImageGStat.max) upperBrightnessBorder = _currentImageGStat.max;
 
             upperBrightnessBorder -= lowerBrightnessBorder;
             var colorScale = 255 / upperBrightnessBorder;
 
-            var bitmapFits = new Bitmap(currentImage.Length, currentImage[0].Length, PixelFormat.Format24bppRgb);
+            var bitmapFits = new Bitmap(_currentImage.Length, _currentImage[0].Length, PixelFormat.Format24bppRgb);
 
             int pixelColor;
-            for (ushort i = 0; i < currentImage.Length; i++)
-            for (ushort j = 0; j < currentImage[i].Length; j++)
+            for (ushort i = 0; i < _currentImage.Length; i++)
+            for (ushort j = 0; j < _currentImage[i].Length; j++)
             {
-                pixelColor = (int) ((currentImage[i][j] - lowerBrightnessBorder) * colorScale);
+                pixelColor = (int) ((_currentImage[i][j] - lowerBrightnessBorder) * colorScale);
                 if (pixelColor < 0) pixelColor = 0;
                 if (pixelColor > 255) pixelColor = 255;
                 bitmapFits.SetPixel(j, i, Color.FromArgb(pixelColor, pixelColor, pixelColor));
@@ -338,12 +336,12 @@ namespace RPCC
 
         private void PictureBoxFits_MouseClick(object sender, MouseEventArgs e)
         {
-            if (isCurrentImageLoaded)
+            if (_isCurrentImageLoaded)
             {
                 if (e.Button == MouseButtons.Right)
                 {
-                    isZoomModeActivated = !isZoomModeActivated;
-                    if (isZoomModeActivated)
+                    _isZoomModeActivated = !_isZoomModeActivated;
+                    if (_isZoomModeActivated)
                     {
                         panelFitsImage.AutoScroll = true;
                         pictureBoxFits.SizeMode = PictureBoxSizeMode.AutoSize;
@@ -358,47 +356,47 @@ namespace RPCC
                 {
                     pictureBoxProfile.Image = null;
 
-                    var xCoordinate = (int) ((double) e.X / pictureBoxFits.Width * currentImage[0].Length);
-                    var yCoordinate = (int) ((double) e.Y / pictureBoxFits.Height * currentImage.Length);
-                    logger.AddLogEntry($"Pixel ({xCoordinate}, {yCoordinate}) selected");
+                    var xCoordinate = (int) ((double) e.X / pictureBoxFits.Width * _currentImage[0].Length);
+                    var yCoordinate = (int) ((double) e.Y / pictureBoxFits.Height * _currentImage.Length);
+                    _logger.AddLogEntry($"Pixel ({xCoordinate}, {yCoordinate}) selected");
 
-                    if (xCoordinate - settings.AnnulusOuterRadius < 0 ||
-                        xCoordinate + settings.AnnulusOuterRadius > currentImage[0].Length - 1 ||
-                        yCoordinate - settings.AnnulusOuterRadius < 0 ||
-                        yCoordinate + settings.AnnulusOuterRadius > currentImage.Length - 1)
+                    if (xCoordinate - _settings.AnnulusOuterRadius < 0 ||
+                        xCoordinate + _settings.AnnulusOuterRadius > _currentImage[0].Length - 1 ||
+                        yCoordinate - _settings.AnnulusOuterRadius < 0 ||
+                        yCoordinate + _settings.AnnulusOuterRadius > _currentImage.Length - 1)
                     {
-                        logger.AddLogEntry("WARNING Pixel is too close to the frame borders");
+                        _logger.AddLogEntry("WARNING Pixel is too close to the frame borders");
                     }
                     else
                     {
-                        var subProfileImage = new ushort[2 * settings.AnnulusOuterRadius + 1][];
+                        var subProfileImage = new ushort[2 * _settings.AnnulusOuterRadius + 1][];
                         for (var i = 0; i < subProfileImage.Length; i++)
                         {
-                            subProfileImage[i] = new ushort[2 * settings.AnnulusOuterRadius + 1];
+                            subProfileImage[i] = new ushort[2 * _settings.AnnulusOuterRadius + 1];
                             for (var j = 0; j < subProfileImage[i].Length; j++)
                                 subProfileImage[i][j] =
-                                    currentImage[yCoordinate - settings.AnnulusOuterRadius + i]
-                                        [xCoordinate - settings.AnnulusOuterRadius + j];
+                                    _currentImage[yCoordinate - _settings.AnnulusOuterRadius + i]
+                                        [xCoordinate - _settings.AnnulusOuterRadius + j];
                         }
 
-                        var localStat = new ProfileImageStat(subProfileImage, ref settings);
-                        logger.AddLogEntry($"Maximum: {localStat.maxValue} " +
-                                           $"({localStat.maxXCoordinate + xCoordinate - settings.AnnulusOuterRadius}, " +
-                                           $"{localStat.maxYCoordinate + yCoordinate - settings.AnnulusOuterRadius})");
-                        logger.AddLogEntry($"Background: {localStat.background:0.#}");
-                        logger.AddLogEntry(
-                            $"Centroid: ({localStat.centroidXCoordinate + xCoordinate - settings.AnnulusOuterRadius:0.#}, " +
-                            $"{localStat.centroidYCoordinate + yCoordinate - settings.AnnulusOuterRadius:0.#})");
-                        logger.AddLogEntry($"SNR: {localStat.snr:0.#}");
-                        logger.AddLogEntry($"FWHM: {localStat.fwhm:0.##}");
-                        PlotProfileImage(ref settings, localStat, subProfileImage);
-                        logger.AddLogEntry("Profile image plotted");
+                        var localStat = new ProfileImageStat(subProfileImage, ref _settings);
+                        _logger.AddLogEntry($"Maximum: {localStat.maxValue} " +
+                                           $"({localStat.maxXCoordinate + xCoordinate - _settings.AnnulusOuterRadius}, " +
+                                           $"{localStat.maxYCoordinate + yCoordinate - _settings.AnnulusOuterRadius})");
+                        _logger.AddLogEntry($"Background: {localStat.background:0.#}");
+                        _logger.AddLogEntry(
+                            $"Centroid: ({localStat.centroidXCoordinate + xCoordinate - _settings.AnnulusOuterRadius:0.#}, " +
+                            $"{localStat.centroidYCoordinate + yCoordinate - _settings.AnnulusOuterRadius:0.#})");
+                        _logger.AddLogEntry($"SNR: {localStat.snr:0.#}");
+                        _logger.AddLogEntry($"FWHM: {localStat.fwhm:0.##}");
+                        PlotProfileImage(ref _settings, localStat, subProfileImage);
+                        _logger.AddLogEntry("Profile image plotted");
                     }
                 }
             }
             else
             {
-                logger.AddLogEntry("WARNING Image not loaded");
+                _logger.AddLogEntry("WARNING Image not loaded");
             }
         }
 
@@ -425,8 +423,8 @@ namespace RPCC
 
             _cameraControl.SetSurveySettings();
             _cameraControl.StartExposure();
-            logger.AddLogEntry($"Survey started - {_cameraControl.task.framesNum} {_cameraControl.task.framesType}" +
-                $"frames with exposure of {_cameraControl.task.framesExpTime} seconds");
+            _logger.AddLogEntry($"Survey started - {_cameraControl.task.framesNum} {_cameraControl.task.framesType}" +
+                $" frames with exposure of {_cameraControl.task.framesExpTime * 1e-3} seconds");
         }
 
         private void ButtonSurveyStop_Click(object sender, EventArgs e)
@@ -440,7 +438,7 @@ namespace RPCC
             numericUpDownSequence.Enabled = true;
             numericUpDownExpTime.Enabled = true;
             updateCamerasSettingsToolStripMenuItem.Enabled = true;
-            logger.AddLogEntry("Survey cancelled");
+            _logger.AddLogEntry("Survey cancelled");
         }
 
         #endregion
@@ -449,9 +447,9 @@ namespace RPCC
 
         private void SettingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var settingsForm = new SettingsForm(settings);
+            var settingsForm = new SettingsForm(_settings);
             settingsForm.ShowDialog();
-            if (settingsForm.DialogResult == DialogResult.OK) logger.AddLogEntry("Settings changed");
+            if (settingsForm.DialogResult == DialogResult.OK) _logger.AddLogEntry("Settings changed");
         }
 
         private void UpdateCameraSettingsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -463,8 +461,8 @@ namespace RPCC
         {
             if (openFileDialogConfig.ShowDialog() == DialogResult.OK)
             {
-                settings.LoadXmlConfig(openFileDialogConfig.FileName);
-                logger.AddLogEntry($"Config file {saveFileDialogConfig.FileName} loaded");
+                _settings.LoadXmlConfig(openFileDialogConfig.FileName);
+                _logger.AddLogEntry($"Config file {saveFileDialogConfig.FileName} loaded");
             }
         }
 
@@ -472,8 +470,8 @@ namespace RPCC
         {
             if (saveFileDialogConfig.ShowDialog() == DialogResult.OK)
             {
-                settings.SaveXmlConfig(saveFileDialogConfig.FileName);
-                logger.AddLogEntry($"Config file {saveFileDialogConfig.FileName} saved");
+                _settings.SaveXmlConfig(saveFileDialogConfig.FileName);
+                _logger.AddLogEntry($"Config file {saveFileDialogConfig.FileName} saved");
             }
         }
 
@@ -485,50 +483,50 @@ namespace RPCC
         {
             var testFits = new RpccFits(".\\Cams\\TestImage.fits");
             var testHeader = testFits.header;
-            logger.AddLogEntry($"Template DATE-OBS: {testHeader.GetStringValue("DATE-OBS")}");
+            _logger.AddLogEntry($"Template DATE-OBS: {testHeader.GetStringValue("DATE-OBS")}");
 
             var libVer = new StringBuilder(128);
             var len = new IntPtr(128);
             var errorLastFliCmd = NativeMethods.FLIGetLibVersion(libVer, len);
             if (errorLastFliCmd == 0)
-                logger.AddLogEntry(libVer.ToString());
+                _logger.AddLogEntry(libVer.ToString());
             else
-                logger.AddLogEntry("WARNING Unable to retrieve FLI library version");
+                _logger.AddLogEntry("WARNING Unable to retrieve FLI library version");
         }
 
         private async void LoadTestImageToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            isCurrentImageLoaded = false;
+            _isCurrentImageLoaded = false;
             var testFits = new RpccFits(".\\Cams\\TestImage.fits");
-            currentImage = testFits.data;
+            _currentImage = testFits.data;
 
-            currentImageGStat = new GeneralImageStat(currentImage);
-            logger.AddLogEntry($"Minimum: {currentImageGStat.min}");
-            logger.AddLogEntry($"Maximum: {currentImageGStat.max}");
-            logger.AddLogEntry($"Mean: {currentImageGStat.mean:0.##}");
-            logger.AddLogEntry($"SD: {currentImageGStat.sd:0.##}");
+            _currentImageGStat = new GeneralImageStat(_currentImage);
+            _logger.AddLogEntry($"Minimum: {_currentImageGStat.min}");
+            _logger.AddLogEntry($"Maximum: {_currentImageGStat.max}");
+            _logger.AddLogEntry($"Mean: {_currentImageGStat.mean:0.##}");
+            _logger.AddLogEntry($"SD: {_currentImageGStat.sd:0.##}");
 
             await Task.Run(() => PlotFitsImage());
-            isCurrentImageLoaded = true;
-            logger.AddLogEntry("Test image plotted");
+            _isCurrentImageLoaded = true;
+            _logger.AddLogEntry("Test image plotted");
         }
 
         private void RestoreDefaultConfigFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            settings.RestoreDefaultXmlConfig();
-            logger.AddLogEntry("Default config file restored");
+            _settings.RestoreDefaultXmlConfig();
+            _logger.AddLogEntry("Default config file restored");
         }
 
         private void SocketToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            logger.AddLogEntry("Test donuts");
+            _logger.AddLogEntry("Test donuts");
             var cwd = Directory.GetCurrentDirectory();
             const string refFile = ".\\Guid\\2023-04-07T17-56-16.918_EAST_V.fits";
             const string testFile = "\\Guid\\2023-04-07T18-00-24.167_EAST_V.fits";
 
             donutsSocket.DonutSetRef(cwd + refFile);
             var outPut = donutsSocket.DonutGetShift(cwd + testFile);
-            logger.AddLogEntry("shifts = " + outPut[0] + "x " + outPut[1] + "y ");
+            _logger.AddLogEntry("shifts = " + outPut[0] + "x " + outPut[1] + "y ");
 
         }
 

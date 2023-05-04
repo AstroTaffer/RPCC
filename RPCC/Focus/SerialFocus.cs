@@ -15,7 +15,7 @@ namespace RPCC.Focus
         private readonly Logger _logger;
 
         //serial port
-        private string comId = "4"; //TODO INIT CONF
+        private string comId = "8"; //TODO INIT CONF
 
         public SerialFocus(Logger logger)
         {
@@ -62,9 +62,26 @@ namespace RPCC.Focus
             try
             {
                 reply = indata.Substring(1, 3);
-                value = Convert.ToByte(indata.Substring(indata.IndexOf('=') + 1));
-                bits = new BitArray(BitConverter.GetBytes(value).ToArray());
-                var dig = int.Parse(indata.Substring(5, 3));
+                var dig = 0;
+                if (reply == "aes")
+                {
+                    value = Convert.ToByte(indata.Substring(5));
+                    var gar = BitConverter.GetBytes(value);
+                    bits = new BitArray(new[] {gar[0]});
+                    bool buf;
+                    for (var i = 0; i < bits.Count / 2; i++) // HACK Reverse order of bits variable
+                    {
+                        buf = bits[i];
+                        bits[i] = bits[bits.Count - i - 1];
+                        bits[bits.Count - i - 1] = buf;
+                    }
+                    dig = int.Parse(indata.Substring(5, 3));
+                }
+                else
+                {
+                    dig = int.Parse(indata.Substring(5));
+                }
+
                 // var msg = "";
                 switch (reply)
                 {
@@ -108,13 +125,13 @@ namespace RPCC.Focus
 
         public void Set_Speed_Slow(int steps)
         {
-            var s = "2szp=" + steps;
+            var s = "2sss=" + steps;
             Write2Serial(s);
         }
 
-        public void Set_Zero(int point)
+        public void Set_Zero()
         {
-            var s = "2sss=" + point;
+            var s = "2szp";
             Write2Serial(s);
         }
 
@@ -132,8 +149,8 @@ namespace RPCC.Focus
 
         public void Stop()
         {
-            _logger.AddLogEntry("SERIAL FOCUS: stop focusing");
-            Write2Serial("2rst;");
+            _logger.AddLogEntry("SERIAL FOCUS: stop");
+            Write2Serial("2rst");
         }
 
         private void Open_Port()
