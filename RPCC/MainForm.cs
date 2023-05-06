@@ -33,10 +33,10 @@ namespace RPCC
         private CameraControl _cameraControl;
         private CameraFocus _cameraFocus;
 
-        private RpccSocketClient domeSocket;
-        private RpccSocketClient donutsSocket;
+        // private RpccSocketClient domeSocket;
+        // private RpccSocketClient donutsSocket;
 
-        private DataCollector _dataCollector;
+        // private DataCollector _dataCollector;
 
         public MainForm()
         {
@@ -69,13 +69,13 @@ namespace RPCC
             _cameraFocus = new CameraFocus(_logger);
 
             // MeteoDome connect
-            domeSocket = new RpccSocketClient(_logger, "dom");
-            domeSocket.Connect();
-            _dataCollector = new DataCollector(domeSocket, _logger);
+            // domeSocket = new RpccSocketClient(_logger, "dom");
+            // domeSocket.Connect();
+            // _dataCollector = new DataCollector(domeSocket, _logger);
 
-            // if (!_cameraFocus.Init())  
-            //     if (MessageBox.Show(@"Can't open Focus serial port", @"OK", MessageBoxButtons.OK) == DialogResult.OK)
-            //         Environment.Exit(1);
+            if (!_cameraFocus.Init())  
+                if (MessageBox.Show(@"Can't open Focus serial port", @"OK", MessageBoxButtons.OK) == DialogResult.OK)
+                    Environment.Exit(1);
         }
 
 
@@ -84,7 +84,7 @@ namespace RPCC
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             timerClock.Stop();
-            domeSocket.DisconnectAll();
+            // domeSocket.DisconnectAll();
             // donutsSocket.DisconnectAll();
             // DataCollector.Dispose();
             _cameraControl.DisconnectCameras();
@@ -219,10 +219,10 @@ namespace RPCC
 
         private void ReconnectSocketsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            _logger.AddLogEntry("Reconnect to servers");
-            domeSocket.DisconnectAll();
+            // _logger.AddLogEntry("Reconnect to servers");
+            // domeSocket.DisconnectAll();
             // donutsSocket.DisconnectAll();
-            domeSocket.Connect();
+            // domeSocket.Connect();
             // donutsSocket.Connect();
         }
 
@@ -519,14 +519,14 @@ namespace RPCC
 
         private void SocketToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            _logger.AddLogEntry("Test donuts");
-            var cwd = Directory.GetCurrentDirectory();
-            const string refFile = ".\\Guid\\2023-04-07T17-56-16.918_EAST_V.fits";
-            const string testFile = "\\Guid\\2023-04-07T18-00-24.167_EAST_V.fits";
-
-            donutsSocket.DonutSetRef(cwd + refFile);
-            var outPut = donutsSocket.DonutGetShift(cwd + testFile);
-            _logger.AddLogEntry("shifts = " + outPut[0] + "x " + outPut[1] + "y ");
+            // _logger.AddLogEntry("Test donuts");
+            // var cwd = Directory.GetCurrentDirectory();
+            // const string refFile = ".\\Guid\\2023-04-07T17-56-16.918_EAST_V.fits";
+            // const string testFile = "\\Guid\\2023-04-07T18-00-24.167_EAST_V.fits";
+            //
+            // donutsSocket.DonutSetRef(cwd + refFile);
+            // var outPut = donutsSocket.DonutGetShift(cwd + testFile);
+            // _logger.AddLogEntry("shifts = " + outPut[0] + "x " + outPut[1] + "y ");
 
         }
 

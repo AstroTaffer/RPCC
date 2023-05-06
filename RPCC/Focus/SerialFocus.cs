@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.IO.Ports;
-using System.Linq;
 using System.Timers;
 using RPCC.Utils;
 
@@ -20,6 +19,7 @@ namespace RPCC.Focus
         public SerialFocus(Logger logger)
         {
             _logger = logger;
+            Switches = new BitArray(8);
         }
 
         public int CurrentPosition { get; private set; }

@@ -40,12 +40,19 @@ namespace RPCC.Focus
             const int waitTime = 500;
             _cameraFocus.SerialFocus.UpdateData();
             Thread.Sleep(waitTime);
-            labelFocusPos.Invoke((MethodInvoker) delegate
+            try
             {
-                labelFocusPos.Text = $@"Focus position: {_cameraFocus.SerialFocus.CurrentPosition}";
-            });
+                labelFocusPos.Invoke((MethodInvoker) delegate
+                {
+                    labelFocusPos.Text = $@"Focus position: {_cameraFocus.SerialFocus.CurrentPosition}";
+                });
 
-            labelEndSwitch.Text = @"Endswitch: " + (_cameraFocus.SerialFocus.Switches[0] ? "joint" : "unjoint");
+                labelEndSwitch.Text = @"Endswitch: " + (_cameraFocus.SerialFocus.Switches[6] ? "joint" : "unjoint");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
         }
 
         private void checkBox_AutoFocus_CheckedChanged(object sender, EventArgs e)
