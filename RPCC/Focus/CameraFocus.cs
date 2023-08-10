@@ -41,7 +41,6 @@ namespace RPCC.Focus
 
         public bool AutoFocus( bool goFocus = true)
         {
-            
             if (!isAutoFocus) return false;
             
             //Обнуляем значение переменной ручной остановки фокуса.

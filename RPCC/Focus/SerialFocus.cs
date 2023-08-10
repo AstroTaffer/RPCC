@@ -14,7 +14,7 @@ namespace RPCC.Focus
         private readonly Logger _logger;
 
         //serial port
-        private string comId = "8"; //TODO: Init config
+        private string comId = "10"; //TODO: Init config
 
         public SerialFocus(Logger logger)
         {

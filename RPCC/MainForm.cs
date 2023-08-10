@@ -4,11 +4,14 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 using System.Threading.Tasks;
+using System.Timers;
 using RPCC.Cams;
 using RPCC.Focus;
 using RPCC.Utils;
+using Timer = System.Timers.Timer;
 
 namespace RPCC
 {
@@ -37,6 +40,7 @@ namespace RPCC
         // private RpccSocketClient donutsSocket;
 
         private DataCollector _dataCollector;
+        private static readonly Timer FocusTimer = new Timer();
 
         public MainForm()
         {
@@ -64,6 +68,11 @@ namespace RPCC
             // donutsSocket = new RpccSocketClient(logger, "don");
             // donutsSocket.Connect();
 
+            //create timer for focus loop
+            FocusTimer.Elapsed += OnTimedEvent_Clock;
+            FocusTimer.Interval = 5000;
+            FocusTimer.Start();
+
             // Hardware controls
             _cameraControl = new CameraControl(_logger, _settings);
             _cameraFocus = new CameraFocus(_logger);
@@ -76,9 +85,9 @@ namespace RPCC
             // HACK: For the love of god stop exiting the program when something is not connected!
             // Call FindFocusToolStripMenuItem_Click
 
-            //if (!_cameraFocus.Init())  
-            //    if (MessageBox.Show(@"Can't open Focus serial port", @"OK", MessageBoxButtons.OK) == DialogResult.OK)
-            //        Environment.Exit(1);
+            if (!_cameraFocus.Init())  
+                if (MessageBox.Show(@"Can't open Focus serial port", @"OK", MessageBoxButtons.OK) == DialogResult.OK)
+                    Environment.Exit(1);
         }
 
 
@@ -92,6 +101,10 @@ namespace RPCC
             // DataCollector.Dispose();
             _cameraControl.DisconnectCameras();
             _cameraFocus.SerialFocus.Close_Port();
+            _cameraFocus.DeFocus = 0;
+            _cameraFocus.IsZenith = false;
+            labelFocusPos.Dispose();
+            FocusTimer.Dispose();
         }
 
         private void TimerClock_Tick(object sender, EventArgs e)
@@ -223,11 +236,6 @@ namespace RPCC
             //_cameraFocus.SerialFocus.Close_Port();
             //_cameraFocus.Init();
         }
-        private void FocusToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            var focusForm = new FocusForm(_cameraFocus);
-            focusForm.Show();
-        }
         private void ReconnectSocketsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // _logger.AddLogEntry("Reconnect to servers");
@@ -254,18 +262,6 @@ namespace RPCC
         #endregion
 
         #region Logs
-
-        private void ButtonLogsClear_Click(object sender, EventArgs e)
-        {
-            _logger.ClearLogs();
-            _logger.AddLogEntry("Logs have been cleaned");
-        }
-
-        private void ButtonLogsSave_Click(object sender, EventArgs e)
-        {
-            _logger.SaveLogs();
-            _logger.AddLogEntry("Logs have been saved");
-        }
 
         private void ListBoxLogs_DoubleClick(object sender, EventArgs e)
         {
@@ -548,5 +544,86 @@ namespace RPCC
         }
 
         #endregion
+
+        private void clearToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //Clear Log window
+            _logger.ClearLogs();
+            _logger.AddLogEntry("Logs have been cleaned");
+        }
+
+        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //Save logs in file
+            _logger.SaveLogs();
+            _logger.AddLogEntry("Logs have been saved");
+        }
+        
+        private void OnTimedEvent_Clock(object sender, ElapsedEventArgs e)
+        {
+            var getFocus = new Thread(GetData);
+            getFocus.Start();
+        }
+        
+        private void GetData()
+        {
+            const int waitTime = 500;
+            _cameraFocus.SerialFocus.UpdateData();
+            Thread.Sleep(waitTime);
+            try
+            {
+                labelFocusPos.Invoke((MethodInvoker) delegate
+                {
+                    labelFocusPos.Text = $@"Focus position: {_cameraFocus.SerialFocus.CurrentPosition}";
+                });
+
+                labelEndSwitch.Text = @"Endswitch: " + (_cameraFocus.SerialFocus.Switches[6] ? "joint" : "unjoint");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
+        
+        private void checkBoxAutoFocus_CheckedChanged(object sender, EventArgs e)
+        {
+            var isAutoFocusEnabled = checkBoxAutoFocus.Checked;
+
+            //Settings
+            buttonRun.Enabled = !isAutoFocusEnabled;
+            buttonSetZeroPos.Enabled = !isAutoFocusEnabled;
+            numericUpDownRun.Enabled = !isAutoFocusEnabled;
+
+            //AutoFocus
+            numericUpDownSetDefoc.Enabled = isAutoFocusEnabled;
+            checkBoxGoZenith.Enabled = isAutoFocusEnabled;
+            _cameraFocus.isAutoFocus = isAutoFocusEnabled;
+        }
+
+        private void numericUpDownSetDefoc_ValueChanged(object sender, EventArgs e)
+        {
+            _cameraFocus.DeFocus = (int)numericUpDownSetDefoc.Value;
+        }
+
+        private void buttonSetZeroPos_Click(object sender, EventArgs e)
+        {
+            _cameraFocus.SerialFocus.Set_Zero();
+        }
+
+        private void buttonRunStop_Click(object sender, EventArgs e)
+        {
+            _cameraFocus.SerialFocus.Stop();
+        }
+
+        private void buttonRun_Click(object sender, EventArgs e)
+        {
+            if (radioButtonRunFast.Checked) _cameraFocus.SerialFocus.FRun_To((int)numericUpDownRun.Value);
+            else if (radioButtonRunSlow.Checked) _cameraFocus.SerialFocus.SRun_To((int)numericUpDownRun.Value);
+        }
+
+        private void checkBoxGoZenith_CheckedChanged(object sender, EventArgs e)
+        {
+            _cameraFocus.IsZenith = checkBoxGoZenith.Checked;
+        }
     }
 }

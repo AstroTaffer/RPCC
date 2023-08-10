@@ -109,12 +109,6 @@
     <Compile Include="Cams\ReadFitsFile.cs" />
     <Compile Include="Focus\AnalysisImageForFocus.cs" />
     <Compile Include="Focus\CameraFocus.cs" />
-    <Compile Include="Focus\FocusForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Focus\FocusForm.Designer.cs">
-      <DependentUpon>FocusForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="Focus\GetDataFromFITS.cs" />
     <Compile Include="Focus\SerialFocus.cs" />
     <Compile Include="MainForm.cs">
@@ -135,9 +129,6 @@
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Utils\Sockets.cs" />
-    <EmbeddedResource Include="Focus\FocusForm.resx">
-      <DependentUpon>FocusForm.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
