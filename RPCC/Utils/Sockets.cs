@@ -97,18 +97,17 @@ namespace RPCC.Utils
         {   
             if (!_dome)
             {
-                _logger.AddLogEntry("Socket error: dome = false");
+                _logger.AddLogEntry("Socket dome error: dome = false");
                 return "";
             }
 
             if (!_client.Connected)
             {
-                _logger.AddLogEntry("Socket error: client disconnected");
+                _logger.AddLogEntry("Socket dome error: client disconnected");
                 return "";
             }
             try
             {
-
                 _writer.WriteLine(msg);
 
                 // получаем ответ
@@ -217,9 +216,9 @@ namespace RPCC.Utils
                 {
                     _stream.Write(Encoding.UTF8.GetBytes("0"), 0, Encoding.UTF8.GetBytes("0").Length);
                 }
-                 // _stream.Close();
-                 // _client.Close();
-                 _client.Dispose();
+                _stream.Close();
+                _client.Close();
+                _client.Dispose();
             }
             catch (Exception e)
             {

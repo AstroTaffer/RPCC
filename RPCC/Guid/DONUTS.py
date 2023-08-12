@@ -11,9 +11,9 @@ if __name__ == '__main__':
     sock.listen(1)  # указываем сколько может сокет принимать соединений
     while True:
         err = 0
+        print('Wait connection')
+        conn, addr = sock.accept()  # начинаем принимать соединения
         try:
-            print('Wait connection')
-            conn, addr = sock.accept()  # начинаем принимать соединения
             print('Connected:', addr)  # выводим информацию о подключении
             size = conn.recv(2)  # принимаем данные от клиента, по 2 байт (2 цифры - длина сообщения пути к файлу)
             size = int(size.decode())
@@ -26,24 +26,24 @@ if __name__ == '__main__':
             print('Set ref file')
             donuts = Donuts(refimage=data, image_ext=0, overscan_width=24, prescan_width=24,
                             border=64, normalise=True, exposure='EXPTIME', subtract_bkg=True, ntiles=32)
+            while conn:
+                try:
+                    data = conn.recv(size)
+                    if not data:
+                        break
+                    data = data.decode()
+                    print('Path to measure file:', data)
+                    print('Calc shifts')
+                    shift_result = donuts.measure_shift(data)
+                    out = f'{np.round(shift_result.x.value, 2)} {np.round(shift_result.y.value, 2)}'
+                    print(out)
+                    conn.send(bytes(out, 'utf-8'))  # в ответ клиенту отправляем сообщение формата '+0.00 +0.00'
+                    print('Shifts sanded')
+                except:
+                    print('Error in calc shifts')
+                    err = err + 1
+                    if err > 5:
+                        break
         except:
             pass
-        while conn:
-            try:
-                data = conn.recv(size)
-                if not data:
-                    break
-                data = data.decode()
-                print('Path to measure file:', data)
-                print('Calc shifts')
-                shift_result = donuts.measure_shift(data)
-                out = f'{np.round(shift_result.x.value, 2)} {np.round(shift_result.y.value, 2)}'
-                print(out)
-                conn.send(bytes(out, 'utf-8'))  # в ответ клиенту отправляем сообщение формата '+0.00 +0.00'
-                print('Shifts sanded')
-            except:
-                print('Error in calc shifts')
-                err = err + 1
-                if err > 5:
-                    break
         conn.close()  # закрываем соединение

@@ -36,8 +36,8 @@ namespace RPCC
         private CameraControl _cameraControl;
         private CameraFocus _cameraFocus;
 
-        // private RpccSocketClient domeSocket;
-        // private RpccSocketClient donutsSocket;
+        private RpccSocketClient domeSocket;
+        private RpccSocketClient donutsSocket;
 
         private DataCollector _dataCollector;
         private static readonly Timer FocusTimer = new Timer();
@@ -64,9 +64,9 @@ namespace RPCC
             }
             
             // // Donuts
-            // StartDonutsPy();
-            // donutsSocket = new RpccSocketClient(logger, "don");
-            // donutsSocket.Connect();
+            StartDonutsPy();
+            donutsSocket = new RpccSocketClient(_logger, "don");
+            donutsSocket.Connect();
 
             //create timer for focus loop
             FocusTimer.Elapsed += OnTimedEvent_Clock;
@@ -78,16 +78,18 @@ namespace RPCC
             _cameraFocus = new CameraFocus(_logger);
 
             // MeteoDome connect
-            // domeSocket = new RpccSocketClient(_logger, "dom");
-            // domeSocket.Connect();
-            // _dataCollector = new DataCollector(domeSocket, _logger);
+            domeSocket = new RpccSocketClient(_logger, "dom");
+            domeSocket.Connect();
+            _dataCollector = new DataCollector(domeSocket, _logger);
 
             // HACK: For the love of god stop exiting the program when something is not connected!
             // Call FindFocusToolStripMenuItem_Click
 
-            if (!_cameraFocus.Init())  
-                if (MessageBox.Show(@"Can't open Focus serial port", @"OK", MessageBoxButtons.OK) == DialogResult.OK)
-                    Environment.Exit(1);
+            if (!_cameraFocus.Init())
+            {
+                MessageBox.Show(@"Can't open Focus serial port", @"OK", MessageBoxButtons.OK);
+                _logger.AddLogEntry(@"Can't open Focus serial port");
+            }
         }
 
 
@@ -238,11 +240,12 @@ namespace RPCC
         }
         private void ReconnectSocketsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            // _logger.AddLogEntry("Reconnect to servers");
-            // domeSocket.DisconnectAll();
-            // donutsSocket.DisconnectAll();
-            // domeSocket.Connect();
-            // donutsSocket.Connect();
+            _logger.AddLogEntry("Reconnect to servers");
+            domeSocket.DisconnectAll();
+            donutsSocket.DisconnectAll();
+            domeSocket.Connect();
+            donutsSocket.Connect();
+            _dataCollector.Dispose();
         }
 
         private static void StartDonutsPy()
