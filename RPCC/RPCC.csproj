@@ -263,6 +263,7 @@
     <Content Include="Guid\2023-04-07T18-00-24.167_EAST_V.fits">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Utils\fwhm_script.py" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

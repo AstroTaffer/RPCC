@@ -66,7 +66,8 @@ namespace RPCC.Utils
                     _reader = new StreamReader(_stream);
                     _writer = new StreamWriter(_stream);
                     _writer.AutoFlush = true;
-                    _logger.AddLogEntry($"Connected to {_client.Client.RemoteEndPoint}");
+                    _logger.AddLogEntry($"Connected to {(_dome ? "MeteoDome" : "DONUTS script")} " +
+                                        $"{_client.Client.RemoteEndPoint}");
                     return true;
                 }
             }
@@ -207,11 +208,6 @@ namespace RPCC.Utils
         {
             try
             {
-                if (_dome)
-                {
-                    _writer.WriteLine("stop");  //hack tcpclient problem
-                }
-
                 if (_don)
                 {
                     _stream.Write(Encoding.UTF8.GetBytes("0"), 0, Encoding.UTF8.GetBytes("0").Length);

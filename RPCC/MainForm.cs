@@ -243,9 +243,9 @@ namespace RPCC
             _logger.AddLogEntry("Reconnect to servers");
             domeSocket.DisconnectAll();
             donutsSocket.DisconnectAll();
+            _dataCollector.Dispose();
             domeSocket.Connect();
             donutsSocket.Connect();
-            _dataCollector.Dispose();
         }
 
         private static void StartDonutsPy()
