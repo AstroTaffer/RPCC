@@ -107,11 +107,6 @@ namespace RPCC.Comms
         {
             try
             {
-                if (_isDome)
-                {
-                    _writer.WriteLine("stop");  //HACK: tcpclient problem
-                }
-
                 if (_isDon)
                 {
                     _stream.Write(Encoding.UTF8.GetBytes("0"), 0, Encoding.UTF8.GetBytes("0").Length);

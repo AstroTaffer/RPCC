@@ -260,11 +260,11 @@ namespace RPCC
             _domeSocket.DisconnectAll();
             _donutsSocket.DisconnectAll();
             _siTechExeSocket.DisconnectAll();
+            _weatherDc.Dispose();
+            _mountDc.Dispose();
             _domeSocket.Connect();
             _donutsSocket.Connect();
             _siTechExeSocket.Connect();
-            _weatherDc.Dispose();
-            _mountDc.Dispose();
         }
 
         private static void StartDonutsPy()
