@@ -35,6 +35,13 @@ namespace RPCC.Utils
             folderBrowserDialogSetFolder.SelectedPath = _settings.OutImgsFolder;
             labelOutFolder.Text = _settings.OutImgsFolder;
             #endregion
+
+            #region Comms
+            numericUpDownFocusComId.Value = _settings.FocusComId;
+            textBoxMeteoDomeTcpIpPort.Text = _settings.MeteoDomeTcpIpPort.ToString();
+            textBoxDonutsTcpIpPort.Text = _settings.DonutsTcpIpPort.ToString();
+            textBoxSiTechExeTcpIpPort.Text = _settings.SiTechExeTcpIpPort.ToString();
+            #endregion
         }
 
 
@@ -91,6 +98,13 @@ namespace RPCC.Utils
 
             #region Survey
             _settings.OutImgsFolder = folderBrowserDialogSetFolder.SelectedPath;
+            #endregion
+
+            #region Comms
+            _settings.FocusComId = (int)numericUpDownFocusComId.Value;
+            _settings.MeteoDomeTcpIpPort = int.Parse(textBoxMeteoDomeTcpIpPort.Text);
+            _settings.DonutsTcpIpPort = int.Parse(textBoxDonutsTcpIpPort.Text);
+            _settings.SiTechExeTcpIpPort = int.Parse(textBoxSiTechExeTcpIpPort.Text);
             #endregion
 
             DialogResult = DialogResult.OK;

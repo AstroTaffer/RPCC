@@ -11,15 +11,15 @@ using System.Timers;
 using RPCC.Cams;
 using RPCC.Focus;
 using RPCC.Utils;
-using Timer = System.Timers.Timer;
+using RPCC.Comms;
 
 namespace RPCC
 {
     public partial class MainForm : Form
     {
         /// <summary>
-        ///     Логика работы основной формы программы.
-        ///     Обработка команд пользователя с помощью вызова готовых функций.
+        ///     Логика работы основной формы программы
+        ///     Обработка команд пользователя с помощью вызова готовых функций
         /// </summary>
         private ushort[][] _currentImage;
         
@@ -36,11 +36,13 @@ namespace RPCC
         private CameraControl _cameraControl;
         private CameraFocus _cameraFocus;
 
-        private RpccSocketClient domeSocket;
-        private RpccSocketClient donutsSocket;
+        private RpccSocketClient _domeSocket;
+        private RpccSocketClient _donutsSocket;
+        private RpccSocketClient _siTechExeSocket;
 
-        private DataCollector _dataCollector;
-        private static readonly Timer FocusTimer = new Timer();
+        private static readonly System.Timers.Timer FocusTimer = new System.Timers.Timer();
+        private WeatherDataCollector _weatherDc;
+        private MountDataCollector _mountDc;
 
         public MainForm()
         {
@@ -60,27 +62,35 @@ namespace RPCC
             }
             catch (FileNotFoundException)
             {
-                _logger.AddLogEntry("WARNING Default config file not found");
+                _logger.AddLogEntry("WARNING Default config file not found, restoring");
+                _settings.RestoreDefaultXmlConfig();
+                _settings.LoadXmlConfig("SettingsDefault.xml");
+                _logger.AddLogEntry("Default config loaded");
             }
-            
-            // // Donuts
-            StartDonutsPy();
-            donutsSocket = new RpccSocketClient(_logger, "don");
-            donutsSocket.Connect();
 
-            //create timer for focus loop
+            // Donuts connect
+            StartDonutsPy();
+            _donutsSocket = new RpccSocketClient(_logger, _settings, "don");
+            _donutsSocket.Connect();
+
+            // Create timer for focus loop
             FocusTimer.Elapsed += OnTimedEvent_Clock;
             FocusTimer.Interval = 5000;
             FocusTimer.Start();
 
             // Hardware controls
             _cameraControl = new CameraControl(_logger, _settings);
-            _cameraFocus = new CameraFocus(_logger);
+            _cameraFocus = new CameraFocus(_logger, _settings);
 
             // MeteoDome connect
-            domeSocket = new RpccSocketClient(_logger, "dom");
-            domeSocket.Connect();
-            _dataCollector = new DataCollector(domeSocket, _logger);
+            _domeSocket = new RpccSocketClient(_logger, _settings, "dom");
+            _domeSocket.Connect();
+            _weatherDc = new WeatherDataCollector(_domeSocket, _logger);
+
+            // SiTechExe connect
+            _siTechExeSocket = new RpccSocketClient(_logger, _settings, "ste");
+            _siTechExeSocket.Connect();
+            _mountDc = new MountDataCollector();
 
             // HACK: For the love of god stop exiting the program when something is not connected!
             // Call FindFocusToolStripMenuItem_Click
@@ -98,10 +108,15 @@ namespace RPCC
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             timerClock.Stop();
-            // domeSocket.DisconnectAll();
-            // donutsSocket.DisconnectAll();
-            // DataCollector.Dispose();
+
+            _donutsSocket.DisconnectAll();
+            _weatherDc.Dispose();
+
+            _siTechExeSocket.DisconnectAll();
+            _mountDc.Dispose();
+
             _cameraControl.DisconnectCameras();
+            
             _cameraFocus.SerialFocus.Close_Port();
             _cameraFocus.DeFocus = 0;
             _cameraFocus.IsZenith = false;
@@ -152,7 +167,7 @@ namespace RPCC
                         // TODO: Move to separate thread
                         RpccFits imageFits = _cameraControl.ReadImage(_cameraControl.cameras[i]);
 
-                        imageFits.SaveFitsFile(_settings, _cameraControl, _dataCollector, i);
+                        imageFits.SaveFitsFile(_settings, _cameraControl, _weatherDc, i);
 
                         if (i == _cameraControl.task.viewCamIndex)
                         {
@@ -238,14 +253,18 @@ namespace RPCC
             //_cameraFocus.SerialFocus.Close_Port();
             //_cameraFocus.Init();
         }
+
         private void ReconnectSocketsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             _logger.AddLogEntry("Reconnect to servers");
-            domeSocket.DisconnectAll();
-            donutsSocket.DisconnectAll();
-            domeSocket.Connect();
-            donutsSocket.Connect();
-            _dataCollector.Dispose();
+            _domeSocket.DisconnectAll();
+            _donutsSocket.DisconnectAll();
+            _siTechExeSocket.DisconnectAll();
+            _domeSocket.Connect();
+            _donutsSocket.Connect();
+            _siTechExeSocket.Connect();
+            _weatherDc.Dispose();
+            _mountDc.Dispose();
         }
 
         private static void StartDonutsPy()

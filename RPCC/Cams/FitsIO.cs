@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using nom.tam.fits;
 using nom.tam.util;
+using RPCC.Comms;
 using RPCC.Utils;
 
 namespace RPCC.Cams
@@ -46,7 +47,7 @@ namespace RPCC.Cams
 
         }
 
-        internal void SaveFitsFile(Settings settings, CameraControl camCtrl, DataCollector dataCollector, int camNum)
+        internal void SaveFitsFile(Settings settings, CameraControl camCtrl, WeatherDataCollector dataCollector, int camNum)
         {
             short[][] convertedData = new short[data.Length][];
             for (var i = 0; i < convertedData.Length; i++)

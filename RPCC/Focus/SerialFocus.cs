@@ -12,13 +12,12 @@ namespace RPCC.Focus
         private static readonly Timer ComTimer = new Timer(); //timer for Serial port communication delay
         private readonly SerialPort _serialPort = new SerialPort();
         private readonly Logger _logger;
+        private readonly Settings _settings;
 
-        //serial port
-        private string comId = "10"; //TODO: Init config
-
-        public SerialFocus(Logger logger)
+        internal SerialFocus(Logger logger, Settings settings)
         {
             _logger = logger;
+            _settings = settings;
             Switches = new BitArray(8);
         }
 
@@ -155,7 +154,7 @@ namespace RPCC.Focus
 
         private void Open_Port()
         {
-            _serialPort.PortName = "COM" + comId;
+            _serialPort.PortName = "COM" + _settings.FocusComId.ToString();
             _serialPort.BaudRate = 9600;
             _serialPort.DataBits = 8;
             try

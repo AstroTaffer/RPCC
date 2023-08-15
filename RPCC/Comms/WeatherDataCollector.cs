@@ -1,22 +1,23 @@
 ﻿using System;
 using System.Timers;
+using RPCC.Utils;
 
-namespace RPCC.Utils
+namespace RPCC.Comms
 {
-    public class DataCollector
+    internal class WeatherDataCollector
     {
         private static readonly Timer MeteoTimer = new Timer(); //clock timer and status check timer
-        private Logger _logger;
+        //private Logger _logger;
 
         /**
          * Class for collect and update weather data
          */
         private readonly RpccSocketClient _socketClient;
 
-        public DataCollector(RpccSocketClient rpccSocketClient, Logger logger)
+        internal WeatherDataCollector(RpccSocketClient rpccSocketClient, Logger logger)
         {
             _socketClient = rpccSocketClient;
-            _logger = logger;
+            //_logger = logger;
 
             //create timer for main loop
             MeteoTimer.Elapsed += OnTimedEvent_Clock;

@@ -9,14 +9,14 @@ namespace RPCC.Utils
     internal class Settings
     {
         /// <summary>
-        ///     Настройки приложения.
-        ///     Чтение и запись конфигурационных файлов.
+        ///     Настройки приложения
+        ///     Чтение и запись конфигурационных файлов
         /// </summary>
 
         #region Analysis and Plotting
 
         /// <summary>
-        ///     Настройки анализа и построения изображения.
+        ///     Настройки анализа и построения изображения
         /// </summary>
         
         private double _lowerBrightnessSd;
@@ -80,7 +80,7 @@ namespace RPCC.Utils
 
         #region Cameras
         /// <summary>
-        ///     Настройки камер.
+        ///     Настройки камер
         /// </summary>
 
         private string _snCamG;
@@ -161,7 +161,7 @@ namespace RPCC.Utils
 
         #region Survey
         /// <summary>
-        ///     Настройки съёмки.
+        ///     Настройки съёмки
         /// </summary>
 
         private string _outImgsFolder;
@@ -176,6 +176,59 @@ namespace RPCC.Utils
                 // Alternative - if (!Exists) CreateDirectory
             }
         }
+        #endregion
+
+        #region Comms
+        /// <summary>
+        ///     Настройки связей между другими приложениями, управляющими телескопом
+        /// </summary>
+        ///
+
+        private int _focusComId;
+        private int _meteoDomeTcpIpPort;
+        private int _donutsTcpIpPort;
+        private int _siTechExeTcpIpPort;
+
+        public int FocusComId
+        {
+            get => _focusComId;
+            set
+            {
+                if (value >= 1 || value <= 256) _focusComId = value;
+                else throw new ArgumentException("Invalid COM port ID");
+            }
+        }
+
+        public int MeteoDomeTcpIpPort
+        {
+            get => _meteoDomeTcpIpPort;
+            set
+            {
+                if (value >= 0 || value <= 65535) _meteoDomeTcpIpPort = value;
+                else throw new ArgumentException("Invalid TCP/IP port");
+            }
+        }
+
+        public int DonutsTcpIpPort
+        {
+            get => _donutsTcpIpPort;
+            set
+            {
+                if (value >= 0 || value <= 65535) _donutsTcpIpPort = value;
+                else throw new ArgumentException("Invalid TCP/IP port");
+            }
+        }
+
+        public int SiTechExeTcpIpPort
+        {
+            get => _siTechExeTcpIpPort;
+            set
+            {
+                if (value >= 0 || value <= 65535) _siTechExeTcpIpPort = value;
+                else throw new ArgumentException("Invalid TCP/IP port");
+            }
+        }
+
         #endregion
 
         #region ConfigIO
@@ -201,6 +254,11 @@ namespace RPCC.Utils
             CamRoMode = (string)config.Root.Element("cameras").Element("сamRoMode");
 
             OutImgsFolder = (string)config.Root.Element("survey").Element("outImgsFolder");
+
+            FocusComId = (int)config.Root.Element("comms").Element("focusComId");
+            MeteoDomeTcpIpPort = (int)config.Root.Element("comms").Element("meteoDomeTcpIpPort");
+            DonutsTcpIpPort = (int)config.Root.Element("comms").Element("donutsTcpIpPort");
+            SiTechExeTcpIpPort = (int)config.Root.Element("comms").Element("siTechExeTcpIpPort");
         }
 
         internal void SaveXmlConfig(string fileName)
@@ -223,7 +281,13 @@ namespace RPCC.Utils
                     new XElement("camRoMode", CamRoMode)),
                 
                 new XElement("survey",
-                    new XElement("outImgsFolder", OutImgsFolder))
+                    new XElement("outImgsFolder", OutImgsFolder)),
+
+                new XElement("comms",
+                    new XElement("focusComId", FocusComId),
+                    new XElement("meteoDomeTcpIpPort", MeteoDomeTcpIpPort),
+                    new XElement("donutsTcpIpPort", DonutsTcpIpPort),
+                    new XElement("siTechExeTcpIpPort", SiTechExeTcpIpPort))
             ));
 
             config.Save(fileName);
@@ -249,7 +313,13 @@ namespace RPCC.Utils
                     new XElement("сamRoMode", "500KHz")),
                 
                 new XElement("survey",
-                    new XElement("outImgsFolder", Directory.GetCurrentDirectory()))
+                    new XElement("outImgsFolder", Directory.GetCurrentDirectory())),
+
+                new XElement("comms",
+                    new XElement("focusComId", 10),
+                    new XElement("meteoDomeTcpIpPort", 8085),
+                    new XElement("donutsTcpIpPort", 3030),
+                    new XElement("siTechExeTcpIpPort", 8079))
             ));
 
             config.Save("SettingsDefault.xml");
