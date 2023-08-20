@@ -100,6 +100,8 @@
             this.tabControlMain = new System.Windows.Forms.TabControl();
             this.tabPageInfo = new System.Windows.Forms.TabPage();
             this.tabPageTasks = new System.Windows.Forms.TabPage();
+            this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.dataGridTasks = new System.Windows.Forms.DataGrid();
             this.tabPageCams = new System.Windows.Forms.TabPage();
             this.label1 = new System.Windows.Forms.Label();
             this.groupBoxInfo = new System.Windows.Forms.GroupBox();
@@ -117,6 +119,9 @@
             this.numericUpDownSetDefoc = new System.Windows.Forms.NumericUpDown();
             this.labelSetDefocus = new System.Windows.Forms.Label();
             this.checkBoxAutoFocus = new System.Windows.Forms.CheckBox();
+            this.dataGridTextBoxColumn1 = new System.Windows.Forms.DataGridTextBoxColumn();
+            this.dataGridTextBoxColumn2 = new System.Windows.Forms.DataGridTextBoxColumn();
+            this.Num = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.reconnectSocketToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.reconnectMeteoDomeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.reconnectDonutsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -128,29 +133,31 @@
             this.groupBoxLogs.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             this.panelFitsImage.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxFits)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBoxFits)).BeginInit();
             this.groupBoxImageAnalysis.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxProfile)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBoxProfile)).BeginInit();
             this.groupBoxCam1.SuspendLayout();
             this.groupBoxCam2.SuspendLayout();
             this.groupBoxCam3.SuspendLayout();
             this.groupBoxSurvey.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownSequence)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownExpTime)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownSequence)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownExpTime)).BeginInit();
             this.tabControlMain.SuspendLayout();
             this.tabPageInfo.SuspendLayout();
+            this.tabPageTasks.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize) (this.dataGridView1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.dataGridTasks)).BeginInit();
             this.tabPageCams.SuspendLayout();
             this.groupBoxInfo.SuspendLayout();
             this.groupBoxFocusSettings.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownRun)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownRun)).BeginInit();
             this.groupBoxAutoFocus.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownSetDefoc)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownSetDefoc)).BeginInit();
             this.SuspendLayout();
             // 
             // statusStrip
             // 
-            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tSStatusClock});
+            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {this.tSStatusClock});
             this.statusStrip.Location = new System.Drawing.Point(0, 549);
             this.statusStrip.Name = "statusStrip";
             this.statusStrip.Size = new System.Drawing.Size(1140, 22);
@@ -166,10 +173,7 @@
             // 
             // menuStrip
             // 
-            this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.launchToolStripMenuItem,
-            this.optionsToolStripMenuItem,
-            this.debugToolStripMenuItem});
+            this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {this.launchToolStripMenuItem, this.optionsToolStripMenuItem, this.debugToolStripMenuItem});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
             this.menuStrip.Size = new System.Drawing.Size(1140, 24);
@@ -202,11 +206,7 @@
             // 
             // optionsToolStripMenuItem
             // 
-            this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.settingsToolStripMenuItem,
-            this.updateCamerasSettingsToolStripMenuItem,
-            this.loadConfigToolStripMenuItem,
-            this.saveConfigToolStripMenuItem});
+            this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.settingsToolStripMenuItem, this.updateCamerasSettingsToolStripMenuItem, this.loadConfigToolStripMenuItem, this.saveConfigToolStripMenuItem});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             this.optionsToolStripMenuItem.Text = "Options";
@@ -241,11 +241,7 @@
             // 
             // debugToolStripMenuItem
             // 
-            this.debugToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.restoreDefaultConfigFileToolStripMenuItem,
-            this.testDLLlibrariesToolStripMenuItem,
-            this.loadTestImageToolStripMenuItem,
-            this.testDonToolStripMenuItem});
+            this.debugToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.restoreDefaultConfigFileToolStripMenuItem, this.testDLLlibrariesToolStripMenuItem, this.loadTestImageToolStripMenuItem, this.testDonToolStripMenuItem});
             this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
             this.debugToolStripMenuItem.Size = new System.Drawing.Size(54, 20);
             this.debugToolStripMenuItem.Text = "Debug";
@@ -303,9 +299,7 @@
             // 
             // contextMenuStrip1
             // 
-            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.clearToolStripMenuItem,
-            this.saveToolStripMenuItem});
+            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {this.clearToolStripMenuItem, this.saveToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.Size = new System.Drawing.Size(102, 48);
             // 
@@ -729,19 +723,11 @@
             // numericUpDownSequence
             // 
             this.numericUpDownSequence.Location = new System.Drawing.Point(107, 80);
-            this.numericUpDownSequence.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
+            this.numericUpDownSequence.Minimum = new decimal(new int[] {1, 0, 0, 0});
             this.numericUpDownSequence.Name = "numericUpDownSequence";
             this.numericUpDownSequence.Size = new System.Drawing.Size(65, 20);
             this.numericUpDownSequence.TabIndex = 5;
-            this.numericUpDownSequence.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
+            this.numericUpDownSequence.Value = new decimal(new int[] {1, 0, 0, 0});
             // 
             // labelSequence
             // 
@@ -772,12 +758,7 @@
             // 
             this.comboBoxImgType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxImgType.FormattingEnabled = true;
-            this.comboBoxImgType.Items.AddRange(new object[] {
-            "Object",
-            "Bias",
-            "Dark",
-            "Flat",
-            "Test"});
+            this.comboBoxImgType.Items.AddRange(new object[] {"Object", "Bias", "Dark", "Flat", "Test"});
             this.comboBoxImgType.Location = new System.Drawing.Point(107, 17);
             this.comboBoxImgType.Name = "comboBoxImgType";
             this.comboBoxImgType.Size = new System.Drawing.Size(65, 21);
@@ -818,6 +799,8 @@
             // 
             // tabPageTasks
             // 
+            this.tabPageTasks.Controls.Add(this.dataGridView1);
+            this.tabPageTasks.Controls.Add(this.dataGridTasks);
             this.tabPageTasks.Location = new System.Drawing.Point(4, 22);
             this.tabPageTasks.Name = "tabPageTasks";
             this.tabPageTasks.Padding = new System.Windows.Forms.Padding(3);
@@ -825,6 +808,25 @@
             this.tabPageTasks.TabIndex = 1;
             this.tabPageTasks.Text = "Tasks";
             this.tabPageTasks.UseVisualStyleBackColor = true;
+            // 
+            // dataGridView1
+            // 
+            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {this.Num});
+            this.dataGridView1.Location = new System.Drawing.Point(17, 46);
+            this.dataGridView1.Name = "dataGridView1";
+            this.dataGridView1.Size = new System.Drawing.Size(651, 396);
+            this.dataGridView1.TabIndex = 1;
+            // 
+            // dataGridTasks
+            // 
+            this.dataGridTasks.DataMember = "";
+            this.dataGridTasks.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dataGridTasks.HeaderForeColor = System.Drawing.SystemColors.ControlText;
+            this.dataGridTasks.Location = new System.Drawing.Point(3, 3);
+            this.dataGridTasks.Name = "dataGridTasks";
+            this.dataGridTasks.Size = new System.Drawing.Size(1126, 493);
+            this.dataGridTasks.TabIndex = 0;
             // 
             // tabPageCams
             // 
@@ -931,7 +933,7 @@
             // 
             // buttonRun
             // 
-            this.buttonRun.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonRun.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonRun.Enabled = false;
             this.buttonRun.Location = new System.Drawing.Point(244, 25);
             this.buttonRun.Name = "buttonRun";
@@ -943,7 +945,7 @@
             // 
             // buttonRunStop
             // 
-            this.buttonRunStop.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonRunStop.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonRunStop.Location = new System.Drawing.Point(244, 60);
             this.buttonRunStop.Name = "buttonRunStop";
             this.buttonRunStop.Size = new System.Drawing.Size(74, 29);
@@ -955,22 +957,10 @@
             // numericUpDownRun
             // 
             this.numericUpDownRun.Enabled = false;
-            this.numericUpDownRun.Increment = new decimal(new int[] {
-            100,
-            0,
-            0,
-            0});
+            this.numericUpDownRun.Increment = new decimal(new int[] {100, 0, 0, 0});
             this.numericUpDownRun.Location = new System.Drawing.Point(138, 25);
-            this.numericUpDownRun.Maximum = new decimal(new int[] {
-            5000,
-            0,
-            0,
-            0});
-            this.numericUpDownRun.Minimum = new decimal(new int[] {
-            5000,
-            0,
-            0,
-            -2147483648});
+            this.numericUpDownRun.Maximum = new decimal(new int[] {5000, 0, 0, 0});
+            this.numericUpDownRun.Minimum = new decimal(new int[] {5000, 0, 0, -2147483648});
             this.numericUpDownRun.Name = "numericUpDownRun";
             this.numericUpDownRun.Size = new System.Drawing.Size(75, 20);
             this.numericUpDownRun.TabIndex = 1;
@@ -1002,16 +992,8 @@
             // numericUpDownSetDefoc
             // 
             this.numericUpDownSetDefoc.Location = new System.Drawing.Point(242, 25);
-            this.numericUpDownSetDefoc.Maximum = new decimal(new int[] {
-            1500,
-            0,
-            0,
-            0});
-            this.numericUpDownSetDefoc.Minimum = new decimal(new int[] {
-            1500,
-            0,
-            0,
-            -2147483648});
+            this.numericUpDownSetDefoc.Maximum = new decimal(new int[] {1500, 0, 0, 0});
+            this.numericUpDownSetDefoc.Minimum = new decimal(new int[] {1500, 0, 0, -2147483648});
             this.numericUpDownSetDefoc.Name = "numericUpDownSetDefoc";
             this.numericUpDownSetDefoc.Size = new System.Drawing.Size(76, 20);
             this.numericUpDownSetDefoc.TabIndex = 15;
@@ -1084,6 +1066,25 @@
             this.reconnectAllToolStripMenuItem.Text = "All";
             this.reconnectAllToolStripMenuItem.Click += new System.EventHandler(this.ReconnectAllToolStripMenuItem_Click);
             // 
+            // dataGridTextBoxColumn1
+            // 
+            this.dataGridTextBoxColumn1.Format = "";
+            this.dataGridTextBoxColumn1.FormatInfo = null;
+            this.dataGridTextBoxColumn1.Width = -1;
+            // 
+            // dataGridTextBoxColumn2
+            // 
+            this.dataGridTextBoxColumn2.Format = "";
+            this.dataGridTextBoxColumn2.FormatInfo = null;
+            this.dataGridTextBoxColumn2.Width = -1;
+            // 
+            // Num
+            // 
+            this.Num.Frozen = true;
+            this.Num.HeaderText = "Num";
+            this.Num.Name = "Num";
+            this.Num.ReadOnly = true;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1093,7 +1094,7 @@
             this.Controls.Add(this.statusStrip);
             this.Controls.Add(this.menuStrip);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip;
             this.MaximizeBox = false;
             this.Name = "MainForm";
@@ -1106,9 +1107,9 @@
             this.groupBoxLogs.ResumeLayout(false);
             this.contextMenuStrip1.ResumeLayout(false);
             this.panelFitsImage.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxFits)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBoxFits)).EndInit();
             this.groupBoxImageAnalysis.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxProfile)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBoxProfile)).EndInit();
             this.groupBoxCam1.ResumeLayout(false);
             this.groupBoxCam1.PerformLayout();
             this.groupBoxCam2.ResumeLayout(false);
@@ -1117,23 +1118,33 @@
             this.groupBoxCam3.PerformLayout();
             this.groupBoxSurvey.ResumeLayout(false);
             this.groupBoxSurvey.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownSequence)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownExpTime)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownSequence)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownExpTime)).EndInit();
             this.tabControlMain.ResumeLayout(false);
             this.tabPageInfo.ResumeLayout(false);
+            this.tabPageTasks.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize) (this.dataGridView1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.dataGridTasks)).EndInit();
             this.tabPageCams.ResumeLayout(false);
             this.groupBoxInfo.ResumeLayout(false);
             this.groupBoxInfo.PerformLayout();
             this.groupBoxFocusSettings.ResumeLayout(false);
             this.groupBoxFocusSettings.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownRun)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownRun)).EndInit();
             this.groupBoxAutoFocus.ResumeLayout(false);
             this.groupBoxAutoFocus.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownSetDefoc)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownSetDefoc)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
+
+        private System.Windows.Forms.DataGridViewTextBoxColumn Num;
+
+        private System.Windows.Forms.DataGridView dataGridView1;
+
+        private System.Windows.Forms.DataGrid dataGridTasks;
+        private System.Windows.Forms.DataGridTextBoxColumn dataGridTextBoxColumn1;
+        private System.Windows.Forms.DataGridTextBoxColumn dataGridTextBoxColumn2;
 
         private System.Windows.Forms.Label label1;
 
