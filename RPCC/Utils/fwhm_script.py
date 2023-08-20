@@ -5,7 +5,7 @@ from photutils.detection import DAOStarFinder
 from astropy.stats import sigma_clipped_stats
 import numpy as np
 
-path2data = r'D:\RoboPhot Data\кал'
+path2data = r'D:\RoboPhot Data\кал\195'
 file_list = []
 dir_content = os.listdir(path2data)
 fwhms = []
@@ -19,7 +19,7 @@ for item in file_list:
     hdu_list.verify('fix')
     hdu_list.close()
     mean, median, std = sigma_clipped_stats(Data, sigma=3.0)
-    daofind = DAOStarFinder(fwhm=2.0, threshold=5.*std)
+    daofind = DAOStarFinder(fwhm=3.0, threshold=5.*std)
     sources = daofind(Data - median)
     for col in sources.colnames:
         if col not in ('id', 'npix'):

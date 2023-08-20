@@ -36,7 +36,6 @@
             this.launchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.findCamerasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.findFocusToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.reconnectSocketsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.updateCamerasSettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -102,6 +101,7 @@
             this.tabPageInfo = new System.Windows.Forms.TabPage();
             this.tabPageTasks = new System.Windows.Forms.TabPage();
             this.tabPageCams = new System.Windows.Forms.TabPage();
+            this.label1 = new System.Windows.Forms.Label();
             this.groupBoxInfo = new System.Windows.Forms.GroupBox();
             this.labelFocusPos = new System.Windows.Forms.Label();
             this.labelEndSwitch = new System.Windows.Forms.Label();
@@ -117,6 +117,12 @@
             this.numericUpDownSetDefoc = new System.Windows.Forms.NumericUpDown();
             this.labelSetDefocus = new System.Windows.Forms.Label();
             this.checkBoxAutoFocus = new System.Windows.Forms.CheckBox();
+            this.reconnectSocketToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.reconnectMeteoDomeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.reconnectDonutsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.reconnectSiTechExeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.reconnectAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip.SuspendLayout();
             this.menuStrip.SuspendLayout();
             this.groupBoxLogs.SuspendLayout();
@@ -175,7 +181,7 @@
             this.launchToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.findCamerasToolStripMenuItem,
             this.findFocusToolStripMenuItem,
-            this.reconnectSocketsToolStripMenuItem});
+            this.reconnectSocketToolStripMenuItem});
             this.launchToolStripMenuItem.Name = "launchToolStripMenuItem";
             this.launchToolStripMenuItem.Size = new System.Drawing.Size(58, 20);
             this.launchToolStripMenuItem.Text = "Launch";
@@ -183,23 +189,16 @@
             // findCamerasToolStripMenuItem
             // 
             this.findCamerasToolStripMenuItem.Name = "findCamerasToolStripMenuItem";
-            this.findCamerasToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
+            this.findCamerasToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.findCamerasToolStripMenuItem.Text = "Find cameras";
             this.findCamerasToolStripMenuItem.Click += new System.EventHandler(this.FindCamerasToolStripMenuItem_Click);
             // 
             // findFocusToolStripMenuItem
             // 
             this.findFocusToolStripMenuItem.Name = "findFocusToolStripMenuItem";
-            this.findFocusToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
+            this.findFocusToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.findFocusToolStripMenuItem.Text = "Find focus";
             this.findFocusToolStripMenuItem.Click += new System.EventHandler(this.FindFocusToolStripMenuItem_Click);
-            // 
-            // reconnectSocketsToolStripMenuItem
-            // 
-            this.reconnectSocketsToolStripMenuItem.Name = "reconnectSocketsToolStripMenuItem";
-            this.reconnectSocketsToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
-            this.reconnectSocketsToolStripMenuItem.Text = "Reconnect sockets";
-            this.reconnectSocketsToolStripMenuItem.Click += new System.EventHandler(this.ReconnectSocketsToolStripMenuItem_Click);
             // 
             // optionsToolStripMenuItem
             // 
@@ -315,14 +314,14 @@
             this.clearToolStripMenuItem.Name = "clearToolStripMenuItem";
             this.clearToolStripMenuItem.Size = new System.Drawing.Size(101, 22);
             this.clearToolStripMenuItem.Text = "Clear";
-            this.clearToolStripMenuItem.Click += new System.EventHandler(this.clearToolStripMenuItem_Click);
+            this.clearToolStripMenuItem.Click += new System.EventHandler(this.ClearToolStripMenuItem_Click);
             // 
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
             this.saveToolStripMenuItem.Size = new System.Drawing.Size(101, 22);
             this.saveToolStripMenuItem.Text = "Save";
-            this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
+            this.saveToolStripMenuItem.Click += new System.EventHandler(this.SaveToolStripMenuItem_Click);
             // 
             // timerClock
             // 
@@ -829,6 +828,7 @@
             // 
             // tabPageCams
             // 
+            this.tabPageCams.Controls.Add(this.label1);
             this.tabPageCams.Controls.Add(this.groupBoxInfo);
             this.tabPageCams.Controls.Add(this.groupBoxFocusSettings);
             this.tabPageCams.Controls.Add(this.groupBoxAutoFocus);
@@ -843,6 +843,14 @@
             this.tabPageCams.TabIndex = 2;
             this.tabPageCams.Text = "Cams&Focus";
             this.tabPageCams.UseVisualStyleBackColor = true;
+            // 
+            // label1
+            // 
+            this.label1.Location = new System.Drawing.Point(465, 295);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(100, 23);
+            this.label1.TabIndex = 22;
+            this.label1.Text = "label1";
             // 
             // groupBoxInfo
             // 
@@ -897,7 +905,7 @@
             this.buttonSetZeroPos.TabIndex = 21;
             this.buttonSetZeroPos.Text = "Set zero position";
             this.buttonSetZeroPos.UseVisualStyleBackColor = true;
-            this.buttonSetZeroPos.Click += new System.EventHandler(this.buttonSetZeroPos_Click);
+            this.buttonSetZeroPos.Click += new System.EventHandler(this.ButtonSetZeroPos_Click);
             // 
             // radioButtonRunSlow
             // 
@@ -931,7 +939,7 @@
             this.buttonRun.TabIndex = 18;
             this.buttonRun.Text = "Run";
             this.buttonRun.UseVisualStyleBackColor = true;
-            this.buttonRun.Click += new System.EventHandler(this.buttonRun_Click);
+            this.buttonRun.Click += new System.EventHandler(this.ButtonRun_Click);
             // 
             // buttonRunStop
             // 
@@ -942,7 +950,7 @@
             this.buttonRunStop.TabIndex = 17;
             this.buttonRunStop.Text = "Stop";
             this.buttonRunStop.UseVisualStyleBackColor = true;
-            this.buttonRunStop.Click += new System.EventHandler(this.buttonRunStop_Click);
+            this.buttonRunStop.Click += new System.EventHandler(this.ButtonRunStop_Click);
             // 
             // numericUpDownRun
             // 
@@ -989,7 +997,7 @@
             this.checkBoxGoZenith.TabIndex = 16;
             this.checkBoxGoZenith.Text = "Focus at zenith";
             this.checkBoxGoZenith.UseVisualStyleBackColor = true;
-            this.checkBoxGoZenith.CheckedChanged += new System.EventHandler(this.checkBoxGoZenith_CheckedChanged);
+            this.checkBoxGoZenith.CheckedChanged += new System.EventHandler(this.CheckBoxGoZenith_CheckedChanged);
             // 
             // numericUpDownSetDefoc
             // 
@@ -1007,7 +1015,7 @@
             this.numericUpDownSetDefoc.Name = "numericUpDownSetDefoc";
             this.numericUpDownSetDefoc.Size = new System.Drawing.Size(76, 20);
             this.numericUpDownSetDefoc.TabIndex = 15;
-            this.numericUpDownSetDefoc.ValueChanged += new System.EventHandler(this.numericUpDownSetDefoc_ValueChanged);
+            this.numericUpDownSetDefoc.ValueChanged += new System.EventHandler(this.NumericUpDownSetDefoc_ValueChanged);
             // 
             // labelSetDefocus
             // 
@@ -1029,7 +1037,52 @@
             this.checkBoxAutoFocus.TabIndex = 12;
             this.checkBoxAutoFocus.Text = "Auto focus";
             this.checkBoxAutoFocus.UseVisualStyleBackColor = true;
-            this.checkBoxAutoFocus.CheckedChanged += new System.EventHandler(this.checkBoxAutoFocus_CheckedChanged);
+            this.checkBoxAutoFocus.CheckedChanged += new System.EventHandler(this.CheckBoxAutoFocus_CheckedChanged);
+            // 
+            // reconnectSocketToolStripMenuItem
+            // 
+            this.reconnectSocketToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.reconnectMeteoDomeToolStripMenuItem,
+            this.reconnectDonutsToolStripMenuItem,
+            this.reconnectSiTechExeToolStripMenuItem,
+            this.toolStripSeparator1,
+            this.reconnectAllToolStripMenuItem});
+            this.reconnectSocketToolStripMenuItem.Name = "reconnectSocketToolStripMenuItem";
+            this.reconnectSocketToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.reconnectSocketToolStripMenuItem.Text = "Reconnect socket";
+            // 
+            // reconnectMeteoDomeToolStripMenuItem
+            // 
+            this.reconnectMeteoDomeToolStripMenuItem.Name = "reconnectMeteoDomeToolStripMenuItem";
+            this.reconnectMeteoDomeToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.reconnectMeteoDomeToolStripMenuItem.Text = "MeteoDome";
+            this.reconnectMeteoDomeToolStripMenuItem.Click += new System.EventHandler(this.ReconnectMeteoDomeToolStripMenuItem_Click);
+            // 
+            // reconnectDonutsToolStripMenuItem
+            // 
+            this.reconnectDonutsToolStripMenuItem.Name = "reconnectDonutsToolStripMenuItem";
+            this.reconnectDonutsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.reconnectDonutsToolStripMenuItem.Text = "DONUTS";
+            this.reconnectDonutsToolStripMenuItem.Click += new System.EventHandler(this.ReconnectDonutsToolStripMenuItem_Click);
+            // 
+            // reconnectSiTechExeToolStripMenuItem
+            // 
+            this.reconnectSiTechExeToolStripMenuItem.Name = "reconnectSiTechExeToolStripMenuItem";
+            this.reconnectSiTechExeToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.reconnectSiTechExeToolStripMenuItem.Text = "SiTechExe";
+            this.reconnectSiTechExeToolStripMenuItem.Click += new System.EventHandler(this.ReconnectSiTechExeToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
+            // 
+            // reconnectAllToolStripMenuItem
+            // 
+            this.reconnectAllToolStripMenuItem.Name = "reconnectAllToolStripMenuItem";
+            this.reconnectAllToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.reconnectAllToolStripMenuItem.Text = "All";
+            this.reconnectAllToolStripMenuItem.Click += new System.EventHandler(this.ReconnectAllToolStripMenuItem_Click);
             // 
             // MainForm
             // 
@@ -1081,6 +1134,8 @@
             this.PerformLayout();
 
         }
+
+        private System.Windows.Forms.Label label1;
 
         private System.Windows.Forms.GroupBox groupBoxInfo;
         private System.Windows.Forms.Label labelFocusPos;
@@ -1173,8 +1228,13 @@
         private System.Windows.Forms.Button buttonSurveyStart;
         private System.Windows.Forms.ComboBox comboBoxImgType;
         private System.Windows.Forms.ToolStripMenuItem testDonToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem reconnectSocketsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem findFocusToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem reconnectSocketToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem reconnectMeteoDomeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem reconnectDonutsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem reconnectSiTechExeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripMenuItem reconnectAllToolStripMenuItem;
     }
 }
 

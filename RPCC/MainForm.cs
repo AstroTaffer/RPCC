@@ -2,12 +2,14 @@
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
+//using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using System.Threading.Tasks;
 using System.Timers;
+
 using RPCC.Cams;
 using RPCC.Focus;
 using RPCC.Utils;
@@ -21,34 +23,34 @@ namespace RPCC
         ///     Логика работы основной формы программы
         ///     Обработка команд пользователя с помощью вызова готовых функций
         /// </summary>
-        private ushort[][] _currentImage;
-        
-        private GeneralImageStat _currentImageGStat;
-        private int _idleCamNum;
-
-        private bool _isCurrentImageLoaded;
-        
-        private bool _isZoomModeActivated;
-
         private readonly Logger _logger;
         private Settings _settings;
 
+        private ushort[][] _currentImage;        
+        private GeneralImageStat _currentImageGStat;
+        private bool _isCurrentImageLoaded;
+        private bool _isZoomModeActivated;
+
         private CameraControl _cameraControl;
+        private int _idleCamNum;
+
         private CameraFocus _cameraFocus;
 
-        private RpccSocketClient _domeSocket;
-        private RpccSocketClient _donutsSocket;
-        private RpccSocketClient _siTechExeSocket;
+        private WeatherSocket _domeSocket;
+        private WeatherDataCollector _weatherDc;
+        
+        //private RpccSocketClient _donutsSocket;
+        //private MountDataCollector _mountDc;
+        
+        //private RpccSocketClient _siTechExeSocket;
 
         private static readonly System.Timers.Timer FocusTimer = new System.Timers.Timer();
-        private WeatherDataCollector _weatherDc;
-        private MountDataCollector _mountDc;
 
         public MainForm()
         {
             InitializeComponent();
 
-            timerClock.Enabled = true;
+            timerClock.Start();
             comboBoxImgType.SelectedIndex = 0;
 
             _logger = new Logger(listBoxLogs);
@@ -68,10 +70,15 @@ namespace RPCC
                 _logger.AddLogEntry("Default config loaded");
             }
 
+            // MeteoDome connect
+            _weatherDc = new WeatherDataCollector();
+            _domeSocket = new WeatherSocket(_logger, _settings, _weatherDc);
+            _domeSocket.Connect();
+
             // Donuts connect
-            StartDonutsPy();
-            _donutsSocket = new RpccSocketClient(_logger, _settings, "don");
-            _donutsSocket.Connect();
+            //StartDonutsPy();
+            //_donutsSocket = new RpccSocketClient(_logger, _settings, "don");
+            //_donutsSocket.Connect();
 
             // Create timer for focus loop
             FocusTimer.Elapsed += OnTimedEvent_Clock;
@@ -82,15 +89,10 @@ namespace RPCC
             _cameraControl = new CameraControl(_logger, _settings);
             _cameraFocus = new CameraFocus(_logger, _settings);
 
-            // MeteoDome connect
-            _domeSocket = new RpccSocketClient(_logger, _settings, "dom");
-            _domeSocket.Connect();
-            _weatherDc = new WeatherDataCollector(_domeSocket, _logger);
-
             // SiTechExe connect
-            _siTechExeSocket = new RpccSocketClient(_logger, _settings, "ste");
-            _siTechExeSocket.Connect();
-            _mountDc = new MountDataCollector();
+            //_siTechExeSocket = new RpccSocketClient(_logger, _settings, "ste");
+            //_siTechExeSocket.Connect();
+            //_mountDc = new MountDataCollector();
 
             // HACK: For the love of god stop exiting the program when something is not connected!
             // Call FindFocusToolStripMenuItem_Click
@@ -109,11 +111,13 @@ namespace RPCC
         {
             timerClock.Stop();
 
-            _donutsSocket.DisconnectAll();
-            _weatherDc.Dispose();
+            _domeSocket.Disconnect();
 
-            _siTechExeSocket.DisconnectAll();
-            _mountDc.Dispose();
+            //_donutsSocket.DisconnectAll();
+            //// _weatherDc.Dispose(); TODO
+            //_domeSocket.Dispose();
+            //_siTechExeSocket.DisconnectAll();
+            //_mountDc.Dispose();
 
             _cameraControl.DisconnectCameras();
             
@@ -128,6 +132,8 @@ namespace RPCC
         {
             tSStatusClock.Text = @"UTC: " + DateTime.UtcNow.ToString("yyyy-MM-ddTHH-mm-ss.fff");
 
+            //label1.Text = _weatherDc.Sun.ToString(CultureInfo.InvariantCulture);
+            
             _cameraControl.GetStatus();
             switch (_cameraControl.cameras.Length)
             {
@@ -254,19 +260,6 @@ namespace RPCC
             //_cameraFocus.Init();
         }
 
-        private void ReconnectSocketsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            _logger.AddLogEntry("Reconnect to servers");
-            _domeSocket.DisconnectAll();
-            _donutsSocket.DisconnectAll();
-            _siTechExeSocket.DisconnectAll();
-            _weatherDc.Dispose();
-            _mountDc.Dispose();
-            _domeSocket.Connect();
-            _donutsSocket.Connect();
-            _siTechExeSocket.Connect();
-        }
-
         private static void StartDonutsPy()
         {
             var cwd = Directory.GetCurrentDirectory();
@@ -281,16 +274,51 @@ namespace RPCC
             Process.Start(start);
         }
 
+        private void ReconnectMeteoDomeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (_domeSocket._isConnected)
+            {
+                _domeSocket.Disconnect();
+            }
+            _domeSocket.Connect();
+        }
+
+        private void ReconnectDonutsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void ReconnectSiTechExeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void ReconnectAllToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ReconnectMeteoDomeToolStripMenuItem_Click(sender, e);
+        }
         #endregion
 
         #region Logs
-
         private void ListBoxLogs_DoubleClick(object sender, EventArgs e)
         {
             // TODO: Nice idea, but nothing points to this feature. Implement in a less obscure way.
             _logger.CopyLogItem();
         }
 
+        private void ClearToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //Clear Log window
+            _logger.ClearLogs();
+            _logger.AddLogEntry("Logs have been cleaned");
+        }
+
+        private void SaveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //Save logs in file
+            _logger.SaveLogs();
+            _logger.AddLogEntry("Logs have been saved");
+        }
         #endregion
 
         #region Images Plotting
@@ -567,20 +595,7 @@ namespace RPCC
 
         #endregion
 
-        private void clearToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            //Clear Log window
-            _logger.ClearLogs();
-            _logger.AddLogEntry("Logs have been cleaned");
-        }
-
-        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            //Save logs in file
-            _logger.SaveLogs();
-            _logger.AddLogEntry("Logs have been saved");
-        }
-        
+        #region Focus
         private void OnTimedEvent_Clock(object sender, ElapsedEventArgs e)
         {
             var getFocus = new Thread(GetData);
@@ -607,7 +622,7 @@ namespace RPCC
             }
         }
         
-        private void checkBoxAutoFocus_CheckedChanged(object sender, EventArgs e)
+        private void CheckBoxAutoFocus_CheckedChanged(object sender, EventArgs e)
         {
             var isAutoFocusEnabled = checkBoxAutoFocus.Checked;
 
@@ -622,30 +637,31 @@ namespace RPCC
             _cameraFocus.isAutoFocus = isAutoFocusEnabled;
         }
 
-        private void numericUpDownSetDefoc_ValueChanged(object sender, EventArgs e)
+        private void NumericUpDownSetDefoc_ValueChanged(object sender, EventArgs e)
         {
             _cameraFocus.DeFocus = (int)numericUpDownSetDefoc.Value;
         }
 
-        private void buttonSetZeroPos_Click(object sender, EventArgs e)
+        private void ButtonSetZeroPos_Click(object sender, EventArgs e)
         {
             _cameraFocus.SerialFocus.Set_Zero();
         }
 
-        private void buttonRunStop_Click(object sender, EventArgs e)
+        private void ButtonRunStop_Click(object sender, EventArgs e)
         {
             _cameraFocus.SerialFocus.Stop();
         }
 
-        private void buttonRun_Click(object sender, EventArgs e)
+        private void ButtonRun_Click(object sender, EventArgs e)
         {
             if (radioButtonRunFast.Checked) _cameraFocus.SerialFocus.FRun_To((int)numericUpDownRun.Value);
             else if (radioButtonRunSlow.Checked) _cameraFocus.SerialFocus.SRun_To((int)numericUpDownRun.Value);
         }
 
-        private void checkBoxGoZenith_CheckedChanged(object sender, EventArgs e)
+        private void CheckBoxGoZenith_CheckedChanged(object sender, EventArgs e)
         {
             _cameraFocus.IsZenith = checkBoxGoZenith.Checked;
         }
+        #endregion
     }
 }
