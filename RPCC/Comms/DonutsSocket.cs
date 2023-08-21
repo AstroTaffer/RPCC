@@ -12,7 +12,7 @@ namespace RPCC.Comms
     {
         private readonly Logger _logger;
         private readonly Settings _settings;
-        internal bool isConnected;
+        // internal bool isConnected;
         private IPEndPoint _endPoint;
         private TcpClient _client;
         private NetworkStream _stream;
@@ -23,25 +23,25 @@ namespace RPCC.Comms
         {
             _logger = logger;
             _settings = settings;
-            
-            isConnected = false;
+            StartDonutsPy();
+            // isConnected = false;
         }
         
-        internal async void Connect()
+        internal void Connect()
         {
-            if (isConnected)
-            {
-                _logger.AddLogEntry("WARNING Already connected to Donuts");
-                return;
-            }
-            StartDonutsPy();
+            // if (isConnected)
+            // {   
+            //     _logger.AddLogEntry("WARNING Already connected to Donuts");
+            //     return;
+            // }
+           
             _client = new TcpClient();
-            IPHostEntry ipHostInfo = await Dns.GetHostEntryAsync(Dns.GetHostName());
+            IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
             IPAddress ipAddress = ipHostInfo.AddressList[1];  //2
             _endPoint = new IPEndPoint(ipAddress, _settings.DonutsTcpIpPort);
             try
             {
-                await _client.ConnectAsync(_endPoint.Address, _endPoint.Port);
+                _client.Connect(_endPoint.Address, _endPoint.Port);
                 if (_client.Connected)
                 {
                     // _client.ReceiveTimeout = 4000; 
@@ -49,7 +49,7 @@ namespace RPCC.Comms
                     _streamReader = new StreamReader(_stream, System.Text.Encoding.UTF8);
                     _streamWriter = new StreamWriter(_stream, System.Text.Encoding.UTF8);
                     _streamWriter.AutoFlush = true;
-                    isConnected = true;
+                    // isConnected = true;
 
                     _logger.AddLogEntry($"Connected to Donuts {_endPoint}");
                 }
@@ -60,17 +60,18 @@ namespace RPCC.Comms
             }
             catch (Exception ex) when (ex is SocketException || ex is IOException)
             {
+                
                 // In case of bugs check "catch" block in Disconnect() function
                 _logger.AddLogEntry($"WARNING Unable to connect to Donuts {ex.Message}");
             }
         }
         internal void Disconnect()
         {
-            if (!isConnected)
-            {
-                _logger.AddLogEntry("WARNING Already disconnected from Donuts");
-                return;
-            }
+            // if (!isConnected)
+            // {
+            //     _logger.AddLogEntry("WARNING Already disconnected from Donuts");
+            //     return;
+            // }
 
             try
             {
@@ -79,9 +80,9 @@ namespace RPCC.Comms
                 _streamReader.Close();
                 _stream.Close();
                 _client.Close();
-                
+                _client.Dispose();
                 _logger.AddLogEntry("Disconnected from Donuts");
-                isConnected = false;
+                // isConnected = false;
             }
             catch (Exception ex) when (ex is SocketException || ex is IOException)
             {
@@ -93,13 +94,13 @@ namespace RPCC.Comms
             }
         }
         
-        internal string ExchangeMessagesAsync(string request)
+        internal string ExchangeMessages(string request)
         {
-            if (!isConnected)
-            {
-                _logger.AddLogEntry("WARNING Unable to exchange messages with Donuts: not connected to Donuts");
-                return null;
-            }
+            // if (!isConnected)
+            // {
+            //     _logger.AddLogEntry("WARNING Unable to exchange messages with Donuts: not connected to Donuts");
+            //     return null;
+            // }
 
             try
             {
@@ -117,14 +118,14 @@ namespace RPCC.Comms
 
         public float[] GetGuideCorrection(string req)
         {
-            var response =  ExchangeMessagesAsync(req);
-            _logger.AddLogEntry($"Resp: {response}");
-            if (!(response is null))
+            var response =  ExchangeMessages(req);
+            // _logger.AddLogEntry($"Resp: {response}");
+            if (!(response is null) && response != "")
             {
                 return response == "fail" ? new float[]{0, 0} : response.Split(' ').Select(float.Parse).ToArray();
             }
             _logger.AddLogEntry("WARNING Disconnecting from Donuts");
-            Disconnect();
+            // Disconnect();
             return null;
         }
 
@@ -149,7 +150,7 @@ namespace RPCC.Comms
 
         public string PingServer()
         {
-            return ExchangeMessagesAsync("ping");
+            return ExchangeMessages("ping");
         }
     }
 }

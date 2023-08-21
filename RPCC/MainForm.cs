@@ -80,7 +80,7 @@ namespace RPCC
 
             // Create timer for focus loop
             FocusTimer.Elapsed += OnTimedEvent_Clock;
-            FocusTimer.Interval = 5000;
+            FocusTimer.Interval = 1000;
             FocusTimer.Start();
 
             // Hardware controls
@@ -260,17 +260,14 @@ namespace RPCC
 
         private void ReconnectMeteoDomeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (_domeSocket._isConnected)
-            {
-                _domeSocket.Disconnect();
-            }
+            if (_domeSocket._isConnected) _domeSocket.Disconnect();
             _domeSocket.Connect();
         }
 
         private void ReconnectDonutsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if(_donutsSocket.isConnected) _donutsSocket.Disconnect();
-            _donutsSocket.Connect();
+            // if(_donutsSocket.isConnected) _donutsSocket.Disconnect();
+            // _donutsSocket.Connect();
         }
 
         private void ReconnectSiTechExeToolStripMenuItem_Click(object sender, EventArgs e)
@@ -569,7 +566,6 @@ namespace RPCC
         private void SocketToolStripMenuItem_Click(object sender, EventArgs e)
         {
             _logger.AddLogEntry("Test donuts");
-            
             _logger.AddLogEntry(_donutsSocket.PingServer());
             
             var cwd = Directory.GetCurrentDirectory();
@@ -587,13 +583,14 @@ namespace RPCC
         #region Focus
         private void OnTimedEvent_Clock(object sender, ElapsedEventArgs e)
         {
-            var getFocus = new Thread(GetData);
-            getFocus.Start();
+            GetData();
+            // var getFocus = new Thread(GetData);
+            // getFocus.Start();
         }
         
         private void GetData()
         {
-            const int waitTime = 500;
+            const int waitTime = 50;
             _cameraFocus.SerialFocus.UpdateData();
             Thread.Sleep(waitTime);
             try

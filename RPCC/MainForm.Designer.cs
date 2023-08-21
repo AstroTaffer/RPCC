@@ -221,13 +221,6 @@
             this.reconnectMeteoDomeToolStripMenuItem.Text = "MeteoDome";
             this.reconnectMeteoDomeToolStripMenuItem.Click += new System.EventHandler(this.ReconnectMeteoDomeToolStripMenuItem_Click);
             // 
-            // reconnectDonutsToolStripMenuItem
-            // 
-            this.reconnectDonutsToolStripMenuItem.Name = "reconnectDonutsToolStripMenuItem";
-            this.reconnectDonutsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.reconnectDonutsToolStripMenuItem.Text = "DONUTS";
-            this.reconnectDonutsToolStripMenuItem.Click += new System.EventHandler(this.ReconnectDonutsToolStripMenuItem_Click);
-            // 
             // reconnectSiTechExeToolStripMenuItem
             // 
             this.reconnectSiTechExeToolStripMenuItem.Name = "reconnectSiTechExeToolStripMenuItem";
