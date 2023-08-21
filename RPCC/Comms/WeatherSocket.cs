@@ -24,7 +24,7 @@ namespace RPCC.Comms
 
         private readonly WeatherDataCollector _collector;
 
-        /*
+        /**
          * Valid messages:
          *   sky     --- 
          *   sky std --- 
@@ -50,7 +50,6 @@ namespace RPCC.Comms
             _meteoTimer.Elapsed += OnMeteoTimedEventAsync;
 
             _isConnected = false;
-            
         }
 
         internal async void Connect()

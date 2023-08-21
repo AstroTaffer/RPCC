@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 //using System.Globalization;
@@ -39,7 +38,7 @@ namespace RPCC
         private WeatherSocket _domeSocket;
         private WeatherDataCollector _weatherDc;
         
-        //private RpccSocketClient _donutsSocket;
+        private DonutsSocket _donutsSocket;
         //private MountDataCollector _mountDc;
         
         //private RpccSocketClient _siTechExeSocket;
@@ -76,9 +75,8 @@ namespace RPCC
             _domeSocket.Connect();
 
             // Donuts connect
-            //StartDonutsPy();
-            //_donutsSocket = new RpccSocketClient(_logger, _settings, "don");
-            //_donutsSocket.Connect();
+            _donutsSocket = new DonutsSocket(_logger, _settings);
+            _donutsSocket.Connect();
 
             // Create timer for focus loop
             FocusTimer.Elapsed += OnTimedEvent_Clock;
@@ -112,7 +110,7 @@ namespace RPCC
             timerClock.Stop();
 
             _domeSocket.Disconnect();
-
+            _donutsSocket.Disconnect();
             //_donutsSocket.DisconnectAll();
             //// _weatherDc.Dispose(); TODO
             //_domeSocket.Dispose();
@@ -260,20 +258,6 @@ namespace RPCC
             //_cameraFocus.Init();
         }
 
-        private static void StartDonutsPy()
-        {
-            var cwd = Directory.GetCurrentDirectory();
-            var start = new ProcessStartInfo
-            {
-                FileName = "python.exe", //cmd is full path to python.exe
-                Arguments = cwd + "\\Guid\\DONUTS.py", //args is path to .py file and any cmd line args
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                CreateNoWindow = true
-            };
-            Process.Start(start);
-        }
-
         private void ReconnectMeteoDomeToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (_domeSocket._isConnected)
@@ -285,7 +269,8 @@ namespace RPCC
 
         private void ReconnectDonutsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            if(_donutsSocket.isConnected) _donutsSocket.Disconnect();
+            _donutsSocket.Connect();
         }
 
         private void ReconnectSiTechExeToolStripMenuItem_Click(object sender, EventArgs e)
@@ -296,6 +281,7 @@ namespace RPCC
         private void ReconnectAllToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ReconnectMeteoDomeToolStripMenuItem_Click(sender, e);
+            ReconnectDonutsToolStripMenuItem_Click(sender, e);
         }
         #endregion
 
@@ -582,15 +568,18 @@ namespace RPCC
 
         private void SocketToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            // _logger.AddLogEntry("Test donuts");
-            // var cwd = Directory.GetCurrentDirectory();
-            // const string refFile = ".\\Guid\\2023-04-07T17-56-16.918_EAST_V.fits";
-            // const string testFile = "\\Guid\\2023-04-07T18-00-24.167_EAST_V.fits";
-            //
-            // donutsSocket.DonutSetRef(cwd + refFile);
-            // var outPut = donutsSocket.DonutGetShift(cwd + testFile);
-            // _logger.AddLogEntry("shifts = " + outPut[0] + "x " + outPut[1] + "y ");
-
+            _logger.AddLogEntry("Test donuts");
+            
+            _logger.AddLogEntry(_donutsSocket.PingServer());
+            
+            var cwd = Directory.GetCurrentDirectory();
+            var refFile = cwd + "\\Guid\\2023-04-07T17-56-16.918_EAST_V.fits";
+            var testFile = cwd + "\\Guid\\2023-04-07T18-00-24.167_EAST_V.fits";
+            var req = refFile + ";" + testFile;
+            // _logger.AddLogEntry(req);
+            var outPut = _donutsSocket.GetGuideCorrection(req);
+            if (outPut == null) return;
+            _logger.AddLogEntry("shifts = " + outPut[0] + "x " + outPut[1] + "y ");
         }
 
         #endregion
