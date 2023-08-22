@@ -107,6 +107,7 @@
             this.tabPageInfo = new System.Windows.Forms.TabPage();
             this.tabPageTasks = new System.Windows.Forms.TabPage();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.Num = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridTasks = new System.Windows.Forms.DataGrid();
             this.tabPageCams = new System.Windows.Forms.TabPage();
             this.label1 = new System.Windows.Forms.Label();
@@ -127,10 +128,6 @@
             this.checkBoxAutoFocus = new System.Windows.Forms.CheckBox();
             this.dataGridTextBoxColumn1 = new System.Windows.Forms.DataGridTextBoxColumn();
             this.dataGridTextBoxColumn2 = new System.Windows.Forms.DataGridTextBoxColumn();
-            this.Num = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.reconnectSiTechExeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.reconnectAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip.SuspendLayout();
             this.menuStrip.SuspendLayout();
             this.groupBoxLogs.SuspendLayout();
@@ -211,22 +208,36 @@
             this.reconnectSocketToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
             this.reconnectSocketToolStripMenuItem.Text = "Reconnect socket";
             // 
+            // reconnectMeteoDomeToolStripMenuItem
+            // 
+            this.reconnectMeteoDomeToolStripMenuItem.Name = "reconnectMeteoDomeToolStripMenuItem";
+            this.reconnectMeteoDomeToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
+            this.reconnectMeteoDomeToolStripMenuItem.Text = "MeteoDome";
+            this.reconnectMeteoDomeToolStripMenuItem.Click += new System.EventHandler(this.ReconnectMeteoDomeToolStripMenuItem_Click);
+            // 
+            // reconnectDonutsToolStripMenuItem
+            // 
+            this.reconnectDonutsToolStripMenuItem.Name = "reconnectDonutsToolStripMenuItem";
+            this.reconnectDonutsToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
+            this.reconnectDonutsToolStripMenuItem.Text = "DONUTS";
+            this.reconnectDonutsToolStripMenuItem.Click += new System.EventHandler(this.ReconnectDonutsToolStripMenuItem_Click);
+            // 
             // reconnectSiTechExeToolStripMenuItem
             // 
             this.reconnectSiTechExeToolStripMenuItem.Name = "reconnectSiTechExeToolStripMenuItem";
-            this.reconnectSiTechExeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.reconnectSiTechExeToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
             this.reconnectSiTechExeToolStripMenuItem.Text = "SiTechExe";
             this.reconnectSiTechExeToolStripMenuItem.Click += new System.EventHandler(this.ReconnectSiTechExeToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(137, 6);
             // 
             // reconnectAllToolStripMenuItem
             // 
             this.reconnectAllToolStripMenuItem.Name = "reconnectAllToolStripMenuItem";
-            this.reconnectAllToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.reconnectAllToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
             this.reconnectAllToolStripMenuItem.Text = "All";
             this.reconnectAllToolStripMenuItem.Click += new System.EventHandler(this.ReconnectAllToolStripMenuItem_Click);
             // 
@@ -839,10 +850,18 @@
             // 
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {this.Num});
-            this.dataGridView1.Location = new System.Drawing.Point(17, 46);
+            this.dataGridView1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dataGridView1.Location = new System.Drawing.Point(3, 3);
             this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.Size = new System.Drawing.Size(651, 396);
+            this.dataGridView1.Size = new System.Drawing.Size(1126, 493);
             this.dataGridView1.TabIndex = 1;
+            // 
+            // Num
+            // 
+            this.Num.Frozen = true;
+            this.Num.HeaderText = "Number";
+            this.Num.Name = "Num";
+            this.Num.ReadOnly = true;
             // 
             // dataGridTasks
             // 
@@ -1047,51 +1066,6 @@
             this.checkBoxAutoFocus.UseVisualStyleBackColor = true;
             this.checkBoxAutoFocus.CheckedChanged += new System.EventHandler(this.CheckBoxAutoFocus_CheckedChanged);
             // 
-            // reconnectSocketToolStripMenuItem
-            // 
-            this.reconnectSocketToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.reconnectMeteoDomeToolStripMenuItem,
-            this.reconnectDonutsToolStripMenuItem,
-            this.reconnectSiTechExeToolStripMenuItem,
-            this.toolStripSeparator1,
-            this.reconnectAllToolStripMenuItem});
-            this.reconnectSocketToolStripMenuItem.Name = "reconnectSocketToolStripMenuItem";
-            this.reconnectSocketToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.reconnectSocketToolStripMenuItem.Text = "Reconnect socket";
-            // 
-            // reconnectMeteoDomeToolStripMenuItem
-            // 
-            this.reconnectMeteoDomeToolStripMenuItem.Name = "reconnectMeteoDomeToolStripMenuItem";
-            this.reconnectMeteoDomeToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.reconnectMeteoDomeToolStripMenuItem.Text = "MeteoDome";
-            this.reconnectMeteoDomeToolStripMenuItem.Click += new System.EventHandler(this.ReconnectMeteoDomeToolStripMenuItem_Click);
-            // 
-            // reconnectDonutsToolStripMenuItem
-            // 
-            this.reconnectDonutsToolStripMenuItem.Name = "reconnectDonutsToolStripMenuItem";
-            this.reconnectDonutsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.reconnectDonutsToolStripMenuItem.Text = "DONUTS";
-            this.reconnectDonutsToolStripMenuItem.Click += new System.EventHandler(this.ReconnectDonutsToolStripMenuItem_Click);
-            // 
-            // reconnectSiTechExeToolStripMenuItem
-            // 
-            this.reconnectSiTechExeToolStripMenuItem.Name = "reconnectSiTechExeToolStripMenuItem";
-            this.reconnectSiTechExeToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.reconnectSiTechExeToolStripMenuItem.Text = "SiTechExe";
-            this.reconnectSiTechExeToolStripMenuItem.Click += new System.EventHandler(this.ReconnectSiTechExeToolStripMenuItem_Click);
-            // 
-            // toolStripSeparator1
-            // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
-            // 
-            // reconnectAllToolStripMenuItem
-            // 
-            this.reconnectAllToolStripMenuItem.Name = "reconnectAllToolStripMenuItem";
-            this.reconnectAllToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.reconnectAllToolStripMenuItem.Text = "All";
-            this.reconnectAllToolStripMenuItem.Click += new System.EventHandler(this.ReconnectAllToolStripMenuItem_Click);
-            // 
             // dataGridTextBoxColumn1
             // 
             this.dataGridTextBoxColumn1.Format = "";
@@ -1103,13 +1077,6 @@
             this.dataGridTextBoxColumn2.Format = "";
             this.dataGridTextBoxColumn2.FormatInfo = null;
             this.dataGridTextBoxColumn2.Width = -1;
-            // 
-            // Num
-            // 
-            this.Num.Frozen = true;
-            this.Num.HeaderText = "Num";
-            this.Num.Name = "Num";
-            this.Num.ReadOnly = true;
             // 
             // MainForm
             // 
