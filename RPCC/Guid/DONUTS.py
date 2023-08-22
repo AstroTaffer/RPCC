@@ -20,6 +20,7 @@ def pars_req(req: str) -> str:
     except:
         return 'fail'
 
+
 def handle_client(reader, writer):
     while True:
         request = reader.readline()
