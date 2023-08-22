@@ -267,7 +267,7 @@ namespace RPCC
         private void ReconnectDonutsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // if(_donutsSocket.isConnected) _donutsSocket.Disconnect();
-            // _donutsSocket.Connect();
+            _donutsSocket.Connect();
         }
 
         private void ReconnectSiTechExeToolStripMenuItem_Click(object sender, EventArgs e)
