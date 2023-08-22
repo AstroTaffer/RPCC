@@ -37,12 +37,12 @@ namespace RPCC.Comms
            
             _client = new TcpClient();
             IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
-            IPAddress ipAddress = ipHostInfo.AddressList[1]; 
-            // IPAddress ipAddress = ipHostInfo.AddressList[0];  
+            IPAddress ipAddress = ipHostInfo.AddressList[1];
             _endPoint = new IPEndPoint(ipAddress, _settings.DonutsTcpIpPort);
             try
             {
-                if (_client.ConnectAsync("127.0.0.1", _endPoint.Port).Wait(1000))
+                _client.Connect(_endPoint.Address, _endPoint.Port);
+                if (_client.Connected)
                 {
                     _stream = _client.GetStream();
                     _streamReader = new StreamReader(_stream, System.Text.Encoding.UTF8);

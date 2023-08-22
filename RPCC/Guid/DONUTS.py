@@ -42,8 +42,11 @@ def run_server():
     # while True:
     client_socket, _ = server.accept()
     # client_socket.settimeout(60)
-    with client_socket:
-        handle_client(client_socket.makefile('r'), client_socket.makefile('w'))
+    try:
+        with client_socket:
+            handle_client(client_socket.makefile('r'), client_socket.makefile('w'))
+    except ConnectionAbortedError:
+        pass
 
 
 if __name__ == '__main__':

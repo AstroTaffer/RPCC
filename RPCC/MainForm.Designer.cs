@@ -128,7 +128,6 @@
             this.dataGridTextBoxColumn1 = new System.Windows.Forms.DataGridTextBoxColumn();
             this.dataGridTextBoxColumn2 = new System.Windows.Forms.DataGridTextBoxColumn();
             this.Num = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.reconnectDonutsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.reconnectSiTechExeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.reconnectAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -211,13 +210,6 @@
             this.reconnectSocketToolStripMenuItem.Name = "reconnectSocketToolStripMenuItem";
             this.reconnectSocketToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
             this.reconnectSocketToolStripMenuItem.Text = "Reconnect socket";
-            // 
-            // reconnectMeteoDomeToolStripMenuItem
-            // 
-            this.reconnectMeteoDomeToolStripMenuItem.Name = "reconnectMeteoDomeToolStripMenuItem";
-            this.reconnectMeteoDomeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.reconnectMeteoDomeToolStripMenuItem.Text = "MeteoDome";
-            this.reconnectMeteoDomeToolStripMenuItem.Click += new System.EventHandler(this.ReconnectMeteoDomeToolStripMenuItem_Click);
             // 
             // reconnectSiTechExeToolStripMenuItem
             // 
