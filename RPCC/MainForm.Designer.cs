@@ -128,7 +128,6 @@
             this.dataGridTextBoxColumn1 = new System.Windows.Forms.DataGridTextBoxColumn();
             this.dataGridTextBoxColumn2 = new System.Windows.Forms.DataGridTextBoxColumn();
             this.Num = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.reconnectSocketToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.reconnectMeteoDomeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.reconnectDonutsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.reconnectSiTechExeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
