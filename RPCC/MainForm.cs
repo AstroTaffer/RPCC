@@ -648,5 +648,10 @@ namespace RPCC
             _cameraFocus.IsZenith = checkBoxGoZenith.Checked;
         }
         #endregion
+
+        private void addToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _logger.AddLogEntry("Add Task click");
+        }
     }
 }
