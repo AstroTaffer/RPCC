@@ -107,23 +107,9 @@
             this.tabPageInfo = new System.Windows.Forms.TabPage();
             this.tabPageTasks = new System.Windows.Forms.TabPage();
             this.dataGridViewTasker = new System.Windows.Forms.DataGridView();
-            this.Num = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.contextMenuStripTasker = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.addToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.DataGridCoord = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.DataGridAdd = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.DataGridRun = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.DataGridFin = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.DataGridExp = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.DataGridProcess = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.DataGridLastExpTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.DataGridFilters = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.DataGridObject = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.DataGridStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.DataGridObserver = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.DataGridFramesType = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.DataGridNotes = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridTasks = new System.Windows.Forms.DataGrid();
             this.tabPageCams = new System.Windows.Forms.TabPage();
             this.label1 = new System.Windows.Forms.Label();
@@ -853,6 +839,7 @@
             // 
             // tabPageTasks
             // 
+            this.tabPageTasks.AutoScroll = true;
             this.tabPageTasks.Controls.Add(this.dataGridViewTasker);
             this.tabPageTasks.Controls.Add(this.dataGridTasks);
             this.tabPageTasks.Location = new System.Drawing.Point(4, 22);
@@ -868,7 +855,6 @@
             this.dataGridViewTasker.BackgroundColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.dataGridViewTasker.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.dataGridViewTasker.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridViewTasker.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {this.Num, this.DataGridCoord, this.DataGridAdd, this.DataGridRun, this.DataGridFin, this.DataGridExp, this.DataGridProcess, this.DataGridLastExpTime, this.DataGridFilters, this.DataGridObject, this.DataGridStatus, this.DataGridObserver, this.DataGridFramesType, this.DataGridNotes});
             this.dataGridViewTasker.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridViewTasker.GridColor = System.Drawing.SystemColors.ActiveBorder;
             this.dataGridViewTasker.Location = new System.Drawing.Point(3, 3);
@@ -876,13 +862,6 @@
             this.dataGridViewTasker.RowHeadersVisible = false;
             this.dataGridViewTasker.Size = new System.Drawing.Size(1126, 493);
             this.dataGridViewTasker.TabIndex = 1;
-            // 
-            // Num
-            // 
-            this.Num.ContextMenuStrip = this.contextMenuStripTasker;
-            this.Num.Frozen = true;
-            this.Num.HeaderText = "Number";
-            this.Num.Name = "Num";
             // 
             // contextMenuStripTasker
             // 
@@ -902,110 +881,7 @@
             this.editToolStripMenuItem.Name = "editToolStripMenuItem";
             this.editToolStripMenuItem.Size = new System.Drawing.Size(96, 22);
             this.editToolStripMenuItem.Text = "Edit";
-            // 
-            // DataGridCoord
-            // 
-            this.DataGridCoord.ContextMenuStrip = this.contextMenuStripTasker;
-            this.DataGridCoord.Frozen = true;
-            this.DataGridCoord.HeaderText = "Coord2000";
-            this.DataGridCoord.Name = "DataGridCoord";
-            this.DataGridCoord.ReadOnly = true;
-            // 
-            // DataGridAdd
-            // 
-            this.DataGridAdd.ContextMenuStrip = this.contextMenuStripTasker;
-            this.DataGridAdd.Frozen = true;
-            this.DataGridAdd.HeaderText = "Add";
-            this.DataGridAdd.Name = "DataGridAdd";
-            this.DataGridAdd.ReadOnly = true;
-            // 
-            // DataGridRun
-            // 
-            this.DataGridRun.ContextMenuStrip = this.contextMenuStripTasker;
-            this.DataGridRun.Frozen = true;
-            this.DataGridRun.HeaderText = "Run";
-            this.DataGridRun.Name = "DataGridRun";
-            this.DataGridRun.ReadOnly = true;
-            // 
-            // DataGridFin
-            // 
-            this.DataGridFin.ContextMenuStrip = this.contextMenuStripTasker;
-            this.DataGridFin.Frozen = true;
-            this.DataGridFin.HeaderText = "Fin";
-            this.DataGridFin.Name = "DataGridFin";
-            this.DataGridFin.ReadOnly = true;
-            // 
-            // DataGridExp
-            // 
-            this.DataGridExp.ContextMenuStrip = this.contextMenuStripTasker;
-            this.DataGridExp.Frozen = true;
-            this.DataGridExp.HeaderText = "Exp";
-            this.DataGridExp.Name = "DataGridExp";
-            this.DataGridExp.ReadOnly = true;
-            // 
-            // DataGridProcess
-            // 
-            this.DataGridProcess.ContextMenuStrip = this.contextMenuStripTasker;
-            this.DataGridProcess.Frozen = true;
-            this.DataGridProcess.HeaderText = "Cur/Sets";
-            this.DataGridProcess.Name = "DataGridProcess";
-            this.DataGridProcess.ReadOnly = true;
-            // 
-            // DataGridLastExpTime
-            // 
-            this.DataGridLastExpTime.ContextMenuStrip = this.contextMenuStripTasker;
-            this.DataGridLastExpTime.Frozen = true;
-            this.DataGridLastExpTime.HeaderText = "Last exp";
-            this.DataGridLastExpTime.Name = "DataGridLastExpTime";
-            this.DataGridLastExpTime.ReadOnly = true;
-            // 
-            // DataGridFilters
-            // 
-            this.DataGridFilters.ContextMenuStrip = this.contextMenuStripTasker;
-            this.DataGridFilters.Frozen = true;
-            this.DataGridFilters.HeaderText = "Filters";
-            this.DataGridFilters.Name = "DataGridFilters";
-            this.DataGridFilters.ReadOnly = true;
-            // 
-            // DataGridObject
-            // 
-            this.DataGridObject.ContextMenuStrip = this.contextMenuStripTasker;
-            this.DataGridObject.Frozen = true;
-            this.DataGridObject.HeaderText = "Object";
-            this.DataGridObject.Name = "DataGridObject";
-            this.DataGridObject.ReadOnly = true;
-            // 
-            // DataGridStatus
-            // 
-            this.DataGridStatus.ContextMenuStrip = this.contextMenuStripTasker;
-            this.DataGridStatus.Frozen = true;
-            this.DataGridStatus.HeaderText = "Status";
-            this.DataGridStatus.Name = "DataGridStatus";
-            this.DataGridStatus.ReadOnly = true;
-            // 
-            // DataGridObserver
-            // 
-            this.DataGridObserver.ContextMenuStrip = this.contextMenuStripTasker;
-            this.DataGridObserver.Frozen = true;
-            this.DataGridObserver.HeaderText = "Observer";
-            this.DataGridObserver.Name = "DataGridObserver";
-            this.DataGridObserver.ReadOnly = true;
-            // 
-            // DataGridFramesType
-            // 
-            this.DataGridFramesType.ContextMenuStrip = this.contextMenuStripTasker;
-            this.DataGridFramesType.Frozen = true;
-            this.DataGridFramesType.HeaderText = "Frames Type";
-            this.DataGridFramesType.Name = "DataGridFramesType";
-            this.DataGridFramesType.ReadOnly = true;
-            // 
-            // DataGridNotes
-            // 
-            this.DataGridNotes.ContextMenuStrip = this.contextMenuStripTasker;
-            this.DataGridNotes.Frozen = true;
-            this.DataGridNotes.HeaderText = "Notes";
-            this.DataGridNotes.Name = "DataGridNotes";
-            this.DataGridNotes.ReadOnly = true;
+            this.editToolStripMenuItem.Click += new System.EventHandler(this.editToolStripMenuItem_Click);
             // 
             // dataGridTasks
             // 
@@ -1281,34 +1157,6 @@
         private System.Windows.Forms.ContextMenuStrip contextMenuStripLogs;
         private System.Windows.Forms.ToolStripMenuItem addToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem editToolStripMenuItem;
-
-        private System.Windows.Forms.DataGridViewTextBoxColumn DataGridStatus;
-
-        private System.Windows.Forms.DataGridViewTextBoxColumn DataGridNotes;
-
-        private System.Windows.Forms.DataGridViewTextBoxColumn DataGridFramesType;
-
-        private System.Windows.Forms.DataGridViewTextBoxColumn DataGridObserver;
-
-        private System.Windows.Forms.DataGridViewTextBoxColumn DataGridObject;
-
-        private System.Windows.Forms.DataGridViewTextBoxColumn DataGridFilters;
-
-        private System.Windows.Forms.DataGridViewTextBoxColumn DataGridLastExpTime;
-
-        private System.Windows.Forms.DataGridViewTextBoxColumn DataGridProcess;
-
-        private System.Windows.Forms.DataGridViewTextBoxColumn DataGridExp;
-
-        private System.Windows.Forms.DataGridViewTextBoxColumn DataGridFin;
-
-        private System.Windows.Forms.DataGridViewTextBoxColumn DataGridRun;
-
-        private System.Windows.Forms.DataGridViewTextBoxColumn DataGridAdd;
-
-        private System.Windows.Forms.DataGridViewTextBoxColumn DataGridCoord;
-
-        private System.Windows.Forms.DataGridViewTextBoxColumn Num;
 
         private System.Windows.Forms.DataGridView dataGridViewTasker;
 

@@ -99,6 +99,12 @@ namespace RPCC
                 MessageBox.Show(@"Can't open Focus serial port", @"OK", MessageBoxButtons.OK);
                 _logger.AddLogEntry(@"Can't open Focus serial port");
             }
+
+            Tasker.logger = _logger;
+            Tasker.dataGridViewTasker = dataGridViewTasker;
+            Tasker.contextMenuStripTasker = contextMenuStripTasker;
+            Tasker.SetHeader();
+            Tasker.LoadTasksFromXml();
         }
 
 
@@ -106,6 +112,8 @@ namespace RPCC
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+            
+            Tasker.SaveTasksToXml();
             timerClock.Stop();
 
             _domeSocket.Disconnect();
@@ -652,6 +660,13 @@ namespace RPCC
         private void addToolStripMenuItem_Click(object sender, EventArgs e)
         {
             _logger.AddLogEntry("Add Task click");
+            Tasker.AddTask();
+            
+        }
+
+        private void editToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            
         }
     }
 }
