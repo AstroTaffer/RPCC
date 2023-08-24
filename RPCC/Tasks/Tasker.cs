@@ -4,7 +4,7 @@ using System.IO;
 using System.Windows.Forms;
 using RPCC.Utils;
 
-namespace RPCC
+namespace RPCC.Tasks
 {
     public static class Tasker
     {
@@ -16,23 +16,26 @@ namespace RPCC
         public static ContextMenuStrip contextMenuStripTasker;
 
         private static readonly string[] Header = {
-            "N", "α, δ J2000", "t_{Added}", @"t_{Run}", @"t_{Fin}", 
+            "N", "RaDecJ2000", "t_{Added}", @"t_{Run}", @"t_{Fin}", 
             "Exp", "Done/All", "t_{Last exp}", "Filters", "Object", "Status", "Observer", "Frame type"
         };
 //gri
 
         public static void SetHeader()
         {
+            // DataGridViewButtonColumn
+            
             foreach (var s in Header)
             {
                 DataTable.Columns.Add(new DataColumn(s));
             }
-
+            
             DataSet.Tables.Add(DataTable);
             dataGridViewTasker.AutoSize = true;
             dataGridViewTasker.DataSource = DataSet.Tables[0];
             dataGridViewTasker.ContextMenuStrip = contextMenuStripTasker;
-            dataGridViewTasker.Rows[0].ContextMenuStrip = contextMenuStripTasker;
+            // dataGridViewTasker.Rows[0].ContextMenuStrip = contextMenuStripTasker;
+            dataGridViewTasker.ReadOnly = true;
         }
         
         public static void SaveTasksToXml()
@@ -57,10 +60,6 @@ namespace RPCC
                 {
                     DataSet.ReadXml(FileName);  
                     dataGridViewTasker.DataSource = DataSet.Tables[0];
-                    foreach (DataGridViewRow row in dataGridViewTasker.Rows)
-                    {
-                        row.ContextMenuStrip = contextMenuStripTasker;
-                    }
                 }
                 catch (System.Xml.XmlException e)
                 {

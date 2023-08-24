@@ -12,6 +12,7 @@ using RPCC.Cams;
 using RPCC.Focus;
 using RPCC.Utils;
 using RPCC.Comms;
+using RPCC.Tasks;
 
 namespace RPCC
 {
@@ -660,13 +661,14 @@ namespace RPCC
         private void addToolStripMenuItem_Click(object sender, EventArgs e)
         {
             _logger.AddLogEntry("Add Task click");
-            Tasker.AddTask();
-            
+            // Tasker.AddTask();
+            TaskForm taskForm = new TaskForm();
+            taskForm.Show();
         }
 
-        private void editToolStripMenuItem_Click(object sender, EventArgs e)
+        private void dataGridViewTasker_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
         {
-            
+            MessageBox.Show(e.RowIndex.ToString());
         }
     }
 }
