@@ -39,12 +39,13 @@ namespace RPCC
         private WeatherDataCollector _weatherDc;
         
         private DonutsSocket _donutsSocket;
-        //private MountDataCollector _mountDc;
         
-        //private RpccSocketClient _siTechExeSocket;
+        private SiTechExeSocket _siTechExeSocket;
+        private MountDataCollector _mountDc;
 
         private static readonly System.Timers.Timer FocusTimer = new System.Timers.Timer();
 
+        #region General
         public MainForm()
         {
             InitializeComponent();
@@ -69,6 +70,10 @@ namespace RPCC
                 _logger.AddLogEntry("Default config loaded");
             }
 
+            // Hardware controls
+            _cameraControl = new CameraControl(_logger, _settings);
+            _cameraFocus = new CameraFocus(_logger, _settings);
+
             // MeteoDome connect
             _weatherDc = new WeatherDataCollector();
             _domeSocket = new WeatherSocket(_logger, _settings, _weatherDc);
@@ -78,19 +83,15 @@ namespace RPCC
             _donutsSocket = new DonutsSocket(_logger, _settings);
             _donutsSocket.Connect();
 
+            // SiTechExe connect
+            _mountDc = new MountDataCollector();
+            _siTechExeSocket = new SiTechExeSocket(_logger, _settings, _mountDc);
+            _siTechExeSocket.Connect();
+
             // Create timer for focus loop
             FocusTimer.Elapsed += OnTimedEvent_Clock;
             FocusTimer.Interval = 1000;
             FocusTimer.Start();
-
-            // Hardware controls
-            _cameraControl = new CameraControl(_logger, _settings);
-            _cameraFocus = new CameraFocus(_logger, _settings);
-
-            // SiTechExe connect
-            //_siTechExeSocket = new RpccSocketClient(_logger, _settings, "ste");
-            //_siTechExeSocket.Connect();
-            //_mountDc = new MountDataCollector();
 
             // HACK: For the love of god stop exiting the program when something is not connected!
             // Call FindFocusToolStripMenuItem_Click
@@ -108,22 +109,16 @@ namespace RPCC
             Tasker.LoadTasksFromXml();
         }
 
-
-        #region General
-
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             
-            Tasker.SaveTasksToXml();
             timerClock.Stop();
+            
+            Tasker.SaveTasksToXml();
 
             _domeSocket.Disconnect();
             _donutsSocket.Disconnect();
-            //_donutsSocket.DisconnectAll();
-            //// _weatherDc.Dispose(); TODO
-            //_domeSocket.Dispose();
-            //_siTechExeSocket.DisconnectAll();
-            //_mountDc.Dispose();
+            _siTechExeSocket.Disconnect();
 
             _cameraControl.DisconnectCameras();
             
@@ -221,11 +216,9 @@ namespace RPCC
                 }
             }
         }
-
         #endregion
 
         #region Launch Menu
-
         private void FindCamerasToolStripMenuItem_Click(object sender, EventArgs e)
         {
             _cameraControl.LaunchCameras();
@@ -280,13 +273,18 @@ namespace RPCC
 
         private void ReconnectSiTechExeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            if (_siTechExeSocket._isConnected)
+            {
+                _siTechExeSocket.Disconnect();
+            }
+            _siTechExeSocket.Connect();
         }
 
         private void ReconnectAllToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ReconnectMeteoDomeToolStripMenuItem_Click(sender, e);
             ReconnectDonutsToolStripMenuItem_Click(sender, e);
+            ReconnectSiTechExeToolStripMenuItem_Click(sender, e);
         }
         #endregion
 
@@ -299,21 +297,20 @@ namespace RPCC
 
         private void ClearToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            //Clear Log window
+            // Clear log window
             _logger.ClearLogs();
             _logger.AddLogEntry("Logs have been cleaned");
         }
 
         private void SaveToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            //Save logs in file
+            // Save logs in file
             _logger.SaveLogs();
             _logger.AddLogEntry("Logs have been saved");
         }
         #endregion
 
         #region Images Plotting
-
         private void PlotFitsImage()
         {
             pictureBoxFits.Image = null;
@@ -453,11 +450,9 @@ namespace RPCC
                 _logger.AddLogEntry("WARNING Image not loaded");
             }
         }
-
         #endregion
 
         #region Survey
-
         private void ButtonSurveyStart_Click(object sender, EventArgs e)
         {
             buttonSurveyStart.Enabled = false;
@@ -494,11 +489,9 @@ namespace RPCC
             numericUpDownExpTime.Enabled = true;
             updateCamerasSettingsToolStripMenuItem.Enabled = true;
         }
-
         #endregion
 
         #region Options
-
         private void SettingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var settingsForm = new SettingsForm(_settings);
@@ -528,11 +521,9 @@ namespace RPCC
                 _logger.AddLogEntry($"Config file {saveFileDialogConfig.FileName} saved");
             }
         }
-
         #endregion
 
         #region Debug Menu
-
         private void TestDLLlibrariesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var testFits = new RpccFits(".\\Cams\\TestImage.fits");
@@ -585,7 +576,6 @@ namespace RPCC
             if (outPut == null) return;
             _logger.AddLogEntry("shifts = " + outPut[0] + "x " + outPut[1] + "y ");
         }
-
         #endregion
 
         #region Focus

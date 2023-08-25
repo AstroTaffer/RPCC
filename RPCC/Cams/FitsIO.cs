@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using nom.tam.fits;
 using nom.tam.util;
