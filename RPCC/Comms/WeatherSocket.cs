@@ -12,6 +12,7 @@ namespace RPCC.Comms
     {
         private readonly Logger _logger;
         private readonly Settings _settings;
+        private readonly WeatherDataCollector _collector;
 
         private readonly Timer _meteoTimer;
 
@@ -21,8 +22,6 @@ namespace RPCC.Comms
         private NetworkStream _stream;
         private StreamReader _streamReader;
         private StreamWriter _streamWriter;
-
-        private readonly WeatherDataCollector _collector;
 
         /**
          * Valid messages:
@@ -38,7 +37,7 @@ namespace RPCC.Comms
          *   flat    --- 
          *   full    --- 
          *   ping    --- 
-         */
+         **/
 
         internal WeatherSocket(Logger logger, Settings settings, WeatherDataCollector collector)
         {
@@ -126,7 +125,7 @@ namespace RPCC.Comms
         {
             if (!_isConnected)
             {
-                _logger.AddLogEntry("WARNING Unable to exchange messages with MeteoDome: not connected to MeteoDome");
+                _logger.AddLogEntry("WARNING Unable to exchange messages with MeteoDome: not connected");
                 return null;
             }
 
@@ -224,6 +223,7 @@ namespace RPCC.Comms
         {
             // data = "{Sky} {SkyStd} {Ext} {ExtStd} {See} {SeeExt} {Wind} {Sun} {Obs} {Flat}"
             // Example: -28.5 +.1 +10 +0 +0 -1 +.7 +92.9 False False
+
             string[] buffData = data.Split(' ');
 
             Sky = double.Parse(buffData[0]);

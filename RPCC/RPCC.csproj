@@ -107,6 +107,7 @@
     <Compile Include="Cams\FitsIO.cs" />
     <Compile Include="Cams\LibFliNative.cs" />
     <Compile Include="Cams\ReadFitsFile.cs" />
+    <Compile Include="Comms\SiTechExeSocket.cs" />
     <Compile Include="Comms\DonutsSocket.cs" />
     <Compile Include="Comms\WeatherSocket.cs" />
     <Compile Include="Focus\AnalysisImageForFocus.cs" />
