@@ -16,8 +16,8 @@ namespace RPCC.Tasks
         public static ContextMenuStrip contextMenuStripTasker;
 
         private static readonly string[] Header = {
-            "N", "RaDecJ2000", "t_{Added}", @"t_{Run}", @"t_{Fin}", 
-            "Exp", "Done/All", "t_{Last exp}", "Filters", "Object", "Status", "Observer", "Frame type"
+            "N", "RaDecJ2000", "t_{Added}", @"t_{Run}", @"t_{Fin}", "Dur (h)",
+            "Exp", "Done", "All", "t_{Last exp}", "Filters", "Object", "Status", "Observer", "Frame type"
         };
 //gri
 
@@ -34,8 +34,9 @@ namespace RPCC.Tasks
             dataGridViewTasker.AutoSize = true;
             dataGridViewTasker.DataSource = DataSet.Tables[0];
             dataGridViewTasker.ContextMenuStrip = contextMenuStripTasker;
-            // dataGridViewTasker.Rows[0].ContextMenuStrip = contextMenuStripTasker;
             dataGridViewTasker.ReadOnly = true;
+            dataGridViewTasker.AllowUserToAddRows = false;
+            dataGridViewTasker.AllowUserToDeleteRows = false;
         }
         
         public static void SaveTasksToXml()
@@ -74,20 +75,47 @@ namespace RPCC.Tasks
             }
         }
 
-        public static void AddTask()
+        public static int GetTasksLen()
+        {
+            return dataGridViewTasker.Rows.Count;
+        }
+        
+        public static void AddTask(ObservationTask task)
         {
             var dataRow = DataTable.NewRow();
-            dataRow[Header[0]] = "1";
-            dataRow[Header[1]] = "10:10:10.20 -20.20.20.20";
+            dataRow[Header[0]] = task.TaskNumber;
+            dataRow[Header[1]] = task.RaDec;
+            dataRow[Header[2]] = task.TimeAdd;
+            dataRow[Header[3]] = task.TimeStart;
+            dataRow[Header[4]] = task.TimeEnd;
+            dataRow[Header[5]] = task.Duration;
+            dataRow[Header[6]] = task.Exp;
+            dataRow[Header[7]] = task.DoneFrames;
+            dataRow[Header[8]] = task.AllFrames;
+            dataRow[Header[9]] = task.TimeLastExp;
+            dataRow[Header[10]] = task.Filters;
+            dataRow[Header[11]] = task.Object;
+            dataRow[Header[12]] = task.Status;
+            dataRow[Header[13]] = task.Observer;
+            dataRow[Header[14]] = task.FrameType;
             DataTable.Rows.Add(dataRow);
-            // DataTable;
-            // dataGridViewTasker.Rows.Add(new object[] {"1", "20:20:20.20 -20:20:20.20"});
-            // dataGridViewTasker.DataSource = dataGridViewTasker.
+            SaveTasksToXml();
         }
 
         public static void EditTask()
         {
             
         }
+
+        public static void DeleteTask(int rowIndex)
+        {
+            dataGridViewTasker.Rows.RemoveAt(rowIndex);
+            SaveTasksToXml();
+        }
+
+        // public static ObservationTask GetTask(int taskN)
+        // {
+        //     // var getTask = ObservationTask();
+        // }
     }
 }

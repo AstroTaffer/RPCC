@@ -44,7 +44,7 @@ namespace RPCC.Tasks
             this.labelCoords = new System.Windows.Forms.Label();
             this.groupBoxFrame = new System.Windows.Forms.GroupBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.textBox3 = new System.Windows.Forms.TextBox();
+            this.textBoxYbin = new System.Windows.Forms.TextBox();
             this.labelYbin = new System.Windows.Forms.Label();
             this.textBoxXbin = new System.Windows.Forms.TextBox();
             this.labelXbin = new System.Windows.Forms.Label();
@@ -56,9 +56,9 @@ namespace RPCC.Tasks
             this.textBoxExpN = new System.Windows.Forms.TextBox();
             this.labelExpN = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.textBoxYend = new System.Windows.Forms.TextBox();
             this.labelYend = new System.Windows.Forms.Label();
-            this.textBox2 = new System.Windows.Forms.TextBox();
+            this.textBoxYstart = new System.Windows.Forms.TextBox();
             this.labelYstart = new System.Windows.Forms.Label();
             this.textBoxXend = new System.Windows.Forms.TextBox();
             this.labelXend = new System.Windows.Forms.Label();
@@ -182,7 +182,7 @@ namespace RPCC.Tasks
             // 
             // groupBox3
             // 
-            this.groupBox3.Controls.Add(this.textBox3);
+            this.groupBox3.Controls.Add(this.textBoxYbin);
             this.groupBox3.Controls.Add(this.labelYbin);
             this.groupBox3.Controls.Add(this.textBoxXbin);
             this.groupBox3.Controls.Add(this.labelXbin);
@@ -193,13 +193,13 @@ namespace RPCC.Tasks
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Binning";
             // 
-            // textBox3
+            // textBoxYbin
             // 
-            this.textBox3.Location = new System.Drawing.Point(13, 116);
-            this.textBox3.Name = "textBox3";
-            this.textBox3.Size = new System.Drawing.Size(65, 26);
-            this.textBox3.TabIndex = 35;
-            this.textBox3.Text = "1";
+            this.textBoxYbin.Location = new System.Drawing.Point(13, 116);
+            this.textBoxYbin.Name = "textBoxYbin";
+            this.textBoxYbin.Size = new System.Drawing.Size(65, 26);
+            this.textBoxYbin.TabIndex = 35;
+            this.textBoxYbin.Text = "1";
             // 
             // labelYbin
             // 
@@ -293,9 +293,9 @@ namespace RPCC.Tasks
             // 
             // groupBox1
             // 
-            this.groupBox1.Controls.Add(this.textBox1);
+            this.groupBox1.Controls.Add(this.textBoxYend);
             this.groupBox1.Controls.Add(this.labelYend);
-            this.groupBox1.Controls.Add(this.textBox2);
+            this.groupBox1.Controls.Add(this.textBoxYstart);
             this.groupBox1.Controls.Add(this.labelYstart);
             this.groupBox1.Controls.Add(this.textBoxXend);
             this.groupBox1.Controls.Add(this.labelXend);
@@ -308,13 +308,13 @@ namespace RPCC.Tasks
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Subframe";
             // 
-            // textBox1
+            // textBoxYend
             // 
-            this.textBox1.Location = new System.Drawing.Point(117, 123);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(65, 26);
-            this.textBox1.TabIndex = 35;
-            this.textBox1.Text = "2048";
+            this.textBoxYend.Location = new System.Drawing.Point(117, 123);
+            this.textBoxYend.Name = "textBoxYend";
+            this.textBoxYend.Size = new System.Drawing.Size(65, 26);
+            this.textBoxYend.TabIndex = 35;
+            this.textBoxYend.Text = "2048";
             // 
             // labelYend
             // 
@@ -324,13 +324,13 @@ namespace RPCC.Tasks
             this.labelYend.TabIndex = 34;
             this.labelYend.Text = "YEnd";
             // 
-            // textBox2
+            // textBoxYstart
             // 
-            this.textBox2.Location = new System.Drawing.Point(46, 123);
-            this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(65, 26);
-            this.textBox2.TabIndex = 33;
-            this.textBox2.Text = "0";
+            this.textBoxYstart.Location = new System.Drawing.Point(46, 123);
+            this.textBoxYstart.Name = "textBoxYstart";
+            this.textBoxYstart.Size = new System.Drawing.Size(65, 26);
+            this.textBoxYstart.TabIndex = 33;
+            this.textBoxYstart.Text = "0";
             // 
             // labelYstart
             // 
@@ -425,6 +425,7 @@ namespace RPCC.Tasks
             this.buttonAdd.TabIndex = 2;
             this.buttonAdd.Text = "Add";
             this.buttonAdd.UseVisualStyleBackColor = true;
+            this.buttonAdd.Click += new System.EventHandler(this.buttonAdd_Click);
             // 
             // buttonCancel
             // 
@@ -434,6 +435,7 @@ namespace RPCC.Tasks
             this.buttonCancel.TabIndex = 3;
             this.buttonCancel.Text = "Cancel";
             this.buttonCancel.UseVisualStyleBackColor = true;
+            this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
             // 
             // buttonDelete
             // 
@@ -443,6 +445,7 @@ namespace RPCC.Tasks
             this.buttonDelete.TabIndex = 4;
             this.buttonDelete.Text = "Delete";
             this.buttonDelete.UseVisualStyleBackColor = true;
+            this.buttonDelete.Click += new System.EventHandler(this.buttonDelete_Click);
             // 
             // TaskForm
             // 
@@ -494,12 +497,12 @@ namespace RPCC.Tasks
         private System.Windows.Forms.Label labelXstart;
         private System.Windows.Forms.TextBox textBoxXstart;
         private System.Windows.Forms.Label labelXend;
-        private System.Windows.Forms.TextBox textBox2;
+        private System.Windows.Forms.TextBox textBoxYstart;
         private System.Windows.Forms.Label labelYstart;
-        private System.Windows.Forms.TextBox textBox3;
+        private System.Windows.Forms.TextBox textBoxYbin;
         private System.Windows.Forms.Label labelYbin;
 
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox textBoxYend;
         private System.Windows.Forms.Label labelFrameType;
 
         private System.Windows.Forms.TextBox textBoxXbin;

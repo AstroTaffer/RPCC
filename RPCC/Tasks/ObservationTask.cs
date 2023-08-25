@@ -4,31 +4,147 @@ namespace RPCC.Tasks
 {
     public class ObservationTask
     {
-        private double Ra;  //decimal deg
-        private double Dec;
-        private DateTime timeAdd;
-        private DateTime timeStart;
-        private DateTime timeEnd;
-        private DateTime timeLastExp;
-        private float exp;
-        private short AllFrames;
-        private short DoneFrames;
-        private short Status;  //0 = Wait, 1 = In progress, 5 = Below horizont, 6 = Ended not complete,
-                               //2 = Ended complete, 3 = Rejected by observer, 4 = Not observed
-        private string Object;
-        private string Observer;
-        private int TaskNumber;
-        private string FrameType;  //light, dark, flat, bias, focus, test
-        private string Filters;
-        private short Xbin; //in pix
-        private short Ybin;
-        private short XSubframeStart;
-        private short YSubframeStart;
-        private short XSubframeEnd;
-        private short YSubframeEnd;
-        private int ExposuresNumber;
-        private float Duration; //in hours
-        // private int Defocus; //in steps
+        // public double Ra //decimal deg
+        // {
+        //     get;
+        //     set;
+        // }
+        //
+        // public double Dec
+        // {
+        //     get;
+        //     set;
+        // }
+        
+        public string RaDec { get; set; }
+
+        public DateTime TimeAdd
+        {
+            get;
+            set;
+        }
+
+        public DateTime TimeStart
+        {
+            get;
+            set;
+        }
+
+        public DateTime TimeEnd
+        {
+            get;
+            set;
+        }
+
+        public DateTime TimeLastExp
+        {
+            get;
+            set;
+        }
+
+        public float Exp //in sec
+        {
+            get;
+            set;
+        }
+
+        public short AllFrames
+        {
+            get;
+            set;
+        }
+
+        public short DoneFrames
+        {
+            get;
+            set;
+        }
+//0 = Wait, 1 = In progress, 5 = Below horizont, 6 = Ended not complete,
+//2 = Ended complete, 3 = Rejected by observer, 4 = Not observed
+        public short Status
+        {
+            get;
+            set;
+        }
+
+        public string Object
+        {
+            get;
+            set;
+        }
+
+        public string Observer
+        {
+            get;
+            set;
+        }
+
+        public int TaskNumber
+        {
+            get;
+            set;
+        }
+//light, dark, flat, bias, focus, test
+        public string FrameType
+        {
+            get;
+            set;
+        }
+
+        public string Filters
+        {
+            get;
+            set;
+        }
+//in pix
+        public short Xbin
+        {
+            get;
+            set;
+        }
+
+        public short Ybin
+        {
+            get;
+            set;
+        }
+
+        public short XSubframeStart
+        {
+            get;
+            set;
+        }
+
+        public short YSubframeStart
+        {
+            get;
+            set;
+        }
+
+        public short XSubframeEnd
+        {
+            get;
+            set;
+        }
+
+        public short YSubframeEnd
+        {
+            get;
+            set;
+        }
+
+        public int ExposuresNumber
+        {
+            get;
+            set;
+        }
+//in hours
+        public float Duration
+        {
+            get;
+            set;
+        }
+        
 
         public ObservationTask()
         {

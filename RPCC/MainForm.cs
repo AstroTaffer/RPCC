@@ -660,15 +660,17 @@ namespace RPCC
 
         private void addToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            _logger.AddLogEntry("Add Task click");
-            // Tasker.AddTask();
-            TaskForm taskForm = new TaskForm();
+            // _logger.AddLogEntry("Add Task click");
+            var taskForm = new TaskForm(true);
             taskForm.Show();
         }
 
         private void dataGridViewTasker_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
         {
-            MessageBox.Show(e.RowIndex.ToString());
+            // MessageBox.Show(e.RowIndex.ToString());
+            if (e.RowIndex == -1) return;
+            var taskForm = new TaskForm(false, e.RowIndex);
+            taskForm.Show();
         }
     }
 }
