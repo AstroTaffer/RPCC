@@ -171,6 +171,7 @@
             this.dataGridViewTasker.Size = new System.Drawing.Size(1126, 493);
             this.dataGridViewTasker.TabIndex = 1;
             this.dataGridViewTasker.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridViewTasker_CellMouseDoubleClick);
+            this.dataGridViewTasker.VisibleChanged += new System.EventHandler(this.dataGridViewTasker_VisibleChanged);
             // 
             // statusStrip
             // 

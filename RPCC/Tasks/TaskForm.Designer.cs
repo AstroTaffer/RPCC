@@ -250,23 +250,23 @@ namespace RPCC.Tasks
             // 
             // comboBoxFrameType
             // 
-            this.comboBoxFrameType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxFrameType.FormattingEnabled = true;
             this.comboBoxFrameType.Items.AddRange(new object[] {"Light", "Dark", "Flat", "Bias"});
             this.comboBoxFrameType.Location = new System.Drawing.Point(302, 48);
             this.comboBoxFrameType.Name = "comboBoxFrameType";
             this.comboBoxFrameType.Size = new System.Drawing.Size(107, 28);
             this.comboBoxFrameType.TabIndex = 27;
+            this.comboBoxFrameType.Text = "Light";
             // 
             // comboBoxExp
             // 
-            this.comboBoxExp.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxExp.FormattingEnabled = true;
             this.comboBoxExp.Items.AddRange(new object[] {"2", "5", "10", "15", "20", "30", "50", "80", "120", "180"});
             this.comboBoxExp.Location = new System.Drawing.Point(85, 49);
             this.comboBoxExp.Name = "comboBoxExp";
             this.comboBoxExp.Size = new System.Drawing.Size(92, 28);
             this.comboBoxExp.TabIndex = 15;
+            this.comboBoxExp.Text = "2";
             // 
             // labelExp
             // 
@@ -282,6 +282,7 @@ namespace RPCC.Tasks
             this.textBoxExpN.Name = "textBoxExpN";
             this.textBoxExpN.Size = new System.Drawing.Size(65, 26);
             this.textBoxExpN.TabIndex = 13;
+            this.textBoxExpN.Text = "2";
             // 
             // labelExpN
             // 
@@ -443,7 +444,7 @@ namespace RPCC.Tasks
             this.buttonDelete.Name = "buttonDelete";
             this.buttonDelete.Size = new System.Drawing.Size(86, 31);
             this.buttonDelete.TabIndex = 4;
-            this.buttonDelete.Text = "Delete";
+            this.buttonDelete.Text = "Reject";
             this.buttonDelete.UseVisualStyleBackColor = true;
             this.buttonDelete.Click += new System.EventHandler(this.buttonDelete_Click);
             // 

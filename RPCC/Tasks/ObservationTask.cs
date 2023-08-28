@@ -41,8 +41,8 @@ namespace RPCC.Tasks
             get;
             set;
         }
-
-        public float Exp //in sec
+    
+        public short Exp //in sec
         {
             get;
             set;
@@ -59,7 +59,7 @@ namespace RPCC.Tasks
             get;
             set;
         }
-//0 = Wait, 1 = In progress, 5 = Below horizont, 6 = Ended not complete,
+//0 = Wait, 1 = In progress, 5 = Ended not complete,
 //2 = Ended complete, 3 = Rejected by observer, 4 = Not observed
         public short Status
         {
@@ -132,12 +132,7 @@ namespace RPCC.Tasks
             get;
             set;
         }
-
-        public int ExposuresNumber
-        {
-            get;
-            set;
-        }
+        
 //in hours
         public float Duration
         {

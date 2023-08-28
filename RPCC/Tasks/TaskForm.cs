@@ -1,80 +1,114 @@
 ﻿using System;
 using System.Globalization;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace RPCC.Tasks
 {
     public partial class TaskForm : Form
     {
-        private bool IsNewTask;
-        private ObservationTask task;
-        private int RowIndex;
+        private readonly bool _isNewTask;
+        private readonly ObservationTask _task = new ObservationTask();
+        private readonly int _rowIndex;
         
         public TaskForm(bool isNewTask, int rowIndex = 0)
         {
             InitializeComponent();
-            RowIndex = rowIndex;
+            _rowIndex = rowIndex;
             textBoxDateTime.Text = DateTime.UtcNow.ToString(CultureInfo.CurrentCulture);
-            IsNewTask = isNewTask;
-            if(IsNewTask)
+            _isNewTask = isNewTask;
+            if(_isNewTask)
             {
-                task.TaskNumber = Tasker.GetTasksLen();
-                labelTaskN.Text = $@"Task №{task.TaskNumber}";
+                _task.TaskNumber = Tasker.GetTasksLen();
             }
             else
             {
+                _task = Tasker.GetTask(_rowIndex);
+               
+                textBoxCoords.Text = _task.RaDec;
+                textBoxObject.Text = _task.Object;
+                textBoxObserver.Text = _task.Observer;
+                textBoxXbin.Text = _task.Xbin.ToString();
+                textBoxXstart.Text = _task.XSubframeStart.ToString();
+                textBoxXend.Text = _task.XSubframeEnd.ToString();
+                textBoxYbin.Text = _task.Ybin.ToString();
+                textBoxYstart.Text = _task.YSubframeStart.ToString();
+                textBoxYend.Text = _task.YSubframeEnd.ToString();
+                textBoxDateTime.Text = _task.TimeStart.ToString(CultureInfo.CurrentCulture);
+                textBoxExpN.Text = _task.AllFrames.ToString(CultureInfo.CurrentCulture);
                 
+                comboBoxExp.Text = _task.Exp.ToString(CultureInfo.CurrentCulture);
+                comboBoxFrameType.Text = _task.FrameType;
+                var s = _task.Filters.Split(' ');
+                if (s.Contains("g")) checkBoxFilg.Checked = true;
+                if (s.Contains("r")) checkBoxFilr.Checked = true;
+                if (s.Contains("i")) checkBoxFili.Checked = true;
             }
+            labelTaskN.Text = $@"Task №{_task.TaskNumber}";
         }
 
         private void buttonAdd_Click(object sender, EventArgs e)
         {
             if (MessageBox.Show(@"Are you sure you want to add this task?", @"confirmation",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Information) != DialogResult.Yes) return;
-            task.RaDec = textBoxCoords.Text;
             
-            task.TimeAdd = DateTime.UtcNow;
-            task.TimeStart = DateTime.Parse(textBoxDateTime.Text);
-            task.Exp = short.Parse(comboBoxExp.Text);
-            task.AllFrames = short.Parse(textBoxExpN.Text);
-            task.Duration = task.Exp * task.AllFrames / 60f;
-            task.TimeEnd = task.TimeStart.AddHours(task.Duration);
-            
-            task.Object = textBoxObject.Text;
-            task.Observer = textBoxObserver.Text;
-            task.Status = 0;
-            task.Xbin = short.Parse(textBoxXbin.Text);
-            task.XSubframeStart = short.Parse(textBoxXstart.Text);
-            task.XSubframeEnd = short.Parse(textBoxXend.Text);
-            task.Ybin = short.Parse(textBoxYbin.Text);
-            task.YSubframeStart = short.Parse(textBoxYstart.Text);
-            task.YSubframeEnd = short.Parse(textBoxYend.Text);
-            var fil = "";
-            if (checkBoxFilg.Checked) fil += "g";
-            if (checkBoxFilr.Checked) fil += "r";
-            if (checkBoxFili.Checked) fil += "i";
-            task.Filters = fil;
-            task.FrameType = comboBoxFrameType.Text;
-            Tasker.AddTask(task);
+            AddTask();
             buttonCancel_Click(sender, e);
+        }
+
+        private void AddTask()
+        {
+            _task.RaDec = textBoxCoords.Text;
+            
+            _task.TimeAdd = DateTime.UtcNow;
+            _task.TimeStart = DateTime.Parse(textBoxDateTime.Text);
+            _task.Exp = short.Parse(comboBoxExp.Text);
+            _task.AllFrames = short.Parse(textBoxExpN.Text);
+            _task.Duration = _task.Exp * _task.AllFrames / 60f / 60;
+            _task.TimeEnd = _task.TimeStart.AddHours(_task.Duration);
+            _task.Object = textBoxObject.Text;
+            _task.Observer = textBoxObserver.Text;
+            _task.Status = 0;
+            _task.Xbin = short.Parse(textBoxXbin.Text);
+            _task.XSubframeStart = short.Parse(textBoxXstart.Text);
+            _task.XSubframeEnd = short.Parse(textBoxXend.Text);
+            _task.Ybin = short.Parse(textBoxYbin.Text);
+            _task.YSubframeStart = short.Parse(textBoxYstart.Text);
+            _task.YSubframeEnd = short.Parse(textBoxYend.Text);
+            var fil = "";
+            if (checkBoxFilg.Checked) fil += "g ";
+            if (checkBoxFilr.Checked) fil += "r ";
+            if (checkBoxFili.Checked) fil += "i";
+            _task.Filters = fil;
+            _task.FrameType = comboBoxFrameType.Text;
+            
+            if(!_isNewTask)
+            {
+                Tasker.DeleteTask(_rowIndex);
+            }
+            Tasker.AddTask(_task);
         }
 
         private void buttonCancel_Click(object sender, EventArgs e)
         {
+            Tasker.PaintTable();
             Close();
         }
 
         private void buttonDelete_Click(object sender, EventArgs e)
         {
-            if (IsNewTask)
+            if (_isNewTask)
             {
                 buttonCancel_Click(sender, e);
                 return;
             }
 
-            if (MessageBox.Show(@"Are you sure you want to delete this task?", @"confirmation",
+            if (MessageBox.Show(@"Are you sure you want to reject this task?", @"confirmation",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Information) != DialogResult.Yes) return;
-            Tasker.DeleteTask(RowIndex);
+            // Tasker.DeleteTask(RowIndex);
+            _task.Status = 3;
+            Tasker.DeleteTask(_rowIndex);
+            Tasker.AddTask(_task);
             buttonCancel_Click(sender, e);
         }
     }

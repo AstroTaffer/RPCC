@@ -45,10 +45,14 @@ namespace RPCC
 
         private static readonly System.Timers.Timer FocusTimer = new System.Timers.Timer();
 
+        private bool isFirstLoad;
+
         #region General
         public MainForm()
         {
             InitializeComponent();
+
+            isFirstLoad = true;
 
             timerClock.Start();
             comboBoxImgType.SelectedIndex = 0;
@@ -661,6 +665,13 @@ namespace RPCC
             if (e.RowIndex == -1) return;
             var taskForm = new TaskForm(false, e.RowIndex);
             taskForm.Show();
+        }
+
+        private void dataGridViewTasker_VisibleChanged(object sender, EventArgs e)
+        {
+            if (!isFirstLoad || !dataGridViewTasker.Visible) return;
+            isFirstLoad = false;
+            Tasker.PaintTable();
         }
     }
 }
