@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Windows.Forms;
 using System.Xml.Linq;
 
 namespace RPCC.Utils
 {
-    // TODO: Instead of throwing exceptions it may be better to display error provider message box
     internal class Settings
     {
         /// <summary>
@@ -13,12 +13,14 @@ namespace RPCC.Utils
         ///     Чтение и запись конфигурационных файлов
         /// </summary>
 
+        private readonly Logger _logger;
+
         #region Analysis and Plotting
 
         /// <summary>
         ///     Настройки анализа и построения изображения
         /// </summary>
-        
+
         private double _lowerBrightnessSd;
         private double _upperBrightnessSd;
         private int _apertureRadius;
@@ -96,7 +98,8 @@ namespace RPCC.Utils
             get => _snCamG;
             set
             {
-                _snCamG = value;
+                if (value.Length > 0) _snCamG = value;
+                else throw new ArgumentException("Camera serial number can't be an empty string");
             }
         }
 
@@ -105,7 +108,8 @@ namespace RPCC.Utils
             get => _snCamR;
             set
             {
-                _snCamR = value;
+                if (value.Length > 0) _snCamR = value;
+                else throw new ArgumentException("Camera serial number can't be an empty string");
             }
         }
 
@@ -114,7 +118,8 @@ namespace RPCC.Utils
             get => _snCamI;
             set
             {
-                _snCamI = value;
+                if (value.Length > 0) _snCamI = value;
+                else throw new ArgumentException("Camera serial number can't be an empty string");
             }
         }
 
@@ -231,34 +236,161 @@ namespace RPCC.Utils
 
         #endregion
 
-        #region ConfigIO
+        internal Settings(Logger logger)
+        {
+            _logger = logger;
+        }
 
+        #region ConfigIO
         internal void LoadXmlConfig(string fileName)
         {
-            // FIXME: Handle error when attempting to access unexisting node
-            // Apparently, using LINQ to XML was a mistake. JSON or simple hand-made .txt parser would be more convenient
-            var config = XDocument.Load(fileName);
+            try
+            {
+                var config = XDocument.Load(fileName);
 
-            LowerBrightnessSd = (double)config.Root.Element("image_analysis").Element("lowerBrightnessSd");
-            UpperBrightnessSd = (double)config.Root.Element("image_analysis").Element("upperBrightnessSd");
-            ApertureRadius = (int)config.Root.Element("image_analysis").Element("apertureRadius");
-            AnnulusInnerRadius = (int)config.Root.Element("image_analysis").Element("annulusInnerRadius");
-            AnnulusOuterRadius = (int)config.Root.Element("image_analysis").Element("annulusOuterRadius");
+                if (!(config.Root.Elements("image_analysis").Any() &&
+                      config.Root.Elements("image_analysis").Elements("lowerBrightnessSd").Any() &&
+                      config.Root.Elements("image_analysis").Elements("upperBrightnessSd").Any() &&
+                      config.Root.Elements("image_analysis").Elements("apertureRadius").Any() &&
+                      config.Root.Elements("image_analysis").Elements("annulusInnerRadius").Any() &&
+                      config.Root.Elements("image_analysis").Elements("annulusOuterRadius").Any() &&
 
-            SnCamG = (string)config.Root.Element("cameras").Element("snCamG");
-            SnCamR = (string)config.Root.Element("cameras").Element("snCamR");
-            SnCamI = (string)config.Root.Element("cameras").Element("snCamI");
-            NumFlushes = (int)config.Root.Element("cameras").Element("numFlushes");
-            CamTemp = (double)config.Root.Element("cameras").Element("camTemp");
-            CamBin = (int)config.Root.Element("cameras").Element("camBin");
-            CamRoMode = (string)config.Root.Element("cameras").Element("сamRoMode");
+                      config.Root.Elements("cameras").Any() &&
+                      config.Root.Elements("cameras").Elements("snCamG").Any() &&
+                      config.Root.Elements("cameras").Elements("snCamR").Any() &&
+                      config.Root.Elements("cameras").Elements("snCamI").Any() &&
+                      config.Root.Elements("cameras").Elements("numFlushes").Any() &&
+                      config.Root.Elements("cameras").Elements("camTemp").Any() &&
+                      config.Root.Elements("cameras").Elements("camBin").Any() &&
+                      config.Root.Elements("cameras").Elements("сamRoMode").Any() &&
 
-            OutImgsFolder = (string)config.Root.Element("survey").Element("outImgsFolder");
+                      config.Root.Elements("survey").Any() &&
+                      config.Root.Elements("survey").Elements("outImgsFolder").Any() &&
 
-            FocusComId = (int)config.Root.Element("comms").Element("focusComId");
-            MeteoDomeTcpIpPort = (int)config.Root.Element("comms").Element("meteoDomeTcpIpPort");
-            DonutsTcpIpPort = (int)config.Root.Element("comms").Element("donutsTcpIpPort");
-            SiTechExeTcpIpPort = (int)config.Root.Element("comms").Element("siTechExeTcpIpPort");
+                      config.Root.Elements("comms").Any() &&
+                      config.Root.Elements("comms").Elements("focusComId").Any() &&
+                      config.Root.Elements("comms").Elements("meteoDomeTcpIpPort").Any() &&
+                      config.Root.Elements("comms").Elements("donutsTcpIpPort").Any() &&
+                      config.Root.Elements("comms").Elements("siTechExeTcpIpPort").Any()))
+                    throw new NullReferenceException();
+
+                LowerBrightnessSd = (double)config.Root.Element("image_analysis").Element("lowerBrightnessSd");
+                UpperBrightnessSd = (double)config.Root.Element("image_analysis").Element("upperBrightnessSd");
+                ApertureRadius = (int)config.Root.Element("image_analysis").Element("apertureRadius");
+                AnnulusInnerRadius = (int)config.Root.Element("image_analysis").Element("annulusInnerRadius");
+                AnnulusOuterRadius = (int)config.Root.Element("image_analysis").Element("annulusOuterRadius");
+
+                SnCamG = (string)config.Root.Element("cameras").Element("snCamG");
+                SnCamR = (string)config.Root.Element("cameras").Element("snCamR");
+                SnCamI = (string)config.Root.Element("cameras").Element("snCamI");
+                NumFlushes = (int)config.Root.Element("cameras").Element("numFlushes");
+                CamTemp = (double)config.Root.Element("cameras").Element("camTemp");
+                CamBin = (int)config.Root.Element("cameras").Element("camBin");
+                var buff = config.Root.Element("cameras");
+                CamRoMode = (string)config.Root.Element("cameras").Element("сamRoMode");
+
+                OutImgsFolder = (string)config.Root.Element("survey").Element("outImgsFolder");
+
+                FocusComId = (int)config.Root.Element("comms").Element("focusComId");
+                MeteoDomeTcpIpPort = (int)config.Root.Element("comms").Element("meteoDomeTcpIpPort");
+                DonutsTcpIpPort = (int)config.Root.Element("comms").Element("donutsTcpIpPort");
+                SiTechExeTcpIpPort = (int)config.Root.Element("comms").Element("siTechExeTcpIpPort");
+
+                _logger.AddLogEntry($"Config file {fileName} loaded");
+            }
+            catch (FileNotFoundException)
+            {
+                if (fileName == "SettingsDefault.xml")
+                {
+                    DialogResult result = MessageBox.Show("Default config file not found.\n" +
+                        "Do you want to restore it (\"YES\")\n" +
+                        "or just close the application (\"NO\")?",
+                        "Config not found",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Error,
+                        MessageBoxDefaultButton.Button1);
+                    _logger.AddLogEntry($"WARNING Default config file not found");
+                    if (result == DialogResult.Yes)
+                    {
+                        RestoreDefaultXmlConfig();
+                        LoadXmlConfig("SettingsDefault.xml");
+                    }
+                    else Environment.Exit(1);
+                }
+                else
+                {
+                    MessageBox.Show($"Config file {fileName} not found.",
+                        "Config not found",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error,
+                        MessageBoxDefaultButton.Button1);
+                    _logger.AddLogEntry($"WARNING Config file {fileName} not found");
+                }
+            }
+            catch (NullReferenceException)
+            {
+                if (fileName == "SettingsDefault.xml")
+                {
+                    DialogResult result = MessageBox.Show("Default config file has invalid structure.\n" +
+                        "Do you want to restore it (\"YES\")\n" +
+                        "or just close the application (\"NO\")?",
+                        "Invalid config structure",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Error,
+                        MessageBoxDefaultButton.Button1);
+                    _logger.AddLogEntry($"WARNING Default config file has invalid structure");
+                    if (result == DialogResult.Yes)
+                    {
+                        RestoreDefaultXmlConfig();
+                        LoadXmlConfig("SettingsDefault.xml");
+                    }
+                    else Environment.Exit(1);
+                }
+                else
+                {
+                    MessageBox.Show($"Config file {fileName} has invalid structure.\n" +
+                        $"Reverting to default config.",
+                        "Invalid config structure",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error,
+                        MessageBoxDefaultButton.Button1);
+                    _logger.AddLogEntry($"WARNING Config file {fileName} has invalid structure");
+                    LoadXmlConfig("SettingsDefault.xml");
+                }
+            }
+            catch (Exception ex) when (ex is ArgumentException || ex is FormatException)
+            {
+                if (fileName == "SettingsDefault.xml")
+                {
+                    DialogResult result = MessageBox.Show("Default config file has invalid parameters:\n" +
+                        $"{ex.Message}.\n" +
+                        "Do you want to restore it (\"YES\")\n" +
+                        "or just close the application (\"NO\")?",
+                        "Invalid config parameters",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Error,
+                        MessageBoxDefaultButton.Button1);
+                    _logger.AddLogEntry($"WARNING Default config file has invalid parameters");
+                    if (result == DialogResult.Yes)
+                    {
+                        RestoreDefaultXmlConfig();
+                        LoadXmlConfig("SettingsDefault.xml");
+                    }
+                    else Environment.Exit(1);
+                }
+                else
+                {
+                    MessageBox.Show($"Config file {fileName} has invalid parameters:\n" +
+                        $"{ex.Message}.\n" +
+                        $"Reverting to default config.",
+                        "Invalid config parameters",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error,
+                        MessageBoxDefaultButton.Button1);
+                    _logger.AddLogEntry($"WARNING Config file {fileName} has invalid parameters");
+                    LoadXmlConfig("SettingsDefault.xml");
+                }
+            }
         }
 
         internal void SaveXmlConfig(string fileName)
@@ -278,7 +410,7 @@ namespace RPCC.Utils
                     new XElement("numFlushes", NumFlushes),
                     new XElement("camTemp", CamTemp),
                     new XElement("camBin", CamBin),
-                    new XElement("camRoMode", CamRoMode)),
+                    new XElement("сamRoMode", CamRoMode)),
                 
                 new XElement("survey",
                     new XElement("outImgsFolder", OutImgsFolder)),
@@ -291,6 +423,7 @@ namespace RPCC.Utils
             ));
 
             config.Save(fileName);
+            _logger.AddLogEntry($"Config file {fileName} saved");
         }
 
         internal void RestoreDefaultXmlConfig()
@@ -323,8 +456,8 @@ namespace RPCC.Utils
             ));
 
             config.Save("SettingsDefault.xml");
+            _logger.AddLogEntry("Default config file restored");
         }
-
         #endregion
     }
 }

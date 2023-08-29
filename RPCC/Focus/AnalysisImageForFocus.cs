@@ -7,7 +7,7 @@ namespace RPCC.Focus
         private const double MaxEll = 0.25;
         private const int MinStars = 20;
 
-        private Logger _log;
+        private readonly Logger _log;
         // переменные кадра
 
         public double Fwhm { get; }

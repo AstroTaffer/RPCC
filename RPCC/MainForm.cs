@@ -30,18 +30,18 @@ namespace RPCC
         private bool _isCurrentImageLoaded;
         private bool _isZoomModeActivated;
 
-        private CameraControl _cameraControl;
+        private readonly CameraControl _cameraControl;
         private int _idleCamNum;
 
-        private CameraFocus _cameraFocus;
+        private readonly CameraFocus _cameraFocus;
 
-        private WeatherSocket _domeSocket;
-        private WeatherDataCollector _weatherDc;
+        private readonly WeatherSocket _domeSocket;
+        private readonly WeatherDataCollector _weatherDc;
         
-        private DonutsSocket _donutsSocket;
+        private readonly DonutsSocket _donutsSocket;
         
-        private SiTechExeSocket _siTechExeSocket;
-        private MountDataCollector _mountDc;
+        private readonly SiTechExeSocket _siTechExeSocket;
+        private readonly MountDataCollector _mountDc;
 
         private static readonly System.Timers.Timer FocusTimer = new System.Timers.Timer();
 
@@ -54,25 +54,11 @@ namespace RPCC
 
             _isFirstLoad = true;
 
-            timerClock.Start();
-            comboBoxImgType.SelectedIndex = 0;
-
             _logger = new Logger(listBoxLogs);
             _logger.AddLogEntry("Application launched");
 
-            _settings = new Settings();
-            try
-            {
-                _settings.LoadXmlConfig("SettingsDefault.xml");
-                _logger.AddLogEntry("Default config loaded");
-            }
-            catch (FileNotFoundException)
-            {
-                _logger.AddLogEntry("WARNING Default config file not found, restoring");
-                _settings.RestoreDefaultXmlConfig();
-                _settings.LoadXmlConfig("SettingsDefault.xml");
-                _logger.AddLogEntry("Default config loaded");
-            }
+            _settings = new Settings(_logger);
+            _settings.LoadXmlConfig("SettingsDefault.xml");
 
             // Hardware controls
             _cameraControl = new CameraControl(_logger, _settings);
@@ -111,6 +97,9 @@ namespace RPCC
             Tasker.contextMenuStripTasker = contextMenuStripTasker;
             Tasker.SetHeader();
             Tasker.LoadTasksFromXml();
+
+            timerClock.Start();
+            comboBoxImgType.SelectedIndex = 0;
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -136,8 +125,6 @@ namespace RPCC
         private void TimerClock_Tick(object sender, EventArgs e)
         {
             tSStatusClock.Text = @"UTC: " + DateTime.UtcNow.ToString("yyyy-MM-ddTHH-mm-ss.fff");
-
-            //label1.Text = _weatherDc.Sun.ToString(CultureInfo.InvariantCulture);
             
             _cameraControl.GetStatus();
             switch (_cameraControl.cameras.Length)
@@ -185,11 +172,10 @@ namespace RPCC
                             _isCurrentImageLoaded = false;
                             _currentImage = imageFits.data;
                             _currentImageGStat = new GeneralImageStat(_currentImage);
-                            // TODO: Too much logs - get rid of them or write stats to labels
-                            _logger.AddLogEntry($"Minimum: {_currentImageGStat.min}");
-                            _logger.AddLogEntry($"Maximum: {_currentImageGStat.max}");
-                            _logger.AddLogEntry($"Mean: {_currentImageGStat.mean:0.##}");
-                            _logger.AddLogEntry($"SD: {_currentImageGStat.sd:0.##}");
+                            _logger.AddLogEntry($"Min: {_currentImageGStat.min}; " +
+                                $"Max: {_currentImageGStat.max}; " +
+                                $"Mean: {_currentImageGStat.mean:0.##}; " +
+                                $"SD: {_currentImageGStat.sd:0.##}");
                             PlotFitsImage();
                             _isCurrentImageLoaded = true;
                         }
@@ -435,15 +421,14 @@ namespace RPCC
                         }
 
                         var localStat = new ProfileImageStat(subProfileImage, ref _settings);
-                        _logger.AddLogEntry($"Maximum: {localStat.maxValue} " +
-                                           $"({localStat.maxXCoordinate + xCoordinate - _settings.AnnulusOuterRadius}, " +
-                                           $"{localStat.maxYCoordinate + yCoordinate - _settings.AnnulusOuterRadius})");
-                        _logger.AddLogEntry($"Background: {localStat.background:0.#}");
-                        _logger.AddLogEntry(
-                            $"Centroid: ({localStat.centroidXCoordinate + xCoordinate - _settings.AnnulusOuterRadius:0.#}, " +
-                            $"{localStat.centroidYCoordinate + yCoordinate - _settings.AnnulusOuterRadius:0.#})");
-                        _logger.AddLogEntry($"SNR: {localStat.snr:0.#}");
-                        _logger.AddLogEntry($"FWHM: {localStat.fwhm:0.##}");
+                        _logger.AddLogEntry($"Max: {localStat.maxValue} " +
+                                           $"({localStat.maxXCoordinate + xCoordinate - _settings.AnnulusOuterRadius}; " +
+                                           $"{localStat.maxYCoordinate + yCoordinate - _settings.AnnulusOuterRadius}); " +
+                                           $"Background: {localStat.background:0.#}; " +
+                                           $"Centroid: ({localStat.centroidXCoordinate + xCoordinate - _settings.AnnulusOuterRadius:0.#}; " +
+                                           $"{localStat.centroidYCoordinate + yCoordinate - _settings.AnnulusOuterRadius:0.#}); " +
+                                           $"SNR: {localStat.snr:0.#}; " +
+                                           $"FWHM: {localStat.fwhm:0.##}");
                         PlotProfileImage(ref _settings, localStat, subProfileImage);
                         _logger.AddLogEntry("Profile image plotted");
                     }
@@ -477,7 +462,7 @@ namespace RPCC
             _cameraControl.SetSurveySettings();
             _cameraControl.StartExposure();
             _logger.AddLogEntry($"Survey started - {_cameraControl.task.framesNum} {_cameraControl.task.framesType}" +
-                $" frames with exposure of {_cameraControl.task.framesExpTime * 1e-3} seconds");
+                $" frames with exposure of {_cameraControl.task.framesExpTime * 1e-3} s");
         }
 
         private void ButtonSurveyStop_Click(object sender, EventArgs e)
@@ -511,19 +496,13 @@ namespace RPCC
         private void LoadConfigToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (openFileDialogConfig.ShowDialog() == DialogResult.OK)
-            {
                 _settings.LoadXmlConfig(openFileDialogConfig.FileName);
-                _logger.AddLogEntry($"Config file {saveFileDialogConfig.FileName} loaded");
-            }
         }
 
         private void SaveConfigToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (saveFileDialogConfig.ShowDialog() == DialogResult.OK)
-            {
                 _settings.SaveXmlConfig(saveFileDialogConfig.FileName);
-                _logger.AddLogEntry($"Config file {saveFileDialogConfig.FileName} saved");
-            }
         }
         #endregion
 
@@ -550,10 +529,10 @@ namespace RPCC
             _currentImage = testFits.data;
 
             _currentImageGStat = new GeneralImageStat(_currentImage);
-            _logger.AddLogEntry($"Minimum: {_currentImageGStat.min}");
-            _logger.AddLogEntry($"Maximum: {_currentImageGStat.max}");
-            _logger.AddLogEntry($"Mean: {_currentImageGStat.mean:0.##}");
-            _logger.AddLogEntry($"SD: {_currentImageGStat.sd:0.##}");
+            _logger.AddLogEntry($"Min: {_currentImageGStat.min}; " +
+                                $"Max: {_currentImageGStat.max}; " +
+                                $"Mean: {_currentImageGStat.mean:0.##}; " +
+                                $"SD: {_currentImageGStat.sd:0.##}");
 
             await Task.Run(() => PlotFitsImage());
             _isCurrentImageLoaded = true;
@@ -563,7 +542,6 @@ namespace RPCC
         private void RestoreDefaultConfigFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
             _settings.RestoreDefaultXmlConfig();
-            _logger.AddLogEntry("Default config file restored");
         }
 
         private void SocketToolStripMenuItem_Click(object sender, EventArgs e)
@@ -652,14 +630,14 @@ namespace RPCC
         }
         #endregion
 
-        private void addToolStripMenuItem_Click(object sender, EventArgs e)
+        private void AddToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // _logger.AddLogEntry("Add Task click");
             var taskForm = new TaskForm(true);
             taskForm.Show();
         }
 
-        private void dataGridViewTasker_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
+        private void DataGridViewTasker_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
         {
             // MessageBox.Show(e.RowIndex.ToString());
             if (e.RowIndex == -1) return;
@@ -667,7 +645,7 @@ namespace RPCC
             taskForm.Show();
         }
 
-        private void dataGridViewTasker_VisibleChanged(object sender, EventArgs e)
+        private void DataGridViewTasker_VisibleChanged(object sender, EventArgs e)
         {
             if (!_isFirstLoad || !dataGridViewTasker.Visible) return;
             _isFirstLoad = false;

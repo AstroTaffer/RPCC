@@ -147,9 +147,7 @@ namespace RPCC.Cams
                 }
                 else cameras[i].serialNumber = camSn.ToString();
 
-                // FIXME: Find out new g-cam serialNumber and remove next line completely
-                if (cameras[i].serialNumber == "ML0882515") cameras[i].filter = "TestCam";
-                else if (cameras[i].serialNumber == _settings.SnCamG) cameras[i].filter = "g";
+                if (cameras[i].serialNumber == _settings.SnCamG) cameras[i].filter = "g";
                 else if (cameras[i].serialNumber == _settings.SnCamR) cameras[i].filter = "r";
                 else if (cameras[i].serialNumber == _settings.SnCamI) cameras[i].filter = "i";
                 else

@@ -62,7 +62,7 @@ namespace RPCC.Comms
             {
                 
                 // In case of bugs check "catch" block in Disconnect() function
-                _logger.AddLogEntry($"WARNING Unable to connect to Donuts {ex.Message}");
+                _logger.AddLogEntry($"WARNING Unable to connect to Donuts: {ex.Message}");
             }
         }
         internal void Disconnect()

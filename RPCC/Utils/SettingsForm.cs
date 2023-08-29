@@ -52,6 +52,7 @@ namespace RPCC.Utils
             Close();
         }
 
+        //HACK: This functions handles ArgumentExceptions raised in "Set" properties itself. It should not.
         private void ButtonAccept_Click(object sender, EventArgs e)
         {
             CultureInfo ruCulture = new CultureInfo("ru-RU");

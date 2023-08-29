@@ -166,7 +166,6 @@ namespace RPCC.Comms
             }
             else
             {
-                _logger.AddLogEntry("SiTechExe timer has elapsed");
                 ReadScopeStatus();
             }
         }
