@@ -38,6 +38,7 @@ namespace RPCC.Tasks
                 textBoxExpN.Text = _task.AllFrames.ToString(CultureInfo.CurrentCulture);
                 
                 comboBoxExp.Text = _task.Exp.ToString(CultureInfo.CurrentCulture);
+                textBoxDuration.Text = _task.Duration.ToString(CultureInfo.CurrentCulture);
                 comboBoxFrameType.Text = _task.FrameType;
                 var s = _task.Filters.Split(' ');
                 if (s.Contains("g")) checkBoxFilg.Checked = true;
@@ -45,26 +46,45 @@ namespace RPCC.Tasks
                 if (s.Contains("i")) checkBoxFili.Checked = true;
             }
             labelTaskN.Text = $@"Task №{_task.TaskNumber}";
+            
         }
 
         private void buttonAdd_Click(object sender, EventArgs e)
         {
             if (MessageBox.Show(@"Are you sure you want to add this task?", @"confirmation",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Information) != DialogResult.Yes) return;
-            
-            AddTask();
-            buttonCancel_Click(sender, e);
+            AddTask(sender, e);
         }
 
-        private void AddTask()
+        private void AddTask(object sender, EventArgs e)
         {
-            _task.RaDec = textBoxCoords.Text;
+            var fil = "";
+            if (checkBoxFilg.Checked) fil += "g ";
+            if (checkBoxFilr.Checked) fil += "r ";
+            if (checkBoxFili.Checked) fil += "i";
             
+            if (textBoxCoords.Text=="" || textBoxDateTime.Text =="" || comboBoxExp.Text =="" ||
+                comboBoxFrameType.Text=="" || fil=="")
+            {
+                MessageBox.Show(@"Blank data, can't add task", @"OK", MessageBoxButtons.OK);
+                return;
+            }
+            _task.RaDec = textBoxCoords.Text;
             _task.TimeAdd = DateTime.UtcNow;
             _task.TimeStart = DateTime.Parse(textBoxDateTime.Text);
             _task.Exp = short.Parse(comboBoxExp.Text);
-            _task.AllFrames = short.Parse(textBoxExpN.Text);
-            _task.Duration = _task.Exp * _task.AllFrames / 60f / 60;
+            
+            if (textBoxDuration.Text == "")
+            {
+                _task.AllFrames = short.Parse(textBoxExpN.Text);
+                _task.Duration = _task.Exp * _task.AllFrames / 60f / 60;
+            }
+            else
+            {
+                _task.Duration = float.Parse(textBoxDuration.Text);
+                _task.AllFrames = Convert.ToInt16(_task.Duration * 60f * 60f / _task.Exp);
+            }
+            
             _task.TimeEnd = _task.TimeStart.AddHours(_task.Duration);
             _task.Object = textBoxObject.Text;
             _task.Observer = textBoxObserver.Text;
@@ -75,10 +95,7 @@ namespace RPCC.Tasks
             _task.Ybin = short.Parse(textBoxYbin.Text);
             _task.YSubframeStart = short.Parse(textBoxYstart.Text);
             _task.YSubframeEnd = short.Parse(textBoxYend.Text);
-            var fil = "";
-            if (checkBoxFilg.Checked) fil += "g ";
-            if (checkBoxFilr.Checked) fil += "r ";
-            if (checkBoxFili.Checked) fil += "i";
+            
             _task.Filters = fil;
             _task.FrameType = comboBoxFrameType.Text;
             
@@ -87,6 +104,7 @@ namespace RPCC.Tasks
                 Tasker.DeleteTask(_rowIndex);
             }
             Tasker.AddTask(_task);
+            buttonCancel_Click(sender, e);
         }
 
         private void buttonCancel_Click(object sender, EventArgs e)

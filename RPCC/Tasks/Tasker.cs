@@ -64,7 +64,13 @@ namespace RPCC.Tasks
             dataGridViewTasker.Columns[18].Visible = false;
             dataGridViewTasker.Columns[19].Visible = false;
             dataGridViewTasker.Columns[20].Visible = false;
+            
+            foreach (DataGridViewColumn column in dataGridViewTasker.Columns)
+            {
+                column.SortMode = DataGridViewColumnSortMode.NotSortable;
+            }
 
+            // dataGridViewTasker.Sort(dataGridViewTasker.Columns[0], ListSortDirection.Descending);
             // dataGridViewTasker.Columns[0].DefaultCellStyle.Alignment = DataGridViewContentAlignment.TopCenter;
         }
         
@@ -165,7 +171,7 @@ namespace RPCC.Tasks
             dataRow[Header[19]] = task.YSubframeStart;
             dataRow[Header[20]] = task.YSubframeEnd;
             
-            DataTable.Rows.Add(dataRow);
+            DataTable.Rows.InsertAt(dataRow, 0);
             SaveTasksToXml();
         }
 

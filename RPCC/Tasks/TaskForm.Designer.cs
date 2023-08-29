@@ -49,6 +49,8 @@ namespace RPCC.Tasks
             this.textBoxXbin = new System.Windows.Forms.TextBox();
             this.labelXbin = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.textBoxDuration = new System.Windows.Forms.TextBox();
+            this.labelDuration = new System.Windows.Forms.Label();
             this.labelFrameType = new System.Windows.Forms.Label();
             this.comboBoxFrameType = new System.Windows.Forms.ComboBox();
             this.comboBoxExp = new System.Windows.Forms.ComboBox();
@@ -227,6 +229,8 @@ namespace RPCC.Tasks
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.textBoxDuration);
+            this.groupBox2.Controls.Add(this.labelDuration);
             this.groupBox2.Controls.Add(this.labelFrameType);
             this.groupBox2.Controls.Add(this.comboBoxFrameType);
             this.groupBox2.Controls.Add(this.comboBoxExp);
@@ -239,6 +243,21 @@ namespace RPCC.Tasks
             this.groupBox2.TabIndex = 26;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Exposures";
+            // 
+            // textBoxDuration
+            // 
+            this.textBoxDuration.Location = new System.Drawing.Point(183, 50);
+            this.textBoxDuration.Name = "textBoxDuration";
+            this.textBoxDuration.Size = new System.Drawing.Size(93, 26);
+            this.textBoxDuration.TabIndex = 30;
+            // 
+            // labelDuration
+            // 
+            this.labelDuration.Location = new System.Drawing.Point(183, 23);
+            this.labelDuration.Name = "labelDuration";
+            this.labelDuration.Size = new System.Drawing.Size(93, 23);
+            this.labelDuration.TabIndex = 29;
+            this.labelDuration.Text = "Duration (h)";
             // 
             // labelFrameType
             // 
@@ -473,6 +492,9 @@ namespace RPCC.Tasks
             this.groupBoxFilters.ResumeLayout(false);
             this.ResumeLayout(false);
         }
+
+        private System.Windows.Forms.TextBox textBoxDuration;
+        private System.Windows.Forms.Label labelDuration;
 
         private System.Windows.Forms.GroupBox groupBox3;
 
