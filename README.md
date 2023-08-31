@@ -11,7 +11,7 @@ This program is designed for control and adjustment of RoboPhot KAO UrFU telesco
 
 Installation:
 1. Make sure you have following software installed:
-    - .NET Framework 4.6.1
+    - .NET Framework 4.8.1
     - [Python 3.X](https://www.python.org/) (latest version)
     - [NumPy](https://numpy.org/install/) (latest version)
     - [Donuts](https://pypi.org/project/donuts/) (latest version)
