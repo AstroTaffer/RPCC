@@ -165,7 +165,7 @@ namespace RPCC
                         // TODO: Move to separate thread
                         RpccFits imageFits = _cameraControl.ReadImage(_cameraControl.cameras[i]);
 
-                        imageFits.SaveFitsFile(_settings, _cameraControl, _weatherDc, i);
+                        imageFits.SaveFitsFile(_settings, _cameraControl, _weatherDc, _cameraFocus.SerialFocus.CurrentPosition, i);
 
                         if (i == _cameraControl.task.viewCamIndex)
                         {

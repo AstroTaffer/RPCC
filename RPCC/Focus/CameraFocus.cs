@@ -16,7 +16,6 @@ namespace RPCC.Focus
         private const int MaxFocBadFrames = 3;
         private const int MaxSumShifts = 1000;
         private readonly Logger _logger;
-        private readonly Settings _settings;
         
         public SerialFocus SerialFocus { get; }
         public double FwhmBest { get; set; }

@@ -3,6 +3,7 @@ using System.IO;
 using nom.tam.fits;
 using nom.tam.util;
 using RPCC.Comms;
+using RPCC.Focus;
 using RPCC.Utils;
 
 namespace RPCC.Cams
@@ -46,7 +47,7 @@ namespace RPCC.Cams
 
         }
 
-        internal void SaveFitsFile(Settings settings, CameraControl camCtrl, WeatherDataCollector dataCollector, int camNum)
+        internal void SaveFitsFile(Settings settings, CameraControl camCtrl, WeatherDataCollector dataCollector, int focusPos, int camNum)
         {
             short[][] convertedData = new short[data.Length][];
             for (var i = 0; i < convertedData.Length; i++)
@@ -70,9 +71,9 @@ namespace RPCC.Cams
             newCursor.Key = "END";
 
             newCursor.Add(new HeaderCard("COMMENT",
-                "FITS(Flexible Image Transport System) format defined in Astronomy and", false));
-            newCursor.Add(new HeaderCard("COMMENT",
-                "Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.", false));
+                "Version 4.0 of FITS format is defined in the followind document:&", false));
+            newCursor.Add(new HeaderCard("CONTINUE",
+                " https://fits.gsfc.nasa.gov/standard40/fits_standard40aa-le.pdf", false));
 
             // Survey keywords
             newCursor.Add(new HeaderCard("DATE-OBS",
@@ -130,6 +131,7 @@ namespace RPCC.Cams
             newCursor.Add(new HeaderCard("BZERO", short.MaxValue + 1.0,
                 "offset data range to that of unsigned short"));
             newCursor.Add(new HeaderCard("BSCALE", 1.0, "default scaling factor"));
+            newCursor.Add(new HeaderCard("FOCUS", focusPos, "focus position"));
 
             // Observatory keywords
             newCursor.Add(new HeaderCard("OBSERVAT", "KAO", "observatory name"));
