@@ -103,7 +103,6 @@ namespace RPCC.Tasks
                 {
                     logger.AddLogEntry($"Tasker Error: {e.Message}");
                 }
-                
             }   
             else
             {
@@ -173,11 +172,6 @@ namespace RPCC.Tasks
             
             DataTable.Rows.InsertAt(dataRow, 0);
             SaveTasksToXml();
-        }
-
-        public static void EditTask()
-        {
-            
         }
 
         public static void DeleteTask(int rowIndex)

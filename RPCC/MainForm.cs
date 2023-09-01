@@ -92,6 +92,8 @@ namespace RPCC
                 _logger.AddLogEntry(@"Can't open Focus serial port");
             }
 
+            groupBoxFocusSettings.Text = $@"Focus Settings (COMPORT {_settings.FocusComId})";
+
             Tasker.logger = _logger;
             Tasker.dataGridViewTasker = dataGridViewTasker;
             Tasker.contextMenuStripTasker = contextMenuStripTasker;

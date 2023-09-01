@@ -120,6 +120,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tasks\Head.cs" />
     <Compile Include="Tasks\ObservationTask.cs" />
     <Compile Include="Tasks\Tasker.cs" />
     <Compile Include="Tasks\TaskForm.cs">
