@@ -17,7 +17,7 @@ namespace RPCC.Tasks
         private static readonly string FileName = Directory.GetCurrentDirectory() + "\\" + "Tasks.xml";
         public static ContextMenuStrip contextMenuStripTasker;
 
-        private static readonly string[] Header = {
+        public static readonly string[] Header = {
             "N", "RaDecJ2000", "t_{Added}", @"t_{Run}", @"t_{Fin}", "Duration",
             "Exp", "Done", "All", "t_{Last exp}", "Filters", "Object", "Status", "Observer", "Frame type", 
             "Xbin", "XSubframeStart", "XSubframeEnd", "Ybin", "YSubframeStart", "YSubframeEnd"
@@ -174,34 +174,96 @@ namespace RPCC.Tasks
             SaveTasksToXml();
         }
 
-        public static void DeleteTask(int rowIndex)
+        public static void UpdateTaskInTable(ObservationTask task)
+        {
+            foreach (DataGridViewRow row in dataGridViewTasker.Rows)
+            {
+                if (!ReferenceEquals(row.Cells[0].Value.ToString(), task.TaskNumber.ToString())) continue;
+                row.Cells[0].Value = task.TaskNumber;
+                row.Cells[1].Value = task.RaDec;
+                row.Cells[2].Value = task.TimeAdd;
+                row.Cells[3].Value = task.TimeStart;
+                row.Cells[4].Value = task.TimeEnd;
+                row.Cells[5].Value = task.Duration;
+                row.Cells[6].Value = task.Exp;
+                row.Cells[7].Value = task.DoneFrames;
+                row.Cells[8].Value = task.AllFrames;
+                row.Cells[9].Value = task.TimeLastExp;
+                row.Cells[10].Value = task.Filters; 
+                row.Cells[11].Value = task.Object;
+                row.Cells[12].Value = task.Status;
+                row.Cells[13].Value = task.Observer;
+                row.Cells[14].Value = task.FrameType;
+                row.Cells[15].Value = task.Xbin;
+                row.Cells[16].Value = task.XSubframeStart;
+                row.Cells[17].Value = task.XSubframeEnd;
+                row.Cells[18].Value = task.Ybin;
+                row.Cells[19].Value = task.YSubframeStart;
+                row.Cells[20].Value = task.YSubframeEnd;
+            }
+            PaintTable();
+        }
+
+        public static void DeleteTaskByRowIndex(int rowIndex)
         {
             dataGridViewTasker.Rows.RemoveAt(rowIndex);
             SaveTasksToXml();
         }
 
-        public static ObservationTask GetTask(int rowIndex)
+        public static ObservationTask GetTaskByNumber(string taskNumber)
         {
             var task = new ObservationTask();
-            task.TaskNumber = Convert.ToInt32(dataGridViewTasker.Rows[rowIndex].Cells[0].Value);
-            task.RaDec = dataGridViewTasker.Rows[rowIndex].Cells[1].Value.ToString();
-            task.TimeAdd = DateTime.Parse(dataGridViewTasker.Rows[rowIndex].Cells[2].Value.ToString());
-            task.TimeStart = DateTime.Parse(dataGridViewTasker.Rows[rowIndex].Cells[3].Value.ToString());
-            task.TimeEnd = DateTime.Parse(dataGridViewTasker.Rows[rowIndex].Cells[4].Value.ToString());
-            task.Duration = float.Parse(dataGridViewTasker.Rows[rowIndex].Cells[5].Value.ToString());
-            task.Exp = Convert.ToInt16(dataGridViewTasker.Rows[rowIndex].Cells[6].Value);
-            task.AllFrames = Convert.ToInt16(dataGridViewTasker.Rows[rowIndex].Cells[8].Value);
-            task.Filters = dataGridViewTasker.Rows[rowIndex].Cells[10].Value.ToString();
+            foreach (DataGridViewRow row in dataGridViewTasker.Rows)
+            {
+                if (!ReferenceEquals(row.Cells[0].Value.ToString(), taskNumber)) continue;
+                task.TaskNumber = Convert.ToInt32(row.Cells[0].Value);
+                task.RaDec = row.Cells[1].Value.ToString();
+                task.TimeAdd = DateTime.Parse(row.Cells[2].Value.ToString());
+                task.TimeStart = DateTime.Parse(row.Cells[3].Value.ToString());
+                task.TimeEnd = DateTime.Parse(row.Cells[4].Value.ToString());
+                task.Duration = float.Parse(row.Cells[5].Value.ToString());
+                task.Exp = Convert.ToInt16(row.Cells[6].Value);
+                task.AllFrames = Convert.ToInt16(row.Cells[8].Value);
+                task.Filters = row.Cells[10].Value.ToString();
+                task.Object = row.Cells[11].Value.ToString();
+                task.Status = Convert.ToInt16(row.Cells[12].Value);
+                task.Observer = row.Cells[13].Value.ToString();
+                task.FrameType = row.Cells[14].Value.ToString();
+                task.Xbin = Convert.ToInt16(row.Cells[15].Value);
+                task.XSubframeStart = Convert.ToInt16(row.Cells[16].Value);
+                task.XSubframeEnd = Convert.ToInt16(row.Cells[17].Value);
+                task.Ybin = Convert.ToInt16(row.Cells[18].Value);
+                task.YSubframeStart = Convert.ToInt16(row.Cells[19].Value);
+                task.YSubframeEnd = Convert.ToInt16(row.Cells[20].Value);
+                break;
+            }
+
+            return task;
+        }
+        
+        public static ObservationTask GetTaskByRowIndex(int rowIndex)
+        {
+            var task = new ObservationTask();
+            DataGridViewRow row = dataGridViewTasker.Rows[rowIndex];
+            task.TaskNumber = Convert.ToInt32(row.Cells[0].Value);
+            task.RaDec = row.Cells[1].Value.ToString();
+            task.TimeAdd = DateTime.Parse(row.Cells[2].Value.ToString());
+            task.TimeStart = DateTime.Parse(row.Cells[3].Value.ToString());
+            task.TimeEnd = DateTime.Parse(row.Cells[4].Value.ToString());
+            task.Duration = float.Parse(row.Cells[5].Value.ToString());
+            task.Exp = Convert.ToInt16(row.Cells[6].Value);
+            task.AllFrames = Convert.ToInt16(row.Cells[8].Value);
+            task.Filters = row.Cells[10].Value.ToString();
             task.Object = dataGridViewTasker.Rows[rowIndex].Cells[11].Value.ToString();
-            task.Status = Convert.ToInt16(dataGridViewTasker.Rows[rowIndex].Cells[12].Value);
-            task.Observer = dataGridViewTasker.Rows[rowIndex].Cells[13].Value.ToString();
-            task.FrameType = dataGridViewTasker.Rows[rowIndex].Cells[14].Value.ToString();
-            task.Xbin = Convert.ToInt16(dataGridViewTasker.Rows[rowIndex].Cells[15].Value);
-            task.XSubframeStart = Convert.ToInt16(dataGridViewTasker.Rows[rowIndex].Cells[16].Value);
-            task.XSubframeEnd = Convert.ToInt16(dataGridViewTasker.Rows[rowIndex].Cells[17].Value);
-            task.Ybin = Convert.ToInt16(dataGridViewTasker.Rows[rowIndex].Cells[18].Value);
-            task.YSubframeStart = Convert.ToInt16(dataGridViewTasker.Rows[rowIndex].Cells[19].Value);
-            task.YSubframeEnd = Convert.ToInt16(dataGridViewTasker.Rows[rowIndex].Cells[20].Value);
+            task.Status = Convert.ToInt16(row.Cells[12].Value);
+            task.Observer = row.Cells[13].Value.ToString();
+            task.FrameType = row.Cells[14].Value.ToString();
+            task.Xbin = Convert.ToInt16(row.Cells[15].Value);
+            task.XSubframeStart = Convert.ToInt16(row.Cells[16].Value);
+            task.XSubframeEnd = Convert.ToInt16(row.Cells[17].Value);
+            task.Ybin = Convert.ToInt16(row.Cells[18].Value);
+            task.YSubframeStart = Convert.ToInt16(row.Cells[19].Value);
+            task.YSubframeEnd = Convert.ToInt16(row.Cells[20].Value);
 
             return task;
         }

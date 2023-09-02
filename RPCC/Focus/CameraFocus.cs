@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using RPCC.Cams;
 using RPCC.Utils;
 
 namespace RPCC.Focus
@@ -26,11 +27,13 @@ namespace RPCC.Focus
         public bool isAutoFocus { get; set; }
         public bool IsZenith { get; set; } = false;
         public int DeFocus { get; set; } = 0;
-        public bool InitPhoto { get; set; }
+        // public bool InitPhoto { get; set; }
+        // private CameraControl _cameraControl;
         
         internal CameraFocus(Logger logger, Settings settings)
         {
             _logger = logger;
+            // _cameraControl = cameraControl;
             SerialFocus = new SerialFocus(logger, settings);
         }
 
@@ -58,12 +61,12 @@ namespace RPCC.Focus
             // Reconfigure(); //TODO проверка камер
 
             //check photometer status after reconfigure
-            if (!InitPhoto)
-            {
-                //TODO флаг проверки работы камеры?
-                _logger.AddLogEntry("FOCUS: InitPhoto=false, exit");
-                return false;
-            }
+            // if (!InitPhoto)
+            // {
+            //     //TODO флаг проверки работы камеры?
+            //     _logger.AddLogEntry("FOCUS: InitPhoto=false, exit");
+            //     return false;
+            // }
 
             if (IsZenith) {
                 Repoint4Focus(); //Перенаводимся в зенит для фокусировки\
@@ -365,6 +368,7 @@ namespace RPCC.Focus
         private GetDataFromFits GetImForFocus(int z)
         {
             SerialFocus.FRun_To(z);
+            // _cameraControl.StartExposure();
             // TODO get im
             // return new double[2048, 2048];
             return new GetDataFromFits("path", _logger, true);

@@ -23,7 +23,7 @@ namespace RPCC.Tasks
             }
             else
             {
-                _task = Tasker.GetTask(_rowIndex);
+                _task = Tasker.GetTaskByRowIndex(_rowIndex);
                
                 textBoxCoords.Text = _task.RaDec;
                 textBoxObject.Text = _task.Object;
@@ -101,7 +101,7 @@ namespace RPCC.Tasks
             
             if(!_isNewTask)
             {
-                Tasker.DeleteTask(_rowIndex);
+                Tasker.DeleteTaskByRowIndex(_rowIndex);
             }
             Tasker.AddTask(_task);
             buttonCancel_Click(sender, e);
@@ -115,7 +115,7 @@ namespace RPCC.Tasks
 
         private void buttonDelete_Click(object sender, EventArgs e)
         {
-            if (_isNewTask)
+            if (_isNewTask || _task.Status > 1)
             {
                 buttonCancel_Click(sender, e);
                 return;
@@ -123,10 +123,8 @@ namespace RPCC.Tasks
 
             if (MessageBox.Show(@"Are you sure you want to reject this task?", @"confirmation",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Information) != DialogResult.Yes) return;
-            // Tasker.DeleteTask(RowIndex);
             _task.Status = 3;
-            Tasker.DeleteTask(_rowIndex);
-            Tasker.AddTask(_task);
+            Tasker.UpdateTaskInTable(_task);
             buttonCancel_Click(sender, e);
         }
     }
