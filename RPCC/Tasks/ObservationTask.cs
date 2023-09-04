@@ -1,22 +1,26 @@
 ﻿using System;
+using ASCOM.Tools;
 
 namespace RPCC.Tasks
 {
     public class ObservationTask
     {
-        // public double Ra //decimal deg
-        // {
-        //     get;
-        //     set;
-        // }
-        //
-        // public double Dec
-        // {
-        //     get;
-        //     set;
-        // }
+        public double Ra //decimal h
+        {
+            get;
+            set;
+        }
         
-        public string RaDec { get; set; }
+        public double Dec //decimal deg
+        {
+            get;
+            set;
+        }
+
+        public string RaDec
+        {
+            get; set;
+        }
 
         public DateTime TimeAdd
         {
@@ -65,7 +69,7 @@ namespace RPCC.Tasks
         {
             get;
             set;
-        }
+        } = 0;
 
         public string Object
         {
@@ -95,43 +99,39 @@ namespace RPCC.Tasks
         {
             get;
             set;
-        }
+        } = "g r i";
 //in pix
-        public short Xbin
-        {
-            get;
-            set;
-        }
+        public short Xbin { get;  set; } = 1;
 
         public short Ybin
         {
             get;
             set;
-        }
+        } = 1;
 
         public short XSubframeStart
         {
             get;
             set;
-        }
+        } = 0;
 
         public short YSubframeStart
         {
             get;
             set;
-        }
+        } = 0;
 
         public short XSubframeEnd
         {
             get;
             set;
-        }
+        } = 2047;
 
         public short YSubframeEnd
         {
             get;
             set;
-        }
+        } = 2047;
         
 //in hours
         public float Duration
@@ -139,23 +139,14 @@ namespace RPCC.Tasks
             get;
             set;
         }
+
+        public void ComputeRaDec(string CoordsString)
+        {
+            RaDec = CoordsString;
+            var radec = RaDec.Split(' ');
+            Ra = Utilities.HMSToHours(radec[0]);
+            Dec = Utilities.DMSToDegrees(radec[1]);
+        }
         
-
-        public ObservationTask()
-        {
-            
-        }
-
-        private string GetInHms()
-        {
-            //h:m:s.ss
-            return ""; 
-        }
-
-        private string GetInDms()
-        {
-            //d:m:s.ss
-            return "";
-        }
     }
 }

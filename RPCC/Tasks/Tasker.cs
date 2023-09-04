@@ -3,7 +3,6 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
-
 using RPCC.Utils;
 
 namespace RPCC.Tasks
@@ -216,7 +215,7 @@ namespace RPCC.Tasks
             {
                 if (!ReferenceEquals(row.Cells[0].Value.ToString(), taskNumber)) continue;
                 task.TaskNumber = Convert.ToInt32(row.Cells[0].Value);
-                task.RaDec = row.Cells[1].Value.ToString();
+                task.ComputeRaDec(row.Cells[1].Value.ToString());
                 task.TimeAdd = DateTime.Parse(row.Cells[2].Value.ToString());
                 task.TimeStart = DateTime.Parse(row.Cells[3].Value.ToString());
                 task.TimeEnd = DateTime.Parse(row.Cells[4].Value.ToString());
@@ -245,7 +244,7 @@ namespace RPCC.Tasks
             var task = new ObservationTask();
             DataGridViewRow row = dataGridViewTasker.Rows[rowIndex];
             task.TaskNumber = Convert.ToInt32(row.Cells[0].Value);
-            task.RaDec = row.Cells[1].Value.ToString();
+            task.ComputeRaDec(row.Cells[1].Value.ToString());
             task.TimeAdd = DateTime.Parse(row.Cells[2].Value.ToString());
             task.TimeStart = DateTime.Parse(row.Cells[3].Value.ToString());
             task.TimeEnd = DateTime.Parse(row.Cells[4].Value.ToString());

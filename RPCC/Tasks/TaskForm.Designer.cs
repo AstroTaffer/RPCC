@@ -334,7 +334,7 @@ namespace RPCC.Tasks
             this.textBoxYend.Name = "textBoxYend";
             this.textBoxYend.Size = new System.Drawing.Size(65, 26);
             this.textBoxYend.TabIndex = 35;
-            this.textBoxYend.Text = "2048";
+            this.textBoxYend.Text = "2047";
             // 
             // labelYend
             // 
@@ -366,7 +366,7 @@ namespace RPCC.Tasks
             this.textBoxXend.Name = "textBoxXend";
             this.textBoxXend.Size = new System.Drawing.Size(65, 26);
             this.textBoxXend.TabIndex = 29;
-            this.textBoxXend.Text = "2048";
+            this.textBoxXend.Text = "2047";
             // 
             // labelXend
             // 

@@ -46,7 +46,6 @@ namespace RPCC.Tasks
                 if (s.Contains("i")) checkBoxFili.Checked = true;
             }
             labelTaskN.Text = $@"Task №{_task.TaskNumber}";
-            
         }
 
         private void buttonAdd_Click(object sender, EventArgs e)
@@ -69,7 +68,7 @@ namespace RPCC.Tasks
                 MessageBox.Show(@"Blank data, can't add task", @"OK", MessageBoxButtons.OK);
                 return;
             }
-            _task.RaDec = textBoxCoords.Text;
+            _task.ComputeRaDec(textBoxCoords.Text);
             _task.TimeAdd = DateTime.UtcNow;
             _task.TimeStart = DateTime.Parse(textBoxDateTime.Text);
             _task.Exp = short.Parse(comboBoxExp.Text);

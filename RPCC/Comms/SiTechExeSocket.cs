@@ -300,10 +300,10 @@ namespace RPCC.Comms
         }
         
         // [RA] = h, [DEC] = deg
-        internal static async void GoTo(double ra, double dec, bool isJ2k)
+        internal static async void GoTo(double ra, double dec, bool isJ2K)
         {
-            string[] response = await ExchangeMessagesAsync($"GoTo {ra} {dec}{(isJ2k? " J2K": "")}");
-            if (CheckResponse(response, $"GoTo {ra} {dec}{(isJ2k ? " J2K" : "")}"))
+            string[] response = await ExchangeMessagesAsync($"GoTo {ra} {dec}{(isJ2K? " J2K": "")}");
+            if (CheckResponse(response, $"GoTo {ra} {dec}{(isJ2K ? " J2K" : "")}"))
             {
                 string message = response[response.Length - 1];
                 if (message == "_GoTo Accepted")
@@ -312,7 +312,7 @@ namespace RPCC.Comms
                 }
                 else
                 {
-                    Logger.AddLogEntry($"WARNING Unable to go to {ra} {dec}{(isJ2k ? " J2K" : "")}: {message}");
+                    Logger.AddLogEntry($"WARNING Unable to go to {ra} {dec}{(isJ2K ? " J2K" : "")}: {message}");
                     // TODO: Do stuff if bad
                 }
             }

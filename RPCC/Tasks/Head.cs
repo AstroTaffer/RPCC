@@ -4,24 +4,32 @@ using System.Windows.Forms;
 using RPCC.Comms;
 using RPCC.Utils;
 using Timer = System.Timers.Timer;
+using ASCOM.Tools;
 
 namespace RPCC.Tasks
 {
     public static class Head
     {
         private static readonly Timer ThinkingTimer = new Timer();
-        private static string ActualTaskNumber;
-        private static ObservationTask ActualTask;
+        private static ObservationTask _currentTask;
         private const short TotalMinutes2StartTask = 5; //TODO add in .cfg
         private const short TotalDays2ReMakeCalibrationFrames = 30; //TODO add in .cfg
-        private static bool isObserve;
-        private static bool isDoFlats;
-        private static bool isDoDarks;
-        private static DateTime lastDarksTime; //TODO add in .cfg
-        private static DateTime lastFlatsTime; //TODO add in .cfg
+        private static bool _isObserve;
+        private static bool _isDoFlats;
+        private static bool _isDoDarks;
+        private static DateTime _lastDarksTime; //TODO add in .cfg
+        private static DateTime _lastFlatsTime; //TODO add in .cfg
+        private const short FlatExp = 2; // in s 
+        private static readonly short[] DarkExps = {2, 5, 10, 15, 20, 30, 50, 80, 120, 180};
+        private static readonly Transform Trans = new Transform();
+        private const short FlatDarkQuantity = 10; //TODO add in .cfg
         
         public static void StartThinking()
         {
+            Trans.SiteElevation = 290;
+            Trans.SiteLatitude = 57.03669;
+            Trans.SiteLongitude = 59.54727;
+            
             ThinkingTimer.Elapsed += Thinking;
             ThinkingTimer.Interval = 60000; //думать раз в минуту
             ThinkingTimer.Start();
@@ -38,11 +46,11 @@ namespace RPCC.Tasks
                 //end cum
             }
             
-            if (!isObserve & !isDoDarks & !isDoFlats & WeatherDataCollector.Flat &
-                (DateTime.UtcNow - lastFlatsTime).TotalDays > TotalDays2ReMakeCalibrationFrames) StartDoFlats();
+            if (!_isObserve & !_isDoDarks & !_isDoFlats & WeatherDataCollector.Flat &
+                (DateTime.UtcNow - _lastFlatsTime).TotalDays > TotalDays2ReMakeCalibrationFrames) StartDoFlats();
             
-            if (!isObserve & !isDoDarks & !isDoFlats & !WeatherDataCollector.Obs &
-                (DateTime.UtcNow - lastDarksTime).TotalDays > TotalDays2ReMakeCalibrationFrames) StartDoDarks();
+            if (!_isObserve & !_isDoDarks & !_isDoFlats & !WeatherDataCollector.Obs &
+                (DateTime.UtcNow - _lastDarksTime).TotalDays > TotalDays2ReMakeCalibrationFrames) StartDoDarks();
 
             foreach (DataGridViewRow row in Tasker.dataGridViewTasker.Rows)
             {
@@ -60,26 +68,26 @@ namespace RPCC.Tasks
                 
                 // Далее выбираем таску для наблюдения 
                 if (!WeatherDataCollector.Obs) continue; // если нельзя наблюдать, то ждем минуту
-                if (isObserve || isDoDarks || isDoFlats) continue; // если уже идет задание, то ждем минуту
+                if (_isObserve || _isDoDarks || _isDoFlats) continue; // если уже идет задание, то ждем минуту
                 
                 //выбираем таску 
-                if (ActualTask is null)
+                if (_currentTask is null)
                 {
-                    ActualTask = bufTask;
+                    _currentTask = bufTask;
                     continue;
                 }
                 
-                if (bufTask.TimeStart<ActualTask.TimeStart) //выбираем таску с наименьшей датой начала наблюдения
+                if (bufTask.TimeStart<_currentTask.TimeStart) //выбираем таску с наименьшей датой начала наблюдения
                                                             //(вне зависимости от нынешнего времени)
                 {
-                    ActualTask = bufTask;
+                    _currentTask = bufTask;
                 }
             }
 
             //если после проверки таблицы не нашлась таска на выполнение, то уходим на следующую минуту
-            if (ActualTask == null) return;
+            if (_currentTask == null) return;
             //а если нашлась и время до начала менее 5 минут, то стартуем 
-            if ((ActualTask.TimeStart - DateTime.UtcNow).TotalMinutes < TotalMinutes2StartTask)
+            if ((_currentTask.TimeStart - DateTime.UtcNow).TotalMinutes < TotalMinutes2StartTask)
             {
                 StartTask();
             }
@@ -87,29 +95,31 @@ namespace RPCC.Tasks
         
         private static void StartTask()
         {
-            ActualTask.Status = 1;
-            Tasker.UpdateTaskInTable(ActualTask);
-            if (ActualTask.FrameType == "light") StartDoLight();
-            if (ActualTask.FrameType == "dark") StartDoDarks(ActualTask);
-            if (ActualTask.FrameType == "flat") StartDoFlats(ActualTask);
+            _currentTask.Status = 1;
+            Tasker.UpdateTaskInTable(_currentTask);
+            if (_currentTask.FrameType == "light") StartDoLight();
+            if (_currentTask.FrameType == "dark") StartDoDark(_currentTask);
+            if (_currentTask.FrameType == "flat") StartDoFlats(_currentTask);
         }
 
         private static void EndTask(short endStatus, ObservationTask task)
         {
             task.Status = endStatus;
             Tasker.UpdateTaskInTable(task);
-            isObserve = false;
-            isDoDarks = false;
-            isDoFlats = false;
-            ActualTask = null;
+            _isObserve = false;
+            _isDoDarks = false;
+            _isDoFlats = false;
+            _currentTask = null;
         }
     
         private static void StartDoLight()
         {
-            Logger.AddLogEntry($"Start task# {ActualTask.TaskNumber}, type: {ActualTask.FrameType}");
-            isObserve = true;
+            Logger.AddLogEntry($"Start task# {_currentTask.TaskNumber}, type: {_currentTask.FrameType}");
+            _isObserve = true;
+            SiTechExeSocket.GoTo(_currentTask.Ra, _currentTask.Dec, true); //проверять доехал ли
             
-            // SiTechExeSocket.GoTo();
+            //если доехал, то начинаем снимать 
+            
             // навести монтировку в нужную точку (проверка на доступность)
             // сфокусироваться
             // начать делать экспозиции (автофокус опционален)
@@ -119,17 +129,29 @@ namespace RPCC.Tasks
 
             private static void StartDoFlats()
             {
-                //TODO create flat task
                 var flatTask = new ObservationTask();
+                flatTask.Exp = FlatExp;
+                flatTask.TaskNumber = Tasker.GetTasksLen();
+                flatTask.TimeAdd = DateTime.UtcNow;
+                flatTask.TimeStart = DateTime.UtcNow;
+                flatTask.TimeEnd = DateTime.UtcNow.AddMinutes((short) (FlatExp * FlatDarkQuantity / 6));
+                flatTask.AllFrames = FlatDarkQuantity;
+                flatTask.Duration = (float)(flatTask.TimeEnd - flatTask.TimeStart).TotalHours;
+                flatTask.Status = 1;
+                flatTask.FrameType = "flat";
+                Trans.SetAzimuthElevation(180, 90);
+                flatTask.ComputeRaDec($"{Utilities.HoursToHMS(Trans.RAJ2000)} " +
+                                      $"{Utilities.DegreesToDMS(Trans.DecJ2000)}");
+                Tasker.AddTask(flatTask);
                 StartDoFlats(flatTask);
-                lastFlatsTime = DateTime.UtcNow;
+                _lastFlatsTime = DateTime.UtcNow;
             }
             private static void StartDoFlats(ObservationTask task)
             {
                 Logger.AddLogEntry($"Start task# {task.TaskNumber}, type: {task.FrameType}");
-                isDoFlats = true;
+                _isDoFlats = true;
                 //TODO FLAT
-                // навести монтировку в зенит
+                SiTechExeSocket.GoTo(task.Ra, task.Dec, true); //проверять доехал ли
                 // начать делать экспозиции (автофокус выкл)
             }
 
@@ -140,15 +162,29 @@ namespace RPCC.Tasks
             private static void StartDoDarks()
             {
                 //TODO create dark task
-                var darkTask = new ObservationTask();
-                StartDoDarks(darkTask);
-                lastDarksTime = DateTime.UtcNow;
+                foreach (var exp in DarkExps)
+                {   
+                    var darkTask = new ObservationTask();
+                    darkTask.TaskNumber = Tasker.GetTasksLen();
+                    darkTask.FrameType = "dark";
+                    darkTask.Exp = exp;
+                    darkTask.Status = 1;
+                    darkTask.AllFrames = FlatDarkQuantity;
+                    darkTask.TimeAdd = DateTime.UtcNow;
+                    darkTask.TimeStart = DateTime.UtcNow;
+                    darkTask.TimeEnd = darkTask.TimeStart.AddMinutes((short) (FlatDarkQuantity * exp / 60) + 3);
+                    darkTask.Duration = (float) (darkTask.TimeEnd - darkTask.TimeStart).TotalHours;
+                    Tasker.AddTask(darkTask);
+                    
+                    StartDoDark(darkTask);
+                }
+                _lastDarksTime = DateTime.UtcNow;
             }
             
-            private static void StartDoDarks(ObservationTask task)
+            private static void StartDoDark(ObservationTask task)
             {
                 Logger.AddLogEntry($"Start task# {task.TaskNumber}, type: {task.FrameType}");
-                isDoDarks = true;
+                _isDoDarks = true;
                 //TODO DARK
                 // начать делать экспозиции (автофокус выкл)
             }
