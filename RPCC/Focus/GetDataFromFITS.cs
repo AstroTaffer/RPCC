@@ -19,16 +19,16 @@ namespace RPCC.Focus
         private readonly string _path2Cat;
         // private const int NumBestStars = 30;
         private List<List<double>> _sortTable;
-        private readonly Logger _log;
+        // private readonly Logger _log;
         // private string Fil { get; }
         // private readonly ushort[,] _img;
         public bool Status { get; }
         public int Focus { get; }
 
         // private readonly Logger _log;
-        public GetDataFromFits(string path2Fits, Logger log, bool s)
+        public GetDataFromFits(string path2Fits, bool s)
         {
-            _log = log;
+            // _log = log;
             Status = s;
             var outputFile = path2Fits.Replace("fit", "cat");
             _path2Cat = outputFile;
@@ -134,7 +134,7 @@ namespace RPCC.Focus
             }    
             catch (IOException ioExp)    
             {
-                _log.AddLogEntry(@"GetDataFromFITS delete outputs error: " + ioExp.Message); 
+                Logger.AddLogEntry(@"GetDataFromFITS delete outputs error: " + ioExp.Message); 
                 return false;
             }   
         }

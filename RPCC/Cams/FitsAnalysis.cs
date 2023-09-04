@@ -61,7 +61,7 @@ namespace RPCC.Cams
         internal int maxYCoordinate;
         internal double snr;
 
-        internal ProfileImageStat(ushort[][] image, ref Settings settings)
+        internal ProfileImageStat(ushort[][] image)
         {
             maxValue = int.MinValue;
             for (var i = 0; i < image.Length; i++)
@@ -80,7 +80,7 @@ namespace RPCC.Cams
             for (var j = 0; j < image[i].Length; j++)
             {
                 pixelRadius = Math.Sqrt(Math.Pow(i - maxYCoordinate, 2) + Math.Pow(j - maxXCoordinate, 2));
-                if (pixelRadius >= settings.AnnulusInnerRadius && pixelRadius <= settings.AnnulusOuterRadius)
+                if (pixelRadius >= Settings.AnnulusInnerRadius && pixelRadius <= Settings.AnnulusOuterRadius)
                 {
                     background += image[i][j];
                     backgroundCounter++;
@@ -114,12 +114,12 @@ namespace RPCC.Cams
                 pixelFlux = image[i][j] - background;
                 pixelRadius = Math.Sqrt(Math.Pow(i - centroidYCoordinate, 2) + Math.Pow(j - centroidXCoordinate, 2));
 
-                if (pixelRadius <= settings.ApertureRadius)
+                if (pixelRadius <= Settings.ApertureRadius)
                 {
                     starFlux += pixelFlux;
                     starPixelCount++;
                 }
-                else if (pixelRadius >= settings.AnnulusInnerRadius && pixelRadius <= settings.AnnulusOuterRadius)
+                else if (pixelRadius >= Settings.AnnulusInnerRadius && pixelRadius <= Settings.AnnulusOuterRadius)
                 {
                     skyFlux += pixelFlux;
                     skyPixelCount++;
@@ -143,7 +143,7 @@ namespace RPCC.Cams
                 pixelFlux = image[i][j] - background;
                 pixelRadius = Math.Sqrt(Math.Pow(i - centroidYCoordinate, 2) + Math.Pow(j - centroidXCoordinate, 2));
 
-                if (pixelRadius <= settings.AnnulusInnerRadius)
+                if (pixelRadius <= Settings.AnnulusInnerRadius)
                 {
                     starFlux += pixelFlux;
                     weightFlux += Math.Pow(pixelRadius, 2) * pixelFlux;

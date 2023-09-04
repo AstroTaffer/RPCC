@@ -11,13 +11,13 @@ namespace RPCC.Focus
     {
         private static readonly Timer ComTimer = new Timer(); //timer for Serial port communication delay
         private readonly SerialPort _serialPort = new SerialPort();
-        private readonly Logger _logger;
-        private readonly Settings _settings;
+        // private readonly Logger Logger;
+        // private readonly Settings Settings;
 
-        internal SerialFocus(Logger logger, Settings settings)
+        internal SerialFocus()
         {
-            _logger = logger;
-            _settings = settings;
+            // Logger = logger;
+            // Settings = settings;
             Switches = new BitArray(8);
         }
 
@@ -47,7 +47,7 @@ namespace RPCC.Focus
             try
             {
                 indata = _serialPort.ReadLine(); //read answer [1ap=1234]
-                // _logger.AddLogEntry("get msg "+indata);
+                // Logger.AddLogEntry("get msg "+indata);
             }
             catch
             {
@@ -100,8 +100,8 @@ namespace RPCC.Focus
             }
             catch (Exception exception)
             {
-                _logger.AddLogEntry("SERIAL FOCUS: Can't read the focus answer " + indata);
-                _logger.AddLogEntry(exception.Message);
+                Logger.AddLogEntry("SERIAL FOCUS: Can't read the focus answer " + indata);
+                Logger.AddLogEntry(exception.Message);
             }
 
             try
@@ -148,13 +148,13 @@ namespace RPCC.Focus
 
         public void Stop()
         {
-            _logger.AddLogEntry("SERIAL FOCUS: stop");
+            Logger.AddLogEntry("SERIAL FOCUS: stop");
             Write2Serial("2rst");
         }
 
         private void Open_Port()
         {
-            _serialPort.PortName = "COM" + _settings.FocusComId;
+            _serialPort.PortName = "COM" + Settings.FocusComId;
             _serialPort.BaudRate = 9600;
             _serialPort.DataBits = 8;
             try
@@ -165,13 +165,13 @@ namespace RPCC.Focus
                 _serialPort.NewLine = "\0";
                 _serialPort.ReceivedBytesThreshold = 6;
                 _serialPort.DiscardInBuffer(); // чистить порт после открытия
-                // _logger.AddLogEntry("SerialPort Focus opened");
+                // Logger.AddLogEntry("SerialPort Focus opened");
                 TransmissionEnabled = true;
             }
             catch (Exception ex)
             {
-                _logger.AddLogEntry("SERIAL FOCUS: opening fails");
-                _logger.AddLogEntry(ex.ToString());
+                Logger.AddLogEntry("SERIAL FOCUS: opening fails");
+                Logger.AddLogEntry(ex.ToString());
             }
         }
 
@@ -182,12 +182,12 @@ namespace RPCC.Focus
                 ComTimer.Stop();
                 TransmissionEnabled = false;
                 _serialPort.Close();
-                _logger.AddLogEntry("SERIAL FOCUS: closed");
+                Logger.AddLogEntry("SERIAL FOCUS: closed");
             }
             catch (Exception ex)
             {
-                _logger.AddLogEntry("SERIAL FOCUS: closing fails");
-                _logger.AddLogEntry(ex.ToString());
+                Logger.AddLogEntry("SERIAL FOCUS: closing fails");
+                Logger.AddLogEntry(ex.ToString());
             }
         }
 
@@ -205,7 +205,7 @@ namespace RPCC.Focus
         public void Write2Serial(string command)
         {
             if (!_serialPort.IsOpen || !TransmissionEnabled) return;
-            // _logger.AddLogEntry("send msg: " + command);
+            // Logger.AddLogEntry("send msg: " + command);
             if (command[1] == 'r' || command[1] == 's') //if run command
             {
                 TransmissionEnabled = false;

@@ -84,7 +84,7 @@ namespace RPCC.Tasks
             get;
             set;
         }
-//light, dark, flat, bias, focus, test
+//light, dark, flat
         public string FrameType
         {
             get;

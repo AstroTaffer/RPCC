@@ -4,54 +4,54 @@ using System.Windows.Forms;
 
 namespace RPCC.Utils
 {
-    public class Logger
+    public static class Logger
     {
-        private readonly ListBox _logBox;
+        internal static ListBox logBox;
 
-        internal Logger(ListBox listBox)
-        {
-            _logBox= listBox;
-        }
+        // internal Logger(ListBox listBox)
+        // {
+        //     LogBox= listBox;
+        // }
 
-        internal void AddLogEntry(string entry)
+        internal static void AddLogEntry(string entry)
         {
-            if (_logBox.Items.Count >= 1024)
+            if (logBox.Items.Count >= 1024)
             {
                 SaveLogs();
                 ClearLogs();
-                _logBox.Items.Insert(0, $"{DateTime.UtcNow:G} Logs have been saved and cleaned");
+                logBox.Items.Insert(0, $"{DateTime.UtcNow:G} Logs have been saved and cleaned");
             }
 
             try
             {
-                _logBox.Items.Insert(0, $"{DateTime.UtcNow:G} {entry}");
+                logBox.Items.Insert(0, $"{DateTime.UtcNow:G} {entry}");
             }
             catch
             {
-                _logBox.Invoke((MethodInvoker) delegate
+                logBox.Invoke((MethodInvoker) delegate
                 {
-                    _logBox.Items.Insert(0, $"{DateTime.UtcNow:G} {entry}");
+                    logBox.Items.Insert(0, $"{DateTime.UtcNow:G} {entry}");
                 });
             }
             
         }
 
-        internal void SaveLogs()
+        internal static void SaveLogs()
         {
             var logsFilePath = $"Logs {DateTime.UtcNow:yyyy-MM-ddTHH-mm-ss}.txt";
             var sw = new StreamWriter(logsFilePath);
-            foreach (string item in _logBox.Items) sw.WriteLine(item);
+            foreach (string item in logBox.Items) sw.WriteLine(item);
             sw.Close();
         }
 
-        internal void ClearLogs()
+        internal static void ClearLogs()
         {
-            _logBox.Items.Clear();
+            logBox.Items.Clear();
         }
 
-        internal void CopyLogItem()
+        internal static void CopyLogItem()
         {
-            if (_logBox.SelectedItems.Count > 0) Clipboard.SetText(_logBox.SelectedItem.ToString());
+            if (logBox.SelectedItems.Count > 0) Clipboard.SetText(logBox.SelectedItem.ToString());
         }
     }
 }

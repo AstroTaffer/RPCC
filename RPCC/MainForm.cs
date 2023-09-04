@@ -22,8 +22,8 @@ namespace RPCC
         ///     Логика работы основной формы программы
         ///     Обработка команд пользователя с помощью вызова готовых функций
         /// </summary>
-        private readonly Logger _logger;
-        private Settings _settings;
+        // private readonly Logger Logger;
+        // private Settings Settings;
 
         private ushort[][] _currentImage;        
         private GeneralImageStat _currentImageGStat;
@@ -36,7 +36,7 @@ namespace RPCC
         private readonly CameraFocus _cameraFocus;
 
         private readonly WeatherSocket _domeSocket;
-        private readonly WeatherDataCollector _weatherDc;
+        // private readonly WeatherDataCollector _weatherDc;
         
         private readonly DonutsSocket _donutsSocket;
         
@@ -54,28 +54,29 @@ namespace RPCC
 
             _isFirstLoad = true;
 
-            _logger = new Logger(listBoxLogs);
-            _logger.AddLogEntry("Application launched");
+            // Logger = new Logger(listBoxLogs);
+            Logger.logBox = listBoxLogs;
+            Logger.AddLogEntry("Application launched");
 
-            _settings = new Settings(_logger);
-            _settings.LoadXmlConfig("SettingsDefault.xml");
+            // Settings = new Settings();
+            Settings.LoadXmlConfig("SettingsDefault.xml");
 
             // Hardware controls
-            _cameraControl = new CameraControl(_logger, _settings);
-            _cameraFocus = new CameraFocus(_logger, _settings);
+            _cameraControl = new CameraControl();
+            _cameraFocus = new CameraFocus();
 
             // MeteoDome connect
-            _weatherDc = new WeatherDataCollector();
-            _domeSocket = new WeatherSocket(_logger, _settings, _weatherDc);
+            // _weatherDc = new WeatherDataCollector();
+            _domeSocket = new WeatherSocket();
             _domeSocket.Connect();
 
             // Donuts connect
-            _donutsSocket = new DonutsSocket(_logger, _settings);
+            _donutsSocket = new DonutsSocket();
             _donutsSocket.Connect();
 
             // SiTechExe connect
             _mountDc = new MountDataCollector();
-            _siTechExeSocket = new SiTechExeSocket(_logger, _settings, _mountDc);
+            _siTechExeSocket = new SiTechExeSocket(_mountDc);
             _siTechExeSocket.Connect();
 
             // Create timer for focus loop
@@ -89,12 +90,12 @@ namespace RPCC
             if (!_cameraFocus.Init())
             {
                 MessageBox.Show(@"Can't open Focus serial port", @"OK", MessageBoxButtons.OK);
-                _logger.AddLogEntry(@"Can't open Focus serial port");
+                Logger.AddLogEntry(@"Can't open Focus serial port");
             }
 
-            groupBoxFocusSettings.Text = $@"Focus Settings (COMPORT {_settings.FocusComId})";
+            groupBoxFocusSettings.Text = $@"Focus Settings (COMPORT {Settings.FocusComId})";
 
-            Tasker.logger = _logger;
+            // Tasker.logger = Logger;
             Tasker.dataGridViewTasker = dataGridViewTasker;
             Tasker.contextMenuStripTasker = contextMenuStripTasker;
             Tasker.SetHeader();
@@ -167,14 +168,14 @@ namespace RPCC
                         // TODO: Move to separate thread
                         RpccFits imageFits = _cameraControl.ReadImage(_cameraControl.cameras[i]);
 
-                        imageFits.SaveFitsFile(_settings, _cameraControl, _weatherDc, _cameraFocus.SerialFocus.CurrentPosition, i);
+                        imageFits.SaveFitsFile(_cameraControl, _cameraFocus.SerialFocus.CurrentPosition, i);
 
                         if (i == _cameraControl.task.viewCamIndex)
                         {
                             _isCurrentImageLoaded = false;
                             _currentImage = imageFits.data;
                             _currentImageGStat = new GeneralImageStat(_currentImage);
-                            _logger.AddLogEntry($"Min: {_currentImageGStat.min}; " +
+                            Logger.AddLogEntry($"Min: {_currentImageGStat.min}; " +
                                 $"Max: {_currentImageGStat.max}; " +
                                 $"Mean: {_currentImageGStat.mean:0.##}; " +
                                 $"SD: {_currentImageGStat.sd:0.##}");
@@ -204,7 +205,7 @@ namespace RPCC
                     numericUpDownSequence.Enabled = true;
                     numericUpDownExpTime.Enabled = true;
                     updateCamerasSettingsToolStripMenuItem.Enabled = true;
-                    _logger.AddLogEntry("Survey finished");
+                    Logger.AddLogEntry("Survey finished");
                 }
             }
         }
@@ -284,21 +285,21 @@ namespace RPCC
         private void ListBoxLogs_DoubleClick(object sender, EventArgs e)
         {
             // TODO: Nice idea, but nothing points to this feature. Implement in a less obscure way.
-            _logger.CopyLogItem();
+            Logger.CopyLogItem();
         }
 
         private void ClearToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // Clear log window
-            _logger.ClearLogs();
-            _logger.AddLogEntry("Logs have been cleaned");
+            Logger.ClearLogs();
+            Logger.AddLogEntry("Logs have been cleaned");
         }
 
         private void SaveToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // Save logs in file
-            _logger.SaveLogs();
-            _logger.AddLogEntry("Logs have been saved");
+            Logger.SaveLogs();
+            Logger.AddLogEntry("Logs have been saved");
         }
         #endregion
 
@@ -308,10 +309,10 @@ namespace RPCC
             pictureBoxFits.Image = null;
             pictureBoxProfile.Image = null;
 
-            var lowerBrightnessBorder = _currentImageGStat.mean - _settings.LowerBrightnessSd * _currentImageGStat.sd;
+            var lowerBrightnessBorder = _currentImageGStat.mean - Settings.LowerBrightnessSd * _currentImageGStat.sd;
             if (lowerBrightnessBorder < _currentImageGStat.min) lowerBrightnessBorder = _currentImageGStat.min;
 
-            var upperBrightnessBorder = _currentImageGStat.mean + _settings.UpperBrightnessSd * _currentImageGStat.sd;
+            var upperBrightnessBorder = _currentImageGStat.mean + Settings.UpperBrightnessSd * _currentImageGStat.sd;
             if (upperBrightnessBorder > _currentImageGStat.max) upperBrightnessBorder = _currentImageGStat.max;
 
             upperBrightnessBorder -= lowerBrightnessBorder;
@@ -331,12 +332,12 @@ namespace RPCC
 
             pictureBoxFits.Image = bitmapFits;
         }
-
-        private void PlotProfileImage(ref Settings settings, ProfileImageStat pStat, ushort[][] image)
+    
+        private void PlotProfileImage(ProfileImageStat pStat, ushort[][] image)
         {
             // It calculates scaling and placing parameters in a rather non-obvious way
             // But it seems harmless. If you don't have anything better to do,
-            // You can tidy it up and create appropriate settings variables
+            // You can tidy it up and create appropriate Settings variables
 
             var bitmapProfile =
                 new Bitmap(pictureBoxProfile.Width, pictureBoxProfile.Height, PixelFormat.Format24bppRgb);
@@ -345,7 +346,7 @@ namespace RPCC
             double pixelRadius;
             int pixelBitmapXCoordinate;
             int pixelBitmapYCoordinate;
-            var bitmapScaleX = pictureBoxProfile.Width / (settings.AnnulusOuterRadius * Math.Sqrt(2));
+            var bitmapScaleX = pictureBoxProfile.Width / (Settings.AnnulusOuterRadius * Math.Sqrt(2));
             var bitmapScaleY = pictureBoxProfile.Height * 0.9 / (pStat.maxValue - pStat.background);
             for (var i = 0; i < image.Length; i++)
             for (var j = 0; j < image[i].Length; j++)
@@ -366,8 +367,8 @@ namespace RPCC
                         Color.FromArgb(255, 255, 255));
             }
 
-            var apertureBitmapXCoordinate = (int) Math.Round(settings.ApertureRadius * bitmapScaleX);
-            var annulusInnerRadiusBitmapXCoordinate = (int) Math.Round(settings.AnnulusInnerRadius * bitmapScaleX);
+            var apertureBitmapXCoordinate = (int) Math.Round(Settings.ApertureRadius * bitmapScaleX);
+            var annulusInnerRadiusBitmapXCoordinate = (int) Math.Round(Settings.AnnulusInnerRadius * bitmapScaleX);
             for (var i = 0; i < pictureBoxProfile.Height; i++)
             {
                 bitmapProfile.SetPixel(apertureBitmapXCoordinate, i, Color.FromArgb(255, 0, 0));
@@ -401,44 +402,44 @@ namespace RPCC
 
                     var xCoordinate = (int) ((double) e.X / pictureBoxFits.Width * _currentImage[0].Length);
                     var yCoordinate = (int) ((double) e.Y / pictureBoxFits.Height * _currentImage.Length);
-                    _logger.AddLogEntry($"Pixel ({xCoordinate}, {yCoordinate}) selected");
+                    Logger.AddLogEntry($"Pixel ({xCoordinate}, {yCoordinate}) selected");
 
-                    if (xCoordinate - _settings.AnnulusOuterRadius < 0 ||
-                        xCoordinate + _settings.AnnulusOuterRadius > _currentImage[0].Length - 1 ||
-                        yCoordinate - _settings.AnnulusOuterRadius < 0 ||
-                        yCoordinate + _settings.AnnulusOuterRadius > _currentImage.Length - 1)
+                    if (xCoordinate - Settings.AnnulusOuterRadius < 0 ||
+                        xCoordinate + Settings.AnnulusOuterRadius > _currentImage[0].Length - 1 ||
+                        yCoordinate - Settings.AnnulusOuterRadius < 0 ||
+                        yCoordinate + Settings.AnnulusOuterRadius > _currentImage.Length - 1)
                     {
-                        _logger.AddLogEntry("WARNING Pixel is too close to the frame borders");
+                        Logger.AddLogEntry("WARNING Pixel is too close to the frame borders");
                     }
                     else
                     {
-                        var subProfileImage = new ushort[2 * _settings.AnnulusOuterRadius + 1][];
+                        var subProfileImage = new ushort[2 * Settings.AnnulusOuterRadius + 1][];
                         for (var i = 0; i < subProfileImage.Length; i++)
                         {
-                            subProfileImage[i] = new ushort[2 * _settings.AnnulusOuterRadius + 1];
+                            subProfileImage[i] = new ushort[2 * Settings.AnnulusOuterRadius + 1];
                             for (var j = 0; j < subProfileImage[i].Length; j++)
                                 subProfileImage[i][j] =
-                                    _currentImage[yCoordinate - _settings.AnnulusOuterRadius + i]
-                                        [xCoordinate - _settings.AnnulusOuterRadius + j];
+                                    _currentImage[yCoordinate - Settings.AnnulusOuterRadius + i]
+                                        [xCoordinate - Settings.AnnulusOuterRadius + j];
                         }
 
-                        var localStat = new ProfileImageStat(subProfileImage, ref _settings);
-                        _logger.AddLogEntry($"Max: {localStat.maxValue} " +
-                                           $"({localStat.maxXCoordinate + xCoordinate - _settings.AnnulusOuterRadius}; " +
-                                           $"{localStat.maxYCoordinate + yCoordinate - _settings.AnnulusOuterRadius}); " +
+                        var localStat = new ProfileImageStat(subProfileImage);
+                        Logger.AddLogEntry($"Max: {localStat.maxValue} " +
+                                           $"({localStat.maxXCoordinate + xCoordinate - Settings.AnnulusOuterRadius}; " +
+                                           $"{localStat.maxYCoordinate + yCoordinate - Settings.AnnulusOuterRadius}); " +
                                            $"Background: {localStat.background:0.#}; " +
-                                           $"Centroid: ({localStat.centroidXCoordinate + xCoordinate - _settings.AnnulusOuterRadius:0.#}; " +
-                                           $"{localStat.centroidYCoordinate + yCoordinate - _settings.AnnulusOuterRadius:0.#}); " +
+                                           $"Centroid: ({localStat.centroidXCoordinate + xCoordinate - Settings.AnnulusOuterRadius:0.#}; " +
+                                           $"{localStat.centroidYCoordinate + yCoordinate - Settings.AnnulusOuterRadius:0.#}); " +
                                            $"SNR: {localStat.snr:0.#}; " +
                                            $"FWHM: {localStat.fwhm:0.##}");
-                        PlotProfileImage(ref _settings, localStat, subProfileImage);
-                        _logger.AddLogEntry("Profile image plotted");
+                        PlotProfileImage(localStat, subProfileImage);
+                        Logger.AddLogEntry("Profile image plotted");
                     }
                 }
             }
             else
             {
-                _logger.AddLogEntry("WARNING Image not loaded");
+                Logger.AddLogEntry("WARNING Image not loaded");
             }
         }
         #endregion
@@ -463,14 +464,14 @@ namespace RPCC
 
             _cameraControl.SetSurveySettings();
             _cameraControl.StartExposure();
-            _logger.AddLogEntry($"Survey started - {_cameraControl.task.framesNum} {_cameraControl.task.framesType}" +
+            Logger.AddLogEntry($"Survey started - {_cameraControl.task.framesNum} {_cameraControl.task.framesType}" +
                 $" frames with exposure of {_cameraControl.task.framesExpTime * 1e-3} s");
         }
 
         private void ButtonSurveyStop_Click(object sender, EventArgs e)
         {
             _cameraControl.CancelSurvey();
-            _logger.AddLogEntry($"Survey cancelled, {_cameraControl.task.framesNum} {(_cameraControl.task.framesNum == 1 ? "frame" : "frames")} skipped");
+            Logger.AddLogEntry($"Survey cancelled, {_cameraControl.task.framesNum} {(_cameraControl.task.framesNum == 1 ? "frame" : "frames")} skipped");
             _cameraControl.task.framesNum = 1;
             numericUpDownSequence.Value = 1;
 
@@ -485,9 +486,9 @@ namespace RPCC
         #region Options
         private void SettingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var settingsForm = new SettingsForm(_settings);
+            var settingsForm = new SettingsForm();
             settingsForm.ShowDialog();
-            if (settingsForm.DialogResult == DialogResult.OK) _logger.AddLogEntry("Settings changed");
+            if (settingsForm.DialogResult == DialogResult.OK) Logger.AddLogEntry("Settings changed");
         }
 
         private void UpdateCameraSettingsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -498,13 +499,13 @@ namespace RPCC
         private void LoadConfigToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (openFileDialogConfig.ShowDialog() == DialogResult.OK)
-                _settings.LoadXmlConfig(openFileDialogConfig.FileName);
+                Settings.LoadXmlConfig(openFileDialogConfig.FileName);
         }
 
         private void SaveConfigToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (saveFileDialogConfig.ShowDialog() == DialogResult.OK)
-                _settings.SaveXmlConfig(saveFileDialogConfig.FileName);
+                Settings.SaveXmlConfig(saveFileDialogConfig.FileName);
         }
         #endregion
 
@@ -513,15 +514,15 @@ namespace RPCC
         {
             var testFits = new RpccFits(".\\Cams\\TestImage.fits");
             var testHeader = testFits.header;
-            _logger.AddLogEntry($"Template DATE-OBS: {testHeader.GetStringValue("DATE-OBS")}");
+            Logger.AddLogEntry($"Template DATE-OBS: {testHeader.GetStringValue("DATE-OBS")}");
 
             var libVer = new StringBuilder(128);
             var len = new IntPtr(128);
             var errorLastFliCmd = NativeMethods.FLIGetLibVersion(libVer, len);
             if (errorLastFliCmd == 0)
-                _logger.AddLogEntry(libVer.ToString());
+                Logger.AddLogEntry(libVer.ToString());
             else
-                _logger.AddLogEntry("WARNING Unable to retrieve FLI library version");
+                Logger.AddLogEntry("WARNING Unable to retrieve FLI library version");
         }
 
         private async void LoadTestImageToolStripMenuItem_Click(object sender, EventArgs e)
@@ -531,34 +532,34 @@ namespace RPCC
             _currentImage = testFits.data;
 
             _currentImageGStat = new GeneralImageStat(_currentImage);
-            _logger.AddLogEntry($"Min: {_currentImageGStat.min}; " +
+            Logger.AddLogEntry($"Min: {_currentImageGStat.min}; " +
                                 $"Max: {_currentImageGStat.max}; " +
                                 $"Mean: {_currentImageGStat.mean:0.##}; " +
                                 $"SD: {_currentImageGStat.sd:0.##}");
 
             await Task.Run(() => PlotFitsImage());
             _isCurrentImageLoaded = true;
-            _logger.AddLogEntry("Test image plotted");
+            Logger.AddLogEntry("Test image plotted");
         }
 
         private void RestoreDefaultConfigFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            _settings.RestoreDefaultXmlConfig();
+            Settings.RestoreDefaultXmlConfig();
         }
 
         private void SocketToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            _logger.AddLogEntry("Test donuts");
-            _logger.AddLogEntry(_donutsSocket.PingServer());
+            Logger.AddLogEntry("Test donuts");
+            Logger.AddLogEntry(_donutsSocket.PingServer());
             
             var cwd = Directory.GetCurrentDirectory();
             var refFile = cwd + "\\Guid\\2023-04-07T17-56-16.918_EAST_V.fits";
             var testFile = cwd + "\\Guid\\2023-04-07T18-00-24.167_EAST_V.fits";
             var req = refFile + ";" + testFile;
-            // _logger.AddLogEntry(req);
+            // Logger.AddLogEntry(req);
             var outPut = _donutsSocket.GetGuideCorrection(req);
             if (outPut == null) return;
-            _logger.AddLogEntry("shifts = " + outPut[0] + "x " + outPut[1] + "y ");
+            Logger.AddLogEntry("shifts = " + outPut[0] + "x " + outPut[1] + "y ");
         }
         #endregion
 
@@ -634,7 +635,7 @@ namespace RPCC
 
         private void AddToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            // _logger.AddLogEntry("Add Task click");
+            // Logger.AddLogEntry("Add Task click");
             var taskForm = new TaskForm(true);
             taskForm.Show();
         }

@@ -6,41 +6,41 @@ namespace RPCC.Utils
 {
     public partial class SettingsForm : Form
     {
-        private readonly Settings _settings;
+        // private readonly Settings Settings;
 
-        internal SettingsForm(Settings settings)
+        internal SettingsForm()
         {
             InitializeComponent();
-            _settings = settings;
+            // Settings = settings;
 
             #region Image Analysis
-            textBoxLowerBrightnessSd.Text = _settings.LowerBrightnessSd.ToString();
-            textBoxUpperBrightnessSd.Text = _settings.UpperBrightnessSd.ToString();
-            numericUpDownApertureRadius.Value = _settings.ApertureRadius;
-            numericUpDownAnnulusInnerRadius.Value = _settings.AnnulusInnerRadius;
-            numericUpDownAnnulusOuterRadius.Value = _settings.AnnulusOuterRadius;
+            textBoxLowerBrightnessSd.Text = Settings.LowerBrightnessSd.ToString();
+            textBoxUpperBrightnessSd.Text = Settings.UpperBrightnessSd.ToString();
+            numericUpDownApertureRadius.Value = Settings.ApertureRadius;
+            numericUpDownAnnulusInnerRadius.Value = Settings.AnnulusInnerRadius;
+            numericUpDownAnnulusOuterRadius.Value = Settings.AnnulusOuterRadius;
             #endregion
 
             #region Cameras
-            textBoxgCamSn.Text = _settings.SnCamG;
-            textBoxrCamSn.Text = _settings.SnCamR;
-            textBoxiCamSn.Text = _settings.SnCamI;
-            numericUpDownNumFlushes.Value = _settings.NumFlushes;
-            comboBoxTemp.Text = _settings.CamTemp.ToString();
-            numericUpDownBin.Value = _settings.CamBin;
-            comboBoxReadout.SelectedItem = _settings.CamRoMode;
+            textBoxgCamSn.Text = Settings.SnCamG;
+            textBoxrCamSn.Text = Settings.SnCamR;
+            textBoxiCamSn.Text = Settings.SnCamI;
+            numericUpDownNumFlushes.Value = Settings.NumFlushes;
+            comboBoxTemp.Text = Settings.CamTemp.ToString();
+            numericUpDownBin.Value = Settings.CamBin;
+            comboBoxReadout.SelectedItem = Settings.CamRoMode;
             #endregion
 
             #region Survey
-            folderBrowserDialogSetFolder.SelectedPath = _settings.OutImgsFolder;
-            labelOutFolder.Text = _settings.OutImgsFolder;
+            folderBrowserDialogSetFolder.SelectedPath = Settings.OutImgsFolder;
+            labelOutFolder.Text = Settings.OutImgsFolder;
             #endregion
 
             #region Comms
-            numericUpDownFocusComId.Value = _settings.FocusComId;
-            textBoxMeteoDomeTcpIpPort.Text = _settings.MeteoDomeTcpIpPort.ToString();
-            textBoxDonutsTcpIpPort.Text = _settings.DonutsTcpIpPort.ToString();
-            textBoxSiTechExeTcpIpPort.Text = _settings.SiTechExeTcpIpPort.ToString();
+            numericUpDownFocusComId.Value = Settings.FocusComId;
+            textBoxMeteoDomeTcpIpPort.Text = Settings.MeteoDomeTcpIpPort.ToString();
+            textBoxDonutsTcpIpPort.Text = Settings.DonutsTcpIpPort.ToString();
+            textBoxSiTechExeTcpIpPort.Text = Settings.SiTechExeTcpIpPort.ToString();
             #endregion
         }
 
@@ -61,51 +61,51 @@ namespace RPCC.Utils
             #region Image Analysis
             try
             {
-                _settings.LowerBrightnessSd = double.Parse(textBoxLowerBrightnessSd.Text, ruCulture);
+                Settings.LowerBrightnessSd = double.Parse(textBoxLowerBrightnessSd.Text, ruCulture);
             }
             catch (FormatException)
             {
-                _settings.LowerBrightnessSd = double.Parse(textBoxLowerBrightnessSd.Text, usCulture);
+                Settings.LowerBrightnessSd = double.Parse(textBoxLowerBrightnessSd.Text, usCulture);
             }
             try
             {
-                _settings.UpperBrightnessSd = double.Parse(textBoxUpperBrightnessSd.Text, ruCulture);
+                Settings.UpperBrightnessSd = double.Parse(textBoxUpperBrightnessSd.Text, ruCulture);
             }
             catch (FormatException)
             {
-                _settings.UpperBrightnessSd = double.Parse(textBoxUpperBrightnessSd.Text, usCulture);
+                Settings.UpperBrightnessSd = double.Parse(textBoxUpperBrightnessSd.Text, usCulture);
             }
-            _settings.ApertureRadius = (int)numericUpDownApertureRadius.Value;
-            _settings.AnnulusInnerRadius = (int)numericUpDownAnnulusInnerRadius.Value;
-            _settings.AnnulusOuterRadius = (int)numericUpDownAnnulusOuterRadius.Value;
+            Settings.ApertureRadius = (int)numericUpDownApertureRadius.Value;
+            Settings.AnnulusInnerRadius = (int)numericUpDownAnnulusInnerRadius.Value;
+            Settings.AnnulusOuterRadius = (int)numericUpDownAnnulusOuterRadius.Value;
             #endregion
 
             #region Cameras
-            _settings.SnCamG = textBoxgCamSn.Text;
-            _settings.SnCamR = textBoxrCamSn.Text;
-            _settings.SnCamI = textBoxiCamSn.Text;
-            _settings.NumFlushes = (int)numericUpDownNumFlushes.Value;
+            Settings.SnCamG = textBoxgCamSn.Text;
+            Settings.SnCamR = textBoxrCamSn.Text;
+            Settings.SnCamI = textBoxiCamSn.Text;
+            Settings.NumFlushes = (int)numericUpDownNumFlushes.Value;
             try
             {
-                _settings.CamTemp = double.Parse(comboBoxTemp.Text, ruCulture);
+                Settings.CamTemp = double.Parse(comboBoxTemp.Text, ruCulture);
             }
             catch (FormatException)
             {
-                _settings.CamTemp = double.Parse(comboBoxTemp.Text, usCulture);
+                Settings.CamTemp = double.Parse(comboBoxTemp.Text, usCulture);
             }
-            _settings.CamBin = (int)numericUpDownBin.Value;
-            _settings.CamRoMode = (string)comboBoxReadout.SelectedItem;
+            Settings.CamBin = (int)numericUpDownBin.Value;
+            Settings.CamRoMode = (string)comboBoxReadout.SelectedItem;
             #endregion
 
             #region Survey
-            _settings.OutImgsFolder = folderBrowserDialogSetFolder.SelectedPath;
+            Settings.OutImgsFolder = folderBrowserDialogSetFolder.SelectedPath;
             #endregion
 
             #region Comms
-            _settings.FocusComId = (int)numericUpDownFocusComId.Value;
-            _settings.MeteoDomeTcpIpPort = int.Parse(textBoxMeteoDomeTcpIpPort.Text);
-            _settings.DonutsTcpIpPort = int.Parse(textBoxDonutsTcpIpPort.Text);
-            _settings.SiTechExeTcpIpPort = int.Parse(textBoxSiTechExeTcpIpPort.Text);
+            Settings.FocusComId = (int)numericUpDownFocusComId.Value;
+            Settings.MeteoDomeTcpIpPort = int.Parse(textBoxMeteoDomeTcpIpPort.Text);
+            Settings.DonutsTcpIpPort = int.Parse(textBoxDonutsTcpIpPort.Text);
+            Settings.SiTechExeTcpIpPort = int.Parse(textBoxSiTechExeTcpIpPort.Text);
             #endregion
 
             DialogResult = DialogResult.OK;

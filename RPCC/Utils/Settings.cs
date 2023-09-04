@@ -6,14 +6,14 @@ using System.Xml.Linq;
 
 namespace RPCC.Utils
 {
-    internal class Settings
+    internal  class Settings
     {
         /// <summary>
         ///     Настройки приложения
         ///     Чтение и запись конфигурационных файлов
         /// </summary>
 
-        private readonly Logger _logger;
+        // private readonly Logger Logger;
 
         #region Analysis and Plotting
 
@@ -21,13 +21,13 @@ namespace RPCC.Utils
         ///     Настройки анализа и построения изображения
         /// </summary>
 
-        private double _lowerBrightnessSd;
-        private double _upperBrightnessSd;
-        private int _apertureRadius;
-        private int _annulusInnerRadius;
-        private int _annulusOuterRadius;
+        private static double _lowerBrightnessSd;
+        private static double _upperBrightnessSd;
+        private static int _apertureRadius;
+        private static int _annulusInnerRadius;
+        private static int _annulusOuterRadius;
 
-        public double LowerBrightnessSd
+        public static double LowerBrightnessSd
         {
             get => _lowerBrightnessSd;
             set
@@ -37,7 +37,7 @@ namespace RPCC.Utils
             }
         }
 
-        public double UpperBrightnessSd
+        public static double UpperBrightnessSd
         {
             get => _upperBrightnessSd;
             set
@@ -47,7 +47,7 @@ namespace RPCC.Utils
             }
         }
 
-        public int ApertureRadius
+        public static int ApertureRadius
         {
             get => _apertureRadius;
             set
@@ -57,7 +57,7 @@ namespace RPCC.Utils
             }
         }
 
-        public int AnnulusInnerRadius
+        public static int AnnulusInnerRadius
         {
             get => _annulusInnerRadius;
             set
@@ -68,7 +68,7 @@ namespace RPCC.Utils
             }
         }
 
-        public int AnnulusOuterRadius
+        public static int AnnulusOuterRadius
         {
             get => _annulusOuterRadius;
             set
@@ -85,15 +85,15 @@ namespace RPCC.Utils
         ///     Настройки камер
         /// </summary>
 
-        private string _snCamG;
-        private string _snCamR;
-        private string _snCamI;
-        private int _numFlushes;
-        private double _camTemp;
-        private int _camBin;
-        private string _camRoMode;
+        private static string _snCamG;
+        private static string _snCamR;
+        private static string _snCamI;
+        private static int _numFlushes;
+        private static double _camTemp;
+        private static int _camBin;
+        private static string _camRoMode;
 
-        public string SnCamG
+        public static string SnCamG
         {
             get => _snCamG;
             set
@@ -103,7 +103,7 @@ namespace RPCC.Utils
             }
         }
 
-        public string SnCamR
+        public static string SnCamR
         {
             get => _snCamR;
             set
@@ -113,7 +113,7 @@ namespace RPCC.Utils
             }
         }
 
-        public string SnCamI
+        public static string SnCamI
         {
             get => _snCamI;
             set
@@ -123,7 +123,7 @@ namespace RPCC.Utils
             }
         }
 
-        public int NumFlushes
+        public static int NumFlushes
         {
             get => _numFlushes;
             set
@@ -133,7 +133,7 @@ namespace RPCC.Utils
             }
         }
 
-        public double CamTemp
+        public static double CamTemp
         {
             get => _camTemp;
             set
@@ -143,7 +143,7 @@ namespace RPCC.Utils
             }
         }
 
-        public int CamBin
+        public static int CamBin
         {
             get => _camBin;
             set
@@ -153,7 +153,7 @@ namespace RPCC.Utils
             }
         }
 
-        public string CamRoMode
+        public static string CamRoMode
         {
             get => _camRoMode;
             set
@@ -169,9 +169,9 @@ namespace RPCC.Utils
         ///     Настройки съёмки
         /// </summary>
 
-        private string _outImgsFolder;
+        private static string _outImgsFolder;
 
-        public string OutImgsFolder
+        public static string OutImgsFolder
         {
             get => _outImgsFolder;
             set
@@ -189,12 +189,12 @@ namespace RPCC.Utils
         /// </summary>
         ///
 
-        private int _focusComId;
-        private int _meteoDomeTcpIpPort;
-        private int _donutsTcpIpPort;
-        private int _siTechExeTcpIpPort;
+        private static int _focusComId;
+        private static int _meteoDomeTcpIpPort;
+        private static int _donutsTcpIpPort;
+        private static int _siTechExeTcpIpPort;
 
-        public int FocusComId
+        public static int FocusComId
         {
             get => _focusComId;
             set
@@ -204,7 +204,7 @@ namespace RPCC.Utils
             }
         }
 
-        public int MeteoDomeTcpIpPort
+        public static int MeteoDomeTcpIpPort
         {
             get => _meteoDomeTcpIpPort;
             set
@@ -214,7 +214,7 @@ namespace RPCC.Utils
             }
         }
 
-        public int DonutsTcpIpPort
+        public static int DonutsTcpIpPort
         {
             get => _donutsTcpIpPort;
             set
@@ -224,7 +224,7 @@ namespace RPCC.Utils
             }
         }
 
-        public int SiTechExeTcpIpPort
+        public static int SiTechExeTcpIpPort
         {
             get => _siTechExeTcpIpPort;
             set
@@ -236,13 +236,13 @@ namespace RPCC.Utils
 
         #endregion
 
-        internal Settings(Logger logger)
-        {
-            _logger = logger;
-        }
+        // internal Settings()
+        // {
+        //     // Logger = logger;
+        // }
 
         #region ConfigIO
-        internal void LoadXmlConfig(string fileName)
+        internal static void LoadXmlConfig(string fileName)
         {
             try
             {
@@ -296,7 +296,7 @@ namespace RPCC.Utils
                 DonutsTcpIpPort = (int)config.Root.Element("comms").Element("donutsTcpIpPort");
                 SiTechExeTcpIpPort = (int)config.Root.Element("comms").Element("siTechExeTcpIpPort");
 
-                _logger.AddLogEntry($"Config file {fileName} loaded");
+                Logger.AddLogEntry($"Config file {fileName} loaded");
             }
             catch (FileNotFoundException)
             {
@@ -309,7 +309,7 @@ namespace RPCC.Utils
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Error,
                         MessageBoxDefaultButton.Button1);
-                    _logger.AddLogEntry($"WARNING Default config file not found");
+                    Logger.AddLogEntry($"WARNING Default config file not found");
                     if (result == DialogResult.Yes)
                     {
                         RestoreDefaultXmlConfig();
@@ -324,7 +324,7 @@ namespace RPCC.Utils
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Error,
                         MessageBoxDefaultButton.Button1);
-                    _logger.AddLogEntry($"WARNING Config file {fileName} not found");
+                    Logger.AddLogEntry($"WARNING Config file {fileName} not found");
                 }
             }
             catch (NullReferenceException)
@@ -338,7 +338,7 @@ namespace RPCC.Utils
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Error,
                         MessageBoxDefaultButton.Button1);
-                    _logger.AddLogEntry($"WARNING Default config file has invalid structure");
+                    Logger.AddLogEntry($"WARNING Default config file has invalid structure");
                     if (result == DialogResult.Yes)
                     {
                         RestoreDefaultXmlConfig();
@@ -354,7 +354,7 @@ namespace RPCC.Utils
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Error,
                         MessageBoxDefaultButton.Button1);
-                    _logger.AddLogEntry($"WARNING Config file {fileName} has invalid structure");
+                    Logger.AddLogEntry($"WARNING Config file {fileName} has invalid structure");
                     LoadXmlConfig("SettingsDefault.xml");
                 }
             }
@@ -370,7 +370,7 @@ namespace RPCC.Utils
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Error,
                         MessageBoxDefaultButton.Button1);
-                    _logger.AddLogEntry($"WARNING Default config file has invalid parameters");
+                    Logger.AddLogEntry($"WARNING Default config file has invalid parameters");
                     if (result == DialogResult.Yes)
                     {
                         RestoreDefaultXmlConfig();
@@ -387,13 +387,13 @@ namespace RPCC.Utils
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Error,
                         MessageBoxDefaultButton.Button1);
-                    _logger.AddLogEntry($"WARNING Config file {fileName} has invalid parameters");
+                    Logger.AddLogEntry($"WARNING Config file {fileName} has invalid parameters");
                     LoadXmlConfig("SettingsDefault.xml");
                 }
             }
         }
 
-        internal void SaveXmlConfig(string fileName)
+        internal static void SaveXmlConfig(string fileName)
         {
             var config = new XDocument(new XElement("settings",
                 new XElement("image_analysis",
@@ -423,10 +423,10 @@ namespace RPCC.Utils
             ));
 
             config.Save(fileName);
-            _logger.AddLogEntry($"Config file {fileName} saved");
+            Logger.AddLogEntry($"Config file {fileName} saved");
         }
 
-        internal void RestoreDefaultXmlConfig()
+        internal static void RestoreDefaultXmlConfig()
         {
             var config = new XDocument(new XElement("settings",
                 new XElement("image_analysis",
@@ -456,7 +456,7 @@ namespace RPCC.Utils
             ));
 
             config.Save("SettingsDefault.xml");
-            _logger.AddLogEntry("Default config file restored");
+            Logger.AddLogEntry("Default config file restored");
         }
         #endregion
     }

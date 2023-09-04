@@ -13,7 +13,6 @@ namespace RPCC.Tasks
         private static readonly DataTable DataTable = new DataTable();
         private static readonly DataSet DataSet = new DataSet();
         public static DataGridView dataGridViewTasker;
-        public static Logger logger;
         private static readonly string FileName = Directory.GetCurrentDirectory() + "\\" + "Tasks.xml";
         public static ContextMenuStrip contextMenuStripTasker;
 
@@ -84,7 +83,7 @@ namespace RPCC.Tasks
             }
             catch (Exception exception)
             {
-                logger.AddLogEntry(exception.Message);
+                Logger.AddLogEntry(exception.Message);
             }
         }
 
@@ -101,7 +100,7 @@ namespace RPCC.Tasks
                 }
                 catch (System.Xml.XmlException e)
                 {
-                    logger.AddLogEntry($"Tasker Error: {e.Message}");
+                    Logger.AddLogEntry($"Tasker Error: {e.Message}");
                 }
             }   
             else

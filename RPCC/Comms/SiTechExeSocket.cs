@@ -10,8 +10,8 @@ namespace RPCC.Comms
 {
     internal class SiTechExeSocket
     {
-        private readonly Logger _logger;
-        private readonly Settings _settings;
+        // private readonly Logger Logger;
+        // private readonly Settings Settings;
         private readonly MountDataCollector _collector;
 
         private readonly Timer _mountTimer;
@@ -40,10 +40,10 @@ namespace RPCC.Comms
          *     SetTrackMode    --- -//-, message == "_SetTrackMode Command Successful"
          **/
 
-        internal SiTechExeSocket(Logger logger, Settings settings, MountDataCollector collector)
+        internal SiTechExeSocket(MountDataCollector collector)
         {
-            _logger = logger;
-            _settings = settings;
+            // Logger = logger;
+            // Settings = settings;
             _collector = collector;
 
             _mountTimer = new Timer(1000);
@@ -57,12 +57,12 @@ namespace RPCC.Comms
         {
             if (_isConnected)
             {
-                _logger.AddLogEntry("WARNING Already connected to SiTechExe");
+                Logger.AddLogEntry("WARNING Already connected to SiTechExe");
                 return;
             }
 
             _client = new TcpClient();
-            _endPoint = new IPEndPoint(IPAddress.Loopback, _settings.SiTechExeTcpIpPort);
+            _endPoint = new IPEndPoint(IPAddress.Loopback, Settings.SiTechExeTcpIpPort);
             try
             {
                 await _client.ConnectAsync(_endPoint.Address, _endPoint.Port);
@@ -79,7 +79,7 @@ namespace RPCC.Comms
                     ReadScopeStatus();
                     _mountTimer.Start();
 
-                    _logger.AddLogEntry($"Connected to SiTechExe {_endPoint}");
+                    Logger.AddLogEntry($"Connected to SiTechExe {_endPoint}");
                 }
                 else
                 {
@@ -89,7 +89,7 @@ namespace RPCC.Comms
             catch (Exception ex) when (ex is SocketException || ex is IOException)
             {
                 _mountTimer.Stop();
-                _logger.AddLogEntry($"WARNING Unable to connect to SiTechExe: {ex.Message}");
+                Logger.AddLogEntry($"WARNING Unable to connect to SiTechExe: {ex.Message}");
             }
         }
 
@@ -97,7 +97,7 @@ namespace RPCC.Comms
         {
             if (!_isConnected)
             {
-                _logger.AddLogEntry("WARNING Already disconnected from SiTechExe");
+                Logger.AddLogEntry("WARNING Already disconnected from SiTechExe");
                 return;
             }
 
@@ -111,12 +111,12 @@ namespace RPCC.Comms
                 _stream.Close();
                 _client.Close();
 
-                _logger.AddLogEntry("Disconnected from SiTechExe");
+                Logger.AddLogEntry("Disconnected from SiTechExe");
                 _isConnected = false;
             }
             catch (Exception ex) when (ex is SocketException || ex is IOException)
             {
-                _logger.AddLogEntry($"WARNING Unable to disconnect from SiTechExe: {ex.Message}");
+                Logger.AddLogEntry($"WARNING Unable to disconnect from SiTechExe: {ex.Message}");
             }
         }
 
@@ -124,7 +124,7 @@ namespace RPCC.Comms
         {
             if (!_isConnected)
             {
-                _logger.AddLogEntry("WARNING Unable to exchange messages with SiTechExe: not connected");
+                Logger.AddLogEntry("WARNING Unable to exchange messages with SiTechExe: not connected");
                 return null;
             }
 
@@ -137,7 +137,7 @@ namespace RPCC.Comms
             }
             catch (Exception ex) when (ex is SocketException || ex is IOException)
             {
-                _logger.AddLogEntry($"WARNING Unable to exchange messages with SiTechExe: {ex.Message}");
+                Logger.AddLogEntry($"WARNING Unable to exchange messages with SiTechExe: {ex.Message}");
                 return null;
             }
         }
@@ -146,13 +146,13 @@ namespace RPCC.Comms
         {
             if (response is null)
             {
-                _logger.AddLogEntry("WARNING Response is null: disconnecting from SiTechExe");
+                Logger.AddLogEntry("WARNING Response is null: disconnecting from SiTechExe");
                 Disconnect();
                 return false;
             }
             else if (response[response.Length - 1] == "_UnRecognized Command")
             {
-                _logger.AddLogEntry($"WARNING Unable to perform {request} command: _UnRecognized Command");
+                Logger.AddLogEntry($"WARNING Unable to perform {request} command: _UnRecognized Command");
                 return false;
             }
             return true;
@@ -184,7 +184,7 @@ namespace RPCC.Comms
                 }
                 else
                 {
-                    _logger.AddLogEntry($"WARNING Unable to read scope status: {message}");
+                    Logger.AddLogEntry($"WARNING Unable to read scope status: {message}");
                     // TODO: Do stuff if bad
                 }
             }
@@ -202,7 +202,7 @@ namespace RPCC.Comms
                 }
                 else
                 {
-                    _logger.AddLogEntry($"WARNING Unable to abort scope movement: {message}");
+                    Logger.AddLogEntry($"WARNING Unable to abort scope movement: {message}");
                     // TODO: Do stuff if bad
                 }
             }
@@ -220,7 +220,7 @@ namespace RPCC.Comms
                 }
                 else
                 {
-                    _logger.AddLogEntry($"WARNING Unable to force the motors to blinky mode: {message}");
+                    Logger.AddLogEntry($"WARNING Unable to force the motors to blinky mode: {message}");
                     // TODO: Do stuff if bad
                 }
             }
@@ -238,7 +238,7 @@ namespace RPCC.Comms
                 }
                 else
                 {
-                    _logger.AddLogEntry($"WARNING Unable to force the motors to auto mode: {message}");
+                    Logger.AddLogEntry($"WARNING Unable to force the motors to auto mode: {message}");
                     // TODO: Do stuff if bad
                 }
             }
@@ -256,7 +256,7 @@ namespace RPCC.Comms
                 }
                 else
                 {
-                    _logger.AddLogEntry($"WARNING Unable to park scope: {message}");
+                    Logger.AddLogEntry($"WARNING Unable to park scope: {message}");
                     // TODO: Do stuff if bad
                 }
             }
@@ -275,7 +275,7 @@ namespace RPCC.Comms
                 }
                 else
                 {
-                    _logger.AddLogEntry($"WARNING Unable to unpark scope: {message}");
+                    Logger.AddLogEntry($"WARNING Unable to unpark scope: {message}");
                     // TODO: Do stuff if bad
                 }
             }
@@ -294,7 +294,7 @@ namespace RPCC.Comms
                 }
                 else
                 {
-                    _logger.AddLogEntry($"WARNING Unable to go to park {parkLocNum} location: {message}");
+                    Logger.AddLogEntry($"WARNING Unable to go to park {parkLocNum} location: {message}");
                     // TODO: Do stuff if bad
                 }
             }
@@ -313,7 +313,7 @@ namespace RPCC.Comms
                 }
                 else
                 {
-                    _logger.AddLogEntry($"WARNING Unable to go to {ra} {dec}{(isJ2k ? " J2K" : "")}: {message}");
+                    Logger.AddLogEntry($"WARNING Unable to go to {ra} {dec}{(isJ2k ? " J2K" : "")}: {message}");
                     // TODO: Do stuff if bad
                 }
             }
@@ -335,14 +335,14 @@ namespace RPCC.Comms
                     }
                     else
                     {
-                        _logger.AddLogEntry($"WARNING Unable to jog {direction} {distance}: {message}");
+                        Logger.AddLogEntry($"WARNING Unable to jog {direction} {distance}: {message}");
                         // TODO: Do stuff if bad
                     }
                 }
             }
             else
             {
-                _logger.AddLogEntry($"WARNING Unable to jog {direction} {distance}: invalid direction");
+                Logger.AddLogEntry($"WARNING Unable to jog {direction} {distance}: invalid direction");
             }
         }
 
@@ -377,7 +377,7 @@ namespace RPCC.Comms
                     }
                     else
                     {
-                        _logger.AddLogEntry($"WARNING Unable to pulse guide {direction} {time}: {message}");
+                        Logger.AddLogEntry($"WARNING Unable to pulse guide {direction} {time}: {message}");
                         // TODO: Do stuff if bad
                     }
                 }
@@ -385,7 +385,7 @@ namespace RPCC.Comms
             }
             else
             {
-                _logger.AddLogEntry($"WARNING Unable to pulse guide {direction} {time}: invalid direction");
+                Logger.AddLogEntry($"WARNING Unable to pulse guide {direction} {time}: invalid direction");
             }
         }
 
@@ -402,7 +402,7 @@ namespace RPCC.Comms
                 }
                 else
                 {
-                    _logger.AddLogEntry($"WARNING Unable to set track mode {(shouldTrack ? 1 : 0)} {(raRate == 0.0 && decRate == 0.0 ? 0 : 1)} {raRate} {decRate}: {message}");
+                    Logger.AddLogEntry($"WARNING Unable to set track mode {(shouldTrack ? 1 : 0)} {(raRate == 0.0 && decRate == 0.0 ? 0 : 1)} {raRate} {decRate}: {message}");
                     // TODO: Do stuff if bad
                 }
             }

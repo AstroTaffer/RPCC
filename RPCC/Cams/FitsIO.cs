@@ -47,7 +47,7 @@ namespace RPCC.Cams
 
         }
 
-        internal void SaveFitsFile(Settings settings, CameraControl camCtrl, WeatherDataCollector dataCollector, int focusPos, int camNum)
+        internal void SaveFitsFile(CameraControl camCtrl, int focusPos, int camNum)
         {
             short[][] convertedData = new short[data.Length][];
             for (var i = 0; i < convertedData.Length; i++)
@@ -108,12 +108,12 @@ namespace RPCC.Cams
             newCursor.Add(new HeaderCard("FILTER", camCtrl.cameras[camNum].filter, "SDSS filter"));
             newCursor.Add(new HeaderCard("CCD-TEMP", camCtrl.cameras[camNum].ccdTemp,
                 "CCD temperature [C]"));
-            newCursor.Add(new HeaderCard("SET-TEMP", settings.CamTemp, "CCD temperature setpoint [C]"));
+            newCursor.Add(new HeaderCard("SET-TEMP", Settings.CamTemp, "CCD temperature setpoint [C]"));
             newCursor.Add(new HeaderCard("HEATSINK", camCtrl.cameras[camNum].baseTemp,
                 "heatsink temperature [C]"));
             newCursor.Add(new HeaderCard("COOLPOWR", camCtrl.cameras[camNum].coolerPwr,
                 "cooler power [%]"));
-            switch (settings.CamRoMode)
+            switch (Settings.CamRoMode)
             {
                 case "2.0MHz":
                     newCursor.Add(new HeaderCard("RATE", 2000.0, "horizontal readout rate [kPix/sec]"));
@@ -125,8 +125,8 @@ namespace RPCC.Cams
                     break;
             }
             newCursor.Add(new HeaderCard("GAIN", 1.4, "typical gain [e/ADU]"));
-            newCursor.Add(new HeaderCard("BINNING", settings.CamBin, "binning factor"));
-            newCursor.Add(new HeaderCard("PIXSZ", 13.5 * settings.CamBin,
+            newCursor.Add(new HeaderCard("BINNING", Settings.CamBin, "binning factor"));
+            newCursor.Add(new HeaderCard("PIXSZ", 13.5 * Settings.CamBin,
                 "pixel size in microns (after binning)"));
             newCursor.Add(new HeaderCard("BZERO", short.MaxValue + 1.0,
                 "offset data range to that of unsigned short"));
@@ -145,7 +145,7 @@ namespace RPCC.Cams
             // Weather keywords
             // TODO: Implement or discard the rest of the keywords
             // Grab Nabat by neck and review this section (and DataCollector) together
-            switch (dataCollector.Sky)
+            switch (WeatherDataCollector.Sky)
             {
                 case -1.0:
                     // Disconnected
@@ -155,11 +155,11 @@ namespace RPCC.Cams
                     newCursor.Add(new HeaderCard("SKY-TEMP", "UNKNOWN", "sky temperature from MLX-90614 sensor [deg]"));
                     break;
                 default:
-                    newCursor.Add(new HeaderCard("SKY-TEMP", dataCollector.Sky, "sky temperature from MLX-90614 sensor [deg]"));
+                    newCursor.Add(new HeaderCard("SKY-TEMP", WeatherDataCollector.Sky, "sky temperature from MLX-90614 sensor [deg]"));
                     break;
             }
             //SkyStd  SKY-STD
-            switch (dataCollector.Extinction)
+            switch (WeatherDataCollector.Extinction)
             {
                 case -1.0:
                     // Disconnected
@@ -169,11 +169,11 @@ namespace RPCC.Cams
                     newCursor.Add(new HeaderCard("EXTINCT", "UNKNOWN", "relative extinction [Vmag]"));
                     break;
                 default:
-                    newCursor.Add(new HeaderCard("EXTINCT", dataCollector.Extinction, "relative extinction [Vmag]"));
+                    newCursor.Add(new HeaderCard("EXTINCT", WeatherDataCollector.Extinction, "relative extinction [Vmag]"));
                     break;
             }
             //ExtinctionStd
-            switch (dataCollector.Seeing)
+            switch (WeatherDataCollector.Seeing)
             {
                 case -1.0:
                     // Disconnected
@@ -183,11 +183,11 @@ namespace RPCC.Cams
                     newCursor.Add(new HeaderCard("SEEING", "UNKNOWN", "seeing [arcsec]"));
                     break;
                 default:
-                    newCursor.Add(new HeaderCard("SEEING", dataCollector.Seeing, "seeing [arcsec]"));
+                    newCursor.Add(new HeaderCard("SEEING", WeatherDataCollector.Seeing, "seeing [arcsec]"));
                     break;
             }
             //SeeingExtinction
-            switch (dataCollector.Wind)
+            switch (WeatherDataCollector.Wind)
             {
                 case -1.0:
                     // Disconnected
@@ -197,20 +197,20 @@ namespace RPCC.Cams
                     newCursor.Add(new HeaderCard("WIND", "UNKNOWN", "wind speed [m/s]"));
                     break;
                 default:
-                    newCursor.Add(new HeaderCard("WIND", dataCollector.Wind, "wind speed [m/s]"));
+                    newCursor.Add(new HeaderCard("WIND", WeatherDataCollector.Wind, "wind speed [m/s]"));
                     break;
             }
-            newCursor.Add(new HeaderCard("SUN-ZD", dataCollector.Sun, "Sun zenith distance"));
+            newCursor.Add(new HeaderCard("SUN-ZD", WeatherDataCollector.Sun, "Sun zenith distance"));
 
             string outDirectory;
             switch (camCtrl.cameras[camNum].filter)
             {
                 case "UNKNOWN":
-                    outDirectory = $"{settings.OutImgsFolder}\\{camCtrl.cameras[camNum].filter}-" +
+                    outDirectory = $"{Settings.OutImgsFolder}\\{camCtrl.cameras[camNum].filter}-" +
                     $"{camCtrl.cameras[camNum].serialNumber}";
                     break;
                 default:
-                    outDirectory = $"{settings.OutImgsFolder}\\{camCtrl.cameras[camNum].filter}";
+                    outDirectory = $"{Settings.OutImgsFolder}\\{camCtrl.cameras[camNum].filter}";
                     break;
             }
             
