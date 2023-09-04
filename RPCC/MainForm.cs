@@ -40,8 +40,8 @@ namespace RPCC
         
         private readonly DonutsSocket _donutsSocket;
         
-        private readonly SiTechExeSocket _siTechExeSocket;
-        private readonly MountDataCollector _mountDc;
+        // private readonly SiTechExeSocket SiTechExeSocket;
+        // private readonly MountDataCollector _mountDc;
 
         private static readonly System.Timers.Timer FocusTimer = new System.Timers.Timer();
 
@@ -75,9 +75,9 @@ namespace RPCC
             _donutsSocket.Connect();
 
             // SiTechExe connect
-            _mountDc = new MountDataCollector();
-            _siTechExeSocket = new SiTechExeSocket(_mountDc);
-            _siTechExeSocket.Connect();
+            // _mountDc = new MountDataCollector();
+            // SiTechExeSocket = new SiTechExeSocket();
+            SiTechExeSocket.Connect();
 
             // Create timer for focus loop
             FocusTimer.Elapsed += OnTimedEvent_Clock;
@@ -114,7 +114,7 @@ namespace RPCC
 
             _domeSocket.Disconnect();
             _donutsSocket.Disconnect();
-            _siTechExeSocket.Disconnect();
+            SiTechExeSocket.Disconnect();
 
             _cameraControl.DisconnectCameras();
             
@@ -266,11 +266,11 @@ namespace RPCC
 
         private void ReconnectSiTechExeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (_siTechExeSocket._isConnected)
+            if (SiTechExeSocket._isConnected)
             {
-                _siTechExeSocket.Disconnect();
+                SiTechExeSocket.Disconnect();
             }
-            _siTechExeSocket.Connect();
+            SiTechExeSocket.Connect();
         }
 
         private void ReconnectAllToolStripMenuItem_Click(object sender, EventArgs e)

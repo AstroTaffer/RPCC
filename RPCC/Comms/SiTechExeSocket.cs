@@ -8,20 +8,20 @@ using RPCC.Utils;
 
 namespace RPCC.Comms
 {
-    internal class SiTechExeSocket
+    internal static class SiTechExeSocket
     {
         // private readonly Logger Logger;
         // private readonly Settings Settings;
-        private readonly MountDataCollector _collector;
+        // private  readonly MountDataCollector MountDataCollector;
 
-        private readonly Timer _mountTimer;
+        private static readonly Timer _mountTimer;
 
-        internal bool _isConnected;
-        private IPEndPoint _endPoint;
-        private TcpClient _client;
-        private NetworkStream _stream;
-        private StreamReader _streamReader;
-        private StreamWriter _streamWriter;
+        internal static bool _isConnected;
+        private static IPEndPoint _endPoint;
+        private static TcpClient _client;
+        private static NetworkStream _stream;
+        private static StreamReader _streamReader;
+        private static StreamWriter _streamWriter;
 
         /**
          * "-//-" == default response string
@@ -39,12 +39,11 @@ namespace RPCC.Comms
          *     PulseGuide      --- -//-, message == "_PulseGuide Accepted"
          *     SetTrackMode    --- -//-, message == "_SetTrackMode Command Successful"
          **/
-
-        internal SiTechExeSocket(MountDataCollector collector)
+        static SiTechExeSocket()
         {
             // Logger = logger;
             // Settings = settings;
-            _collector = collector;
+            // MountDataCollector = collector;
 
             _mountTimer = new Timer(1000);
             _mountTimer.Elapsed += OnMountTimedEvent;
@@ -53,7 +52,7 @@ namespace RPCC.Comms
         }
 
         #region General
-        internal async void Connect()
+        internal static async void Connect()
         {
             if (_isConnected)
             {
@@ -93,7 +92,7 @@ namespace RPCC.Comms
             }
         }
 
-        internal void Disconnect()
+        internal static void Disconnect()
         {
             if (!_isConnected)
             {
@@ -120,7 +119,7 @@ namespace RPCC.Comms
             }
         }
 
-        internal async Task<string[]> ExchangeMessagesAsync(string request)
+        internal static async Task<string[]> ExchangeMessagesAsync(string request)
         {
             if (!_isConnected)
             {
@@ -132,7 +131,7 @@ namespace RPCC.Comms
             {
                 await _streamWriter.WriteLineAsync(request);
                 string[] response = (await _streamReader.ReadLineAsync()).Split(';');
-                _collector.ParseScopeStatus(response);
+                MountDataCollector.ParseScopeStatus(response);
                 return response;
             }
             catch (Exception ex) when (ex is SocketException || ex is IOException)
@@ -142,7 +141,7 @@ namespace RPCC.Comms
             }
         }
 
-        private bool CheckResponse(string[] response, string request)
+        private static bool CheckResponse(string[] response, string request)
         {
             if (response is null)
             {
@@ -158,7 +157,7 @@ namespace RPCC.Comms
             return true;
         }
 
-        private void OnMountTimedEvent(object sender, EventArgs e)
+        private static void OnMountTimedEvent(object sender, EventArgs e)
         {
             if (!_isConnected)
             {
@@ -172,7 +171,7 @@ namespace RPCC.Comms
         #endregion
 
         #region SiTechExe Commands
-        internal async void ReadScopeStatus()
+        internal static async void ReadScopeStatus()
         {
             string[] response = await ExchangeMessagesAsync("ReadScopeStatus");
             if (CheckResponse(response, "ReadScopeStatus"))
@@ -190,7 +189,7 @@ namespace RPCC.Comms
             }
         }
 
-        internal async void Abort()
+        internal static async void Abort()
         {
             string[] response = await ExchangeMessagesAsync("Abort");
             if (CheckResponse(response, "Abort"))
@@ -208,7 +207,7 @@ namespace RPCC.Comms
             }
         }
 
-        internal async void MotorsToBlinky()
+        internal static async void MotorsToBlinky()
         {
             string[] response = await ExchangeMessagesAsync("MotorsToBlinky");
             if (CheckResponse(response, "MotorsToBlinky"))
@@ -226,7 +225,7 @@ namespace RPCC.Comms
             }
         }
 
-        internal async void MotorsToAuto()
+        internal static async void MotorsToAuto()
         {
             string[] response = await ExchangeMessagesAsync("MotorsToAuto");
             if (CheckResponse(response, "MotorsToAuto"))
@@ -244,7 +243,7 @@ namespace RPCC.Comms
             }
         }
 
-        internal async void Park()
+        internal static async void Park()
         {
             string[] response = await ExchangeMessagesAsync("Park");
             if (CheckResponse(response, "Park"))
@@ -263,7 +262,7 @@ namespace RPCC.Comms
         }
 
         // HACK: Apparently, it takes ~5 seconds to Unpark the scope
-        internal async void Unpark()
+        internal static async void Unpark()
         {
             string[] response = await ExchangeMessagesAsync("UnPark");
             if (CheckResponse(response, "UnPark"))
@@ -282,7 +281,7 @@ namespace RPCC.Comms
         }
 
         // HACK: After completing GoToPark command the scope won't be "parked", but won't be tracking either
-        internal async void GoToPark(int parkLocNum)
+        internal static async void GoToPark(int parkLocNum)
         {
             string[] response = await ExchangeMessagesAsync($"GoToPark {parkLocNum}");
             if (CheckResponse(response, $"GoToPark {parkLocNum}"))
@@ -301,7 +300,7 @@ namespace RPCC.Comms
         }
         
         // [RA] = h, [DEC] = deg
-        internal async void GoTo(double ra, double dec, bool isJ2k)
+        internal static async void GoTo(double ra, double dec, bool isJ2k)
         {
             string[] response = await ExchangeMessagesAsync($"GoTo {ra} {dec}{(isJ2k? " J2K": "")}");
             if (CheckResponse(response, $"GoTo {ra} {dec}{(isJ2k ? " J2K" : "")}"))
@@ -321,7 +320,7 @@ namespace RPCC.Comms
         
         // Valid directions: N (to North Celestial Pole), S (to South Celestial Pole), W (clockwise), E (counterclockwise)
         // [distance] == arcseconds
-        internal async void Jog(string direction, int distance)
+        internal static async void Jog(string direction, int distance)
         {
             if (direction == "N" || direction == "S" || direction == "E" || direction == "W")
             {
@@ -348,7 +347,7 @@ namespace RPCC.Comms
 
         // Valid directions: N (to North Celestial Pole), S (to South Celestial Pole), W (clockwise), E (counterclockwise)
         // [time] == msec
-        internal async void PulseGuide(string direction, int time)
+        internal static async void PulseGuide(string direction, int time)
         {
             if (direction == "N" || direction == "S" || direction == "E" || direction == "W")
             {
@@ -390,7 +389,7 @@ namespace RPCC.Comms
         }
 
         // [raRate] = [decRate] = [arcsec/sec]
-        internal async void SetTrackMode (bool shouldTrack, double raRate = 0.0, double decRate = 0.0)
+        internal static async void SetTrackMode (bool shouldTrack, double raRate = 0.0, double decRate = 0.0)
         {
             string[] response = await ExchangeMessagesAsync($"SetTrackMode {(shouldTrack ? 1 : 0)} {(raRate == 0.0 && decRate == 0.0 ? 0 : 1)} {raRate} {decRate}");
             if (CheckResponse(response, $"SetTrackMode {(shouldTrack ? 1 : 0)} {(raRate == 0.0 && decRate == 0.0 ? 0 : 1)} {raRate} {decRate}"))
@@ -410,36 +409,36 @@ namespace RPCC.Comms
         #endregion
     }
 
-    internal class MountDataCollector
+    internal static class MountDataCollector
     {
         #region Bool parameters
-        public bool IsInit { get; set; } // Scope is initialized
-        public bool IsTracking { get; set; } // Scope is tracking
-        public bool IsSlewing { get; set; } // Scope is slewing
-        public bool IsParking { get; set; } // Scope is parking
-        public bool IsParked { get; set; } // Scope is parked
-        public bool IsLookingEast { get; set; } // Scope is "Looking East" (GEM)
-        public bool IsInBlinky { get; set; } // BrushlessController is in Blinky mode, one or both axis's
-        public bool IsCommFault { get; set; } // Communication fault between SiTechExe and BrushlessController
-        public bool IsPplsOn { get; set; } // Primary Plus Limit Switch activated
-        public bool IsPmlsOn { get; set; } // Primary Minus Limit Switch activated
-        public bool IsSplsOn { get; set; } // Secondary Plus Limit Switch activated
-        public bool IsSmlsOn { get; set; } // Secondary Minus Limit Switch activated
-        public bool IsPhsOn { get; set; } // Primary Homing Switch activated
-        public bool IsShsOn { get; set; } // Secondary Homing Switch activated
+        public static bool IsInit { get; set; } // Scope is initialized
+        public static bool IsTracking { get; set; } // Scope is tracking
+        public static bool IsSlewing { get; set; } // Scope is slewing
+        public static bool IsParking { get; set; } // Scope is parking
+        public static bool IsParked { get; set; } // Scope is parked
+        public static bool IsLookingEast { get; set; } // Scope is "Looking East" (GEM)
+        public static bool IsInBlinky { get; set; } // BrushlessController is in Blinky mode, one or both axis's
+        public static bool IsCommFault { get; set; } // Communication fault between SiTechExe and BrushlessController
+        public static bool IsPplsOn { get; set; } // Primary Plus Limit Switch activated
+        public static bool IsPmlsOn { get; set; } // Primary Minus Limit Switch activated
+        public static bool IsSplsOn { get; set; } // Secondary Plus Limit Switch activated
+        public static bool IsSmlsOn { get; set; } // Secondary Minus Limit Switch activated
+        public static bool IsPhsOn { get; set; } // Primary Homing Switch activated
+        public static bool IsShsOn { get; set; } // Secondary Homing Switch activated
         #endregion
 
         #region Non-bool parameters
-        public double RightAsc { get; set; } // Scope Right Ascension [h]
-        public double Declination { get; set; } // Scope Declination [deg]
-        public double Altitude { get; set; } // Scope Altitude [deg]
-        public double Azimuth { get; set; } // Scope Azimuth [deg]
-        public double SiderealTime { get; set; } // Scope Sidereal Time [h]
-        public double JulianDate { get; set; } // Scope JD [d]
-        public double Time { get; set; } // Scope Time [h]
+        public static double RightAsc { get; set; } // Scope Right Ascension [h]
+        public static double Declination { get; set; } // Scope Declination [deg]
+        public static double Altitude { get; set; } // Scope Altitude [deg]
+        public static double Azimuth { get; set; } // Scope Azimuth [deg]
+        public static double SiderealTime { get; set; } // Scope Sidereal Time [h]
+        public static double JulianDate { get; set; } // Scope JD [d]
+        public static double Time { get; set; } // Scope Time [h]
         #endregion
 
-        internal bool ParseScopeStatus(string[] data)
+        internal static bool ParseScopeStatus(string[] data)
         {
             /* 0  - int    BoolParms
              * 1  - double RightAsc

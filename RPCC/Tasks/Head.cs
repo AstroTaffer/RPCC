@@ -29,6 +29,15 @@ namespace RPCC.Tasks
         
         private static void Thinking(object sender, ElapsedEventArgs e)
         {
+            if (WeatherDataCollector.Sun >= 90)
+            {
+                //start cum + условие на работу камеры
+            }
+            else
+            {
+                //end cum
+            }
+            
             if (!isObserve & !isDoDarks & !isDoFlats & WeatherDataCollector.Flat &
                 (DateTime.UtcNow - lastFlatsTime).TotalDays > TotalDays2ReMakeCalibrationFrames) StartDoFlats();
             
@@ -85,18 +94,25 @@ namespace RPCC.Tasks
             if (ActualTask.FrameType == "flat") StartDoFlats(ActualTask);
         }
 
-        private static void EndTask(short endStatus)
+        private static void EndTask(short endStatus, ObservationTask task)
         {
-            ActualTask.Status = endStatus;
-            Tasker.UpdateTaskInTable(ActualTask);
+            task.Status = endStatus;
+            Tasker.UpdateTaskInTable(task);
             isObserve = false;
+            isDoDarks = false;
+            isDoFlats = false;
             ActualTask = null;
         }
     
         private static void StartDoLight()
         {
-            
+            Logger.AddLogEntry($"Start task# {ActualTask.TaskNumber}, type: {ActualTask.FrameType}");
             isObserve = true;
+            
+            // SiTechExeSocket.GoTo();
+            // навести монтировку в нужную точку (проверка на доступность)
+            // сфокусироваться
+            // начать делать экспозиции (автофокус опционален)
         }
 
         #region Flats
@@ -110,14 +126,15 @@ namespace RPCC.Tasks
             }
             private static void StartDoFlats(ObservationTask task)
             {
+                Logger.AddLogEntry($"Start task# {task.TaskNumber}, type: {task.FrameType}");
                 isDoFlats = true;
                 //TODO FLAT
-                   
+                // навести монтировку в зенит
+                // начать делать экспозиции (автофокус выкл)
             }
 
         #endregion
-
-
+        
         #region Dark
 
             private static void StartDoDarks()
@@ -130,8 +147,10 @@ namespace RPCC.Tasks
             
             private static void StartDoDarks(ObservationTask task)
             {
+                Logger.AddLogEntry($"Start task# {task.TaskNumber}, type: {task.FrameType}");
                 isDoDarks = true;
                 //TODO DARK
+                // начать делать экспозиции (автофокус выкл)
             }
 
         #endregion
