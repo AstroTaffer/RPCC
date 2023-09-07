@@ -9,17 +9,16 @@ from astroquery.astrometry_net import AstrometryNet
 from photutils.detection import DAOStarFinder
 
 
-def Astrometry(path2data, C):
-    print(f"Astrometry: working on {path2data}")
+def Astrometry(path, files, C):
 
     ast = AstrometryNet()
     ast.api_key = 'hipfhzhlzygnlvix'
-    files = glob.glob(fr'{path2data}\*.fits')
-    path2save = path2data + r'\done'
+    path2save = path + r'\done'
     if not os.path.exists(path2save):
         os.mkdir(path2save)
     for item in files:
         try:
+            print(f"Astrometry: working on {item}")
             # read file, copy data and header
             hdulist = fits.open(item, 'update', memmap=False)
             # del hdulist[0].header['COMMENT']
@@ -57,8 +56,8 @@ def Astrometry(path2data, C):
                                                     center_dec=C.dec.degree,
                                                     radius=0.1,
                                                     downsample_factor=2,
-                                                    scale_lower=1.1,
-                                                    scale_upper=1.4,
+                                                    scale_lower=1,
+                                                    scale_upper=1.5,
                                                     scale_units='arcsecperpix'
                                                     )
             hdu = fits.PrimaryHDU(hdulist[0].data, Header + wcs_header)
