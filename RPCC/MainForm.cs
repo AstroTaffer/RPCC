@@ -462,6 +462,12 @@ namespace RPCC
             else if (radioButtonViewCam2.Checked) _cameraControl.task.viewCamIndex = 1;
             else if (radioButtonViewCam3.Checked) _cameraControl.task.viewCamIndex = 2;
 
+            if (_cameraControl.task.framesType == "Test") _cameraControl.task.framesNum = 1;
+
+            _cameraControl.task.objectName = textBoxObjectName.Text;
+            _cameraControl.task.objectRa = textBoxObjectRa.Text;
+            _cameraControl.task.objectDec = textBoxObjectDec.Text;
+
             _cameraControl.SetSurveySettings();
             _cameraControl.StartExposure();
             Logger.AddLogEntry($"Survey started - {_cameraControl.task.framesNum} {_cameraControl.task.framesType}" +

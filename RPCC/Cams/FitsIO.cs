@@ -71,9 +71,7 @@ namespace RPCC.Cams
             newCursor.Key = "END";
 
             newCursor.Add(new HeaderCard("COMMENT",
-                "Version 4.0 of FITS format is defined in the followind document:&", false));
-            newCursor.Add(new HeaderCard("CONTINUE",
-                " https://fits.gsfc.nasa.gov/standard40/fits_standard40aa-le.pdf", false));
+                "Conforms to FITS Version 4.0: updated 2016 July 22", false));
 
             // Survey keywords
             newCursor.Add(new HeaderCard("DATE-OBS",
@@ -84,14 +82,15 @@ namespace RPCC.Cams
             switch (camCtrl.task.framesType)
             {
                 case "Object":
-                    // TODO: Add proper object name
-                    // OBJECT = '' / object name
-                    newCursor.Add(new HeaderCard("OBJECT", "Object", "object name"));
+                    newCursor.Add(new HeaderCard("OBJNAME", camCtrl.task.objectName, "object name"));
                     break;
                 default:
-                    newCursor.Add(new HeaderCard("OBJECT", camCtrl.task.framesType, "object name"));
+                    newCursor.Add(new HeaderCard("OBJNAME", camCtrl.task.framesType, "object name"));
                     break;
             }
+            //TODO: It's a hotfix, implement properly later
+            newCursor.Add(new HeaderCard("ALPHA", camCtrl.task.objectRa, "right ascention coordinates [hh mm ss.s]"));
+            newCursor.Add(new HeaderCard("DELTA", camCtrl.task.objectDec, "declination coordinates [dd mm ss.s]"));
             newCursor.Add(new HeaderCard("IMAGETYP", camCtrl.task.framesType,
                 "Object, Flat, Dark, Bias, Test, Focus"));
             // RA      = '21:51:12.055'       / target RA
@@ -219,11 +218,10 @@ namespace RPCC.Cams
             switch (camCtrl.task.framesType)
             {
                 case "Object":
-                    // TODO: Add proper object name
-                    outName = $"Object-{camCtrl.cameras[camNum].expStartDt:yyyy-MM-ddThh-mm-ss}.fits";
+                    outName = $"{camCtrl.task.objectName}-{camCtrl.cameras[camNum].filter}-{camCtrl.cameras[camNum].expStartDt:yyyy-MM-ddThh-mm-ss}.fits";
                     break;
                 default:
-                    outName = $"{camCtrl.task.framesType}-" +
+                    outName = $"{camCtrl.task.framesType}-{camCtrl.cameras[camNum].filter}-" +
                         $"{camCtrl.cameras[camNum].expStartDt:yyyy-MM-ddThh-mm-ss}.fits";
                     break;
             }

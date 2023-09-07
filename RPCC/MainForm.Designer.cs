@@ -128,6 +128,12 @@
             this.addToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dataGridTextBoxColumn1 = new System.Windows.Forms.DataGridTextBoxColumn();
             this.dataGridTextBoxColumn2 = new System.Windows.Forms.DataGridTextBoxColumn();
+            this.labelObjectName = new System.Windows.Forms.Label();
+            this.labelObjectRa = new System.Windows.Forms.Label();
+            this.labelObjectDec = new System.Windows.Forms.Label();
+            this.textBoxObjectName = new System.Windows.Forms.TextBox();
+            this.textBoxObjectRa = new System.Windows.Forms.TextBox();
+            this.textBoxObjectDec = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewTasker)).BeginInit();
             this.statusStrip.SuspendLayout();
             this.menuStrip.SuspendLayout();
@@ -724,7 +730,7 @@
             // 
             this.radioButtonViewCam3.AutoSize = true;
             this.radioButtonViewCam3.Enabled = false;
-            this.radioButtonViewCam3.Location = new System.Drawing.Point(197, 62);
+            this.radioButtonViewCam3.Location = new System.Drawing.Point(9, 181);
             this.radioButtonViewCam3.Name = "radioButtonViewCam3";
             this.radioButtonViewCam3.Size = new System.Drawing.Size(96, 17);
             this.radioButtonViewCam3.TabIndex = 3;
@@ -735,7 +741,7 @@
             // 
             this.radioButtonViewCam2.AutoSize = true;
             this.radioButtonViewCam2.Enabled = false;
-            this.radioButtonViewCam2.Location = new System.Drawing.Point(197, 39);
+            this.radioButtonViewCam2.Location = new System.Drawing.Point(9, 158);
             this.radioButtonViewCam2.Name = "radioButtonViewCam2";
             this.radioButtonViewCam2.Size = new System.Drawing.Size(96, 17);
             this.radioButtonViewCam2.TabIndex = 2;
@@ -747,7 +753,7 @@
             this.radioButtonViewCam1.AutoSize = true;
             this.radioButtonViewCam1.Checked = true;
             this.radioButtonViewCam1.Enabled = false;
-            this.radioButtonViewCam1.Location = new System.Drawing.Point(197, 16);
+            this.radioButtonViewCam1.Location = new System.Drawing.Point(9, 135);
             this.radioButtonViewCam1.Name = "radioButtonViewCam1";
             this.radioButtonViewCam1.Size = new System.Drawing.Size(96, 17);
             this.radioButtonViewCam1.TabIndex = 1;
@@ -757,6 +763,12 @@
             // 
             // groupBoxSurvey
             // 
+            this.groupBoxSurvey.Controls.Add(this.textBoxObjectDec);
+            this.groupBoxSurvey.Controls.Add(this.textBoxObjectRa);
+            this.groupBoxSurvey.Controls.Add(this.textBoxObjectName);
+            this.groupBoxSurvey.Controls.Add(this.labelObjectDec);
+            this.groupBoxSurvey.Controls.Add(this.labelObjectRa);
+            this.groupBoxSurvey.Controls.Add(this.labelObjectName);
             this.groupBoxSurvey.Controls.Add(this.radioButtonViewCam3);
             this.groupBoxSurvey.Controls.Add(this.buttonSurveyStop);
             this.groupBoxSurvey.Controls.Add(this.radioButtonViewCam2);
@@ -770,7 +782,7 @@
             this.groupBoxSurvey.Controls.Add(this.labelImgType);
             this.groupBoxSurvey.Location = new System.Drawing.Point(8, 167);
             this.groupBoxSurvey.Name = "groupBoxSurvey";
-            this.groupBoxSurvey.Size = new System.Drawing.Size(306, 136);
+            this.groupBoxSurvey.Size = new System.Drawing.Size(462, 231);
             this.groupBoxSurvey.TabIndex = 10;
             this.groupBoxSurvey.TabStop = false;
             this.groupBoxSurvey.Text = "Survey";
@@ -798,6 +810,11 @@
             // numericUpDownSequence
             // 
             this.numericUpDownSequence.Location = new System.Drawing.Point(107, 80);
+            this.numericUpDownSequence.Maximum = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
             this.numericUpDownSequence.Minimum = new decimal(new int[] {
             1,
             0,
@@ -824,6 +841,11 @@
             // numericUpDownExpTime
             // 
             this.numericUpDownExpTime.Location = new System.Drawing.Point(107, 50);
+            this.numericUpDownExpTime.Maximum = new decimal(new int[] {
+            300,
+            0,
+            0,
+            0});
             this.numericUpDownExpTime.Name = "numericUpDownExpTime";
             this.numericUpDownExpTime.Size = new System.Drawing.Size(65, 20);
             this.numericUpDownExpTime.TabIndex = 3;
@@ -1138,6 +1160,54 @@
             this.dataGridTextBoxColumn2.FormatInfo = null;
             this.dataGridTextBoxColumn2.Width = -1;
             // 
+            // labelObjectName
+            // 
+            this.labelObjectName.AutoSize = true;
+            this.labelObjectName.Location = new System.Drawing.Point(199, 20);
+            this.labelObjectName.Name = "labelObjectName";
+            this.labelObjectName.Size = new System.Drawing.Size(72, 13);
+            this.labelObjectName.TabIndex = 22;
+            this.labelObjectName.Text = "Object Name:";
+            // 
+            // labelObjectRa
+            // 
+            this.labelObjectRa.AutoSize = true;
+            this.labelObjectRa.Location = new System.Drawing.Point(199, 50);
+            this.labelObjectRa.Name = "labelObjectRa";
+            this.labelObjectRa.Size = new System.Drawing.Size(59, 13);
+            this.labelObjectRa.TabIndex = 23;
+            this.labelObjectRa.Text = "Object RA:";
+            // 
+            // labelObjectDec
+            // 
+            this.labelObjectDec.AutoSize = true;
+            this.labelObjectDec.Location = new System.Drawing.Point(199, 80);
+            this.labelObjectDec.Name = "labelObjectDec";
+            this.labelObjectDec.Size = new System.Drawing.Size(66, 13);
+            this.labelObjectDec.TabIndex = 24;
+            this.labelObjectDec.Text = "Object DEC:";
+            // 
+            // textBoxObjectName
+            // 
+            this.textBoxObjectName.Location = new System.Drawing.Point(291, 17);
+            this.textBoxObjectName.Name = "textBoxObjectName";
+            this.textBoxObjectName.Size = new System.Drawing.Size(165, 20);
+            this.textBoxObjectName.TabIndex = 25;
+            // 
+            // textBoxObjectRa
+            // 
+            this.textBoxObjectRa.Location = new System.Drawing.Point(291, 47);
+            this.textBoxObjectRa.Name = "textBoxObjectRa";
+            this.textBoxObjectRa.Size = new System.Drawing.Size(165, 20);
+            this.textBoxObjectRa.TabIndex = 26;
+            // 
+            // textBoxObjectDec
+            // 
+            this.textBoxObjectDec.Location = new System.Drawing.Point(291, 77);
+            this.textBoxObjectDec.Name = "textBoxObjectDec";
+            this.textBoxObjectDec.Size = new System.Drawing.Size(165, 20);
+            this.textBoxObjectDec.TabIndex = 27;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1301,6 +1371,12 @@
         private System.Windows.Forms.ToolStripMenuItem reconnectSiTechExeToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem reconnectAllToolStripMenuItem;
+        private System.Windows.Forms.TextBox textBoxObjectDec;
+        private System.Windows.Forms.TextBox textBoxObjectRa;
+        private System.Windows.Forms.TextBox textBoxObjectName;
+        private System.Windows.Forms.Label labelObjectDec;
+        private System.Windows.Forms.Label labelObjectRa;
+        private System.Windows.Forms.Label labelObjectName;
     }
 }
 

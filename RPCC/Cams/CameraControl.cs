@@ -33,6 +33,9 @@ namespace RPCC.Cams
         internal string framesType;
         internal int framesExpTime;
         internal int viewCamIndex;
+        internal string objectName;
+        internal string objectRa;
+        internal string objectDec;
     }
     internal class CameraControl
     {

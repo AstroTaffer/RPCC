@@ -437,8 +437,8 @@ namespace RPCC.Utils
                     new XElement("annulusOuterRadius", 15)),
                 
                 new XElement("cameras",
-                    new XElement("snCamG", "ML0892515"),
-                    new XElement("snCamR", "ML0882515"),
+                    new XElement("snCamG", "ML0882515"),
+                    new XElement("snCamR", "ML0892515"),
                     new XElement("snCamI", "ML0742515"),
                     new XElement("numFlushes", 5),
                     new XElement("camTemp", -5.0),
