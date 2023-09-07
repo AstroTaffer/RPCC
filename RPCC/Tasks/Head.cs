@@ -95,7 +95,7 @@ namespace RPCC.Tasks
         
         private static void StartTask()
         {
-            _currentTask.Status = 1;
+            
             Tasker.UpdateTaskInTable(_currentTask);
             if (_currentTask.FrameType == "light") StartDoLight();
             if (_currentTask.FrameType == "dark") StartDoDark(_currentTask);
@@ -114,10 +114,10 @@ namespace RPCC.Tasks
     
         private static void StartDoLight()
         {
+            _currentTask.Status = 1;
             Logger.AddLogEntry($"Start task# {_currentTask.TaskNumber}, type: {_currentTask.FrameType}");
             _isObserve = true;
             SiTechExeSocket.GoTo(_currentTask.Ra, _currentTask.Dec, true); //проверять доехал ли
-            
             //если доехал, то начинаем снимать 
             
             // навести монтировку в нужную точку (проверка на доступность)
@@ -161,7 +161,6 @@ namespace RPCC.Tasks
 
             private static void StartDoDarks()
             {
-                //TODO create dark task
                 foreach (var exp in DarkExps)
                 {   
                     var darkTask = new ObservationTask();

@@ -120,7 +120,10 @@ def DrawMap(Image, Size, Header, Cat, Name, RAper):
         plt.gca().invert_yaxis()
 
     # Title = Object + ', ' + DT + '\n'
-    Title = f'Filter={Header["FILTER"]}'
+    try:
+        Title = f'Filter={Header["FILTER"]}'
+    except:
+        Title = 'Filter=V'
     Title += ', aperture radius =' + '{:.1f}'.format(3600 * RAper * abs(Header['CD1_1'])) + '"'
     plt.title(Title)
     ax.coords[1].set_ticklabel(rotation=90)

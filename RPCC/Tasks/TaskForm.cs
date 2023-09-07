@@ -76,7 +76,7 @@ namespace RPCC.Tasks
             if (textBoxDuration.Text == "")
             {
                 _task.AllFrames = short.Parse(textBoxExpN.Text);
-                _task.Duration = _task.Exp * _task.AllFrames / 60f / 60;
+                _task.Duration = _task.Exp * _task.AllFrames / 60f / 60 + 0.05f;
             }
             else
             {
