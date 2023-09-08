@@ -82,15 +82,20 @@ namespace RPCC.Cams
             switch (camCtrl.task.framesType)
             {
                 case "Object":
-                    newCursor.Add(new HeaderCard("OBJNAME", camCtrl.task.objectName, "object name"));
+                    newCursor.Add(string.IsNullOrEmpty(camCtrl.task.objectName)
+                        ? new HeaderCard("OBJNAME", "UNKNOWN", "object name")
+                        : new HeaderCard("OBJNAME", camCtrl.task.objectName, "object name"));
                     break;
                 default:
                     newCursor.Add(new HeaderCard("OBJNAME", camCtrl.task.framesType, "object name"));
                     break;
             }
-            //TODO: It's a hotfix, implement properly later
-            newCursor.Add(new HeaderCard("ALPHA", camCtrl.task.objectRa, "right ascention coordinates [hh mm ss.s]"));
-            newCursor.Add(new HeaderCard("DELTA", camCtrl.task.objectDec, "declination coordinates [dd mm ss.s]"));
+            newCursor.Add(string.IsNullOrEmpty(camCtrl.task.objectRa)
+                ? new HeaderCard("ALPHA", "UNKNOWN", "target RA [hh mm ss.s]")
+                : new HeaderCard("ALPHA", camCtrl.task.objectRa, "target RA [hh mm ss.s]"));
+            newCursor.Add(string.IsNullOrEmpty(camCtrl.task.objectDec)
+                ? new HeaderCard("DELTA", "UNKNOWN", "target DEC [dd mm ss.s]")
+                : new HeaderCard("DELTA", camCtrl.task.objectDec, "target DEC [dd mm ss.s]"));
             newCursor.Add(new HeaderCard("IMAGETYP", camCtrl.task.framesType,
                 "Object, Flat, Dark, Bias, Test, Focus"));
             // RA      = '21:51:12.055'       / target RA
@@ -218,7 +223,8 @@ namespace RPCC.Cams
             switch (camCtrl.task.framesType)
             {
                 case "Object":
-                    outName = $"{camCtrl.task.objectName}-{camCtrl.cameras[camNum].filter}-{camCtrl.cameras[camNum].expStartDt:yyyy-MM-ddThh-mm-ss}.fits";
+                    outName = $"{(string.IsNullOrEmpty(camCtrl.task.objectName) ? "UNKNOWN" : camCtrl.task.objectName)}-" +
+                              $"{camCtrl.cameras[camNum].filter}-{camCtrl.cameras[camNum].expStartDt:yyyy-MM-ddThh-mm-ss}.fits";
                     break;
                 default:
                     outName = $"{camCtrl.task.framesType}-{camCtrl.cameras[camNum].filter}-" +
