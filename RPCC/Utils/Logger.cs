@@ -38,8 +38,10 @@ namespace RPCC.Utils
 
         internal static void SaveLogs()
         {
-            var logsFilePath = $"Logs {DateTime.UtcNow:yyyy-MM-ddTHH-mm-ss}.txt";
-            var sw = new StreamWriter(logsFilePath);
+            var logsDir = $"{Settings.MainOutFolder}\\LOGS";
+            if (!Directory.Exists(logsDir)) Directory.CreateDirectory(logsDir);
+            var logsFileName = $"Logs {DateTime.UtcNow:yyyy-MM-ddTHH-mm-ss}.txt";
+            var sw = new StreamWriter($"{logsDir}\\{logsFileName}");
             foreach (string item in logBox.Items) sw.WriteLine(item);
             sw.Close();
         }

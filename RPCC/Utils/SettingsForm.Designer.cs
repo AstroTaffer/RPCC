@@ -57,21 +57,21 @@
             this.textBoxgCamSn = new System.Windows.Forms.TextBox();
             this.labelgCamSn = new System.Windows.Forms.Label();
             this.tabPageSurvey = new System.Windows.Forms.TabPage();
-            this.labelOutFolder = new System.Windows.Forms.Label();
-            this.buttonSetFolder = new System.Windows.Forms.Button();
-            this.labelOutImgsFolder = new System.Windows.Forms.Label();
+            this.labelMainOutFolderDisplay = new System.Windows.Forms.Label();
+            this.buttonSetMainOutFolder = new System.Windows.Forms.Button();
+            this.labelMainOutFolder = new System.Windows.Forms.Label();
+            this.tabPageComms = new System.Windows.Forms.TabPage();
+            this.textBoxSiTechExeTcpIpPort = new System.Windows.Forms.TextBox();
+            this.textBoxDonutsTcpIpPort = new System.Windows.Forms.TextBox();
+            this.textBoxMeteoDomeTcpIpPort = new System.Windows.Forms.TextBox();
+            this.numericUpDownFocusComId = new System.Windows.Forms.NumericUpDown();
+            this.labelSiTechExeTcpIpPort = new System.Windows.Forms.Label();
+            this.labelDonutsTcpIpPort = new System.Windows.Forms.Label();
+            this.labelMeteoDomeTcpIpPort = new System.Windows.Forms.Label();
+            this.labelFocusComId = new System.Windows.Forms.Label();
             this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonAccept = new System.Windows.Forms.Button();
             this.folderBrowserDialogSetFolder = new System.Windows.Forms.FolderBrowserDialog();
-            this.tabPageComms = new System.Windows.Forms.TabPage();
-            this.labelFocusComId = new System.Windows.Forms.Label();
-            this.labelMeteoDomeTcpIpPort = new System.Windows.Forms.Label();
-            this.labelDonutsTcpIpPort = new System.Windows.Forms.Label();
-            this.labelSiTechExeTcpIpPort = new System.Windows.Forms.Label();
-            this.numericUpDownFocusComId = new System.Windows.Forms.NumericUpDown();
-            this.textBoxMeteoDomeTcpIpPort = new System.Windows.Forms.TextBox();
-            this.textBoxDonutsTcpIpPort = new System.Windows.Forms.TextBox();
-            this.textBoxSiTechExeTcpIpPort = new System.Windows.Forms.TextBox();
             this.tabControlSettings.SuspendLayout();
             this.tabPageImageAnalysis.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownAnnulusOuterRadius)).BeginInit();
@@ -87,10 +87,10 @@
             // 
             // tabControlSettings
             // 
-            this.tabControlSettings.Controls.Add(this.tabPageImageAnalysis);
             this.tabControlSettings.Controls.Add(this.tabPageCameras);
             this.tabControlSettings.Controls.Add(this.tabPageSurvey);
             this.tabControlSettings.Controls.Add(this.tabPageComms);
+            this.tabControlSettings.Controls.Add(this.tabPageImageAnalysis);
             this.tabControlSettings.Dock = System.Windows.Forms.DockStyle.Top;
             this.tabControlSettings.Location = new System.Drawing.Point(0, 0);
             this.tabControlSettings.Name = "tabControlSettings";
@@ -391,42 +391,138 @@
             // tabPageSurvey
             // 
             this.tabPageSurvey.BackColor = System.Drawing.SystemColors.Control;
-            this.tabPageSurvey.Controls.Add(this.labelOutFolder);
-            this.tabPageSurvey.Controls.Add(this.buttonSetFolder);
-            this.tabPageSurvey.Controls.Add(this.labelOutImgsFolder);
+            this.tabPageSurvey.Controls.Add(this.labelMainOutFolderDisplay);
+            this.tabPageSurvey.Controls.Add(this.buttonSetMainOutFolder);
+            this.tabPageSurvey.Controls.Add(this.labelMainOutFolder);
             this.tabPageSurvey.Location = new System.Drawing.Point(4, 22);
             this.tabPageSurvey.Name = "tabPageSurvey";
             this.tabPageSurvey.Size = new System.Drawing.Size(291, 342);
             this.tabPageSurvey.TabIndex = 2;
             this.tabPageSurvey.Text = "Survey";
             // 
-            // labelOutFolder
+            // labelMainOutFolderDisplay
             // 
-            this.labelOutFolder.AutoEllipsis = true;
-            this.labelOutFolder.Location = new System.Drawing.Point(6, 45);
-            this.labelOutFolder.Name = "labelOutFolder";
-            this.labelOutFolder.Size = new System.Drawing.Size(277, 13);
-            this.labelOutFolder.TabIndex = 2;
-            this.labelOutFolder.Text = "OUTPUT IMAGES FOLDER OUTPUT IMAGES FOLDER";
+            this.labelMainOutFolderDisplay.AutoEllipsis = true;
+            this.labelMainOutFolderDisplay.Location = new System.Drawing.Point(6, 45);
+            this.labelMainOutFolderDisplay.Name = "labelMainOutFolderDisplay";
+            this.labelMainOutFolderDisplay.Size = new System.Drawing.Size(277, 13);
+            this.labelMainOutFolderDisplay.TabIndex = 2;
+            this.labelMainOutFolderDisplay.Text = "OUTPUT IMAGES FOLDER OUTPUT IMAGES FOLDER";
             // 
-            // buttonSetFolder
+            // buttonSetMainOutFolder
             // 
-            this.buttonSetFolder.Location = new System.Drawing.Point(208, 19);
-            this.buttonSetFolder.Name = "buttonSetFolder";
-            this.buttonSetFolder.Size = new System.Drawing.Size(75, 23);
-            this.buttonSetFolder.TabIndex = 1;
-            this.buttonSetFolder.Text = "Set folder";
-            this.buttonSetFolder.UseVisualStyleBackColor = true;
-            this.buttonSetFolder.Click += new System.EventHandler(this.ButtonSetFolder_Click);
+            this.buttonSetMainOutFolder.Location = new System.Drawing.Point(208, 19);
+            this.buttonSetMainOutFolder.Name = "buttonSetMainOutFolder";
+            this.buttonSetMainOutFolder.Size = new System.Drawing.Size(75, 23);
+            this.buttonSetMainOutFolder.TabIndex = 1;
+            this.buttonSetMainOutFolder.Text = "Set folder";
+            this.buttonSetMainOutFolder.UseVisualStyleBackColor = true;
+            this.buttonSetMainOutFolder.Click += new System.EventHandler(this.ButtonSetFolder_Click);
             // 
-            // labelOutImgsFolder
+            // labelMainOutFolder
             // 
-            this.labelOutImgsFolder.AutoSize = true;
-            this.labelOutImgsFolder.Location = new System.Drawing.Point(6, 24);
-            this.labelOutImgsFolder.Name = "labelOutImgsFolder";
-            this.labelOutImgsFolder.Size = new System.Drawing.Size(104, 13);
-            this.labelOutImgsFolder.TabIndex = 0;
-            this.labelOutImgsFolder.Text = "Output images folder";
+            this.labelMainOutFolder.AutoSize = true;
+            this.labelMainOutFolder.Location = new System.Drawing.Point(6, 24);
+            this.labelMainOutFolder.Name = "labelMainOutFolder";
+            this.labelMainOutFolder.Size = new System.Drawing.Size(92, 13);
+            this.labelMainOutFolder.TabIndex = 0;
+            this.labelMainOutFolder.Text = "Main output folder";
+            // 
+            // tabPageComms
+            // 
+            this.tabPageComms.BackColor = System.Drawing.SystemColors.Control;
+            this.tabPageComms.Controls.Add(this.textBoxSiTechExeTcpIpPort);
+            this.tabPageComms.Controls.Add(this.textBoxDonutsTcpIpPort);
+            this.tabPageComms.Controls.Add(this.textBoxMeteoDomeTcpIpPort);
+            this.tabPageComms.Controls.Add(this.numericUpDownFocusComId);
+            this.tabPageComms.Controls.Add(this.labelSiTechExeTcpIpPort);
+            this.tabPageComms.Controls.Add(this.labelDonutsTcpIpPort);
+            this.tabPageComms.Controls.Add(this.labelMeteoDomeTcpIpPort);
+            this.tabPageComms.Controls.Add(this.labelFocusComId);
+            this.tabPageComms.Location = new System.Drawing.Point(4, 22);
+            this.tabPageComms.Name = "tabPageComms";
+            this.tabPageComms.Size = new System.Drawing.Size(291, 342);
+            this.tabPageComms.TabIndex = 3;
+            this.tabPageComms.Text = "Comms";
+            // 
+            // textBoxSiTechExeTcpIpPort
+            // 
+            this.textBoxSiTechExeTcpIpPort.Location = new System.Drawing.Point(238, 159);
+            this.textBoxSiTechExeTcpIpPort.Name = "textBoxSiTechExeTcpIpPort";
+            this.textBoxSiTechExeTcpIpPort.Size = new System.Drawing.Size(45, 20);
+            this.textBoxSiTechExeTcpIpPort.TabIndex = 7;
+            // 
+            // textBoxDonutsTcpIpPort
+            // 
+            this.textBoxDonutsTcpIpPort.Location = new System.Drawing.Point(238, 114);
+            this.textBoxDonutsTcpIpPort.Name = "textBoxDonutsTcpIpPort";
+            this.textBoxDonutsTcpIpPort.Size = new System.Drawing.Size(45, 20);
+            this.textBoxDonutsTcpIpPort.TabIndex = 6;
+            // 
+            // textBoxMeteoDomeTcpIpPort
+            // 
+            this.textBoxMeteoDomeTcpIpPort.Location = new System.Drawing.Point(238, 69);
+            this.textBoxMeteoDomeTcpIpPort.Name = "textBoxMeteoDomeTcpIpPort";
+            this.textBoxMeteoDomeTcpIpPort.Size = new System.Drawing.Size(45, 20);
+            this.textBoxMeteoDomeTcpIpPort.TabIndex = 5;
+            // 
+            // numericUpDownFocusComId
+            // 
+            this.numericUpDownFocusComId.Location = new System.Drawing.Point(241, 24);
+            this.numericUpDownFocusComId.Maximum = new decimal(new int[] {
+            256,
+            0,
+            0,
+            0});
+            this.numericUpDownFocusComId.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numericUpDownFocusComId.Name = "numericUpDownFocusComId";
+            this.numericUpDownFocusComId.Size = new System.Drawing.Size(42, 20);
+            this.numericUpDownFocusComId.TabIndex = 4;
+            this.numericUpDownFocusComId.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            // 
+            // labelSiTechExeTcpIpPort
+            // 
+            this.labelSiTechExeTcpIpPort.AutoSize = true;
+            this.labelSiTechExeTcpIpPort.Location = new System.Drawing.Point(6, 159);
+            this.labelSiTechExeTcpIpPort.Name = "labelSiTechExeTcpIpPort";
+            this.labelSiTechExeTcpIpPort.Size = new System.Drawing.Size(120, 13);
+            this.labelSiTechExeTcpIpPort.TabIndex = 3;
+            this.labelSiTechExeTcpIpPort.Text = "SiTechExe TCP/IP Port";
+            // 
+            // labelDonutsTcpIpPort
+            // 
+            this.labelDonutsTcpIpPort.AutoSize = true;
+            this.labelDonutsTcpIpPort.Location = new System.Drawing.Point(6, 114);
+            this.labelDonutsTcpIpPort.Name = "labelDonutsTcpIpPort";
+            this.labelDonutsTcpIpPort.Size = new System.Drawing.Size(114, 13);
+            this.labelDonutsTcpIpPort.TabIndex = 2;
+            this.labelDonutsTcpIpPort.Text = "DONUTS TCP/IP Port";
+            // 
+            // labelMeteoDomeTcpIpPort
+            // 
+            this.labelMeteoDomeTcpIpPort.AutoSize = true;
+            this.labelMeteoDomeTcpIpPort.Location = new System.Drawing.Point(6, 69);
+            this.labelMeteoDomeTcpIpPort.Name = "labelMeteoDomeTcpIpPort";
+            this.labelMeteoDomeTcpIpPort.Size = new System.Drawing.Size(126, 13);
+            this.labelMeteoDomeTcpIpPort.TabIndex = 1;
+            this.labelMeteoDomeTcpIpPort.Text = "MeteoDome TCP/IP Port";
+            // 
+            // labelFocusComId
+            // 
+            this.labelFocusComId.AutoSize = true;
+            this.labelFocusComId.Location = new System.Drawing.Point(6, 24);
+            this.labelFocusComId.Name = "labelFocusComId";
+            this.labelFocusComId.Size = new System.Drawing.Size(77, 13);
+            this.labelFocusComId.TabIndex = 0;
+            this.labelFocusComId.Text = "Focus COM ID";
             // 
             // buttonCancel
             // 
@@ -454,102 +550,6 @@
             // folderBrowserDialogSetFolder
             // 
             this.folderBrowserDialogSetFolder.RootFolder = System.Environment.SpecialFolder.MyComputer;
-            // 
-            // tabPageComms
-            // 
-            this.tabPageComms.BackColor = System.Drawing.SystemColors.Control;
-            this.tabPageComms.Controls.Add(this.textBoxSiTechExeTcpIpPort);
-            this.tabPageComms.Controls.Add(this.textBoxDonutsTcpIpPort);
-            this.tabPageComms.Controls.Add(this.textBoxMeteoDomeTcpIpPort);
-            this.tabPageComms.Controls.Add(this.numericUpDownFocusComId);
-            this.tabPageComms.Controls.Add(this.labelSiTechExeTcpIpPort);
-            this.tabPageComms.Controls.Add(this.labelDonutsTcpIpPort);
-            this.tabPageComms.Controls.Add(this.labelMeteoDomeTcpIpPort);
-            this.tabPageComms.Controls.Add(this.labelFocusComId);
-            this.tabPageComms.Location = new System.Drawing.Point(4, 22);
-            this.tabPageComms.Name = "tabPageComms";
-            this.tabPageComms.Size = new System.Drawing.Size(291, 342);
-            this.tabPageComms.TabIndex = 3;
-            this.tabPageComms.Text = "Comms";
-            // 
-            // labelFocusComId
-            // 
-            this.labelFocusComId.AutoSize = true;
-            this.labelFocusComId.Location = new System.Drawing.Point(6, 24);
-            this.labelFocusComId.Name = "labelFocusComId";
-            this.labelFocusComId.Size = new System.Drawing.Size(77, 13);
-            this.labelFocusComId.TabIndex = 0;
-            this.labelFocusComId.Text = "Focus COM ID";
-            // 
-            // labelMeteoDomeTcpIpPort
-            // 
-            this.labelMeteoDomeTcpIpPort.AutoSize = true;
-            this.labelMeteoDomeTcpIpPort.Location = new System.Drawing.Point(6, 69);
-            this.labelMeteoDomeTcpIpPort.Name = "labelMeteoDomeTcpIpPort";
-            this.labelMeteoDomeTcpIpPort.Size = new System.Drawing.Size(126, 13);
-            this.labelMeteoDomeTcpIpPort.TabIndex = 1;
-            this.labelMeteoDomeTcpIpPort.Text = "MeteoDome TCP/IP Port";
-            // 
-            // labelDonutsTcpIpPort
-            // 
-            this.labelDonutsTcpIpPort.AutoSize = true;
-            this.labelDonutsTcpIpPort.Location = new System.Drawing.Point(6, 114);
-            this.labelDonutsTcpIpPort.Name = "labelDonutsTcpIpPort";
-            this.labelDonutsTcpIpPort.Size = new System.Drawing.Size(114, 13);
-            this.labelDonutsTcpIpPort.TabIndex = 2;
-            this.labelDonutsTcpIpPort.Text = "DONUTS TCP/IP Port";
-            // 
-            // labelSiTechExeTcpIpPort
-            // 
-            this.labelSiTechExeTcpIpPort.AutoSize = true;
-            this.labelSiTechExeTcpIpPort.Location = new System.Drawing.Point(6, 159);
-            this.labelSiTechExeTcpIpPort.Name = "labelSiTechExeTcpIpPort";
-            this.labelSiTechExeTcpIpPort.Size = new System.Drawing.Size(120, 13);
-            this.labelSiTechExeTcpIpPort.TabIndex = 3;
-            this.labelSiTechExeTcpIpPort.Text = "SiTechExe TCP/IP Port";
-            // 
-            // numericUpDownFocusComId
-            // 
-            this.numericUpDownFocusComId.Location = new System.Drawing.Point(241, 24);
-            this.numericUpDownFocusComId.Maximum = new decimal(new int[] {
-            256,
-            0,
-            0,
-            0});
-            this.numericUpDownFocusComId.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.numericUpDownFocusComId.Name = "numericUpDownFocusComId";
-            this.numericUpDownFocusComId.Size = new System.Drawing.Size(42, 20);
-            this.numericUpDownFocusComId.TabIndex = 4;
-            this.numericUpDownFocusComId.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            // 
-            // textBoxMeteoDomeTcpIpPort
-            // 
-            this.textBoxMeteoDomeTcpIpPort.Location = new System.Drawing.Point(238, 69);
-            this.textBoxMeteoDomeTcpIpPort.Name = "textBoxMeteoDomeTcpIpPort";
-            this.textBoxMeteoDomeTcpIpPort.Size = new System.Drawing.Size(45, 20);
-            this.textBoxMeteoDomeTcpIpPort.TabIndex = 5;
-            // 
-            // textBoxDonutsTcpIpPort
-            // 
-            this.textBoxDonutsTcpIpPort.Location = new System.Drawing.Point(238, 114);
-            this.textBoxDonutsTcpIpPort.Name = "textBoxDonutsTcpIpPort";
-            this.textBoxDonutsTcpIpPort.Size = new System.Drawing.Size(45, 20);
-            this.textBoxDonutsTcpIpPort.TabIndex = 6;
-            // 
-            // textBoxSiTechExeTcpIpPort
-            // 
-            this.textBoxSiTechExeTcpIpPort.Location = new System.Drawing.Point(238, 159);
-            this.textBoxSiTechExeTcpIpPort.Name = "textBoxSiTechExeTcpIpPort";
-            this.textBoxSiTechExeTcpIpPort.Size = new System.Drawing.Size(45, 20);
-            this.textBoxSiTechExeTcpIpPort.TabIndex = 7;
             // 
             // SettingsForm
             // 
@@ -617,10 +617,10 @@
         private System.Windows.Forms.ComboBox comboBoxReadout;
         private System.Windows.Forms.Label labelReadout;
         private System.Windows.Forms.TabPage tabPageSurvey;
-        private System.Windows.Forms.Label labelOutImgsFolder;
+        private System.Windows.Forms.Label labelMainOutFolder;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialogSetFolder;
-        private System.Windows.Forms.Button buttonSetFolder;
-        private System.Windows.Forms.Label labelOutFolder;
+        private System.Windows.Forms.Button buttonSetMainOutFolder;
+        private System.Windows.Forms.Label labelMainOutFolderDisplay;
         private System.Windows.Forms.TabPage tabPageComms;
         private System.Windows.Forms.Label labelSiTechExeTcpIpPort;
         private System.Windows.Forms.Label labelDonutsTcpIpPort;

@@ -32,8 +32,8 @@ namespace RPCC.Utils
             #endregion
 
             #region Survey
-            folderBrowserDialogSetFolder.SelectedPath = Settings.OutImgsFolder;
-            labelOutFolder.Text = Settings.OutImgsFolder;
+            folderBrowserDialogSetFolder.SelectedPath = Settings.MainOutFolder;
+            labelMainOutFolderDisplay.Text = Settings.MainOutFolder;
             #endregion
 
             #region Comms
@@ -98,7 +98,7 @@ namespace RPCC.Utils
             #endregion
 
             #region Survey
-            Settings.OutImgsFolder = folderBrowserDialogSetFolder.SelectedPath;
+            Settings.MainOutFolder = folderBrowserDialogSetFolder.SelectedPath;
             #endregion
 
             #region Comms
@@ -116,7 +116,7 @@ namespace RPCC.Utils
         {
             if (folderBrowserDialogSetFolder.ShowDialog() == DialogResult.OK)
             {
-                labelOutFolder.Text = folderBrowserDialogSetFolder.SelectedPath;
+                labelMainOutFolderDisplay.Text = folderBrowserDialogSetFolder.SelectedPath;
             }
         }
         #endregion

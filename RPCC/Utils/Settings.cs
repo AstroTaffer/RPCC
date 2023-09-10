@@ -169,14 +169,14 @@ namespace RPCC.Utils
         ///     Настройки съёмки
         /// </summary>
 
-        private static string _outImgsFolder;
+        private static string _mainOutFolder;
 
-        public static string OutImgsFolder
+        public static string MainOutFolder
         {
-            get => _outImgsFolder;
+            get => _mainOutFolder;
             set
             {
-                if (Directory.Exists(value)) _outImgsFolder = value;
+                if (Directory.Exists(value)) _mainOutFolder = value;
                 else throw new ArgumentException("Selected output images folder does not exists");
                 // Alternative - if (!Exists) CreateDirectory
             }
@@ -265,7 +265,7 @@ namespace RPCC.Utils
                       config.Root.Elements("cameras").Elements("сamRoMode").Any() &&
 
                       config.Root.Elements("survey").Any() &&
-                      config.Root.Elements("survey").Elements("outImgsFolder").Any() &&
+                      config.Root.Elements("survey").Elements("mainOutFolder").Any() &&
 
                       config.Root.Elements("comms").Any() &&
                       config.Root.Elements("comms").Elements("focusComId").Any() &&
@@ -289,7 +289,7 @@ namespace RPCC.Utils
                 var buff = config.Root.Element("cameras");
                 CamRoMode = (string)config.Root.Element("cameras").Element("сamRoMode");
 
-                OutImgsFolder = (string)config.Root.Element("survey").Element("outImgsFolder");
+                MainOutFolder = (string)config.Root.Element("survey").Element("mainOutFolder");
 
                 FocusComId = (int)config.Root.Element("comms").Element("focusComId");
                 MeteoDomeTcpIpPort = (int)config.Root.Element("comms").Element("meteoDomeTcpIpPort");
@@ -413,7 +413,7 @@ namespace RPCC.Utils
                     new XElement("сamRoMode", CamRoMode)),
                 
                 new XElement("survey",
-                    new XElement("outImgsFolder", OutImgsFolder)),
+                    new XElement("mainOutFolder", MainOutFolder)),
 
                 new XElement("comms",
                     new XElement("focusComId", FocusComId),
@@ -441,12 +441,13 @@ namespace RPCC.Utils
                     new XElement("snCamR", "ML0892515"),
                     new XElement("snCamI", "ML0742515"),
                     new XElement("numFlushes", 5),
-                    new XElement("camTemp", -5.0),
-                    new XElement("camBin", 3),
+                    new XElement("camTemp", -30.0),
+                    new XElement("camBin", 2),
                     new XElement("сamRoMode", "500KHz")),
                 
                 new XElement("survey",
-                    new XElement("outImgsFolder", Directory.GetCurrentDirectory())),
+                    new XElement("mainOutFolder", "D:\\RoboPhot Data\\Images")),
+                  //new XElement("mainOutFolder", Directory.GetCurrentDirectory())),
 
                 new XElement("comms",
                     new XElement("focusComId", 10),

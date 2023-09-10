@@ -1,4 +1,3 @@
-import glob
 import os
 import astropy.io.fits as fits
 import numpy as np
@@ -16,9 +15,10 @@ def Astrometry(path, files, C):
     path2save = path + r'\done'
     if not os.path.exists(path2save):
         os.mkdir(path2save)
-    for item in files:
+    for count, item in enumerate(files):
         try:
-            print(f"Astrometry: working on {item}")
+            name = item.split('\\')[-1]
+            print(f"Astrometry ({count}/{len(files)}): working on {name}")
             # read file, copy data and header
             hdulist = fits.open(item, 'update', memmap=False)
             # del hdulist[0].header['COMMENT']
@@ -61,7 +61,7 @@ def Astrometry(path, files, C):
                                                     scale_units='arcsecperpix'
                                                     )
             hdu = fits.PrimaryHDU(hdulist[0].data, Header + wcs_header)
-            name = item.split('\\')[-1]
+            
             hdu.writeto(path2save + '\\' + name)
             hdulist.close()
             print('done')
