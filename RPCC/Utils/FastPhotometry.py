@@ -22,13 +22,13 @@ def Core(path2data, do_wcs=False):
     V_lim = 15  # catalog max depth
     Bbox = 9  # centering/morphology box half-size (pixels)
     Raper = 5
-    
+
     # read directory and create list of fits-files
     file_list = []
     for f in os.listdir(path2data):
         if f.count('.fits') or f.count('.fit'):
             file_list.append(path2data + '\\' + f)
-    
+
     hdu = fits.open(file_list[0])
     header = hdu[0].header
     date = header['DATE-OBS'].split('T')[0]
@@ -259,7 +259,6 @@ def Plot_Curve(path2phot, objname, date, filter):
     shift_fig.savefig(rf'{path2phot}\plot_shifts.pdf')
 
 
-# Core(r'D:\RoboPhot Data\Raw Images\2023_09 FLI\2023_09_08 TIC233047097_01\r\DO_BOTH')
-# Core(r'D:\RoboPhot Data\Raw Images\2023_09 FLI\2023_09_08 TIC233047097_01\r\DO_DARK')
-Plot_Curve(r'D:\RoboPhot Data\Raw Images\2023_09 FLI\2023_09_08 TIC233047097_01\i\DO_BOTH\Photometry', 
-           'TIC233047097_01', '2023-09-08', 'i')
+Core(r'D:\RoboPhot Data\Images\2023_09_08 TIC233047097_01\i\DO_BOTH')
+# Plot_Curve(r'D:\RoboPhot Data\Raw Images\2023_09 FLI\2023_09_08 TIC233047097_01\i\DO_BOTH\Photometry', 
+#            'TIC233047097_01', '2023-09-08', 'i')

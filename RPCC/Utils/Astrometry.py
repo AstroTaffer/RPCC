@@ -56,13 +56,12 @@ def Astrometry(path, files, C):
                                                     center_dec=C.dec.degree,
                                                     radius=0.1,
                                                     downsample_factor=2,
-                                                    scale_lower=1,
+                                                    scale_lower=0.6,
                                                     scale_upper=1.5,
                                                     scale_units='arcsecperpix'
                                                     )
             hdu = fits.PrimaryHDU(hdulist[0].data, Header + wcs_header)
-            
-            hdu.writeto(path2save + '\\' + name)
+            hdu.writeto(path2save + '\\' + name, overwrite=True)
             hdulist.close()
             print('done')
         except Exception as e:

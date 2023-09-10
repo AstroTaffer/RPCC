@@ -124,7 +124,7 @@ def DrawMap(Image, Size, Header, Cat, Name, RAper):
         Title = f'Filter={Header["FILTER"]}'
     except:
         Title = 'Filter=V'
-    Title += ', aperture radius =' + '{:.1f}'.format(3600 * RAper * abs(Header['CD1_1'])) + '"'
+    Title += ', aperture radius =' + '{:.1f}'.format(3600 * RAper * np.sqrt(Header['CD1_1']**2+Header['CD1_2']**2))+'"'
     plt.title(Title)
     ax.coords[1].set_ticklabel(rotation=90)
     ax.coords[0].set_major_formatter('hh:mm:ss')
