@@ -50,7 +50,6 @@
             this.saveConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.debugToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.restoreDefaultConfigFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.testDLLlibrariesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loadTestImageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.testDonToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBoxLogs = new System.Windows.Forms.GroupBox();
@@ -96,6 +95,12 @@
             this.radioButtonViewCam2 = new System.Windows.Forms.RadioButton();
             this.radioButtonViewCam1 = new System.Windows.Forms.RadioButton();
             this.groupBoxSurvey = new System.Windows.Forms.GroupBox();
+            this.textBoxObjectDec = new System.Windows.Forms.TextBox();
+            this.textBoxObjectRa = new System.Windows.Forms.TextBox();
+            this.textBoxObjectName = new System.Windows.Forms.TextBox();
+            this.labelObjectDec = new System.Windows.Forms.Label();
+            this.labelObjectRa = new System.Windows.Forms.Label();
+            this.labelObjectName = new System.Windows.Forms.Label();
             this.buttonSurveyStop = new System.Windows.Forms.Button();
             this.buttonSurveyStart = new System.Windows.Forms.Button();
             this.numericUpDownSequence = new System.Windows.Forms.NumericUpDown();
@@ -128,12 +133,6 @@
             this.addToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dataGridTextBoxColumn1 = new System.Windows.Forms.DataGridTextBoxColumn();
             this.dataGridTextBoxColumn2 = new System.Windows.Forms.DataGridTextBoxColumn();
-            this.labelObjectName = new System.Windows.Forms.Label();
-            this.labelObjectRa = new System.Windows.Forms.Label();
-            this.labelObjectDec = new System.Windows.Forms.Label();
-            this.textBoxObjectName = new System.Windows.Forms.TextBox();
-            this.textBoxObjectRa = new System.Windows.Forms.TextBox();
-            this.textBoxObjectDec = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewTasker)).BeginInit();
             this.statusStrip.SuspendLayout();
             this.menuStrip.SuspendLayout();
@@ -318,7 +317,6 @@
             // 
             this.debugToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.restoreDefaultConfigFileToolStripMenuItem,
-            this.testDLLlibrariesToolStripMenuItem,
             this.loadTestImageToolStripMenuItem,
             this.testDonToolStripMenuItem});
             this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
@@ -331,13 +329,6 @@
             this.restoreDefaultConfigFileToolStripMenuItem.Size = new System.Drawing.Size(209, 22);
             this.restoreDefaultConfigFileToolStripMenuItem.Text = "Restore default config file";
             this.restoreDefaultConfigFileToolStripMenuItem.Click += new System.EventHandler(this.RestoreDefaultConfigFileToolStripMenuItem_Click);
-            // 
-            // testDLLlibrariesToolStripMenuItem
-            // 
-            this.testDLLlibrariesToolStripMenuItem.Name = "testDLLlibrariesToolStripMenuItem";
-            this.testDLLlibrariesToolStripMenuItem.Size = new System.Drawing.Size(209, 22);
-            this.testDLLlibrariesToolStripMenuItem.Text = "Test DLL-libraries";
-            this.testDLLlibrariesToolStripMenuItem.Click += new System.EventHandler(this.TestDLLlibrariesToolStripMenuItem_Click);
             // 
             // loadTestImageToolStripMenuItem
             // 
@@ -787,6 +778,54 @@
             this.groupBoxSurvey.TabStop = false;
             this.groupBoxSurvey.Text = "Survey";
             // 
+            // textBoxObjectDec
+            // 
+            this.textBoxObjectDec.Location = new System.Drawing.Point(291, 77);
+            this.textBoxObjectDec.Name = "textBoxObjectDec";
+            this.textBoxObjectDec.Size = new System.Drawing.Size(165, 20);
+            this.textBoxObjectDec.TabIndex = 27;
+            // 
+            // textBoxObjectRa
+            // 
+            this.textBoxObjectRa.Location = new System.Drawing.Point(291, 47);
+            this.textBoxObjectRa.Name = "textBoxObjectRa";
+            this.textBoxObjectRa.Size = new System.Drawing.Size(165, 20);
+            this.textBoxObjectRa.TabIndex = 26;
+            // 
+            // textBoxObjectName
+            // 
+            this.textBoxObjectName.Location = new System.Drawing.Point(291, 17);
+            this.textBoxObjectName.Name = "textBoxObjectName";
+            this.textBoxObjectName.Size = new System.Drawing.Size(165, 20);
+            this.textBoxObjectName.TabIndex = 25;
+            // 
+            // labelObjectDec
+            // 
+            this.labelObjectDec.AutoSize = true;
+            this.labelObjectDec.Location = new System.Drawing.Point(199, 80);
+            this.labelObjectDec.Name = "labelObjectDec";
+            this.labelObjectDec.Size = new System.Drawing.Size(66, 13);
+            this.labelObjectDec.TabIndex = 24;
+            this.labelObjectDec.Text = "Object DEC:";
+            // 
+            // labelObjectRa
+            // 
+            this.labelObjectRa.AutoSize = true;
+            this.labelObjectRa.Location = new System.Drawing.Point(199, 50);
+            this.labelObjectRa.Name = "labelObjectRa";
+            this.labelObjectRa.Size = new System.Drawing.Size(59, 13);
+            this.labelObjectRa.TabIndex = 23;
+            this.labelObjectRa.Text = "Object RA:";
+            // 
+            // labelObjectName
+            // 
+            this.labelObjectName.AutoSize = true;
+            this.labelObjectName.Location = new System.Drawing.Point(199, 20);
+            this.labelObjectName.Name = "labelObjectName";
+            this.labelObjectName.Size = new System.Drawing.Size(72, 13);
+            this.labelObjectName.TabIndex = 22;
+            this.labelObjectName.Text = "Object Name:";
+            // 
             // buttonSurveyStop
             // 
             this.buttonSurveyStop.Location = new System.Drawing.Point(97, 106);
@@ -1160,54 +1199,6 @@
             this.dataGridTextBoxColumn2.FormatInfo = null;
             this.dataGridTextBoxColumn2.Width = -1;
             // 
-            // labelObjectName
-            // 
-            this.labelObjectName.AutoSize = true;
-            this.labelObjectName.Location = new System.Drawing.Point(199, 20);
-            this.labelObjectName.Name = "labelObjectName";
-            this.labelObjectName.Size = new System.Drawing.Size(72, 13);
-            this.labelObjectName.TabIndex = 22;
-            this.labelObjectName.Text = "Object Name:";
-            // 
-            // labelObjectRa
-            // 
-            this.labelObjectRa.AutoSize = true;
-            this.labelObjectRa.Location = new System.Drawing.Point(199, 50);
-            this.labelObjectRa.Name = "labelObjectRa";
-            this.labelObjectRa.Size = new System.Drawing.Size(59, 13);
-            this.labelObjectRa.TabIndex = 23;
-            this.labelObjectRa.Text = "Object RA:";
-            // 
-            // labelObjectDec
-            // 
-            this.labelObjectDec.AutoSize = true;
-            this.labelObjectDec.Location = new System.Drawing.Point(199, 80);
-            this.labelObjectDec.Name = "labelObjectDec";
-            this.labelObjectDec.Size = new System.Drawing.Size(66, 13);
-            this.labelObjectDec.TabIndex = 24;
-            this.labelObjectDec.Text = "Object DEC:";
-            // 
-            // textBoxObjectName
-            // 
-            this.textBoxObjectName.Location = new System.Drawing.Point(291, 17);
-            this.textBoxObjectName.Name = "textBoxObjectName";
-            this.textBoxObjectName.Size = new System.Drawing.Size(165, 20);
-            this.textBoxObjectName.TabIndex = 25;
-            // 
-            // textBoxObjectRa
-            // 
-            this.textBoxObjectRa.Location = new System.Drawing.Point(291, 47);
-            this.textBoxObjectRa.Name = "textBoxObjectRa";
-            this.textBoxObjectRa.Size = new System.Drawing.Size(165, 20);
-            this.textBoxObjectRa.TabIndex = 26;
-            // 
-            // textBoxObjectDec
-            // 
-            this.textBoxObjectDec.Location = new System.Drawing.Point(291, 77);
-            this.textBoxObjectDec.Name = "textBoxObjectDec";
-            this.textBoxObjectDec.Size = new System.Drawing.Size(165, 20);
-            this.textBoxObjectDec.TabIndex = 27;
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1307,7 +1298,6 @@
         private System.Windows.Forms.ToolStripMenuItem launchToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem findCamerasToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem debugToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem testDLLlibrariesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem loadTestImageToolStripMenuItem;
         private System.Windows.Forms.GroupBox groupBoxLogs;
         private System.Windows.Forms.Timer timerClock;

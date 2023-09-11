@@ -25,13 +25,13 @@ namespace RPCC
         // private readonly Logger Logger;
         // private Settings Settings;
 
-        private ushort[][] _currentImage;        
-        private GeneralImageStat _currentImageGStat;
-        private bool _isCurrentImageLoaded;
-        private bool _isZoomModeActivated;
+        //private ushort[][] _currentImage;        
+        //private GeneralImageStat _currentImageGStat;
+        //private bool _isCurrentImageLoaded;
+        //private bool _isZoomModeActivated;
 
-        private readonly CameraControl _cameraControl;
-        private int _idleCamNum;
+        //private readonly CameraControl _cameraControl;
+        //private int _idleCamNum;
 
         private readonly CameraFocus _cameraFocus;
 
@@ -62,7 +62,7 @@ namespace RPCC
             Settings.LoadXmlConfig("SettingsDefault.xml");
 
             // Hardware controls
-            _cameraControl = new CameraControl();
+            //_cameraControl = new CameraControl();
             _cameraFocus = new CameraFocus();
 
             // MeteoDome connect
@@ -116,7 +116,7 @@ namespace RPCC
             _donutsSocket.Disconnect();
             SiTechExeSocket.Disconnect();
 
-            _cameraControl.DisconnectCameras();
+            //_cameraControl.DisconnectCameras();
             
             _cameraFocus.SerialFocus.Close_Port();
             _cameraFocus.DeFocus = 0;
@@ -129,117 +129,117 @@ namespace RPCC
         {
             tSStatusClock.Text = @"UTC: " + DateTime.UtcNow.ToString("yyyy-MM-ddTHH-mm-ss.fff");
             
-            _cameraControl.GetStatus();
-            switch (_cameraControl.cameras.Length)
-            {
-                case 3:
-                    labelCam3CcdTemp.Text = $@"CCD Temp: {_cameraControl.cameras[2].ccdTemp}";
-                    labelCam3BaseTemp.Text = $@"Base Temp: {_cameraControl.cameras[2].baseTemp}";
-                    labelCam3CoolerPwr.Text = $@"Cooler Power: {_cameraControl.cameras[2].coolerPwr} %";
-                    labelCam3Status.Text = $@"Status: {_cameraControl.cameras[2].status}";
-                    labelCam3RemTime.Text = $@"Remaining: {_cameraControl.cameras[2].remTime / 1000}";
-                    goto case 2;
-                case 2:
-                    labelCam2CcdTemp.Text = $@"CCD Temp: {_cameraControl.cameras[1].ccdTemp}";
-                    labelCam2BaseTemp.Text = $@"Base Temp: {_cameraControl.cameras[1].baseTemp}";
-                    labelCam2CoolerPwr.Text = $@"Cooler Power: {_cameraControl.cameras[1].coolerPwr} %";
-                    labelCam2Status.Text = $@"Status: {_cameraControl.cameras[1].status}";
-                    labelCam2RemTime.Text = $@"Remaining: {_cameraControl.cameras[1].remTime / 1000}";
-                    goto case 1;
-                case 1:
-                    labelCam1CcdTemp.Text = $@"CCD Temp: {_cameraControl.cameras[0].ccdTemp}";
-                    labelCam1BaseTemp.Text = $@"Base Temp: {_cameraControl.cameras[0].baseTemp}";
-                    labelCam1CoolerPwr.Text = $@"Cooler Power: {_cameraControl.cameras[0].coolerPwr}  %";
-                    labelCam1Status.Text = $@"Status: {_cameraControl.cameras[0].status}";
-                    labelCam1RemTime.Text = $@"Remaining: {_cameraControl.cameras[0].remTime / 1000}";
-                    break;
-            }
+            //_cameraControl.GetStatus();
+            //switch (_cameraControl.cameras.Length)
+            //{
+            //    case 3:
+            //        labelCam3CcdTemp.Text = $@"CCD Temp: {_cameraControl.cameras[2].ccdTemp}";
+            //        labelCam3BaseTemp.Text = $@"Base Temp: {_cameraControl.cameras[2].baseTemp}";
+            //        labelCam3CoolerPwr.Text = $@"Cooler Power: {_cameraControl.cameras[2].coolerPwr} %";
+            //        labelCam3Status.Text = $@"Status: {_cameraControl.cameras[2].status}";
+            //        labelCam3RemTime.Text = $@"Remaining: {_cameraControl.cameras[2].remTime / 1000}";
+            //        goto case 2;
+            //    case 2:
+            //        labelCam2CcdTemp.Text = $@"CCD Temp: {_cameraControl.cameras[1].ccdTemp}";
+            //        labelCam2BaseTemp.Text = $@"Base Temp: {_cameraControl.cameras[1].baseTemp}";
+            //        labelCam2CoolerPwr.Text = $@"Cooler Power: {_cameraControl.cameras[1].coolerPwr} %";
+            //        labelCam2Status.Text = $@"Status: {_cameraControl.cameras[1].status}";
+            //        labelCam2RemTime.Text = $@"Remaining: {_cameraControl.cameras[1].remTime / 1000}";
+            //        goto case 1;
+            //    case 1:
+            //        labelCam1CcdTemp.Text = $@"CCD Temp: {_cameraControl.cameras[0].ccdTemp}";
+            //        labelCam1BaseTemp.Text = $@"Base Temp: {_cameraControl.cameras[0].baseTemp}";
+            //        labelCam1CoolerPwr.Text = $@"Cooler Power: {_cameraControl.cameras[0].coolerPwr}  %";
+            //        labelCam1Status.Text = $@"Status: {_cameraControl.cameras[0].status}";
+            //        labelCam1RemTime.Text = $@"Remaining: {_cameraControl.cameras[0].remTime / 1000}";
+            //        break;
+            //}
 
-            _idleCamNum = 0;
-            for (int i = 0; i < _cameraControl.cameras.Length; i++)
-            {
-                if (_cameraControl.cameras[i].status == "IDLE")
-                {
-                    _idleCamNum++;
-                    if (_cameraControl.cameras[i].isExposing)
-                    {
-                        // Image ready
+            //_idleCamNum = 0;
+            //for (int i = 0; i < _cameraControl.cameras.Length; i++)
+            //{
+            //    if (_cameraControl.cameras[i].status == "IDLE")
+            //    {
+            //        _idleCamNum++;
+            //        if (_cameraControl.cameras[i].isExposing)
+            //        {
+            //            // Image ready
 
-                        // TODO: Move to separate thread
-                        RpccFits imageFits = _cameraControl.ReadImage(_cameraControl.cameras[i]);
+            //            // TODO: Move to separate thread
+            //            RpccFits imageFits = _cameraControl.ReadImage(_cameraControl.cameras[i]);
 
-                        imageFits.SaveFitsFile(_cameraControl, _cameraFocus.SerialFocus.CurrentPosition, i);
+            //            imageFits.SaveFitsFile(_cameraControl, _cameraFocus.SerialFocus.CurrentPosition, i);
 
-                        if (i == _cameraControl.task.viewCamIndex)
-                        {
-                            _isCurrentImageLoaded = false;
-                            _currentImage = imageFits.data;
-                            _currentImageGStat = new GeneralImageStat(_currentImage);
-                            Logger.AddLogEntry($"Min: {_currentImageGStat.min}; " +
-                                $"Max: {_currentImageGStat.max}; " +
-                                $"Mean: {_currentImageGStat.mean:0.##}; " +
-                                $"SD: {_currentImageGStat.sd:0.##}");
-                            PlotFitsImage();
-                            _isCurrentImageLoaded = true;
-                        }
+            //            if (i == _cameraControl.task.viewCamIndex)
+            //            {
+            //                _isCurrentImageLoaded = false;
+            //                _currentImage = imageFits.data;
+            //                _currentImageGStat = new GeneralImageStat(_currentImage);
+            //                Logger.AddLogEntry($"Min: {_currentImageGStat.min}; " +
+            //                    $"Max: {_currentImageGStat.max}; " +
+            //                    $"Mean: {_currentImageGStat.mean:0.##}; " +
+            //                    $"SD: {_currentImageGStat.sd:0.##}");
+            //                PlotFitsImage();
+            //                _isCurrentImageLoaded = true;
+            //            }
 
-                        // TODO: AUTOFOCUS, check quality
-                        // _cameraFocus.AutoFocus();
-                        _cameraControl.cameras[i].isExposing = false;
-                    }
-                }
-            }
+            //            // TODO: AUTOFOCUS, check quality
+            //            // _cameraFocus.AutoFocus();
+            //            _cameraControl.cameras[i].isExposing = false;
+            //        }
+            //    }
+            //}
 
-            if (_idleCamNum == _cameraControl.cameras.Length)
-            {
-                if (_cameraControl.task.framesNum > 1)
-                {
-                    _cameraControl.task.framesNum--;
-                    numericUpDownSequence.Value = _cameraControl.task.framesNum;
-                    _cameraControl.StartExposure();
-                }
-                else if (!buttonSurveyStart.Enabled)
-                {
-                    buttonSurveyStart.Enabled = true;
-                    comboBoxImgType.Enabled = true;
-                    numericUpDownSequence.Enabled = true;
-                    numericUpDownExpTime.Enabled = true;
-                    updateCamerasSettingsToolStripMenuItem.Enabled = true;
-                    Logger.AddLogEntry("Survey finished");
-                }
-            }
+            //if (_idleCamNum == _cameraControl.cameras.Length)
+            //{
+            //    if (_cameraControl.task.framesNum > 1)
+            //    {
+            //        _cameraControl.task.framesNum--;
+            //        numericUpDownSequence.Value = _cameraControl.task.framesNum;
+            //        _cameraControl.StartExposure();
+            //    }
+            //    else if (!buttonSurveyStart.Enabled)
+            //    {
+            //        buttonSurveyStart.Enabled = true;
+            //        comboBoxImgType.Enabled = true;
+            //        numericUpDownSequence.Enabled = true;
+            //        numericUpDownExpTime.Enabled = true;
+            //        updateCamerasSettingsToolStripMenuItem.Enabled = true;
+            //        Logger.AddLogEntry("Survey finished");
+            //    }
+            //}
         }
         #endregion
 
         #region Launch Menu
         private void FindCamerasToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            _cameraControl.LaunchCameras();
+            //_cameraControl.LaunchCameras();
 
-            switch (_cameraControl.cameras.Length)
-            {
-                case 3:
-                    groupBoxCam3.Enabled = true;
-                    radioButtonViewCam3.Enabled = true;
-                    labelCam3Model.Text = $@"Model: {_cameraControl.cameras[2].modelName}";
-                    labelCam3Sn.Text = $@"Serial Num: {_cameraControl.cameras[2].serialNumber}";
-                    labelCam3Filter.Text = $@"Filter: {_cameraControl.cameras[2].filter}";
-                    goto case 2;
-                case 2:
-                    groupBoxCam2.Enabled = true;
-                    radioButtonViewCam2.Enabled = true;
-                    labelCam2Model.Text = $@"Model: {_cameraControl.cameras[1].modelName}";
-                    labelCam2Sn.Text = $@"Serial Num: {_cameraControl.cameras[1].serialNumber}";
-                    labelCam2Filter.Text = $@"Filter: {_cameraControl.cameras[1].filter}";
-                    goto case 1;
-                case 1:
-                    groupBoxCam1.Enabled = true;
-                    radioButtonViewCam1.Enabled = true;
-                    labelCam1Model.Text = $@"Model: {_cameraControl.cameras[0].modelName}";
-                    labelCam1Sn.Text = $@"Serial Num: {_cameraControl.cameras[0].serialNumber}";
-                    labelCam1Filter.Text = $@"Filter: {_cameraControl.cameras[0].filter}";
-                    break;
-            }
+            //switch (_cameraControl.cameras.Length)
+            //{
+            //    case 3:
+            //        groupBoxCam3.Enabled = true;
+            //        radioButtonViewCam3.Enabled = true;
+            //        labelCam3Model.Text = $@"Model: {_cameraControl.cameras[2].modelName}";
+            //        labelCam3Sn.Text = $@"Serial Num: {_cameraControl.cameras[2].serialNumber}";
+            //        labelCam3Filter.Text = $@"Filter: {_cameraControl.cameras[2].filter}";
+            //        goto case 2;
+            //    case 2:
+            //        groupBoxCam2.Enabled = true;
+            //        radioButtonViewCam2.Enabled = true;
+            //        labelCam2Model.Text = $@"Model: {_cameraControl.cameras[1].modelName}";
+            //        labelCam2Sn.Text = $@"Serial Num: {_cameraControl.cameras[1].serialNumber}";
+            //        labelCam2Filter.Text = $@"Filter: {_cameraControl.cameras[1].filter}";
+            //        goto case 1;
+            //    case 1:
+            //        groupBoxCam1.Enabled = true;
+            //        radioButtonViewCam1.Enabled = true;
+            //        labelCam1Model.Text = $@"Model: {_cameraControl.cameras[0].modelName}";
+            //        labelCam1Sn.Text = $@"Serial Num: {_cameraControl.cameras[0].serialNumber}";
+            //        labelCam1Filter.Text = $@"Filter: {_cameraControl.cameras[0].filter}";
+            //        break;
+            //}
         }
 
         private void FindFocusToolStripMenuItem_Click(object sender, EventArgs e)
@@ -304,188 +304,188 @@ namespace RPCC
         #endregion
 
         #region Images Plotting
-        private void PlotFitsImage()
-        {
-            pictureBoxFits.Image = null;
-            pictureBoxProfile.Image = null;
+        //private void PlotFitsImage()
+        //{
+        //    pictureBoxFits.Image = null;
+        //    pictureBoxProfile.Image = null;
 
-            var lowerBrightnessBorder = _currentImageGStat.mean - Settings.LowerBrightnessSd * _currentImageGStat.sd;
-            if (lowerBrightnessBorder < _currentImageGStat.min) lowerBrightnessBorder = _currentImageGStat.min;
+        //    var lowerBrightnessBorder = _currentImageGStat.mean - Settings.LowerBrightnessSd * _currentImageGStat.sd;
+        //    if (lowerBrightnessBorder < _currentImageGStat.min) lowerBrightnessBorder = _currentImageGStat.min;
 
-            var upperBrightnessBorder = _currentImageGStat.mean + Settings.UpperBrightnessSd * _currentImageGStat.sd;
-            if (upperBrightnessBorder > _currentImageGStat.max) upperBrightnessBorder = _currentImageGStat.max;
+        //    var upperBrightnessBorder = _currentImageGStat.mean + Settings.UpperBrightnessSd * _currentImageGStat.sd;
+        //    if (upperBrightnessBorder > _currentImageGStat.max) upperBrightnessBorder = _currentImageGStat.max;
 
-            upperBrightnessBorder -= lowerBrightnessBorder;
-            var colorScale = 255 / upperBrightnessBorder;
+        //    upperBrightnessBorder -= lowerBrightnessBorder;
+        //    var colorScale = 255 / upperBrightnessBorder;
 
-            var bitmapFits = new Bitmap(_currentImage.Length, _currentImage[0].Length, PixelFormat.Format24bppRgb);
+        //    var bitmapFits = new Bitmap(_currentImage.Length, _currentImage[0].Length, PixelFormat.Format24bppRgb);
 
-            int pixelColor;
-            for (ushort i = 0; i < _currentImage.Length; i++)
-            for (ushort j = 0; j < _currentImage[i].Length; j++)
-            {
-                pixelColor = (int) ((_currentImage[i][j] - lowerBrightnessBorder) * colorScale);
-                if (pixelColor < 0) pixelColor = 0;
-                if (pixelColor > 255) pixelColor = 255;
-                bitmapFits.SetPixel(j, i, Color.FromArgb(pixelColor, pixelColor, pixelColor));
-            }
+        //    int pixelColor;
+        //    for (ushort i = 0; i < _currentImage.Length; i++)
+        //        for (ushort j = 0; j < _currentImage[i].Length; j++)
+        //        {
+        //            pixelColor = (int)((_currentImage[i][j] - lowerBrightnessBorder) * colorScale);
+        //            if (pixelColor < 0) pixelColor = 0;
+        //            if (pixelColor > 255) pixelColor = 255;
+        //            bitmapFits.SetPixel(j, i, Color.FromArgb(pixelColor, pixelColor, pixelColor));
+        //        }
 
-            pictureBoxFits.Image = bitmapFits;
-        }
+        //    pictureBoxFits.Image = bitmapFits;
+        //}
     
-        private void PlotProfileImage(ProfileImageStat pStat, ushort[][] image)
-        {
-            // It calculates scaling and placing parameters in a rather non-obvious way
-            // But it seems harmless. If you don't have anything better to do,
-            // You can tidy it up and create appropriate Settings variables
+        //private void PlotProfileImage(ProfileImageStat pStat, ushort[][] image)
+        //{
+        //    //// It calculates scaling and placing parameters in a rather non-obvious way
+        //    //// But it seems harmless. If you don't have anything better to do,
+        //    //// You can tidy it up and create appropriate Settings variables
 
-            var bitmapProfile =
-                new Bitmap(pictureBoxProfile.Width, pictureBoxProfile.Height, PixelFormat.Format24bppRgb);
+        //    var bitmapProfile =
+        //        new Bitmap(pictureBoxProfile.Width, pictureBoxProfile.Height, PixelFormat.Format24bppRgb);
 
-            double pixelFlux;
-            double pixelRadius;
-            int pixelBitmapXCoordinate;
-            int pixelBitmapYCoordinate;
-            var bitmapScaleX = pictureBoxProfile.Width / (Settings.AnnulusOuterRadius * Math.Sqrt(2));
-            var bitmapScaleY = pictureBoxProfile.Height * 0.9 / (pStat.maxValue - pStat.background);
-            for (var i = 0; i < image.Length; i++)
-            for (var j = 0; j < image[i].Length; j++)
-            {
-                pixelFlux = image[i][j] - pStat.background;
-                pixelBitmapYCoordinate = pictureBoxProfile.Height -
-                                         (int) Math.Round(pictureBoxProfile.Height * 0.05 + pixelFlux * bitmapScaleY);
+        //    double pixelFlux;
+        //    double pixelRadius;
+        //    int pixelBitmapXCoordinate;
+        //    int pixelBitmapYCoordinate;
+        //    var bitmapScaleX = pictureBoxProfile.Width / (Settings.AnnulusOuterRadius * Math.Sqrt(2));
+        //    var bitmapScaleY = pictureBoxProfile.Height * 0.9 / (pStat.maxValue - pStat.background);
+        //    for (var i = 0; i < image.Length; i++)
+        //        for (var j = 0; j < image[i].Length; j++)
+        //        {
+        //            pixelFlux = image[i][j] - pStat.background;
+        //            pixelBitmapYCoordinate = pictureBoxProfile.Height -
+        //                                     (int)Math.Round(pictureBoxProfile.Height * 0.05 + pixelFlux * bitmapScaleY);
 
-                pixelRadius = Math.Sqrt(Math.Pow(i - pStat.centroidYCoordinate, 2) +
-                                        Math.Pow(j - pStat.centroidXCoordinate, 2));
-                pixelBitmapXCoordinate = (int) Math.Round(pixelRadius * bitmapScaleX);
+        //            pixelRadius = Math.Sqrt(Math.Pow(i - pStat.centroidYCoordinate, 2) +
+        //                                    Math.Pow(j - pStat.centroidXCoordinate, 2));
+        //            pixelBitmapXCoordinate = (int)Math.Round(pixelRadius * bitmapScaleX);
 
-                if (pixelBitmapXCoordinate >= 0 &&
-                    pixelBitmapXCoordinate < pictureBoxProfile.Width &&
-                    pixelBitmapYCoordinate >= 0 &&
-                    pixelBitmapYCoordinate < pictureBoxProfile.Height)
-                    bitmapProfile.SetPixel(pixelBitmapXCoordinate, pixelBitmapYCoordinate,
-                        Color.FromArgb(255, 255, 255));
-            }
+        //            if (pixelBitmapXCoordinate >= 0 &&
+        //                pixelBitmapXCoordinate < pictureBoxProfile.Width &&
+        //                pixelBitmapYCoordinate >= 0 &&
+        //                pixelBitmapYCoordinate < pictureBoxProfile.Height)
+        //                bitmapProfile.SetPixel(pixelBitmapXCoordinate, pixelBitmapYCoordinate,
+        //                    Color.FromArgb(255, 255, 255));
+        //        }
 
-            var apertureBitmapXCoordinate = (int) Math.Round(Settings.ApertureRadius * bitmapScaleX);
-            var annulusInnerRadiusBitmapXCoordinate = (int) Math.Round(Settings.AnnulusInnerRadius * bitmapScaleX);
-            for (var i = 0; i < pictureBoxProfile.Height; i++)
-            {
-                bitmapProfile.SetPixel(apertureBitmapXCoordinate, i, Color.FromArgb(255, 0, 0));
-                bitmapProfile.SetPixel(annulusInnerRadiusBitmapXCoordinate, i, Color.FromArgb(0, 0, 255));
-            }
+        //    var apertureBitmapXCoordinate = (int)Math.Round(Settings.ApertureRadius * bitmapScaleX);
+        //    var annulusInnerRadiusBitmapXCoordinate = (int)Math.Round(Settings.AnnulusInnerRadius * bitmapScaleX);
+        //    for (var i = 0; i < pictureBoxProfile.Height; i++)
+        //    {
+        //        bitmapProfile.SetPixel(apertureBitmapXCoordinate, i, Color.FromArgb(255, 0, 0));
+        //        bitmapProfile.SetPixel(annulusInnerRadiusBitmapXCoordinate, i, Color.FromArgb(0, 0, 255));
+        //    }
 
-            pictureBoxProfile.Image = bitmapProfile;
-        }
+        //    pictureBoxProfile.Image = bitmapProfile;
+        //}
 
         private void PictureBoxFits_MouseClick(object sender, MouseEventArgs e)
         {
-            if (_isCurrentImageLoaded)
-            {
-                if (e.Button == MouseButtons.Right)
-                {
-                    _isZoomModeActivated = !_isZoomModeActivated;
-                    if (_isZoomModeActivated)
-                    {
-                        panelFitsImage.AutoScroll = true;
-                        pictureBoxFits.SizeMode = PictureBoxSizeMode.AutoSize;
-                    }
-                    else
-                    {
-                        panelFitsImage.AutoScroll = false;
-                        pictureBoxFits.SizeMode = PictureBoxSizeMode.StretchImage;
-                    }
-                }
-                else if (e.Button == MouseButtons.Left)
-                {
-                    pictureBoxProfile.Image = null;
+            //if (_isCurrentImageLoaded)
+            //{
+            //    if (e.Button == MouseButtons.Right)
+            //    {
+            //        _isZoomModeActivated = !_isZoomModeActivated;
+            //        if (_isZoomModeActivated)
+            //        {
+            //            panelFitsImage.AutoScroll = true;
+            //            pictureBoxFits.SizeMode = PictureBoxSizeMode.AutoSize;
+            //        }
+            //        else
+            //        {
+            //            panelFitsImage.AutoScroll = false;
+            //            pictureBoxFits.SizeMode = PictureBoxSizeMode.StretchImage;
+            //        }
+            //    }
+            //    else if (e.Button == MouseButtons.Left)
+            //    {
+            //        pictureBoxProfile.Image = null;
 
-                    var xCoordinate = (int) ((double) e.X / pictureBoxFits.Width * _currentImage[0].Length);
-                    var yCoordinate = (int) ((double) e.Y / pictureBoxFits.Height * _currentImage.Length);
-                    Logger.AddLogEntry($"Pixel ({xCoordinate}, {yCoordinate}) selected");
+            //        var xCoordinate = (int) ((double) e.X / pictureBoxFits.Width * _currentImage[0].Length);
+            //        var yCoordinate = (int) ((double) e.Y / pictureBoxFits.Height * _currentImage.Length);
+            //        Logger.AddLogEntry($"Pixel ({xCoordinate}, {yCoordinate}) selected");
 
-                    if (xCoordinate - Settings.AnnulusOuterRadius < 0 ||
-                        xCoordinate + Settings.AnnulusOuterRadius > _currentImage[0].Length - 1 ||
-                        yCoordinate - Settings.AnnulusOuterRadius < 0 ||
-                        yCoordinate + Settings.AnnulusOuterRadius > _currentImage.Length - 1)
-                    {
-                        Logger.AddLogEntry("WARNING Pixel is too close to the frame borders");
-                    }
-                    else
-                    {
-                        var subProfileImage = new ushort[2 * Settings.AnnulusOuterRadius + 1][];
-                        for (var i = 0; i < subProfileImage.Length; i++)
-                        {
-                            subProfileImage[i] = new ushort[2 * Settings.AnnulusOuterRadius + 1];
-                            for (var j = 0; j < subProfileImage[i].Length; j++)
-                                subProfileImage[i][j] =
-                                    _currentImage[yCoordinate - Settings.AnnulusOuterRadius + i]
-                                        [xCoordinate - Settings.AnnulusOuterRadius + j];
-                        }
+            //        if (xCoordinate - Settings.AnnulusOuterRadius < 0 ||
+            //            xCoordinate + Settings.AnnulusOuterRadius > _currentImage[0].Length - 1 ||
+            //            yCoordinate - Settings.AnnulusOuterRadius < 0 ||
+            //            yCoordinate + Settings.AnnulusOuterRadius > _currentImage.Length - 1)
+            //        {
+            //            Logger.AddLogEntry("WARNING Pixel is too close to the frame borders");
+            //        }
+            //        else
+            //        {
+            //            var subProfileImage = new ushort[2 * Settings.AnnulusOuterRadius + 1][];
+            //            for (var i = 0; i < subProfileImage.Length; i++)
+            //            {
+            //                subProfileImage[i] = new ushort[2 * Settings.AnnulusOuterRadius + 1];
+            //                for (var j = 0; j < subProfileImage[i].Length; j++)
+            //                    subProfileImage[i][j] =
+            //                        _currentImage[yCoordinate - Settings.AnnulusOuterRadius + i]
+            //                            [xCoordinate - Settings.AnnulusOuterRadius + j];
+            //            }
 
-                        var localStat = new ProfileImageStat(subProfileImage);
-                        Logger.AddLogEntry($"Max: {localStat.maxValue} " +
-                                           $"({localStat.maxXCoordinate + xCoordinate - Settings.AnnulusOuterRadius}; " +
-                                           $"{localStat.maxYCoordinate + yCoordinate - Settings.AnnulusOuterRadius}); " +
-                                           $"Background: {localStat.background:0.#}; " +
-                                           $"Centroid: ({localStat.centroidXCoordinate + xCoordinate - Settings.AnnulusOuterRadius:0.#}; " +
-                                           $"{localStat.centroidYCoordinate + yCoordinate - Settings.AnnulusOuterRadius:0.#}); " +
-                                           $"SNR: {localStat.snr:0.#}; " +
-                                           $"FWHM: {localStat.fwhm:0.##}");
-                        PlotProfileImage(localStat, subProfileImage);
-                        Logger.AddLogEntry("Profile image plotted");
-                    }
-                }
-            }
-            else
-            {
-                Logger.AddLogEntry("WARNING Image not loaded");
-            }
+            //            var localStat = new ProfileImageStat(subProfileImage);
+            //            Logger.AddLogEntry($"Max: {localStat.maxValue} " +
+            //                               $"({localStat.maxXCoordinate + xCoordinate - Settings.AnnulusOuterRadius}; " +
+            //                               $"{localStat.maxYCoordinate + yCoordinate - Settings.AnnulusOuterRadius}); " +
+            //                               $"Background: {localStat.background:0.#}; " +
+            //                               $"Centroid: ({localStat.centroidXCoordinate + xCoordinate - Settings.AnnulusOuterRadius:0.#}; " +
+            //                               $"{localStat.centroidYCoordinate + yCoordinate - Settings.AnnulusOuterRadius:0.#}); " +
+            //                               $"SNR: {localStat.snr:0.#}; " +
+            //                               $"FWHM: {localStat.fwhm:0.##}");
+            //            PlotProfileImage(localStat, subProfileImage);
+            //            Logger.AddLogEntry("Profile image plotted");
+            //        }
+            //    }
+            //}
+            //else
+            //{
+            //    Logger.AddLogEntry("WARNING Image not loaded");
+            //}
         }
         #endregion
 
         #region Survey
         private void ButtonSurveyStart_Click(object sender, EventArgs e)
         {
-            buttonSurveyStart.Enabled = false;
-            comboBoxImgType.Enabled = false;
-            numericUpDownSequence.Enabled = false;
-            numericUpDownExpTime.Enabled = false;
-            updateCamerasSettingsToolStripMenuItem.Enabled = false;
+            //buttonSurveyStart.Enabled = false;
+            //comboBoxImgType.Enabled = false;
+            //numericUpDownSequence.Enabled = false;
+            //numericUpDownExpTime.Enabled = false;
+            //updateCamerasSettingsToolStripMenuItem.Enabled = false;
 
-            _cameraControl.task.framesNum = (int) numericUpDownSequence.Value;
-            _cameraControl.task.framesType = comboBoxImgType.Text;
-            if (_cameraControl.task.framesType == "Bias") _cameraControl.task.framesExpTime = 0;
-            else _cameraControl.task.framesExpTime = (int) numericUpDownExpTime.Value * 1000;
+            //_cameraControl.task.framesNum = (int) numericUpDownSequence.Value;
+            //_cameraControl.task.framesType = comboBoxImgType.Text;
+            //if (_cameraControl.task.framesType == "Bias") _cameraControl.task.framesExpTime = 0;
+            //else _cameraControl.task.framesExpTime = (int) numericUpDownExpTime.Value * 1000;
 
-            if (radioButtonViewCam1.Checked) _cameraControl.task.viewCamIndex = 0;
-            else if (radioButtonViewCam2.Checked) _cameraControl.task.viewCamIndex = 1;
-            else if (radioButtonViewCam3.Checked) _cameraControl.task.viewCamIndex = 2;
+            //if (radioButtonViewCam1.Checked) _cameraControl.task.viewCamIndex = 0;
+            //else if (radioButtonViewCam2.Checked) _cameraControl.task.viewCamIndex = 1;
+            //else if (radioButtonViewCam3.Checked) _cameraControl.task.viewCamIndex = 2;
 
-            if (_cameraControl.task.framesType == "Test") _cameraControl.task.framesNum = 1;
+            //if (_cameraControl.task.framesType == "Test") _cameraControl.task.framesNum = 1;
 
-            _cameraControl.task.objectName = textBoxObjectName.Text;
-            _cameraControl.task.objectRa = textBoxObjectRa.Text;
-            _cameraControl.task.objectDec = textBoxObjectDec.Text;
+            //_cameraControl.task.objectName = textBoxObjectName.Text;
+            //_cameraControl.task.objectRa = textBoxObjectRa.Text;
+            //_cameraControl.task.objectDec = textBoxObjectDec.Text;
 
-            _cameraControl.SetSurveySettings();
-            _cameraControl.StartExposure();
-            Logger.AddLogEntry($"Survey started - {_cameraControl.task.framesNum} {_cameraControl.task.framesType}" +
-                $" frames with exposure of {_cameraControl.task.framesExpTime * 1e-3} s");
+            //_cameraControl.SetSurveySettings();
+            //_cameraControl.StartExposure();
+            //Logger.AddLogEntry($"Survey started - {_cameraControl.task.framesNum} {_cameraControl.task.framesType}" +
+            //    $" frames with exposure of {_cameraControl.task.framesExpTime * 1e-3} s");
         }
 
         private void ButtonSurveyStop_Click(object sender, EventArgs e)
         {
-            _cameraControl.CancelSurvey();
-            Logger.AddLogEntry($"Survey cancelled, {_cameraControl.task.framesNum} {(_cameraControl.task.framesNum == 1 ? "frame" : "frames")} skipped");
-            _cameraControl.task.framesNum = 1;
-            numericUpDownSequence.Value = 1;
+            //_cameraControl.CancelSurvey();
+            //Logger.AddLogEntry($"Survey cancelled, {_cameraControl.task.framesNum} {(_cameraControl.task.framesNum == 1 ? "frame" : "frames")} skipped");
+            //_cameraControl.task.framesNum = 1;
+            //numericUpDownSequence.Value = 1;
 
-            buttonSurveyStart.Enabled = true;
-            comboBoxImgType.Enabled = true;
-            numericUpDownSequence.Enabled = true;
-            numericUpDownExpTime.Enabled = true;
-            updateCamerasSettingsToolStripMenuItem.Enabled = true;
+            //buttonSurveyStart.Enabled = true;
+            //comboBoxImgType.Enabled = true;
+            //numericUpDownSequence.Enabled = true;
+            //numericUpDownExpTime.Enabled = true;
+            //updateCamerasSettingsToolStripMenuItem.Enabled = true;
         }
         #endregion
 
@@ -499,7 +499,7 @@ namespace RPCC
 
         private void UpdateCameraSettingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            _cameraControl.UpdateSettings();
+            //_cameraControl.UpdateSettings();
         }
 
         private void LoadConfigToolStripMenuItem_Click(object sender, EventArgs e)
@@ -516,36 +516,21 @@ namespace RPCC
         #endregion
 
         #region Debug Menu
-        private void TestDLLlibrariesToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            var testFits = new RpccFits(".\\Cams\\TestImage.fits");
-            var testHeader = testFits.header;
-            Logger.AddLogEntry($"Template DATE-OBS: {testHeader.GetStringValue("DATE-OBS")}");
-
-            var libVer = new StringBuilder(128);
-            var len = new IntPtr(128);
-            var errorLastFliCmd = NativeMethods.FLIGetLibVersion(libVer, len);
-            if (errorLastFliCmd == 0)
-                Logger.AddLogEntry(libVer.ToString());
-            else
-                Logger.AddLogEntry("WARNING Unable to retrieve FLI library version");
-        }
-
         private async void LoadTestImageToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            _isCurrentImageLoaded = false;
-            var testFits = new RpccFits(".\\Cams\\TestImage.fits");
-            _currentImage = testFits.data;
+            //_isCurrentImageLoaded = false;
+            //var testFits = new RpccFits(".\\Cams\\TestImage.fits");
+            //_currentImage = testFits.data;
 
-            _currentImageGStat = new GeneralImageStat(_currentImage);
-            Logger.AddLogEntry($"Min: {_currentImageGStat.min}; " +
-                                $"Max: {_currentImageGStat.max}; " +
-                                $"Mean: {_currentImageGStat.mean:0.##}; " +
-                                $"SD: {_currentImageGStat.sd:0.##}");
+            //_currentImageGStat = new GeneralImageStat(_currentImage);
+            //Logger.AddLogEntry($"Min: {_currentImageGStat.min}; " +
+            //                    $"Max: {_currentImageGStat.max}; " +
+            //                    $"Mean: {_currentImageGStat.mean:0.##}; " +
+            //                    $"SD: {_currentImageGStat.sd:0.##}");
 
-            await Task.Run(() => PlotFitsImage());
-            _isCurrentImageLoaded = true;
-            Logger.AddLogEntry("Test image plotted");
+            //await Task.Run(() => PlotFitsImage());
+            //_isCurrentImageLoaded = true;
+            //Logger.AddLogEntry("Test image plotted");
         }
 
         private void RestoreDefaultConfigFileToolStripMenuItem_Click(object sender, EventArgs e)
