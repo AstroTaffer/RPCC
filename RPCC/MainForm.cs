@@ -248,8 +248,9 @@ namespace RPCC
             //       This function must work properly when called more than once
             //       Watch out! SerialFocus.Init() keeps adding functions on ComTimer.Elapsed every time it is called!
 
-            //_cameraFocus.SerialFocus.Close_Port();
-            //_cameraFocus.Init();
+            _cameraFocus.SerialFocus.Close_Port();
+            FocusTimer.Elapsed -= OnTimedEvent_Clock;
+            _cameraFocus.Init();
         }
 
         private void ReconnectMeteoDomeToolStripMenuItem_Click(object sender, EventArgs e)

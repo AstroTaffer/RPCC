@@ -63,8 +63,9 @@ namespace RPCC.Tasks
             get;
             set;
         }
-//0 = Wait, 1 = In progress, 5 = Ended not complete,
-//2 = Ended complete, 3 = Rejected by observer, 4 = Not observed
+
+        //0 = Wait, 1 = In progress, 5 = Ended not complete,
+        //2 = Ended complete, 3 = Rejected by observer, 4 = Not observed
         public short Status
         {
             get;
