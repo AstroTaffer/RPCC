@@ -1,23 +1,22 @@
 import os
-
 import astropy.io.fits as fits
 import astropy.wcs as wcs
-from astropy.io import ascii
 from astropy.stats import SigmaClip
 from astropy.time import Time
-from photutils.aperture import aperture_photometry
+from donuts import Donuts
 from photutils.background import Background2D, MedianBackground
+from photutils.aperture import aperture_photometry
+from astropy.io import ascii
 
 from Astrometry import Astrometry
 from Photometry_Utils import *
-
 
 # '02:20:50.9 +33:20:46.6' GSC2314–0530
 # RA/Dec (J2000, epoch 2015.5): 20:00:16.06 +22:09:43.54 TIC 424112727
 # RA/Dec (J2000, epoch 2015.5): 21:07:55.93 +48:34:56.27 TIC 357872559
 
 
-def Core(path2data):
+def Core(path2data, do_wcs=False):
     Cat_R = 0.1  # catalog each cone radius
     Cat_len = 400  # catalog max length
     V_lim = 15  # catalog max depth
@@ -40,7 +39,13 @@ def Core(path2data):
     C = SkyCoord(coords, unit=(u.hourangle, u.deg), frame='icrs')  # , obstime='J2015.5'
 
     # do astrometry
-    path2data = Astrometry(path2data, file_list, C)
+    if do_wcs:
+        path2data = Astrometry(path2data, file_list, C)
+
+    file_list = []
+    for f in os.listdir(path2data):
+        if f.count('.fits') or f.count('.fit'):
+            file_list.append(path2data + '\\' + f)
 
     # set paths and suffix for output files
     Path2Save = path2data + '/Photometry'
@@ -50,7 +55,7 @@ def Core(path2data):
     # clean old photometry
     for f in os.listdir(Path2Save):
         if f.count('Phot'):
-            os.remove(Path2Save + '/' + f)
+            os.remove(Path2Save+'/'+f)
 
     print('Download GAIA')
     Catalog = Get_GAIA(C.ra.degree, C.dec.degree, Cat_R, V_lim, Cat_len)
@@ -59,9 +64,13 @@ def Core(path2data):
     # open log file
     df = open(Path2Save + '/Time.txt', 'w')
     df.write('JD\tEXPTIME\t' +
-             'Sky\tX\tY\tMax\n')
+             'Sky\tX\tY\tMax\tShiftXDon\tShiftYDon\tShiftXCom\tShiftYCom\n')
     output = open(Path2Save + '/Phot' + '.txt', 'a')
     counter = 0
+    shifts_don = []
+    shifts_com = []
+    don = None
+    obj_xy = None
     for f in file_list:
         counter = counter + 1
         print(f'----------<Frame: {counter}/{len(file_list)}>-----------')
@@ -97,14 +106,27 @@ def Core(path2data):
 
         if counter == 1:
             DrawMap(Data, 256, Header, Catalog_COM, Path2Save + r'\field_com.pdf', Raper)
+            don = Donuts(refimage=f, image_ext=0, overscan_width=24, prescan_width=24,
+                         border=64, normalise=True, exposure='EXPTIME', subtract_bkg=True, ntiles=32)
+            shifts_don = [0, 0]
+            shifts_com = [0, 0]
+            obj_xy = [Catalog_COM['X'][0], Catalog_COM['Y'][0]]
+        else:
+            shift = don.measure_shift(f)
+            shifts_don = [shift.x.value, shift.y.value]
+            shifts_com = [obj_xy[0] - Catalog_COM['X'][0], obj_xy[1] - Catalog_COM['Y'][0]]
 
         df.write('{:.7f}'.format(jd) + '\t')  # JD
         # df.write('{:.7f}'.format(Header['jd']) + '\t')  # JD
         df.write('{:.1f}'.format(Header['EXPTIME']) + '\t')  # EXPTIME
         df.write('{:.1f}'.format(Sky) + '\t')  # Sky
-        df.write('{0:.3f}\t{1:.3f}\t{2:.1f}\n'.format(Catalog_COM['X'][0],
+        df.write('{0:.3f}\t{1:.3f}\t{2:.1f}\t'.format(Catalog_COM['X'][0],
                                                       Catalog_COM['Y'][0],
                                                       Catalog_COM['Max'][0]))
+        df.write(str(np.round(shifts_don[0], 2)) + '\t')
+        df.write(str(np.round(shifts_don[1], 2)) + '\t')
+        df.write(str(np.round(shifts_com[0], 2)) + '\t')
+        df.write(str(np.round(shifts_com[1], 2)) + '\n')
         print('Max count={0:.1f}'.format(Catalog_COM['Max'][0]))
 
         Positions = np.transpose([Catalog_COM['X'], Catalog_COM['Y']])
@@ -117,7 +139,6 @@ def Core(path2data):
         output.write('\n')
 
         Catalog_COM.remove_columns(names=('X', 'Y', 'Max'))
-
     output.close()
     df.close()
     Plot_Curve(Path2Save, obj, date, filter)
@@ -204,6 +225,40 @@ def Plot_Curve(path2phot, objname, date, filter):
     axs[2].grid()
     fig.savefig(rf'{path2phot}\plot_{objname}_{date}_{camera}.pdf')
 
+    shift_fig, shift_ax = plt.subplots(3, 1, figsize=(6, 7), dpi=125)
+    left = 0.1
+    width = 0.85
+    high = 0.18
+    pos = [left, 0.7, width, high]
+    shift_ax[0].set_position(pos)
+    shift_ax[0].plot(t, time['ShiftXDon'], 'r.', label='X shift')
+    shift_ax[0].plot(t, time['ShiftYDon'], 'g.', label='Y shift')
+    shift_ax[0].set_title('Donuts shifts')
+    shift_ax[0].grid()
+    shift_ax[0].set_xlabel(f'JD-{ZERO}')
+    shift_ax[0].set_ylabel('pixel')
+    shift_ax[0].legend()
 
-Core(r'D:\RoboPhot Data\Raw Images\2023_09 FLI\2023_09_07 TIC431660224_01\i')
-Core(r'D:\RoboPhot Data\Raw Images\2023_09 FLI\2023_09_07 TIC431660224_01\r')
+    pos = [left, 0.4, width, high]
+    shift_ax[1].set_position(pos)
+    shift_ax[1].plot(t, time['ShiftXCom'], 'r.', label='X shift')
+    shift_ax[1].plot(t, time['ShiftYCom'], 'g.', label='Y shift')
+    shift_ax[1].set_title('Com shifts')
+    shift_ax[1].grid()
+    shift_ax[1].set_xlabel(f'JD-{ZERO}')
+    shift_ax[1].set_ylabel('pixel')
+    shift_ax[1].legend()
+
+    pos = [left, 0.1, width, high]
+    shift_ax[2].set_position(pos)
+    shift_ax[2].plot(t, time['ShiftXCom'] - time['ShiftXDon'], 'r.')
+    shift_ax[2].set_title('Delta X shifts')
+    shift_ax[2].grid()
+    shift_ax[2].set_xlabel(f'JD-{ZERO}')
+    shift_ax[2].set_ylabel('pixel')
+    shift_fig.savefig(rf'{path2phot}\plot_shifts.pdf')
+
+
+Core(r'D:\RoboPhot Data\Images\2023_09_08 TIC233047097_01\i\DO_BOTH')
+# Plot_Curve(r'D:\RoboPhot Data\Raw Images\2023_09 FLI\2023_09_08 TIC233047097_01\i\DO_BOTH\Photometry', 
+#            'TIC233047097_01', '2023-09-08', 'i')

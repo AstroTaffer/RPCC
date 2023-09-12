@@ -83,16 +83,20 @@ namespace RPCC.Cams
             switch (camCtrl.task.framesType)
             {
                 case "Object":
-                    newCursor.Add(new HeaderCard("OBJNAME", camCtrl.task.objectName, "object name"));
+                    newCursor.Add(string.IsNullOrEmpty(camCtrl.task.objectName)
+                        ? new HeaderCard("OBJNAME", "UNKNOWN", "object name")
+                        : new HeaderCard("OBJNAME", camCtrl.task.objectName, "object name"));
                     break;
                 default:
                     newCursor.Add(new HeaderCard("OBJNAME", camCtrl.task.framesType, "object name"));
                     break;
             }
-
-            //TODO: It's a hotfix, implement properly later
-            newCursor.Add(new HeaderCard("ALPHA", camCtrl.task.objectRa, "right ascention coordinates [hh mm ss.s]"));
-            newCursor.Add(new HeaderCard("DELTA", camCtrl.task.objectDec, "declination coordinates [dd mm ss.s]"));
+            newCursor.Add(string.IsNullOrEmpty(camCtrl.task.objectRa)
+                ? new HeaderCard("ALPHA", "UNKNOWN", "target RA [hh mm ss.s]")
+                : new HeaderCard("ALPHA", camCtrl.task.objectRa, "target RA [hh mm ss.s]"));
+            newCursor.Add(string.IsNullOrEmpty(camCtrl.task.objectDec)
+                ? new HeaderCard("DELTA", "UNKNOWN", "target DEC [dd mm ss.s]")
+                : new HeaderCard("DELTA", camCtrl.task.objectDec, "target DEC [dd mm ss.s]"));
             newCursor.Add(new HeaderCard("IMAGETYP", camCtrl.task.framesType,
                 "Object, Flat, Dark, Bias, Test, Focus"));
             // RA      = '21:51:12.055'       / target RA
@@ -218,34 +222,57 @@ namespace RPCC.Cams
 
             newCursor.Add(new HeaderCard("SUN-ZD", WeatherDataCollector.Sun, "Sun zenith distance"));
 
-            string outDirectory;
-            switch (camCtrl.cameras[camNum].filter)
+            // FIXME: Use MJD or something like that instead
+            string outDirectory = $"{Settings.MainOutFolder}\\{DateTime.Now.AddHours(-12):yyyy-MM-dd} " +
+                $"{(string.IsNullOrEmpty(camCtrl.task.objectName) ? "UNKNOWN" : camCtrl.task.objectName)}\\";
+            switch (camCtrl.task.framesType)
             {
-                case "UNKNOWN":
-                    outDirectory = $"{Settings.OutImgsFolder}\\{camCtrl.cameras[camNum].filter}-" +
-                                   $"{camCtrl.cameras[camNum].serialNumber}";
+                case "Object":
+                    outDirectory += $"RAW\\{(camCtrl.cameras[camNum].filter == "UNKNOWN" ? "UNKNOWN_" + camCtrl.cameras[camNum].serialNumber : camCtrl.cameras[camNum].filter)}";
+                    break;
+                case "Bias":
+                    outDirectory += $"BIAS\\{(camCtrl.cameras[camNum].filter == "UNKNOWN" ? "UNKNOWN_" + camCtrl.cameras[camNum].serialNumber : camCtrl.cameras[camNum].filter)}";
+                    break;
+                case "Dark":
+                    outDirectory += $"DARK\\{(camCtrl.cameras[camNum].filter == "UNKNOWN" ? "UNKNOWN_" + camCtrl.cameras[camNum].serialNumber : camCtrl.cameras[camNum].filter)}";
+                    break;
+                case "Flat":
+                    outDirectory += $"FLAT\\{(camCtrl.cameras[camNum].filter == "UNKNOWN" ? "UNKNOWN_" + camCtrl.cameras[camNum].serialNumber : camCtrl.cameras[camNum].filter)}";
+                    break;
+                case "Test":
+                    outDirectory += "TEST";
+                    break;
+                case "Focus":
+                    outDirectory += "FOCUS";
                     break;
                 default:
-                    outDirectory = $"{Settings.OutImgsFolder}\\{camCtrl.cameras[camNum].filter}";
+                    outDirectory += "EXTRA";
                     break;
             }
-
             if (!Directory.Exists(outDirectory)) Directory.CreateDirectory(outDirectory);
+            
             string outName;
             switch (camCtrl.task.framesType)
             {
                 case "Object":
-                    outName =
-                        $"{camCtrl.task.objectName}-{camCtrl.cameras[camNum].filter}-{camCtrl.cameras[camNum].expStartDt:yyyy-MM-ddThh-mm-ss}.fits";
+                    outName = $"{(string.IsNullOrEmpty(camCtrl.task.objectName) ? "UNKNOWN" : camCtrl.task.objectName)}_" +
+                        $"{camCtrl.cameras[camNum].filter}_{camCtrl.cameras[camNum].expStartDt:yyyy-MM-ddTHH-mm-ss}.fits";
+                    break;
+                case "Bias":
+                    goto case "Dark";
+                case "Flat":
+                    goto case "Dark";
+                case "Dark":
+                    // If you'll need more precise output for CamTemp, make sure to set decimal separator (use Culture?)
+                    outName = $"{camCtrl.task.framesType}_{camCtrl.cameras[camNum].expStartDt:yyyy-MM-ddTHH-mm-ss}_" +
+                        $"B={Settings.CamBin}_F={camCtrl.cameras[camNum].filter}_E={camCtrl.task.framesExpTime}_T={Settings.CamTemp:F0}.fits";
                     break;
                 default:
-                    outName = $"{camCtrl.task.framesType}-{camCtrl.cameras[camNum].filter}-" +
-                              $"{camCtrl.cameras[camNum].expStartDt:yyyy-MM-ddThh-mm-ss}.fits";
+                    outName = $"{camCtrl.task.framesType}_{camCtrl.cameras[camNum].filter}_{camCtrl.cameras[camNum].expStartDt:yyyy-MM-ddTHH-mm-ss}.fits";
                     break;
             }
 
-            var outStream = new BufferedDataStream(new FileStream($"{outDirectory}\\" +
-                                                                  $"{outName}", FileMode.Create));
+            BufferedDataStream outStream = new BufferedDataStream(new FileStream($"{outDirectory}\\{outName}", FileMode.Create));
             newFits.Write(outStream);
             // FIXME: Suddenly caught a bug in next line - said something like "can't access closed file".
             // Check it and, if needed, remove the next two lines.

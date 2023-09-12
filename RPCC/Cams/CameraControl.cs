@@ -497,7 +497,12 @@ namespace RPCC.Cams
 
         internal void DisconnectCameras()
         {
-            foreach (var cam in cameras) NativeMethods.FLIClose(cam.handle);
+            foreach(var cam in cameras)
+            {
+                // 0x00 = FLI_FAN_SPEED_OFF
+                NativeMethods.FLISetFanSpeed(cam.handle, 0x00);
+                NativeMethods.FLIClose(cam.handle);
+            }
         }
 
         /// <summary>
