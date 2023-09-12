@@ -8,44 +8,47 @@ namespace RPCC.Cams
 {
     internal class CameraDevice
     {
-        // id
-        internal int handle;
-        internal string fileName;
-        internal string modelName;
-        internal string serialNumber;
-        internal string filter;
+        internal double baseTemp;
 
         // status
         internal double ccdTemp;
-        internal double baseTemp;
         internal double coolerPwr;
-        internal string status;
-        internal int remTime;
+        internal DateTime expStartDt;
+        internal string fileName;
+
+        internal string filter;
+
+        // id
+        internal int handle;
 
         // exposure
         internal bool isExposing;
-        internal DateTime expStartDt;
+        internal string modelName;
+        internal int remTime;
+        internal string serialNumber;
+        internal string status;
     }
 
     internal class CameraTask
     {
+        internal int framesExpTime;
         internal int framesNum;
         internal string framesType;
-        internal int framesExpTime;
-        internal int viewCamIndex;
+        internal string objectDec;
         internal string objectName;
         internal string objectRa;
-        internal string objectDec;
+        internal int viewCamIndex;
     }
+
     internal class CameraControl
     {
         // camerasDomain = bitwise OR of 0x02 (USB interface) and 0x100 (Camera device)
         private const int camDomain = 0x02 | 0x100;
-        private int[] imageAreaAbsolute;
         // private readonly Logger Logger;
         // private readonly Settings Settings;
 
         internal CameraDevice[] cameras;
+        private int[] imageAreaAbsolute;
         internal CameraTask task;
 
         internal CameraControl()
@@ -60,23 +63,18 @@ namespace RPCC.Cams
         {
             DisconnectCameras();
 
-            DeviceName[] camerasNames = EnumerateCameras(camDomain);
+            var camerasNames = EnumerateCameras(camDomain);
 
             cameras = new CameraDevice[camerasNames.Length];
-            for (int i = 0; i < cameras.Length; i++)
-            {
+            for (var i = 0; i < cameras.Length; i++)
                 cameras[i] = new CameraDevice
                 {
                     fileName = camerasNames[i].FileName,
                     modelName = camerasNames[i].ModelName
                 };
-            }
             Logger.AddLogEntry($"{cameras.Length} cameras found");
 
-            if (cameras.Length > 0)
-            {
-                SetupCameras();
-            }
+            if (cameras.Length > 0) SetupCameras();
         }
 
         // HACK: I have no idea what is going on in here and I can't find it out without losing my sanity
@@ -85,7 +83,7 @@ namespace RPCC.Cams
             IntPtr NamesHandle;
 
             // first, get the data, using an opaque token for the string array
-            int errorLastFliCmd = NativeMethods.FLIList(domain, out NamesHandle);
+            var errorLastFliCmd = NativeMethods.FLIList(domain, out NamesHandle);
             if (errorLastFliCmd != 0)
             {
                 Logger.AddLogEntry("WARNING Can't get list of FLIDevices");
@@ -93,21 +91,21 @@ namespace RPCC.Cams
             }
 
             // now marshal the string array into the return type we actually want
-            List<DeviceName> NameList = new List<DeviceName>();
-            IntPtr p = NamesHandle;
+            var NameList = new List<DeviceName>();
+            var p = NamesHandle;
             string s;
             while (IntPtr.Zero != p)
             {
                 // manually bring the string into managed memory
-                s = ((StringWrapper)Marshal.PtrToStructure(p, typeof(StringWrapper))).s;
+                s = ((StringWrapper) Marshal.PtrToStructure(p, typeof(StringWrapper))).s;
                 if (null == s)
                     break;
 
                 // parse it according to FLI SDK spec
-                int DelimPos = s.IndexOf(';');
-                DeviceName dn = new DeviceName();
-                dn.FileName = (-1 == DelimPos ? s : s.Substring(0, DelimPos));
-                dn.ModelName = (-1 == DelimPos ? null : s.Substring(DelimPos + 1, s.Length - (DelimPos + 1)));
+                var DelimPos = s.IndexOf(';');
+                var dn = new DeviceName();
+                dn.FileName = -1 == DelimPos ? s : s.Substring(0, DelimPos);
+                dn.ModelName = -1 == DelimPos ? null : s.Substring(DelimPos + 1, s.Length - (DelimPos + 1));
                 // and accumulate into our list
                 NameList.Add(dn);
 
@@ -127,7 +125,7 @@ namespace RPCC.Cams
             int errorLastFliCmd;
             var imageAreaRelativeLrPoint = new int[2];
 
-            for (int i = 0; i < cameras.Length; i++)
+            for (var i = 0; i < cameras.Length; i++)
             {
                 Logger.AddLogEntry($"Connecting to camera {i + 1}");
 
@@ -148,11 +146,23 @@ namespace RPCC.Cams
                     Logger.AddLogEntry($"WARNING Unable to get camera {i + 1} serial number");
                     cameras[i].serialNumber = "ERROR";
                 }
-                else cameras[i].serialNumber = camSn.ToString();
+                else
+                {
+                    cameras[i].serialNumber = camSn.ToString();
+                }
 
-                if (cameras[i].serialNumber == Settings.SnCamG) cameras[i].filter = "g";
-                else if (cameras[i].serialNumber == Settings.SnCamR) cameras[i].filter = "r";
-                else if (cameras[i].serialNumber == Settings.SnCamI) cameras[i].filter = "i";
+                if (cameras[i].serialNumber == Settings.SnCamG)
+                {
+                    cameras[i].filter = "g";
+                }
+                else if (cameras[i].serialNumber == Settings.SnCamR)
+                {
+                    cameras[i].filter = "r";
+                }
+                else if (cameras[i].serialNumber == Settings.SnCamI)
+                {
+                    cameras[i].filter = "i";
+                }
                 else
                 {
                     Logger.AddLogEntry($"WARNING Unable to identify camera {i + 1} filter");
@@ -160,21 +170,22 @@ namespace RPCC.Cams
                 }
 
                 Logger.AddLogEntry($"Camera {i + 1}: Handle {cameras[i].handle} | " +
-                    $"Filename {cameras[i].fileName} | " +
-                    $"Model {cameras[i].modelName} | Serial Number {cameras[i].serialNumber} | " +
-                    $"Filter {cameras[i].filter}");
+                                   $"Filename {cameras[i].fileName} | " +
+                                   $"Model {cameras[i].modelName} | Serial Number {cameras[i].serialNumber} | " +
+                                   $"Filter {cameras[i].filter}");
 
                 // unchecked((int)0xffffffff) = FLI_FAN_SPEED_ON
-                errorLastFliCmd = NativeMethods.FLISetFanSpeed(cameras[i].handle, unchecked((int)0xffffffff));
+                errorLastFliCmd = NativeMethods.FLISetFanSpeed(cameras[i].handle, unchecked((int) 0xffffffff));
                 if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to turn on camera {i + 1} fan");
 
                 // 1 = FLI_MODE_16BIT
                 errorLastFliCmd = NativeMethods.FLISetBitDepth(cameras[i].handle, 1);
                 if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} bit depth");
-                
+
                 // 0x0001 = FLI_BGFLUSH_START
                 errorLastFliCmd = NativeMethods.FLIControlBackgroundFlush(cameras[i].handle, 0x0001);
-                if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to turn on camera {i + 1} background flush");
+                if (errorLastFliCmd != 0)
+                    Logger.AddLogEntry($"WARNING Unable to turn on camera {i + 1} background flush");
 
                 errorLastFliCmd = NativeMethods.FLISetNFlushes(cameras[i].handle, Settings.NumFlushes);
                 if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} number of flushes");
@@ -191,7 +202,8 @@ namespace RPCC.Cams
                     errorLastFliCmd = NativeMethods.FLISetHBin(cameras[i].handle, 1);
                     if (errorLastFliCmd != 0) Logger.AddLogEntry("WARNING Unable to reset camera 1 hbin");
                     // TODO: Check if works correctly when reconnecting cameras after changing CamBin
-                    errorLastFliCmd = NativeMethods.FLIGetVisibleArea(cameras[i].handle, out imageAreaAbsolute[0], out imageAreaAbsolute[1], out imageAreaAbsolute[2], out imageAreaAbsolute[3]);
+                    errorLastFliCmd = NativeMethods.FLIGetVisibleArea(cameras[i].handle, out imageAreaAbsolute[0],
+                        out imageAreaAbsolute[1], out imageAreaAbsolute[2], out imageAreaAbsolute[3]);
                     if (errorLastFliCmd != 0)
                     {
                         Logger.AddLogEntry("WARNING Unable to get camera 1 visible area, using default values");
@@ -200,16 +212,21 @@ namespace RPCC.Cams
                         imageAreaAbsolute[2] = 2048;
                         imageAreaAbsolute[3] = 2048;
                     }
-                    imageAreaRelativeLrPoint[0] = imageAreaAbsolute[0] + (imageAreaAbsolute[2] - imageAreaAbsolute[0]) / Settings.CamBin;
-                    imageAreaRelativeLrPoint[1] = imageAreaAbsolute[1] + (imageAreaAbsolute[3] - imageAreaAbsolute[1]) / Settings.CamBin;
+
+                    imageAreaRelativeLrPoint[0] = imageAreaAbsolute[0] +
+                                                  (imageAreaAbsolute[2] - imageAreaAbsolute[0]) / Settings.CamBin;
+                    imageAreaRelativeLrPoint[1] = imageAreaAbsolute[1] +
+                                                  (imageAreaAbsolute[3] - imageAreaAbsolute[1]) / Settings.CamBin;
                     // TODO: To allow user to use only a part of CCD, imageAreaAbsolute must be stored in settings,
                     // not calculated via CamBin and CCD size. Also, use FLIGetArrayArea.
                 }
+
                 errorLastFliCmd = NativeMethods.FLISetVBin(cameras[i].handle, Settings.CamBin);
                 if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} vbin");
                 errorLastFliCmd = NativeMethods.FLISetHBin(cameras[i].handle, Settings.CamBin);
                 if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} hbin");
-                errorLastFliCmd = NativeMethods.FLISetImageArea(cameras[i].handle, imageAreaAbsolute[0], imageAreaAbsolute[1], imageAreaRelativeLrPoint[0], imageAreaRelativeLrPoint[1]);
+                errorLastFliCmd = NativeMethods.FLISetImageArea(cameras[i].handle, imageAreaAbsolute[0],
+                    imageAreaAbsolute[1], imageAreaRelativeLrPoint[0], imageAreaRelativeLrPoint[1]);
                 if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} image area");
 
                 switch (Settings.CamRoMode)
@@ -223,6 +240,7 @@ namespace RPCC.Cams
                         errorLastFliCmd = NativeMethods.FLISetCameraMode(cameras[i].handle, 1);
                         break;
                 }
+
                 if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} readout mode");
             }
         }
@@ -270,19 +288,16 @@ namespace RPCC.Cams
                         break;
                 }
 
-                if (FliStatusError != 0)
-                {
-                    cam.status = "ERROR";
-                }
+                if (FliStatusError != 0) cam.status = "ERROR";
             }
         }
-        
+
         internal void UpdateSettings()
         {
             int errorLastFliCmd;
             var imageAreaRelativeLrPoint = new int[2];
 
-            for (int i = 0; i < cameras.Length; i++)
+            for (var i = 0; i < cameras.Length; i++)
             {
                 errorLastFliCmd = NativeMethods.FLISetNFlushes(cameras[i].handle, Settings.NumFlushes);
                 if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} number of flushes");
@@ -293,14 +308,18 @@ namespace RPCC.Cams
 
                 if (i == 0)
                 {
-                    imageAreaRelativeLrPoint[0] = imageAreaAbsolute[0] + (imageAreaAbsolute[2] - imageAreaAbsolute[0]) / Settings.CamBin;
-                    imageAreaRelativeLrPoint[1] = imageAreaAbsolute[1] + (imageAreaAbsolute[3] - imageAreaAbsolute[1]) / Settings.CamBin;
+                    imageAreaRelativeLrPoint[0] = imageAreaAbsolute[0] +
+                                                  (imageAreaAbsolute[2] - imageAreaAbsolute[0]) / Settings.CamBin;
+                    imageAreaRelativeLrPoint[1] = imageAreaAbsolute[1] +
+                                                  (imageAreaAbsolute[3] - imageAreaAbsolute[1]) / Settings.CamBin;
                 }
+
                 errorLastFliCmd = NativeMethods.FLISetVBin(cameras[i].handle, Settings.CamBin);
                 if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} vbin");
                 errorLastFliCmd = NativeMethods.FLISetHBin(cameras[i].handle, Settings.CamBin);
                 if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} hbin");
-                errorLastFliCmd = NativeMethods.FLISetImageArea(cameras[i].handle, imageAreaAbsolute[0], imageAreaAbsolute[1], imageAreaRelativeLrPoint[0], imageAreaRelativeLrPoint[1]);
+                errorLastFliCmd = NativeMethods.FLISetImageArea(cameras[i].handle, imageAreaAbsolute[0],
+                    imageAreaAbsolute[1], imageAreaRelativeLrPoint[0], imageAreaRelativeLrPoint[1]);
                 if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} image area");
                 switch (Settings.CamRoMode)
                 {
@@ -313,6 +332,7 @@ namespace RPCC.Cams
                         errorLastFliCmd = NativeMethods.FLISetCameraMode(cameras[i].handle, 1);
                         break;
                 }
+
                 if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} readout mode");
             }
 
@@ -329,35 +349,44 @@ namespace RPCC.Cams
             switch (task.framesType)
             {
                 case "Object":
-                    for (int i = 0; i < cameras.Length; i++)
+                    for (var i = 0; i < cameras.Length; i++)
                     {
                         // 0 = FLI_FRAME_TYPE_NORMAL
                         errorLastFliCmd = NativeMethods.FLISetFrameType(cameras[i].handle, 0);
-                        if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} frame type");
+                        if (errorLastFliCmd != 0)
+                            Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} frame type");
                         errorLastFliCmd = NativeMethods.FLISetExposureTime(cameras[i].handle, task.framesExpTime);
-                        if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} exposure time");
+                        if (errorLastFliCmd != 0)
+                            Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} exposure time");
                     }
+
                     break;
                 case "Bias":
-                    for (int i = 0; i < cameras.Length; i++)
+                    for (var i = 0; i < cameras.Length; i++)
                     {
                         // 1 = FLI_FRAME_TYPE_DARK
                         errorLastFliCmd = NativeMethods.FLISetFrameType(cameras[i].handle, 1);
-                        if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} frame type");
+                        if (errorLastFliCmd != 0)
+                            Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} frame type");
                         // Exposure time is explisitly set to 0 ms as a security feature
                         errorLastFliCmd = NativeMethods.FLISetExposureTime(cameras[i].handle, 0);
-                        if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} exposure time");
+                        if (errorLastFliCmd != 0)
+                            Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} exposure time");
                     }
+
                     break;
                 case "Dark":
-                    for (int i = 0; i < cameras.Length; i++)
+                    for (var i = 0; i < cameras.Length; i++)
                     {
                         // 1 = FLI_FRAME_TYPE_DARK
                         errorLastFliCmd = NativeMethods.FLISetFrameType(cameras[i].handle, 1);
-                        if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} frame type");
+                        if (errorLastFliCmd != 0)
+                            Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} frame type");
                         errorLastFliCmd = NativeMethods.FLISetExposureTime(cameras[i].handle, task.framesExpTime);
-                        if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} exposure time");
+                        if (errorLastFliCmd != 0)
+                            Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} exposure time");
                     }
+
                     break;
                 case "Flat":
                     // 0 = FLI_FRAME_TYPE_NORMAL
@@ -367,10 +396,14 @@ namespace RPCC.Cams
                     if (cameras.Length > 0)
                     {
                         errorLastFliCmd = NativeMethods.FLISetFrameType(cameras[task.viewCamIndex].handle, 0);
-                        if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to set camera {task.viewCamIndex + 1} frame type");
-                        errorLastFliCmd = NativeMethods.FLISetExposureTime(cameras[task.viewCamIndex].handle, task.framesExpTime);
-                        if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to set camera {task.viewCamIndex + 1} exposure time");
+                        if (errorLastFliCmd != 0)
+                            Logger.AddLogEntry($"WARNING Unable to set camera {task.viewCamIndex + 1} frame type");
+                        errorLastFliCmd =
+                            NativeMethods.FLISetExposureTime(cameras[task.viewCamIndex].handle, task.framesExpTime);
+                        if (errorLastFliCmd != 0)
+                            Logger.AddLogEntry($"WARNING Unable to set camera {task.viewCamIndex + 1} exposure time");
                     }
+
                     break;
             }
         }
@@ -382,14 +415,16 @@ namespace RPCC.Cams
             switch (task.framesType)
             {
                 case "Object":
-                    for (int i = 0; i < cameras.Length; i++)
+                    for (var i = 0; i < cameras.Length; i++)
                     {
                         errorLastFliCmd = NativeMethods.FLIExposeFrame(cameras[i].handle);
                         // Getting time just after exposure start, for better accuracy
                         cameras[i].expStartDt = DateTime.UtcNow;
-                        if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to start camera {i + 1} exposure");
+                        if (errorLastFliCmd != 0)
+                            Logger.AddLogEntry($"WARNING Unable to start camera {i + 1} exposure");
                         cameras[i].isExposing = true;
                     }
+
                     break;
                 case "Bias":
                     goto case "Object";
@@ -403,23 +438,25 @@ namespace RPCC.Cams
                         errorLastFliCmd = NativeMethods.FLIExposeFrame(cameras[task.viewCamIndex].handle);
                         // Getting time just after exposure start, for better accuracy
                         cameras[task.viewCamIndex].expStartDt = DateTime.UtcNow;
-                        if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to start camera {task.viewCamIndex + 1} exposure");
+                        if (errorLastFliCmd != 0)
+                            Logger.AddLogEntry($"WARNING Unable to start camera {task.viewCamIndex + 1} exposure");
                         cameras[task.viewCamIndex].isExposing = true;
                     }
+
                     break;
             }
         }
 
         internal RpccFits ReadImage(CameraDevice cam)
         {
-            RpccFits imageFits = new RpccFits();
+            var imageFits = new RpccFits();
 
-            int imageWidth = (imageAreaAbsolute[2] - imageAreaAbsolute[0]) / Settings.CamBin;
-            int imageHeight = (imageAreaAbsolute[3] - imageAreaAbsolute[1]) / Settings.CamBin;
+            var imageWidth = (imageAreaAbsolute[2] - imageAreaAbsolute[0]) / Settings.CamBin;
+            var imageHeight = (imageAreaAbsolute[3] - imageAreaAbsolute[1]) / Settings.CamBin;
             imageFits.data = new ushort[imageHeight][];
 
             // TODO: There is an FLIGrabFrame command. Would be nice to try it out.
-            for (int i = 0; i < imageHeight; i++)
+            for (var i = 0; i < imageHeight; i++)
             {
                 imageFits.data[i] = new ushort[imageWidth];
                 ReadImageRow(cam, imageFits.data[i]);
@@ -433,10 +470,11 @@ namespace RPCC.Cams
         private void ReadImageRow(CameraDevice cam, ushort[] buff)
         {
             int errorLastFliCmd;
-            IntPtr buffWidth = new IntPtr(buff.Length);
-            
+            var buffWidth = new IntPtr(buff.Length);
+
             errorLastFliCmd = NativeMethods.FLIGrabRow(cam.handle, buff, buffWidth);
-            if (errorLastFliCmd != 0) Logger.AddLogEntry($"ERROR Unable to read frame row from {cam.serialNumber} camera");
+            if (errorLastFliCmd != 0)
+                Logger.AddLogEntry($"ERROR Unable to read frame row from {cam.serialNumber} camera");
         }
 
         internal void CancelSurvey()
@@ -449,7 +487,7 @@ namespace RPCC.Cams
 
             int errorLastFliCmd;
 
-            for (int i = 0; i < cameras.Length; i++)
+            for (var i = 0; i < cameras.Length; i++)
             {
                 errorLastFliCmd = NativeMethods.FLICancelExposure(cameras[i].handle);
                 if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to cancel camera {i + 1} exposure");
@@ -459,30 +497,27 @@ namespace RPCC.Cams
 
         internal void DisconnectCameras()
         {
-            foreach(var cam in cameras)
-            {
-                NativeMethods.FLIClose(cam.handle);
-            }
+            foreach (var cam in cameras) NativeMethods.FLIClose(cam.handle);
         }
 
         /// <summary>
-        /// Used by List() to store a list of enumerated devices
+        ///     Used by List() to store a list of enumerated devices
         /// </summary>
         private class DeviceName
         {
             /// <summary>
-            /// Formal device name needed by Open()
+            ///     Formal device name needed by Open()
             /// </summary>
             public string FileName;
 
             /// <summary>
-            /// Model name or user assigned device name
+            ///     Model name or user assigned device name
             /// </summary>
             public string ModelName;
         }
 
         /// <summary>
-        /// Internal struct used for marshaling strings
+        ///     Internal struct used for marshaling strings
         /// </summary>
         [StructLayout(LayoutKind.Sequential)]
         private class StringWrapper

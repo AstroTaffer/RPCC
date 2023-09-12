@@ -8,23 +8,23 @@ namespace RPCC.Tasks
     public partial class TaskForm : Form
     {
         private readonly bool _isNewTask;
-        private readonly ObservationTask _task = new ObservationTask();
         private readonly int _rowIndex;
-        
+        private readonly ObservationTask _task = new ObservationTask();
+
         public TaskForm(bool isNewTask, int rowIndex = 0)
         {
             InitializeComponent();
             _rowIndex = rowIndex;
             textBoxDateTime.Text = DateTime.UtcNow.ToString(CultureInfo.CurrentCulture);
             _isNewTask = isNewTask;
-            if(_isNewTask)
+            if (_isNewTask)
             {
                 _task.TaskNumber = Tasker.GetTasksLen();
             }
             else
             {
                 _task = Tasker.GetTaskByRowIndex(_rowIndex);
-               
+
                 textBoxCoords.Text = _task.RaDec;
                 textBoxObject.Text = _task.Object;
                 textBoxObserver.Text = _task.Observer;
@@ -36,7 +36,7 @@ namespace RPCC.Tasks
                 textBoxYend.Text = _task.YSubframeEnd.ToString();
                 textBoxDateTime.Text = _task.TimeStart.ToString(CultureInfo.CurrentCulture);
                 textBoxExpN.Text = _task.AllFrames.ToString(CultureInfo.CurrentCulture);
-                
+
                 comboBoxExp.Text = _task.Exp.ToString(CultureInfo.CurrentCulture);
                 textBoxDuration.Text = _task.Duration.ToString(CultureInfo.CurrentCulture);
                 comboBoxFrameType.Text = _task.FrameType;
@@ -45,6 +45,7 @@ namespace RPCC.Tasks
                 if (s.Contains("r")) checkBoxFilr.Checked = true;
                 if (s.Contains("i")) checkBoxFili.Checked = true;
             }
+
             labelTaskN.Text = $@"Task №{_task.TaskNumber}";
         }
 
@@ -61,18 +62,19 @@ namespace RPCC.Tasks
             if (checkBoxFilg.Checked) fil += "g ";
             if (checkBoxFilr.Checked) fil += "r ";
             if (checkBoxFili.Checked) fil += "i";
-            
-            if (textBoxCoords.Text=="" || textBoxDateTime.Text =="" || comboBoxExp.Text =="" ||
-                comboBoxFrameType.Text=="" || fil=="")
+
+            if (textBoxCoords.Text == "" || textBoxDateTime.Text == "" || comboBoxExp.Text == "" ||
+                comboBoxFrameType.Text == "" || fil == "")
             {
                 MessageBox.Show(@"Blank data, can't add task", @"OK", MessageBoxButtons.OK);
                 return;
             }
+
             _task.ComputeRaDec(textBoxCoords.Text);
             _task.TimeAdd = DateTime.UtcNow;
             _task.TimeStart = DateTime.Parse(textBoxDateTime.Text);
             _task.Exp = short.Parse(comboBoxExp.Text);
-            
+
             if (textBoxDuration.Text == "")
             {
                 _task.AllFrames = short.Parse(textBoxExpN.Text);
@@ -83,7 +85,7 @@ namespace RPCC.Tasks
                 _task.Duration = float.Parse(textBoxDuration.Text);
                 _task.AllFrames = Convert.ToInt16(_task.Duration * 60f * 60f / _task.Exp);
             }
-            
+
             _task.TimeEnd = _task.TimeStart.AddHours(_task.Duration);
             _task.Object = textBoxObject.Text;
             _task.Observer = textBoxObserver.Text;
@@ -94,14 +96,11 @@ namespace RPCC.Tasks
             _task.Ybin = short.Parse(textBoxYbin.Text);
             _task.YSubframeStart = short.Parse(textBoxYstart.Text);
             _task.YSubframeEnd = short.Parse(textBoxYend.Text);
-            
+
             _task.Filters = fil;
             _task.FrameType = comboBoxFrameType.Text;
-            
-            if(!_isNewTask)
-            {
-                Tasker.DeleteTaskByRowIndex(_rowIndex);
-            }
+
+            if (!_isNewTask) Tasker.DeleteTaskByRowIndex(_rowIndex);
             Tasker.AddTask(_task);
             buttonCancel_Click(sender, e);
         }

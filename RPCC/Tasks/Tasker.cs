@@ -3,6 +3,7 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
+using System.Xml;
 using RPCC.Utils;
 
 namespace RPCC.Tasks
@@ -15,23 +16,20 @@ namespace RPCC.Tasks
         private static readonly string FileName = Directory.GetCurrentDirectory() + "\\" + "Tasks.xml";
         public static ContextMenuStrip contextMenuStripTasker;
 
-        public static readonly string[] Header = {
+        public static readonly string[] Header =
+        {
             "N", "RaDecJ2000", "t_{Added}", @"t_{Run}", @"t_{Fin}", "Duration",
-            "Exp", "Done", "All", "t_{Last exp}", "Filters", "Object", "Status", "Observer", "Frame type", 
+            "Exp", "Done", "All", "t_{Last exp}", "Filters", "Object", "Status", "Observer", "Frame type",
             "Xbin", "XSubframeStart", "XSubframeEnd", "Ybin", "YSubframeStart", "YSubframeEnd"
-            
         };
 //gri
 
         public static void SetHeader()
         {
             // DataGridViewButtonColumn
-            
-            foreach (var s in Header)
-            {
-                DataTable.Columns.Add(new DataColumn(s));
-            }
-            
+
+            foreach (var s in Header) DataTable.Columns.Add(new DataColumn(s));
+
             DataSet.Tables.Add(DataTable);
             dataGridViewTasker.AutoSize = true;
             dataGridViewTasker.DataSource = DataSet.Tables[0];
@@ -39,7 +37,7 @@ namespace RPCC.Tasks
             dataGridViewTasker.ReadOnly = true;
             dataGridViewTasker.AllowUserToAddRows = false;
             dataGridViewTasker.AllowUserToDeleteRows = false;
-            
+
             dataGridViewTasker.Columns[0].Width = 60;
             dataGridViewTasker.Columns[1].Width = 150;
             dataGridViewTasker.Columns[2].Width = 120;
@@ -62,23 +60,20 @@ namespace RPCC.Tasks
             dataGridViewTasker.Columns[18].Visible = false;
             dataGridViewTasker.Columns[19].Visible = false;
             dataGridViewTasker.Columns[20].Visible = false;
-            
+
             foreach (DataGridViewColumn column in dataGridViewTasker.Columns)
-            {
                 column.SortMode = DataGridViewColumnSortMode.NotSortable;
-            }
 
             // dataGridViewTasker.Sort(dataGridViewTasker.Columns[0], ListSortDirection.Descending);
             // dataGridViewTasker.Columns[0].DefaultCellStyle.Alignment = DataGridViewContentAlignment.TopCenter;
         }
-        
+
         public static void SaveTasksToXml()
         {
             var dataTable = (DataTable) dataGridViewTasker.DataSource;
             try
             {
                 dataTable.WriteXml(FileName);
-        
             }
             catch (Exception exception)
             {
@@ -92,28 +87,26 @@ namespace RPCC.Tasks
             {
                 try
                 {
-                    DataSet.ReadXml(FileName);  
+                    DataSet.ReadXml(FileName);
                     dataGridViewTasker.DataSource = DataSet.Tables[0];
                     PaintTable();
-                    
                 }
-                catch (System.Xml.XmlException e)
+                catch (XmlException e)
                 {
                     Logger.AddLogEntry($"Tasker Error: {e.Message}");
                 }
-            }   
+            }
             else
             {
                 File.Create(FileName);
                 SaveTasksToXml();
             }
         }
-        
+
 
         public static void PaintTable()
         {
             foreach (DataGridViewRow row in dataGridViewTasker.Rows)
-            {
                 switch (short.Parse(row.Cells[12].Value.ToString()))
                 {
                     case 0: // Wait
@@ -135,14 +128,13 @@ namespace RPCC.Tasks
                         row.DefaultCellStyle.BackColor = Color.Green;
                         break;
                 }
-            }
         }
 
         public static int GetTasksLen()
         {
             return dataGridViewTasker.Rows.Count;
         }
-        
+
         public static void AddTask(ObservationTask task)
         {
             var dataRow = DataTable.NewRow();
@@ -156,7 +148,7 @@ namespace RPCC.Tasks
             dataRow[Header[7]] = task.DoneFrames;
             dataRow[Header[8]] = task.AllFrames;
             dataRow[Header[9]] = task.TimeLastExp;
-            dataRow[Header[10]] = task.Filters; 
+            dataRow[Header[10]] = task.Filters;
             dataRow[Header[11]] = task.Object;
             dataRow[Header[12]] = task.Status;
             dataRow[Header[13]] = task.Observer;
@@ -167,7 +159,7 @@ namespace RPCC.Tasks
             dataRow[Header[18]] = task.Ybin;
             dataRow[Header[19]] = task.YSubframeStart;
             dataRow[Header[20]] = task.YSubframeEnd;
-            
+
             DataTable.Rows.InsertAt(dataRow, 0);
             SaveTasksToXml();
         }
@@ -187,7 +179,7 @@ namespace RPCC.Tasks
                 row.Cells[7].Value = task.DoneFrames;
                 row.Cells[8].Value = task.AllFrames;
                 row.Cells[9].Value = task.TimeLastExp;
-                row.Cells[10].Value = task.Filters; 
+                row.Cells[10].Value = task.Filters;
                 row.Cells[11].Value = task.Object;
                 row.Cells[12].Value = task.Status;
                 row.Cells[13].Value = task.Observer;
@@ -199,6 +191,7 @@ namespace RPCC.Tasks
                 row.Cells[19].Value = task.YSubframeStart;
                 row.Cells[20].Value = task.YSubframeEnd;
             }
+
             PaintTable();
         }
 
@@ -238,11 +231,11 @@ namespace RPCC.Tasks
 
             return task;
         }
-        
+
         public static ObservationTask GetTaskByRowIndex(int rowIndex)
         {
             var task = new ObservationTask();
-            DataGridViewRow row = dataGridViewTasker.Rows[rowIndex];
+            var row = dataGridViewTasker.Rows[rowIndex];
             task.TaskNumber = Convert.ToInt32(row.Cells[0].Value);
             task.ComputeRaDec(row.Cells[1].Value.ToString());
             task.TimeAdd = DateTime.Parse(row.Cells[2].Value.ToString());

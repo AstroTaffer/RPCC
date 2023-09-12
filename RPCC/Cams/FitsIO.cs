@@ -1,9 +1,10 @@
 ﻿using System;
 using System.IO;
+using ASCOM.Tools;
 using nom.tam.fits;
 using nom.tam.util;
 using RPCC.Comms;
-using RPCC.Focus;
+using RPCC.Tasks;
 using RPCC.Utils;
 
 namespace RPCC.Cams
@@ -44,30 +45,27 @@ namespace RPCC.Cams
         // Create new empty RpccFits
         internal RpccFits()
         {
-
         }
 
         internal void SaveFitsFile(CameraControl camCtrl, int focusPos, int camNum)
         {
-            short[][] convertedData = new short[data.Length][];
+            var convertedData = new short[data.Length][];
             for (var i = 0; i < convertedData.Length; i++)
             {
                 convertedData[i] = new short[data[i].Length];
                 for (var j = 0; j < convertedData[i].Length; j++)
-                {
                     // Convert ushort (used in LibFli and RpccFits) to short (used in nom.tam.fits)
-                    convertedData[i][j] = (short)(data[i][j] - short.MaxValue - 1);
-                }
+                    convertedData[i][j] = (short) (data[i][j] - short.MaxValue - 1);
             }
 
-            Fits newFits = new Fits();
+            var newFits = new Fits();
             newFits.AddHDU(FitsFactory.HDUFactory(convertedData));
-            Header newHeader = ((ImageHDU)newFits.GetHDU(0)).Header;
+            var newHeader = ((ImageHDU) newFits.GetHDU(0)).Header;
 
             // When filling in header keys with Add function, CSharpFITS tends to shuffle keys.
             // Though it can be fixed, I can't think of a simple and clean way to do so.
             // Therefore, it's a feature now.
-            Cursor newCursor = newHeader.GetCursor();
+            var newCursor = newHeader.GetCursor();
             newCursor.Key = "END";
 
             newCursor.Add(new HeaderCard("COMMENT",
@@ -77,6 +75,9 @@ namespace RPCC.Cams
             newCursor.Add(new HeaderCard("DATE-OBS",
                 camCtrl.cameras[camNum].expStartDt.ToString("yyyy-MM-ddTHH:mm:ss.fff"),
                 "date at the begining of exposure"));
+            newCursor.Add(new HeaderCard("JD",
+                Utilities.JulianDateFromDateTime(camCtrl.cameras[camNum].expStartDt),
+                "Julian date at the begining of exposure"));
             newCursor.Add(new HeaderCard("EXPTIME", camCtrl.task.framesExpTime / 1000.0,
                 "actual integration time [sec]"));
             switch (camCtrl.task.framesType)
@@ -88,6 +89,7 @@ namespace RPCC.Cams
                     newCursor.Add(new HeaderCard("OBJNAME", camCtrl.task.framesType, "object name"));
                     break;
             }
+
             //TODO: It's a hotfix, implement properly later
             newCursor.Add(new HeaderCard("ALPHA", camCtrl.task.objectRa, "right ascention coordinates [hh mm ss.s]"));
             newCursor.Add(new HeaderCard("DELTA", camCtrl.task.objectDec, "declination coordinates [dd mm ss.s]"));
@@ -123,6 +125,7 @@ namespace RPCC.Cams
                     newCursor.Add(new HeaderCard("RDNOISE", 9.0, "datasheet readnoise [e]"));
                     break;
             }
+
             newCursor.Add(new HeaderCard("GAIN", 1.4, "typical gain [e/ADU]"));
             newCursor.Add(new HeaderCard("BINNING", Settings.CamBin, "binning factor"));
             newCursor.Add(new HeaderCard("PIXSZ", 13.5 * Settings.CamBin,
@@ -144,6 +147,14 @@ namespace RPCC.Cams
             // Weather keywords
             // TODO: Implement or discard the rest of the keywords
             // Grab Nabat by neck and review this section (and DataCollector) together
+            newCursor.Add(new HeaderCard("AIRMASS", MountDataCollector.Airmass, "Airmass"));
+            newCursor.Add(new HeaderCard("MOONPHAS", Utilities.MoonPhase(Utilities.JulianDateUtc),
+                "Illuminated fraction of the Moon"));
+            newCursor.Add(new HeaderCard("DMOON", 
+                CoordinatesManager.CalculateObjectDistance2Moon(new ObservationTask()), //TODO INSERT TASK
+                "Ang. distance to Moon [deg]"));  
+
+
             switch (WeatherDataCollector.Sky)
             {
                 case -1.0:
@@ -154,9 +165,11 @@ namespace RPCC.Cams
                     newCursor.Add(new HeaderCard("SKY-TEMP", "UNKNOWN", "sky temperature from MLX-90614 sensor [deg]"));
                     break;
                 default:
-                    newCursor.Add(new HeaderCard("SKY-TEMP", WeatherDataCollector.Sky, "sky temperature from MLX-90614 sensor [deg]"));
+                    newCursor.Add(new HeaderCard("SKY-TEMP", WeatherDataCollector.Sky,
+                        "sky temperature from MLX-90614 sensor [deg]"));
                     break;
             }
+
             //SkyStd  SKY-STD
             switch (WeatherDataCollector.Extinction)
             {
@@ -168,9 +181,11 @@ namespace RPCC.Cams
                     newCursor.Add(new HeaderCard("EXTINCT", "UNKNOWN", "relative extinction [Vmag]"));
                     break;
                 default:
-                    newCursor.Add(new HeaderCard("EXTINCT", WeatherDataCollector.Extinction, "relative extinction [Vmag]"));
+                    newCursor.Add(new HeaderCard("EXTINCT", WeatherDataCollector.Extinction,
+                        "relative extinction [Vmag]"));
                     break;
             }
+
             //ExtinctionStd
             switch (WeatherDataCollector.Seeing)
             {
@@ -185,6 +200,7 @@ namespace RPCC.Cams
                     newCursor.Add(new HeaderCard("SEEING", WeatherDataCollector.Seeing, "seeing [arcsec]"));
                     break;
             }
+
             //SeeingExtinction
             switch (WeatherDataCollector.Wind)
             {
@@ -199,6 +215,7 @@ namespace RPCC.Cams
                     newCursor.Add(new HeaderCard("WIND", WeatherDataCollector.Wind, "wind speed [m/s]"));
                     break;
             }
+
             newCursor.Add(new HeaderCard("SUN-ZD", WeatherDataCollector.Sun, "Sun zenith distance"));
 
             string outDirectory;
@@ -206,28 +223,29 @@ namespace RPCC.Cams
             {
                 case "UNKNOWN":
                     outDirectory = $"{Settings.OutImgsFolder}\\{camCtrl.cameras[camNum].filter}-" +
-                    $"{camCtrl.cameras[camNum].serialNumber}";
+                                   $"{camCtrl.cameras[camNum].serialNumber}";
                     break;
                 default:
                     outDirectory = $"{Settings.OutImgsFolder}\\{camCtrl.cameras[camNum].filter}";
                     break;
             }
-            
+
             if (!Directory.Exists(outDirectory)) Directory.CreateDirectory(outDirectory);
             string outName;
             switch (camCtrl.task.framesType)
             {
                 case "Object":
-                    outName = $"{camCtrl.task.objectName}-{camCtrl.cameras[camNum].filter}-{camCtrl.cameras[camNum].expStartDt:yyyy-MM-ddThh-mm-ss}.fits";
+                    outName =
+                        $"{camCtrl.task.objectName}-{camCtrl.cameras[camNum].filter}-{camCtrl.cameras[camNum].expStartDt:yyyy-MM-ddThh-mm-ss}.fits";
                     break;
                 default:
                     outName = $"{camCtrl.task.framesType}-{camCtrl.cameras[camNum].filter}-" +
-                        $"{camCtrl.cameras[camNum].expStartDt:yyyy-MM-ddThh-mm-ss}.fits";
+                              $"{camCtrl.cameras[camNum].expStartDt:yyyy-MM-ddThh-mm-ss}.fits";
                     break;
             }
 
-            BufferedDataStream outStream = new BufferedDataStream(new FileStream($"{outDirectory}\\" +
-                $"{outName}", FileMode.Create));
+            var outStream = new BufferedDataStream(new FileStream($"{outDirectory}\\" +
+                                                                  $"{outName}", FileMode.Create));
             newFits.Write(outStream);
             // FIXME: Suddenly caught a bug in next line - said something like "can't access closed file".
             // Check it and, if needed, remove the next two lines.

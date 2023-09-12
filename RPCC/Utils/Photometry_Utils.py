@@ -1,16 +1,17 @@
-from astropy.stats import sigma_clipped_stats
-from astropy.wcs import WCS
-from matplotlib import pyplot as plt
 import numpy as np
 from astropy import units as u
 from astropy.coordinates import Angle
 from astropy.coordinates import SkyCoord
+from astropy.stats import sigma_clipped_stats
 from astropy.table import Table
+from astropy.wcs import WCS
 from astroquery.vizier import Vizier
+from matplotlib import pyplot as plt
 from numpy import arange
 from photutils.aperture import CircularAperture
 from photutils.centroids import centroid_sources, centroid_com
 from photutils.utils import CutoutImage
+
 
 def get_com(Data, Cat, Bbox):
     x, y = centroid_sources(Data, Cat['X'], Cat['Y'], box_size=Bbox,
@@ -134,6 +135,5 @@ def DrawMap(Image, Size, Header, Cat, Name, RAper):
     ax.coords.grid(color='blue', ls='--', alpha=0.7)
     # plt.show()
     fig.savefig(Name)
-
 
 # FastPlot(r'C:\Users\User\Desktop\2023_08_21 GSC2314–0530')

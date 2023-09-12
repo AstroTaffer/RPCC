@@ -1,14 +1,16 @@
 import os
+
 import astropy.io.fits as fits
 import astropy.wcs as wcs
+from astropy.io import ascii
 from astropy.stats import SigmaClip
 from astropy.time import Time
-from photutils.background import Background2D, MedianBackground
 from photutils.aperture import aperture_photometry
-from astropy.io import ascii
+from photutils.background import Background2D, MedianBackground
 
 from Astrometry import Astrometry
 from Photometry_Utils import *
+
 
 # '02:20:50.9 +33:20:46.6' GSC2314–0530
 # RA/Dec (J2000, epoch 2015.5): 20:00:16.06 +22:09:43.54 TIC 424112727
@@ -21,13 +23,13 @@ def Core(path2data):
     V_lim = 15  # catalog max depth
     Bbox = 9  # centering/morphology box half-size (pixels)
     Raper = 5
-    
+
     # read directory and create list of fits-files
     file_list = []
     for f in os.listdir(path2data):
         if f.count('.fits') or f.count('.fit'):
             file_list.append(path2data + '\\' + f)
-    
+
     hdu = fits.open(file_list[0])
     header = hdu[0].header
     date = header['DATE-OBS'].split('T')[0]
@@ -48,7 +50,7 @@ def Core(path2data):
     # clean old photometry
     for f in os.listdir(Path2Save):
         if f.count('Phot'):
-            os.remove(Path2Save+'/'+f)
+            os.remove(Path2Save + '/' + f)
 
     print('Download GAIA')
     Catalog = Get_GAIA(C.ra.degree, C.dec.degree, Cat_R, V_lim, Cat_len)

@@ -4,50 +4,73 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Text;
 using System.Threading;
-using System.Windows.Forms;
 using System.Threading.Tasks;
 using System.Timers;
-
+using System.Windows.Forms;
 using RPCC.Cams;
-using RPCC.Focus;
-using RPCC.Utils;
 using RPCC.Comms;
+using RPCC.Focus;
 using RPCC.Tasks;
+using RPCC.Utils;
+using Timer = System.Timers.Timer;
 
 namespace RPCC
 {
     public partial class MainForm : Form
     {
+        // private readonly SiTechExeSocket SiTechExeSocket;
+        // private readonly MountDataCollector _mountDc;
+
+        private static readonly Timer FocusTimer = new Timer();
+
+        private readonly CameraControl _cameraControl;
+
+        // private readonly CameraFocus CameraFocus;
+
+        private readonly WeatherSocket _domeSocket;
+        // private readonly WeatherDataCollector _weatherDc;
+
+        private readonly DonutsSocket _donutsSocket;
+
         /// <summary>
         ///     Логика работы основной формы программы
         ///     Обработка команд пользователя с помощью вызова готовых функций
         /// </summary>
         // private readonly Logger Logger;
         // private Settings Settings;
+        private ushort[][] _currentImage;
 
-        private ushort[][] _currentImage;        
         private GeneralImageStat _currentImageGStat;
-        private bool _isCurrentImageLoaded;
-        private bool _isZoomModeActivated;
-
-        private readonly CameraControl _cameraControl;
         private int _idleCamNum;
-
-        private readonly CameraFocus _cameraFocus;
-
-        private readonly WeatherSocket _domeSocket;
-        // private readonly WeatherDataCollector _weatherDc;
-        
-        private readonly DonutsSocket _donutsSocket;
-        
-        // private readonly SiTechExeSocket SiTechExeSocket;
-        // private readonly MountDataCollector _mountDc;
-
-        private static readonly System.Timers.Timer FocusTimer = new System.Timers.Timer();
+        private bool _isCurrentImageLoaded;
 
         private bool _isFirstLoad;
+        private bool _isZoomModeActivated;
+
+        private void AddToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Logger.AddLogEntry("Add Task click");
+            var taskForm = new TaskForm(true);
+            taskForm.Show();
+        }
+
+        private void DataGridViewTasker_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            // MessageBox.Show(e.RowIndex.ToString());
+            if (e.RowIndex == -1) return;
+            var taskForm = new TaskForm(false, e.RowIndex);
+            taskForm.Show();
+        }
+
+        private void DataGridViewTasker_VisibleChanged(object sender, EventArgs e)
+        {
+            if (!_isFirstLoad || !dataGridViewTasker.Visible) return;
+            _isFirstLoad = false;
+            Tasker.PaintTable();
+        }
 
         #region General
+
         public MainForm()
         {
             InitializeComponent();
@@ -63,7 +86,6 @@ namespace RPCC
 
             // Hardware controls
             _cameraControl = new CameraControl();
-            _cameraFocus = new CameraFocus();
 
             // MeteoDome connect
             // _weatherDc = new WeatherDataCollector();
@@ -87,7 +109,7 @@ namespace RPCC
             // HACK: For the love of god stop exiting the program when something is not connected!
             // Call FindFocusToolStripMenuItem_Click
 
-            if (!_cameraFocus.Init())
+            if (!SerialFocus.Init())
             {
                 MessageBox.Show(@"Can't open Focus serial port", @"OK", MessageBoxButtons.OK);
                 Logger.AddLogEntry(@"Can't open Focus serial port");
@@ -107,9 +129,8 @@ namespace RPCC
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            
             timerClock.Stop();
-            
+
             Tasker.SaveTasksToXml();
 
             _domeSocket.Disconnect();
@@ -117,10 +138,10 @@ namespace RPCC
             SiTechExeSocket.Disconnect();
 
             _cameraControl.DisconnectCameras();
-            
-            _cameraFocus.SerialFocus.Close_Port();
-            _cameraFocus.DeFocus = 0;
-            _cameraFocus.IsZenith = false;
+
+            SerialFocus.Close_Port();
+            CameraFocus.DeFocus = 0;
+            CameraFocus.IsZenith = false;
             labelFocusPos.Dispose();
             FocusTimer.Dispose();
         }
@@ -128,7 +149,7 @@ namespace RPCC
         private void TimerClock_Tick(object sender, EventArgs e)
         {
             tSStatusClock.Text = @"UTC: " + DateTime.UtcNow.ToString("yyyy-MM-ddTHH-mm-ss.fff");
-            
+
             _cameraControl.GetStatus();
             switch (_cameraControl.cameras.Length)
             {
@@ -156,19 +177,17 @@ namespace RPCC
             }
 
             _idleCamNum = 0;
-            for (int i = 0; i < _cameraControl.cameras.Length; i++)
-            {
+            for (var i = 0; i < _cameraControl.cameras.Length; i++)
                 if (_cameraControl.cameras[i].status == "IDLE")
                 {
                     _idleCamNum++;
                     if (_cameraControl.cameras[i].isExposing)
                     {
                         // Image ready
-
                         // TODO: Move to separate thread
-                        RpccFits imageFits = _cameraControl.ReadImage(_cameraControl.cameras[i]);
+                        var imageFits = _cameraControl.ReadImage(_cameraControl.cameras[i]);
 
-                        imageFits.SaveFitsFile(_cameraControl, _cameraFocus.SerialFocus.CurrentPosition, i);
+                        imageFits.SaveFitsFile(_cameraControl, SerialFocus.CurrentPosition, i);
 
                         if (i == _cameraControl.task.viewCamIndex)
                         {
@@ -176,19 +195,18 @@ namespace RPCC
                             _currentImage = imageFits.data;
                             _currentImageGStat = new GeneralImageStat(_currentImage);
                             Logger.AddLogEntry($"Min: {_currentImageGStat.min}; " +
-                                $"Max: {_currentImageGStat.max}; " +
-                                $"Mean: {_currentImageGStat.mean:0.##}; " +
-                                $"SD: {_currentImageGStat.sd:0.##}");
+                                               $"Max: {_currentImageGStat.max}; " +
+                                               $"Mean: {_currentImageGStat.mean:0.##}; " +
+                                               $"SD: {_currentImageGStat.sd:0.##}");
                             PlotFitsImage();
                             _isCurrentImageLoaded = true;
                         }
 
                         // TODO: AUTOFOCUS, check quality
-                        // _cameraFocus.AutoFocus();
+                        // CameraFocus.AutoFocus();
                         _cameraControl.cameras[i].isExposing = false;
                     }
                 }
-            }
 
             if (_idleCamNum == _cameraControl.cameras.Length)
             {
@@ -209,9 +227,11 @@ namespace RPCC
                 }
             }
         }
+
         #endregion
 
         #region Launch Menu
+
         private void FindCamerasToolStripMenuItem_Click(object sender, EventArgs e)
         {
             _cameraControl.LaunchCameras();
@@ -248,8 +268,8 @@ namespace RPCC
             //       This function must work properly when called more than once
             //       Watch out! SerialFocus.Init() keeps adding functions on ComTimer.Elapsed every time it is called!
 
-            //_cameraFocus.SerialFocus.Close_Port();
-            //_cameraFocus.Init();
+            //SerialFocus.Close_Port();
+            //CameraFocus.Init();
         }
 
         private void ReconnectMeteoDomeToolStripMenuItem_Click(object sender, EventArgs e)
@@ -266,10 +286,7 @@ namespace RPCC
 
         private void ReconnectSiTechExeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (SiTechExeSocket._isConnected)
-            {
-                SiTechExeSocket.Disconnect();
-            }
+            if (SiTechExeSocket._isConnected) SiTechExeSocket.Disconnect();
             SiTechExeSocket.Connect();
         }
 
@@ -279,9 +296,11 @@ namespace RPCC
             ReconnectDonutsToolStripMenuItem_Click(sender, e);
             ReconnectSiTechExeToolStripMenuItem_Click(sender, e);
         }
+
         #endregion
 
         #region Logs
+
         private void ListBoxLogs_DoubleClick(object sender, EventArgs e)
         {
             // TODO: Nice idea, but nothing points to this feature. Implement in a less obscure way.
@@ -301,9 +320,11 @@ namespace RPCC
             Logger.SaveLogs();
             Logger.AddLogEntry("Logs have been saved");
         }
+
         #endregion
 
         #region Images Plotting
+
         private void PlotFitsImage()
         {
             pictureBoxFits.Image = null;
@@ -332,7 +353,7 @@ namespace RPCC
 
             pictureBoxFits.Image = bitmapFits;
         }
-    
+
         private void PlotProfileImage(ProfileImageStat pStat, ushort[][] image)
         {
             // It calculates scaling and placing parameters in a rather non-obvious way
@@ -442,9 +463,11 @@ namespace RPCC
                 Logger.AddLogEntry("WARNING Image not loaded");
             }
         }
+
         #endregion
 
         #region Survey
+
         private void ButtonSurveyStart_Click(object sender, EventArgs e)
         {
             buttonSurveyStart.Enabled = false;
@@ -471,13 +494,14 @@ namespace RPCC
             _cameraControl.SetSurveySettings();
             _cameraControl.StartExposure();
             Logger.AddLogEntry($"Survey started - {_cameraControl.task.framesNum} {_cameraControl.task.framesType}" +
-                $" frames with exposure of {_cameraControl.task.framesExpTime * 1e-3} s");
+                               $" frames with exposure of {_cameraControl.task.framesExpTime * 1e-3} s");
         }
 
         private void ButtonSurveyStop_Click(object sender, EventArgs e)
         {
             _cameraControl.CancelSurvey();
-            Logger.AddLogEntry($"Survey cancelled, {_cameraControl.task.framesNum} {(_cameraControl.task.framesNum == 1 ? "frame" : "frames")} skipped");
+            Logger.AddLogEntry(
+                $"Survey cancelled, {_cameraControl.task.framesNum} {(_cameraControl.task.framesNum == 1 ? "frame" : "frames")} skipped");
             _cameraControl.task.framesNum = 1;
             numericUpDownSequence.Value = 1;
 
@@ -487,9 +511,11 @@ namespace RPCC
             numericUpDownExpTime.Enabled = true;
             updateCamerasSettingsToolStripMenuItem.Enabled = true;
         }
+
         #endregion
 
         #region Options
+
         private void SettingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var settingsForm = new SettingsForm();
@@ -513,9 +539,11 @@ namespace RPCC
             if (saveFileDialogConfig.ShowDialog() == DialogResult.OK)
                 Settings.SaveXmlConfig(saveFileDialogConfig.FileName);
         }
+
         #endregion
 
         #region Debug Menu
+
         private void TestDLLlibrariesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var testFits = new RpccFits(".\\Cams\\TestImage.fits");
@@ -539,9 +567,9 @@ namespace RPCC
 
             _currentImageGStat = new GeneralImageStat(_currentImage);
             Logger.AddLogEntry($"Min: {_currentImageGStat.min}; " +
-                                $"Max: {_currentImageGStat.max}; " +
-                                $"Mean: {_currentImageGStat.mean:0.##}; " +
-                                $"SD: {_currentImageGStat.sd:0.##}");
+                               $"Max: {_currentImageGStat.max}; " +
+                               $"Mean: {_currentImageGStat.mean:0.##}; " +
+                               $"SD: {_currentImageGStat.sd:0.##}");
 
             await Task.Run(() => PlotFitsImage());
             _isCurrentImageLoaded = true;
@@ -557,7 +585,7 @@ namespace RPCC
         {
             Logger.AddLogEntry("Test donuts");
             Logger.AddLogEntry(_donutsSocket.PingServer());
-            
+
             var cwd = Directory.GetCurrentDirectory();
             var refFile = cwd + "\\Guid\\2023-04-07T17-56-16.918_EAST_V.fits";
             var testFile = cwd + "\\Guid\\2023-04-07T18-00-24.167_EAST_V.fits";
@@ -567,36 +595,38 @@ namespace RPCC
             if (outPut == null) return;
             Logger.AddLogEntry("shifts = " + outPut[0] + "x " + outPut[1] + "y ");
         }
+
         #endregion
 
         #region Focus
+
         private void OnTimedEvent_Clock(object sender, ElapsedEventArgs e)
         {
             GetData();
             // var getFocus = new Thread(GetData);
             // getFocus.Start();
         }
-        
+
         private void GetData()
         {
             const int waitTime = 50;
-            _cameraFocus.SerialFocus.UpdateData();
+            SerialFocus.UpdateData();
             Thread.Sleep(waitTime);
             try
             {
                 labelFocusPos.Invoke((MethodInvoker) delegate
                 {
-                    labelFocusPos.Text = $@"Focus position: {_cameraFocus.SerialFocus.CurrentPosition}";
+                    labelFocusPos.Text = $@"Focus position: {SerialFocus.CurrentPosition}";
                 });
 
-                labelEndSwitch.Text = @"Endswitch: " + (_cameraFocus.SerialFocus.Switches[6] ? "joint" : "unjoint");
+                labelEndSwitch.Text = @"Endswitch: " + (SerialFocus.Switches[6] ? "joint" : "unjoint");
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
             }
         }
-        
+
         private void CheckBoxAutoFocus_CheckedChanged(object sender, EventArgs e)
         {
             var isAutoFocusEnabled = checkBoxAutoFocus.Checked;
@@ -609,56 +639,35 @@ namespace RPCC
             //AutoFocus
             numericUpDownSetDefoc.Enabled = isAutoFocusEnabled;
             checkBoxGoZenith.Enabled = isAutoFocusEnabled;
-            _cameraFocus.isAutoFocus = isAutoFocusEnabled;
+            CameraFocus.IsAutoFocus = isAutoFocusEnabled;
         }
 
         private void NumericUpDownSetDefoc_ValueChanged(object sender, EventArgs e)
         {
-            _cameraFocus.DeFocus = (int)numericUpDownSetDefoc.Value;
+            CameraFocus.DeFocus = (int) numericUpDownSetDefoc.Value;
         }
 
         private void ButtonSetZeroPos_Click(object sender, EventArgs e)
         {
-            _cameraFocus.SerialFocus.Set_Zero();
+            SerialFocus.Set_Zero();
         }
 
         private void ButtonRunStop_Click(object sender, EventArgs e)
         {
-            _cameraFocus.SerialFocus.Stop();
+            SerialFocus.Stop();
         }
 
         private void ButtonRun_Click(object sender, EventArgs e)
         {
-            if (radioButtonRunFast.Checked) _cameraFocus.SerialFocus.FRun_To((int)numericUpDownRun.Value);
-            else if (radioButtonRunSlow.Checked) _cameraFocus.SerialFocus.SRun_To((int)numericUpDownRun.Value);
+            if (radioButtonRunFast.Checked) SerialFocus.FRun_To((int) numericUpDownRun.Value);
+            else if (radioButtonRunSlow.Checked) SerialFocus.SRun_To((int) numericUpDownRun.Value);
         }
 
         private void CheckBoxGoZenith_CheckedChanged(object sender, EventArgs e)
         {
-            _cameraFocus.IsZenith = checkBoxGoZenith.Checked;
+            CameraFocus.IsZenith = checkBoxGoZenith.Checked;
         }
+
         #endregion
-
-        private void AddToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            // Logger.AddLogEntry("Add Task click");
-            var taskForm = new TaskForm(true);
-            taskForm.Show();
-        }
-
-        private void DataGridViewTasker_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
-        {
-            // MessageBox.Show(e.RowIndex.ToString());
-            if (e.RowIndex == -1) return;
-            var taskForm = new TaskForm(false, e.RowIndex);
-            taskForm.Show();
-        }
-
-        private void DataGridViewTasker_VisibleChanged(object sender, EventArgs e)
-        {
-            if (!_isFirstLoad || !dataGridViewTasker.Visible) return;
-            _isFirstLoad = false;
-            Tasker.PaintTable();
-        }
     }
 }

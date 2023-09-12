@@ -1,5 +1,5 @@
-import glob
 import os
+
 import astropy.io.fits as fits
 import numpy as np
 from astropy.convolution import Gaussian2DKernel
@@ -10,7 +10,6 @@ from photutils.detection import DAOStarFinder
 
 
 def Astrometry(path, files, C):
-
     ast = AstrometryNet()
     ast.api_key = 'hipfhzhlzygnlvix'
     path2save = path + r'\done'
@@ -68,7 +67,6 @@ def Astrometry(path, files, C):
         except Exception as e:
             print(e)
     return path2save
-
 
 # paths = [r'D:\RoboPhot Data\Raw Images\2023_09 FLI\2023_09_06 GSC2314–0530\i',
 #          r'D:\RoboPhot Data\Raw Images\2023_09 FLI\2023_09_06 GSC2314–0530\r']

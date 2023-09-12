@@ -6,7 +6,7 @@ using System.Xml.Linq;
 
 namespace RPCC.Utils
 {
-    internal  class Settings
+    internal class Settings
     {
         /// <summary>
         ///     Настройки приложения
@@ -20,8 +20,8 @@ namespace RPCC.Utils
         /// <summary>
         ///     Настройки анализа и построения изображения
         /// </summary>
-
         private static double _lowerBrightnessSd;
+
         private static double _upperBrightnessSd;
         private static int _apertureRadius;
         private static int _annulusInnerRadius;
@@ -81,11 +81,12 @@ namespace RPCC.Utils
         #endregion
 
         #region Cameras
+
         /// <summary>
         ///     Настройки камер
         /// </summary>
-
         private static string _snCamG;
+
         private static string _snCamR;
         private static string _snCamI;
         private static int _numFlushes;
@@ -139,7 +140,9 @@ namespace RPCC.Utils
             set
             {
                 if (value >= -55.0 && value <= 45.0) _camTemp = value;
-                else throw new ArgumentException("Camera temperature must be set in range from -55 to +45 degrees Celsius");
+                else
+                    throw new ArgumentException(
+                        "Camera temperature must be set in range from -55 to +45 degrees Celsius");
             }
         }
 
@@ -162,13 +165,14 @@ namespace RPCC.Utils
                 else throw new ArgumentException("Camera mode must be set to \"2.0 MHz\" or \"500KHz\"");
             }
         }
+
         #endregion
 
         #region Survey
+
         /// <summary>
         ///     Настройки съёмки
         /// </summary>
-
         private static string _outImgsFolder;
 
         public static string OutImgsFolder
@@ -181,15 +185,16 @@ namespace RPCC.Utils
                 // Alternative - if (!Exists) CreateDirectory
             }
         }
+
         #endregion
 
         #region Comms
+
         /// <summary>
         ///     Настройки связей между другими приложениями, управляющими телескопом
         /// </summary>
-        ///
-
         private static int _focusComId;
+
         private static int _meteoDomeTcpIpPort;
         private static int _donutsTcpIpPort;
         private static int _siTechExeTcpIpPort;
@@ -242,6 +247,7 @@ namespace RPCC.Utils
         // }
 
         #region ConfigIO
+
         internal static void LoadXmlConfig(string fileName)
         {
             try
@@ -254,7 +260,6 @@ namespace RPCC.Utils
                       config.Root.Elements("image_analysis").Elements("apertureRadius").Any() &&
                       config.Root.Elements("image_analysis").Elements("annulusInnerRadius").Any() &&
                       config.Root.Elements("image_analysis").Elements("annulusOuterRadius").Any() &&
-
                       config.Root.Elements("cameras").Any() &&
                       config.Root.Elements("cameras").Elements("snCamG").Any() &&
                       config.Root.Elements("cameras").Elements("snCamR").Any() &&
@@ -263,10 +268,8 @@ namespace RPCC.Utils
                       config.Root.Elements("cameras").Elements("camTemp").Any() &&
                       config.Root.Elements("cameras").Elements("camBin").Any() &&
                       config.Root.Elements("cameras").Elements("сamRoMode").Any() &&
-
                       config.Root.Elements("survey").Any() &&
                       config.Root.Elements("survey").Elements("outImgsFolder").Any() &&
-
                       config.Root.Elements("comms").Any() &&
                       config.Root.Elements("comms").Elements("focusComId").Any() &&
                       config.Root.Elements("comms").Elements("meteoDomeTcpIpPort").Any() &&
@@ -274,27 +277,27 @@ namespace RPCC.Utils
                       config.Root.Elements("comms").Elements("siTechExeTcpIpPort").Any()))
                     throw new NullReferenceException();
 
-                LowerBrightnessSd = (double)config.Root.Element("image_analysis").Element("lowerBrightnessSd");
-                UpperBrightnessSd = (double)config.Root.Element("image_analysis").Element("upperBrightnessSd");
-                ApertureRadius = (int)config.Root.Element("image_analysis").Element("apertureRadius");
-                AnnulusInnerRadius = (int)config.Root.Element("image_analysis").Element("annulusInnerRadius");
-                AnnulusOuterRadius = (int)config.Root.Element("image_analysis").Element("annulusOuterRadius");
+                LowerBrightnessSd = (double) config.Root.Element("image_analysis").Element("lowerBrightnessSd");
+                UpperBrightnessSd = (double) config.Root.Element("image_analysis").Element("upperBrightnessSd");
+                ApertureRadius = (int) config.Root.Element("image_analysis").Element("apertureRadius");
+                AnnulusInnerRadius = (int) config.Root.Element("image_analysis").Element("annulusInnerRadius");
+                AnnulusOuterRadius = (int) config.Root.Element("image_analysis").Element("annulusOuterRadius");
 
-                SnCamG = (string)config.Root.Element("cameras").Element("snCamG");
-                SnCamR = (string)config.Root.Element("cameras").Element("snCamR");
-                SnCamI = (string)config.Root.Element("cameras").Element("snCamI");
-                NumFlushes = (int)config.Root.Element("cameras").Element("numFlushes");
-                CamTemp = (double)config.Root.Element("cameras").Element("camTemp");
-                CamBin = (int)config.Root.Element("cameras").Element("camBin");
+                SnCamG = (string) config.Root.Element("cameras").Element("snCamG");
+                SnCamR = (string) config.Root.Element("cameras").Element("snCamR");
+                SnCamI = (string) config.Root.Element("cameras").Element("snCamI");
+                NumFlushes = (int) config.Root.Element("cameras").Element("numFlushes");
+                CamTemp = (double) config.Root.Element("cameras").Element("camTemp");
+                CamBin = (int) config.Root.Element("cameras").Element("camBin");
                 var buff = config.Root.Element("cameras");
-                CamRoMode = (string)config.Root.Element("cameras").Element("сamRoMode");
+                CamRoMode = (string) config.Root.Element("cameras").Element("сamRoMode");
 
-                OutImgsFolder = (string)config.Root.Element("survey").Element("outImgsFolder");
+                OutImgsFolder = (string) config.Root.Element("survey").Element("outImgsFolder");
 
-                FocusComId = (int)config.Root.Element("comms").Element("focusComId");
-                MeteoDomeTcpIpPort = (int)config.Root.Element("comms").Element("meteoDomeTcpIpPort");
-                DonutsTcpIpPort = (int)config.Root.Element("comms").Element("donutsTcpIpPort");
-                SiTechExeTcpIpPort = (int)config.Root.Element("comms").Element("siTechExeTcpIpPort");
+                FocusComId = (int) config.Root.Element("comms").Element("focusComId");
+                MeteoDomeTcpIpPort = (int) config.Root.Element("comms").Element("meteoDomeTcpIpPort");
+                DonutsTcpIpPort = (int) config.Root.Element("comms").Element("donutsTcpIpPort");
+                SiTechExeTcpIpPort = (int) config.Root.Element("comms").Element("siTechExeTcpIpPort");
 
                 Logger.AddLogEntry($"Config file {fileName} loaded");
             }
@@ -302,20 +305,23 @@ namespace RPCC.Utils
             {
                 if (fileName == "SettingsDefault.xml")
                 {
-                    DialogResult result = MessageBox.Show("Default config file not found.\n" +
-                        "Do you want to restore it (\"YES\")\n" +
-                        "or just close the application (\"NO\")?",
+                    var result = MessageBox.Show("Default config file not found.\n" +
+                                                 "Do you want to restore it (\"YES\")\n" +
+                                                 "or just close the application (\"NO\")?",
                         "Config not found",
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Error,
                         MessageBoxDefaultButton.Button1);
-                    Logger.AddLogEntry($"WARNING Default config file not found");
+                    Logger.AddLogEntry("WARNING Default config file not found");
                     if (result == DialogResult.Yes)
                     {
                         RestoreDefaultXmlConfig();
                         LoadXmlConfig("SettingsDefault.xml");
                     }
-                    else Environment.Exit(1);
+                    else
+                    {
+                        Environment.Exit(1);
+                    }
                 }
                 else
                 {
@@ -331,25 +337,28 @@ namespace RPCC.Utils
             {
                 if (fileName == "SettingsDefault.xml")
                 {
-                    DialogResult result = MessageBox.Show("Default config file has invalid structure.\n" +
-                        "Do you want to restore it (\"YES\")\n" +
-                        "or just close the application (\"NO\")?",
+                    var result = MessageBox.Show("Default config file has invalid structure.\n" +
+                                                 "Do you want to restore it (\"YES\")\n" +
+                                                 "or just close the application (\"NO\")?",
                         "Invalid config structure",
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Error,
                         MessageBoxDefaultButton.Button1);
-                    Logger.AddLogEntry($"WARNING Default config file has invalid structure");
+                    Logger.AddLogEntry("WARNING Default config file has invalid structure");
                     if (result == DialogResult.Yes)
                     {
                         RestoreDefaultXmlConfig();
                         LoadXmlConfig("SettingsDefault.xml");
                     }
-                    else Environment.Exit(1);
+                    else
+                    {
+                        Environment.Exit(1);
+                    }
                 }
                 else
                 {
                     MessageBox.Show($"Config file {fileName} has invalid structure.\n" +
-                        $"Reverting to default config.",
+                                    "Reverting to default config.",
                         "Invalid config structure",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Error,
@@ -362,27 +371,30 @@ namespace RPCC.Utils
             {
                 if (fileName == "SettingsDefault.xml")
                 {
-                    DialogResult result = MessageBox.Show("Default config file has invalid parameters:\n" +
-                        $"{ex.Message}.\n" +
-                        "Do you want to restore it (\"YES\")\n" +
-                        "or just close the application (\"NO\")?",
+                    var result = MessageBox.Show("Default config file has invalid parameters:\n" +
+                                                 $"{ex.Message}.\n" +
+                                                 "Do you want to restore it (\"YES\")\n" +
+                                                 "or just close the application (\"NO\")?",
                         "Invalid config parameters",
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Error,
                         MessageBoxDefaultButton.Button1);
-                    Logger.AddLogEntry($"WARNING Default config file has invalid parameters");
+                    Logger.AddLogEntry("WARNING Default config file has invalid parameters");
                     if (result == DialogResult.Yes)
                     {
                         RestoreDefaultXmlConfig();
                         LoadXmlConfig("SettingsDefault.xml");
                     }
-                    else Environment.Exit(1);
+                    else
+                    {
+                        Environment.Exit(1);
+                    }
                 }
                 else
                 {
                     MessageBox.Show($"Config file {fileName} has invalid parameters:\n" +
-                        $"{ex.Message}.\n" +
-                        $"Reverting to default config.",
+                                    $"{ex.Message}.\n" +
+                                    "Reverting to default config.",
                         "Invalid config parameters",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Error,
@@ -402,7 +414,6 @@ namespace RPCC.Utils
                     new XElement("apertureRadius", ApertureRadius),
                     new XElement("annulusInnerRadius", AnnulusInnerRadius),
                     new XElement("annulusOuterRadius", AnnulusOuterRadius)),
-                
                 new XElement("cameras",
                     new XElement("snCamG", SnCamG),
                     new XElement("snCamR", SnCamR),
@@ -411,10 +422,8 @@ namespace RPCC.Utils
                     new XElement("camTemp", CamTemp),
                     new XElement("camBin", CamBin),
                     new XElement("сamRoMode", CamRoMode)),
-                
                 new XElement("survey",
                     new XElement("outImgsFolder", OutImgsFolder)),
-
                 new XElement("comms",
                     new XElement("focusComId", FocusComId),
                     new XElement("meteoDomeTcpIpPort", MeteoDomeTcpIpPort),
@@ -435,7 +444,6 @@ namespace RPCC.Utils
                     new XElement("apertureRadius", 6),
                     new XElement("annulusInnerRadius", 10),
                     new XElement("annulusOuterRadius", 15)),
-                
                 new XElement("cameras",
                     new XElement("snCamG", "ML0882515"),
                     new XElement("snCamR", "ML0892515"),
@@ -444,10 +452,8 @@ namespace RPCC.Utils
                     new XElement("camTemp", -5.0),
                     new XElement("camBin", 3),
                     new XElement("сamRoMode", "500KHz")),
-                
                 new XElement("survey",
                     new XElement("outImgsFolder", Directory.GetCurrentDirectory())),
-
                 new XElement("comms",
                     new XElement("focusComId", 10),
                     new XElement("meteoDomeTcpIpPort", 8085),
@@ -458,6 +464,7 @@ namespace RPCC.Utils
             config.Save("SettingsDefault.xml");
             Logger.AddLogEntry("Default config file restored");
         }
+
         #endregion
     }
 }

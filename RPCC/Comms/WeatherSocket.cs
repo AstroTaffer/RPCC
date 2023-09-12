@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using RPCC.Utils;
@@ -15,30 +16,29 @@ namespace RPCC.Comms
         // private readonly WeatherDataCollector _collector;
 
         private readonly Timer _meteoTimer;
+        private TcpClient _client;
+        private IPEndPoint _endPoint;
 
         internal bool _isConnected;
-        private IPEndPoint _endPoint;
-        private TcpClient _client;
         private NetworkStream _stream;
         private StreamReader _streamReader;
         private StreamWriter _streamWriter;
 
         /**
          * Valid messages:
-         *   sky     --- 
-         *   sky std --- 
-         *   ext     --- 
-         *   ext std --- 
-         *   see     --- 
-         *   see ext --- 
-         *   wind    --- 
-         *   sun     --- 
-         *   obs     --- 
-         *   flat    --- 
-         *   full    --- 
-         *   ping    --- 
-         **/
-    
+         * sky     ---
+         * sky std ---
+         * ext     ---
+         * ext std ---
+         * see     ---
+         * see ext ---
+         * wind    ---
+         * sun     ---
+         * obs     ---
+         * flat    ---
+         * full    ---
+         * ping    ---
+         */
         internal WeatherSocket()
         {
             // Logger = logger;
@@ -67,8 +67,8 @@ namespace RPCC.Comms
                 if (_client.Connected)
                 {
                     _stream = _client.GetStream();
-                    _streamReader = new StreamReader(_stream, System.Text.Encoding.UTF8);
-                    _streamWriter = new StreamWriter(_stream, System.Text.Encoding.UTF8);
+                    _streamReader = new StreamReader(_stream, Encoding.UTF8);
+                    _streamWriter = new StreamWriter(_stream, Encoding.UTF8);
                     _streamWriter.AutoFlush = true;
                     _isConnected = true;
 
@@ -107,7 +107,7 @@ namespace RPCC.Comms
                 _streamReader.Close();
                 _stream.Close();
                 _client.Close();
-                
+
                 Logger.AddLogEntry("Disconnected from MeteoDome");
                 _isConnected = false;
             }
@@ -116,7 +116,7 @@ namespace RPCC.Comms
                 // I added IOException to handle situation when MeteoDome shuts down connection from his side (i.e. when MeteoDome is closed before RPCC)
                 // The proper way to do this is to ping it with some basic message, but I'm afraid that it'll shuffle the answers or load up the connection
                 // In case of any bugs implement proper solution with key-response pair like "ping - pong"
-                
+
                 Logger.AddLogEntry($"WARNING Unable to disconnect from MeteoDome: {ex.Message}");
             }
         }
@@ -143,9 +143,9 @@ namespace RPCC.Comms
             }
         }
 
-        internal  async void GetFullDataAsync()
+        internal async void GetFullDataAsync()
         {
-            string response = await ExchangeMessagesAsync("full");
+            var response = await ExchangeMessagesAsync("full");
             if (response is null)
             {
                 Logger.AddLogEntry("WARNING Disconnecting from MeteoDome");
@@ -198,13 +198,9 @@ namespace RPCC.Comms
         private void OnMeteoTimedEventAsync(object sender, ElapsedEventArgs e)
         {
             if (!_isConnected)
-            {
                 _meteoTimer.Stop();
-            }
             else
-            {
                 GetFullDataAsync();
-            }
         }
     }
 
@@ -226,7 +222,7 @@ namespace RPCC.Comms
             // data = "{Sky} {SkyStd} {Ext} {ExtStd} {See} {SeeExt} {Wind} {Sun} {Obs} {Flat}"
             // Example: -28.5 +.1 +10 +0 +0 -1 +.7 +92.9 False False
 
-            string[] buffData = data.Split(' ');
+            var buffData = data.Split(' ');
 
             Sky = double.Parse(buffData[0]);
             SkyStd = double.Parse(buffData[1]);

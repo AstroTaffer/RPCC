@@ -4,20 +4,23 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using RPCC.Utils;
 
 namespace RPCC.Comms
 {
     public class DonutsSocket
     {
+        private TcpClient _client;
+        private IPEndPoint _endPoint;
+        private NetworkStream _stream;
+        private StreamReader _streamReader;
+
+        private StreamWriter _streamWriter;
+
         // private readonly Logger Logger;
         // private readonly Settings Settings;
         internal bool isConnected;
-        private IPEndPoint _endPoint;
-        private TcpClient _client;
-        private NetworkStream _stream;
-        private StreamReader _streamReader;
-        private StreamWriter _streamWriter;
 
         internal DonutsSocket()
         {
@@ -26,18 +29,18 @@ namespace RPCC.Comms
             // Settings = settings;
             isConnected = false;
         }
-        
+
         internal void Connect()
         {
             if (isConnected)
-            {   
+            {
                 Logger.AddLogEntry("WARNING Already connected to Donuts");
                 return;
             }
-           
+
             _client = new TcpClient();
-            IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
-            IPAddress ipAddress = ipHostInfo.AddressList[1];
+            var ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
+            var ipAddress = ipHostInfo.AddressList[1];
             _endPoint = new IPEndPoint(ipAddress, Settings.DonutsTcpIpPort);
             try
             {
@@ -45,8 +48,8 @@ namespace RPCC.Comms
                 if (_client.Connected)
                 {
                     _stream = _client.GetStream();
-                    _streamReader = new StreamReader(_stream, System.Text.Encoding.UTF8);
-                    _streamWriter = new StreamWriter(_stream, System.Text.Encoding.UTF8);
+                    _streamReader = new StreamReader(_stream, Encoding.UTF8);
+                    _streamWriter = new StreamWriter(_stream, Encoding.UTF8);
                     _streamWriter.AutoFlush = true;
                     isConnected = true;
 
@@ -60,11 +63,11 @@ namespace RPCC.Comms
             }
             catch (Exception ex) when (ex is SocketException || ex is IOException)
             {
-                
                 // In case of bugs check "catch" block in Disconnect() function
                 Logger.AddLogEntry($"WARNING Unable to connect to Donuts: {ex.Message}");
             }
         }
+
         internal void Disconnect()
         {
             if (!isConnected)
@@ -89,11 +92,11 @@ namespace RPCC.Comms
                 // I added IOException to handle situation when MeteoDome shuts down connection from his side (i.e. when MeteoDome is closed before RPCC)
                 // The proper way to do this is to ping it with some basic message, but I'm afraid that it'll shuffle the answers or load up the connection
                 // In case of any bugs implement proper solution with key-response pair like "ping - pong"
-                
+
                 Logger.AddLogEntry($"WARNING Unable to disconnect from Donuts: {ex.Message}");
             }
         }
-        
+
         internal string ExchangeMessages(string request)
         {
             if (!isConnected)
@@ -118,12 +121,9 @@ namespace RPCC.Comms
 
         public float[] GetGuideCorrection(string req)
         {
-            
-            var response =  ExchangeMessages(req);
+            var response = ExchangeMessages(req);
             if (!(response is null) && response != "")
-            {
-                return response == "fail" ? new float[]{0, 0} : response.Split(' ').Select(float.Parse).ToArray();
-            }
+                return response == "fail" ? new float[] {0, 0} : response.Split(' ').Select(float.Parse).ToArray();
             Logger.AddLogEntry("WARNING Disconnecting from Donuts");
             Disconnect();
             return null;
@@ -133,7 +133,7 @@ namespace RPCC.Comms
         {
             _streamWriter.WriteLine("quit");
         }
-        
+
         private void StartDonutsPy()
         {
             var cwd = Directory.GetCurrentDirectory();
