@@ -75,9 +75,12 @@ namespace RPCC.Cams
             newCursor.Add(new HeaderCard("DATE-OBS",
                 camCtrl.cameras[camNum].expStartDt.ToString("yyyy-MM-ddTHH:mm:ss.fff"),
                 "date at the begining of exposure"));
-            newCursor.Add(new HeaderCard("JD",
-                Utilities.JulianDateFromDateTime(camCtrl.cameras[camNum].expStartDt),
-                "Julian date at the begining of exposure"));
+            // newCursor.Add(new HeaderCard("JD",
+            //     Utilities.JulianDateFromDateTime(camCtrl.cameras[camNum].expStartDt),
+            //     "Julian date at the begining of exposure"));
+            // newCursor.Add(new HeaderCard("JD",
+            //     Utilities.JulianDateUtc,
+            //     "Julian date at the begining of exposure"));
             newCursor.Add(new HeaderCard("EXPTIME", camCtrl.task.framesExpTime / 1000.0,
                 "actual integration time [sec]"));
             switch (camCtrl.task.framesType)
@@ -152,11 +155,11 @@ namespace RPCC.Cams
             // TODO: Implement or discard the rest of the keywords
             // Grab Nabat by neck and review this section (and DataCollector) together
             newCursor.Add(new HeaderCard("AIRMASS", MountDataCollector.Airmass, "Airmass"));
-            newCursor.Add(new HeaderCard("MOONPHAS", Utilities.MoonPhase(Utilities.JulianDateUtc),
-                "Illuminated fraction of the Moon"));
-            newCursor.Add(new HeaderCard("DMOON", 
-                CoordinatesManager.CalculateObjectDistance2Moon(new ObservationTask()), //TODO INSERT TASK
-                "Ang. distance to Moon [deg]"));  
+            // newCursor.Add(new HeaderCard("MOONPHAS", Utilities.MoonPhase(Utilities.JulianDateUtc),
+            //     "Illuminated fraction of the Moon"));
+            // newCursor.Add(new HeaderCard("DMOON", 
+            //     CoordinatesManager.CalculateObjectDistance2Moon(new ObservationTask()), //TODO INSERT TASK
+            //     "Ang. distance to Moon [deg]"));  
 
 
             switch (WeatherDataCollector.Sky)
@@ -190,7 +193,7 @@ namespace RPCC.Cams
                     break;
             }
 
-            //ExtinctionStd
+            //Seeing
             switch (WeatherDataCollector.Seeing)
             {
                 case -1.0:
@@ -205,7 +208,7 @@ namespace RPCC.Cams
                     break;
             }
 
-            //SeeingExtinction
+            //Wind
             switch (WeatherDataCollector.Wind)
             {
                 case -1.0:
