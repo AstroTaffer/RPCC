@@ -11,9 +11,9 @@ namespace RPCC.Cams
     internal static class CameraControl
     {
         // camerasDomain = bitwise OR of 0x02 (USB interface) and 0x100 (Camera device)
-        private const int camDomain = 0x02 | 0x100;
+        private const int _camDomain = 0x02 | 0x100;
 
-        private static readonly Timer camsTimer = new Timer(1000);
+        private static readonly Timer _camsTimer = new Timer(1000);
 
         internal static ObservationTask loadedTask = new ObservationTask();
         internal static CameraDevice[] cams = Array.Empty<CameraDevice>();
@@ -23,7 +23,7 @@ namespace RPCC.Cams
         {
             DisconnectCameras();
 
-            DeviceName[] camerasNames = EnumerateCameras(camDomain);
+            DeviceName[] camerasNames = EnumerateCameras(_camDomain);
 
             cams = new CameraDevice[camerasNames.Length];
             for (int i = 0; i < cams.Length; i++)
@@ -43,9 +43,14 @@ namespace RPCC.Cams
         {
             int errorLastFliCmd;
 
+            // imageArea = [ul_x, ul_y, lr_x, lr_y]
+            // Note that ul_x and ul_y are absolute (don't take hbin or vbin into account)
+            // but lr_x and lr_y are relative (take hbin and vbin into account, but only after ul_x and ul_y)
+            int[] imageArea = new int[4];
+
             for (int i = 0; i < cams.Length;i++)
             {
-                errorLastFliCmd = NativeMethods.FLIOpen(out cams[i].handle, cams[i].fileName, camDomain);
+                errorLastFliCmd = NativeMethods.FLIOpen(out cams[i].handle, cams[i].fileName, _camDomain);
                 if (errorLastFliCmd != 0)
                 {
                     Logger.AddLogEntry($"WARNING Unable to connect to camera {i + 1}");
@@ -96,7 +101,29 @@ namespace RPCC.Cams
                 errorLastFliCmd = NativeMethods.FLISetTemperature(cams[i].handle, Settings.CamTemp);
                 if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} temperature");
 
-                // TODO: SetVBin, SetHBin, SetImageArea !
+                errorLastFliCmd = NativeMethods.FLISetVBin(cams[i].handle, Settings.CamBin);
+                if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} vbin");
+                errorLastFliCmd = NativeMethods.FLISetHBin(cams[i].handle, Settings.CamBin);
+                if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} hbin");
+                
+                if (i == 0)
+                {
+                    errorLastFliCmd = NativeMethods.FLIGetVisibleArea(cams[i].handle, out imageArea[0], out imageArea[1], out imageArea[2], out imageArea[3]);
+                    if (errorLastFliCmd != 0)
+                    {
+                        Logger.AddLogEntry("WARNING Unable to get camera 1 visible area, using default values");
+                        imageArea[0] = 50;
+                        imageArea[1] = 2;
+                        imageArea[2] = 2098;
+                        imageArea[3] = 2050;
+                    }
+
+                    imageArea[2] = imageArea[0] + (imageArea[2] - imageArea[0]) / Settings.CamBin;
+                    imageArea[3] = imageArea[1] + (imageArea[3] - imageArea[1]) / Settings.CamBin;
+                }
+
+                errorLastFliCmd = NativeMethods.FLISetImageArea(cams[i].handle, imageArea[0], imageArea[1], imageArea[2], imageArea[3]);
+                if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} image area");
 
                 switch (Settings.CamRoMode)
                 {
@@ -112,14 +139,14 @@ namespace RPCC.Cams
                 if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} readout mode");
             }
 
-            camsTimer.Elapsed += CamsTimerTick;
-            camsTimer.Start();
+            _camsTimer.Elapsed += CamsTimerTick;
+            _camsTimer.Start();
         }
 
         static internal void DisconnectCameras()
         {
-            camsTimer.Stop();
-            camsTimer.Elapsed -= CamsTimerTick;
+            _camsTimer.Stop();
+            _camsTimer.Elapsed -= CamsTimerTick;
 
             int errorLastFliCmd;
             for (int i = 0; i < cams.Length; i++)
@@ -182,6 +209,9 @@ namespace RPCC.Cams
                     // 0x03 = FLI_CAMERA_STATUS_READING_CCD
                     case 0x03:
                         cam.status = "READING CCD";
+                        break;
+                    default:
+                        cam.status = "UNKNOWN";
                         break;
                 }
 
