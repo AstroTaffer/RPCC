@@ -32,8 +32,6 @@ namespace RPCC
 
         //private int _idleCamNum;
 
-        private readonly CameraFocus _cameraFocus;
-
         private readonly WeatherSocket _domeSocket;
         // private readonly WeatherDataCollector _weatherDc;
         
@@ -56,15 +54,12 @@ namespace RPCC
             Logger.logBox = listBoxLogs;
             Logger.AddLogEntry("Application launched");
 
-            // Settings = new Settings();
             Settings.LoadXmlConfig("SettingsDefault.xml");
 
             // Hardware controls
-            _cameraFocus = new CameraFocus();
             CameraControl.resetUi = ResetCamsUi;
 
             // MeteoDome connect
-            // _weatherDc = new WeatherDataCollector();
             _domeSocket = new WeatherSocket();
             _domeSocket.Connect();
 
@@ -73,8 +68,6 @@ namespace RPCC
             _donutsSocket.Connect();
 
             // SiTechExe connect
-            // _mountDc = new MountDataCollector();
-            // SiTechExeSocket = new SiTechExeSocket();
             SiTechExeSocket.Connect();
 
             // Create timer for focus loop
@@ -85,7 +78,7 @@ namespace RPCC
             // HACK: For the love of god stop exiting the program when something is not connected!
             // Call FindFocusToolStripMenuItem_Click
 
-            if (!_cameraFocus.Init())
+            if (!SerialFocus.Init())
             {
                 MessageBox.Show(@"Can't open Focus serial port", @"OK", MessageBoxButtons.OK);
                 Logger.AddLogEntry(@"Can't open Focus serial port");
@@ -115,10 +108,10 @@ namespace RPCC
             SiTechExeSocket.Disconnect();
 
             CameraControl.DisconnectCameras();
-            
-            _cameraFocus.SerialFocus.Close_Port();
-            _cameraFocus.DeFocus = 0;
-            _cameraFocus.IsZenith = false;
+
+            SerialFocus.Close_Port();
+            CameraFocus.DeFocus = 0;
+            CameraFocus.IsZenith = false;
             labelFocusPos.Dispose();
             FocusTimer.Dispose();
         }
@@ -284,9 +277,9 @@ namespace RPCC
             //       This function must work properly when called more than once
             //       Watch out! SerialFocus.Init() keeps adding functions on ComTimer.Elapsed every time it is called!
 
-            _cameraFocus.SerialFocus.Close_Port();
-            FocusTimer.Elapsed -= OnTimedEvent_Clock;
-            _cameraFocus.Init();
+            //SerialFocus.Close_Port();
+            //FocusTimer.Elapsed -= OnTimedEvent_Clock;
+            //SerialFocus.Init();
         }
 
         private void ReconnectMeteoDomeToolStripMenuItem_Click(object sender, EventArgs e)
@@ -303,10 +296,7 @@ namespace RPCC
 
         private void ReconnectSiTechExeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (SiTechExeSocket._isConnected)
-            {
-                SiTechExeSocket.Disconnect();
-            }
+            if (SiTechExeSocket._isConnected) SiTechExeSocket.Disconnect();
             SiTechExeSocket.Connect();
         }
 
@@ -602,16 +592,16 @@ namespace RPCC
         private void GetData()
         {
             const int waitTime = 50;
-            _cameraFocus.SerialFocus.UpdateData();
+            SerialFocus.UpdateData();
             Thread.Sleep(waitTime);
             try
             {
                 labelFocusPos.Invoke((MethodInvoker) delegate
                 {
-                    labelFocusPos.Text = $@"Focus position: {_cameraFocus.SerialFocus.CurrentPosition}";
+                    labelFocusPos.Text = $@"Focus position: {SerialFocus.CurrentPosition}";
                 });
 
-                labelEndSwitch.Text = @"Endswitch: " + (_cameraFocus.SerialFocus.Switches[6] ? "joint" : "unjoint");
+                labelEndSwitch.Text = @"Endswitch: " + (SerialFocus.Switches[6] ? "joint" : "unjoint");
             }
             catch (Exception e)
             {
@@ -631,36 +621,37 @@ namespace RPCC
             //AutoFocus
             numericUpDownSetDefoc.Enabled = isAutoFocusEnabled;
             checkBoxGoZenith.Enabled = isAutoFocusEnabled;
-            _cameraFocus.isAutoFocus = isAutoFocusEnabled;
+            CameraFocus.IsAutoFocus = isAutoFocusEnabled;
         }
 
         private void NumericUpDownSetDefoc_ValueChanged(object sender, EventArgs e)
         {
-            _cameraFocus.DeFocus = (int)numericUpDownSetDefoc.Value;
+            CameraFocus.DeFocus = (int)numericUpDownSetDefoc.Value;
         }
 
         private void ButtonSetZeroPos_Click(object sender, EventArgs e)
         {
-            _cameraFocus.SerialFocus.Set_Zero();
+            SerialFocus.Set_Zero();
         }
 
         private void ButtonRunStop_Click(object sender, EventArgs e)
         {
-            _cameraFocus.SerialFocus.Stop();
+            SerialFocus.Stop();
         }
 
         private void ButtonRun_Click(object sender, EventArgs e)
         {
-            if (radioButtonRunFast.Checked) _cameraFocus.SerialFocus.FRun_To((int)numericUpDownRun.Value);
-            else if (radioButtonRunSlow.Checked) _cameraFocus.SerialFocus.SRun_To((int)numericUpDownRun.Value);
+            if (radioButtonRunFast.Checked) SerialFocus.FRun_To((int)numericUpDownRun.Value);
+            else if (radioButtonRunSlow.Checked) SerialFocus.SRun_To((int)numericUpDownRun.Value);
         }
 
         private void CheckBoxGoZenith_CheckedChanged(object sender, EventArgs e)
         {
-            _cameraFocus.IsZenith = checkBoxGoZenith.Checked;
+            CameraFocus.IsZenith = checkBoxGoZenith.Checked;
         }
         #endregion
 
+        #region Tasker
         private void AddToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // Logger.AddLogEntry("Add Task click");
@@ -682,5 +673,6 @@ namespace RPCC
             _isFirstLoad = false;
             Tasker.PaintTable();
         }
+        #endregion
     }
 }

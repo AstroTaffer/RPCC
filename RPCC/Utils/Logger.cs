@@ -28,12 +28,8 @@ namespace RPCC.Utils
             }
             catch
             {
-                logBox.Invoke((MethodInvoker) delegate
-                {
-                    logBox.Items.Insert(0, $"{DateTime.UtcNow:G} {entry}");
-                });
+                logBox.Invoke((MethodInvoker) delegate { logBox.Items.Insert(0, $"{DateTime.UtcNow:G} {entry}"); });
             }
-            
         }
 
         internal static void SaveLogs()

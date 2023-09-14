@@ -5,12 +5,6 @@ namespace RPCC.Cams
 {
     public class ReadFitsFile
     {
-        public string Path { get; }
-
-        public Header Header { get; }
-
-        public ushort[,] Data { get; }
-
         public ReadFitsFile(string fitsFileName)
         {
             Path = fitsFileName;
@@ -24,14 +18,18 @@ namespace RPCC.Cams
             var dataWidth = fitsDataRaw[0].Length;
             Data = new ushort[dataHeight, dataHeight];
             for (var i = 0; i < dataHeight; i++)
+            for (var j = 0; j < dataWidth; j++)
             {
-                for (var j = 0; j < dataWidth; j++)
-                {
-                    // Convert ushort (used in LibFli and RpccFits) to short (used in nom.tam.fits)
-                    var buff = short.MaxValue + (short) fitsDataRaw[i].GetValue(j) + 1;
-                    Data[i, j] = (ushort) buff;
-                }
+                // Convert ushort (used in LibFli and RpccFits) to short (used in nom.tam.fits)
+                var buff = short.MaxValue + (short) fitsDataRaw[i].GetValue(j) + 1;
+                Data[i, j] = (ushort) buff;
             }
         }
+
+        public string Path { get; }
+
+        public Header Header { get; }
+
+        public ushort[,] Data { get; }
     }
 }

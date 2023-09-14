@@ -391,10 +391,8 @@ namespace RPCC.Cams
         #region eliotg's code
         static private DeviceName[] EnumerateCameras(int domain)
         {
-            IntPtr NamesHandle;
-
             // first, get the data, using an opaque token for the string array
-            int errorLastFliCmd = NativeMethods.FLIList(domain, out NamesHandle);
+            int errorLastFliCmd = NativeMethods.FLIList(domain, out IntPtr NamesHandle);
             if (errorLastFliCmd != 0)
             {
                 Logger.AddLogEntry("WARNING Can't get list of FLIDevices");
@@ -414,9 +412,11 @@ namespace RPCC.Cams
 
                 // parse it according to FLI SDK spec
                 int DelimPos = s.IndexOf(';');
-                DeviceName dn = new DeviceName();
-                dn.FileName = (-1 == DelimPos ? s : s.Substring(0, DelimPos));
-                dn.ModelName = (-1 == DelimPos ? null : s.Substring(DelimPos + 1, s.Length - (DelimPos + 1)));
+                DeviceName dn = new DeviceName
+                {
+                    FileName = (-1 == DelimPos ? s : s.Substring(0, DelimPos)),
+                    ModelName = (-1 == DelimPos ? null : s.Substring(DelimPos + 1, s.Length - (DelimPos + 1)))
+                };
                 // and accumulate into our list
                 NameList.Add(dn);
 
@@ -432,23 +432,23 @@ namespace RPCC.Cams
         }
 
         /// <summary>
-        /// Used by List() to store a list of enumerated devices
+        ///     Used by List() to store a list of enumerated devices
         /// </summary>
         private class DeviceName
         {
             /// <summary>
-            /// Formal device name needed by Open()
+            ///     Formal device name needed by Open()
             /// </summary>
             public string FileName;
 
             /// <summary>
-            /// Model name or user assigned device name
+            ///     Model name or user assigned device name
             /// </summary>
             public string ModelName;
         }
 
         /// <summary>
-        /// Internal struct used for marshaling strings
+        ///     Internal struct used for marshaling strings
         /// </summary>
         [StructLayout(LayoutKind.Sequential)]
         private class StringWrapper

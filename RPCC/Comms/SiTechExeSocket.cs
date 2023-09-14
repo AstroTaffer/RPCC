@@ -2,6 +2,7 @@
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using RPCC.Utils;
@@ -23,22 +24,23 @@ namespace RPCC.Comms
         private static StreamReader _streamReader;
         private static StreamWriter _streamWriter;
 
+
         /**
          * "-//-" == default response string
          * 
          * Valid requests and their respective confirmation responses:
-         *     ReadScopeStatus --- -//-
-         *     Abort           --- -//-, message == "_Abort Command Successful"
-         *     MotorsToBlinky  --- -//-, message == "_ToBlinky"
-         *     MotorsToAuto    --- -//-, message == "_ToAuto"
-         *     Park            --- -//-, message == "_Park Command Successful"
-         *     UnPark          --- -//-, message == "_UnPark Command Successful"
-         *     GoToPark        --- -//-, message == "_GoToPark {parkLocNum} Command Successful"
-         *     GoTo            --- -//-, message == "_GoTo Accepted"
-         *     Jog             --- -//-, message == "__JogArcSeconds Accepted"
-         *     PulseGuide      --- -//-, message == "_PulseGuide Accepted"
-         *     SetTrackMode    --- -//-, message == "_SetTrackMode Command Successful"
-         **/
+         * ReadScopeStatus --- -//-
+         * Abort           --- -//-, message == "_Abort Command Successful"
+         * MotorsToBlinky  --- -//-, message == "_ToBlinky"
+         * MotorsToAuto    --- -//-, message == "_ToAuto"
+         * Park            --- -//-, message == "_Park Command Successful"
+         * UnPark          --- -//-, message == "_UnPark Command Successful"
+         * GoToPark        --- -//-, message == "_GoToPark {parkLocNum} Command Successful"
+         * GoTo            --- -//-, message == "_GoTo Accepted"
+         * Jog             --- -//-, message == "__JogArcSeconds Accepted"
+         * PulseGuide      --- -//-, message == "_PulseGuide Accepted"
+         * SetTrackMode    --- -//-, message == "_SetTrackMode Command Successful"
+         */
         static SiTechExeSocket()
         {
             // Logger = logger;
@@ -52,6 +54,7 @@ namespace RPCC.Comms
         }
 
         #region General
+
         internal static async void Connect()
         {
             if (_isConnected)
@@ -68,8 +71,8 @@ namespace RPCC.Comms
                 if (_client.Connected)
                 {
                     _stream = _client.GetStream();
-                    _streamReader = new StreamReader(_stream, System.Text.Encoding.ASCII);
-                    _streamWriter = new StreamWriter(_stream, System.Text.Encoding.ASCII);
+                    _streamReader = new StreamReader(_stream, Encoding.ASCII);
+                    _streamWriter = new StreamWriter(_stream, Encoding.ASCII);
                     _streamWriter.AutoFlush = true;
                     _isConnected = true;
 
@@ -130,7 +133,7 @@ namespace RPCC.Comms
             try
             {
                 await _streamWriter.WriteLineAsync(request);
-                string[] response = (await _streamReader.ReadLineAsync()).Split(';');
+                var response = (await _streamReader.ReadLineAsync()).Split(';');
                 MountDataCollector.ParseScopeStatus(response);
                 return response;
             }
@@ -149,34 +152,34 @@ namespace RPCC.Comms
                 Disconnect();
                 return false;
             }
-            else if (response[response.Length - 1] == "_UnRecognized Command")
+
+            if (response[response.Length - 1] == "_UnRecognized Command")
             {
                 Logger.AddLogEntry($"WARNING Unable to perform {request} command: _UnRecognized Command");
                 return false;
             }
+
             return true;
         }
 
         private static void OnMountTimedEvent(object sender, EventArgs e)
         {
             if (!_isConnected)
-            {
                 _mountTimer.Stop();
-            }
             else
-            {
                 ReadScopeStatus();
-            }
         }
+
         #endregion
 
         #region SiTechExe Commands
+
         internal static async void ReadScopeStatus()
         {
-            string[] response = await ExchangeMessagesAsync("ReadScopeStatus");
+            var response = await ExchangeMessagesAsync("ReadScopeStatus");
             if (CheckResponse(response, "ReadScopeStatus"))
             {
-                string message = response[response.Length - 1];
+                var message = response[response.Length - 1];
                 if (message == "_")
                 {
                     // TODO: Do stuff if good
@@ -191,10 +194,10 @@ namespace RPCC.Comms
 
         internal static async void Abort()
         {
-            string[] response = await ExchangeMessagesAsync("Abort");
+            var response = await ExchangeMessagesAsync("Abort");
             if (CheckResponse(response, "Abort"))
             {
-                string message = response[response.Length - 1];
+                var message = response[response.Length - 1];
                 if (message == "_Abort Command Successful")
                 {
                     // TODO: Do stuff if good
@@ -209,10 +212,10 @@ namespace RPCC.Comms
 
         internal static async void MotorsToBlinky()
         {
-            string[] response = await ExchangeMessagesAsync("MotorsToBlinky");
+            var response = await ExchangeMessagesAsync("MotorsToBlinky");
             if (CheckResponse(response, "MotorsToBlinky"))
             {
-                string message = response[response.Length - 1];
+                var message = response[response.Length - 1];
                 if (message == "_ToBlinky")
                 {
                     // TODO: Do stuff if good
@@ -227,10 +230,10 @@ namespace RPCC.Comms
 
         internal static async void MotorsToAuto()
         {
-            string[] response = await ExchangeMessagesAsync("MotorsToAuto");
+            var response = await ExchangeMessagesAsync("MotorsToAuto");
             if (CheckResponse(response, "MotorsToAuto"))
             {
-                string message = response[response.Length - 1];
+                var message = response[response.Length - 1];
                 if (message == "_ToAuto")
                 {
                     // TODO: Do stuff if good
@@ -245,10 +248,10 @@ namespace RPCC.Comms
 
         internal static async void Park()
         {
-            string[] response = await ExchangeMessagesAsync("Park");
+            var response = await ExchangeMessagesAsync("Park");
             if (CheckResponse(response, "Park"))
             {
-                string message = response[response.Length - 1];
+                var message = response[response.Length - 1];
                 if (message == "_Park Command Successful")
                 {
                     // TODO: Do stuff if good
@@ -264,10 +267,10 @@ namespace RPCC.Comms
         // HACK: Apparently, it takes ~5 seconds to Unpark the scope
         internal static async void Unpark()
         {
-            string[] response = await ExchangeMessagesAsync("UnPark");
+            var response = await ExchangeMessagesAsync("UnPark");
             if (CheckResponse(response, "UnPark"))
             {
-                string message = response[response.Length - 1];
+                var message = response[response.Length - 1];
                 if (message == "_UnPark Command Successful")
                 {
                     // TODO: Do stuff if good
@@ -283,10 +286,10 @@ namespace RPCC.Comms
         // HACK: After completing GoToPark command the scope won't be "parked", but won't be tracking either
         internal static async void GoToPark(int parkLocNum)
         {
-            string[] response = await ExchangeMessagesAsync($"GoToPark {parkLocNum}");
+            var response = await ExchangeMessagesAsync($"GoToPark {parkLocNum}");
             if (CheckResponse(response, $"GoToPark {parkLocNum}"))
             {
-                string message = response[response.Length - 1];
+                var message = response[response.Length - 1];
                 if (message == $"_GoToPark {parkLocNum} Command Successful")
                 {
                     // TODO: Do stuff if good
@@ -298,14 +301,14 @@ namespace RPCC.Comms
                 }
             }
         }
-        
+
         // [RA] = h, [DEC] = deg
         internal static async void GoTo(double ra, double dec, bool isJ2K)
         {
-            string[] response = await ExchangeMessagesAsync($"GoTo {ra} {dec}{(isJ2K? " J2K": "")}");
+            var response = await ExchangeMessagesAsync($"GoTo {ra} {dec}{(isJ2K ? " J2K" : "")}");
             if (CheckResponse(response, $"GoTo {ra} {dec}{(isJ2K ? " J2K" : "")}"))
             {
-                string message = response[response.Length - 1];
+                var message = response[response.Length - 1];
                 if (message == "_GoTo Accepted")
                 {
                     // TODO: Do stuff if good
@@ -317,17 +320,26 @@ namespace RPCC.Comms
                 }
             }
         }
-        
+
+        internal static double[] GoToAltAz(double az, double el)
+        {
+            CoordinatesManager.Trans.SetAzimuthElevation(az, el);
+            var ra = CoordinatesManager.Trans.RAJ2000;
+            var dec = CoordinatesManager.Trans.DecJ2000;
+            GoTo(ra, dec, true);
+            return new[] {ra, dec};
+        }
+
         // Valid directions: N (to North Celestial Pole), S (to South Celestial Pole), W (clockwise), E (counterclockwise)
         // [distance] == arcseconds
         internal static async void Jog(string direction, int distance)
         {
             if (direction == "N" || direction == "S" || direction == "E" || direction == "W")
             {
-                string[] response = await ExchangeMessagesAsync($"JogArcSeconds {direction} {distance}");
+                var response = await ExchangeMessagesAsync($"JogArcSeconds {direction} {distance}");
                 if (CheckResponse(response, $"JogArcSeconds {direction} {distance}"))
                 {
-                    string message = response[response.Length - 1];
+                    var message = response[response.Length - 1];
                     if (message == "__JogArcSeconds Accepted")
                     {
                         // TODO: Do stuff if good
@@ -354,22 +366,23 @@ namespace RPCC.Comms
                 string[] response = null;
                 switch (direction)
                 {
-                    case"N":
+                    case "N":
                         response = await ExchangeMessagesAsync($"PulseGuide 0 {time}");
                         break;
-                    case"S":
+                    case "S":
                         response = await ExchangeMessagesAsync($"PulseGuide 1 {time}");
                         break;
-                    case"E":
+                    case "E":
                         response = await ExchangeMessagesAsync($"PulseGuide 2 {time}");
                         break;
                     case "W":
                         response = await ExchangeMessagesAsync($"PulseGuide 3 {time}");
                         break;
                 }
+
                 if (CheckResponse(response, $"PulseGuide {direction} {time}"))
                 {
-                    string message = response[response.Length - 1];
+                    var message = response[response.Length - 1];
                     if (message == "_PulseGuide Accepted")
                     {
                         // TODO: Do stuff if good
@@ -380,7 +393,6 @@ namespace RPCC.Comms
                         // TODO: Do stuff if bad
                     }
                 }
-
             }
             else
             {
@@ -389,55 +401,32 @@ namespace RPCC.Comms
         }
 
         // [raRate] = [decRate] = [arcsec/sec]
-        internal static async void SetTrackMode (bool shouldTrack, double raRate = 0.0, double decRate = 0.0)
+        internal static async void SetTrackMode(bool shouldTrack, double raRate = 0.0, double decRate = 0.0)
         {
-            string[] response = await ExchangeMessagesAsync($"SetTrackMode {(shouldTrack ? 1 : 0)} {(raRate == 0.0 && decRate == 0.0 ? 0 : 1)} {raRate} {decRate}");
-            if (CheckResponse(response, $"SetTrackMode {(shouldTrack ? 1 : 0)} {(raRate == 0.0 && decRate == 0.0 ? 0 : 1)} {raRate} {decRate}"))
+            var response = await ExchangeMessagesAsync(
+                $"SetTrackMode {(shouldTrack ? 1 : 0)} {(raRate == 0.0 && decRate == 0.0 ? 0 : 1)} {raRate} {decRate}");
+            if (CheckResponse(response,
+                    $"SetTrackMode {(shouldTrack ? 1 : 0)} {(raRate == 0.0 && decRate == 0.0 ? 0 : 1)} {raRate} {decRate}"))
             {
-                string message = response[response.Length - 1];
+                var message = response[response.Length - 1];
                 if (message == "_SetTrackMode Command Successful")
                 {
                     // TODO: Do stuff if good
                 }
                 else
                 {
-                    Logger.AddLogEntry($"WARNING Unable to set track mode {(shouldTrack ? 1 : 0)} {(raRate == 0.0 && decRate == 0.0 ? 0 : 1)} {raRate} {decRate}: {message}");
+                    Logger.AddLogEntry(
+                        $"WARNING Unable to set track mode {(shouldTrack ? 1 : 0)} {(raRate == 0.0 && decRate == 0.0 ? 0 : 1)} {raRate} {decRate}: {message}");
                     // TODO: Do stuff if bad
                 }
             }
         }
+
         #endregion
     }
 
     internal static class MountDataCollector
     {
-        #region Bool parameters
-        public static bool IsInit { get; set; } // Scope is initialized
-        public static bool IsTracking { get; set; } // Scope is tracking
-        public static bool IsSlewing { get; set; } // Scope is slewing
-        public static bool IsParking { get; set; } // Scope is parking
-        public static bool IsParked { get; set; } // Scope is parked
-        public static bool IsLookingEast { get; set; } // Scope is "Looking East" (GEM)
-        public static bool IsInBlinky { get; set; } // BrushlessController is in Blinky mode, one or both axis's
-        public static bool IsCommFault { get; set; } // Communication fault between SiTechExe and BrushlessController
-        public static bool IsPplsOn { get; set; } // Primary Plus Limit Switch activated
-        public static bool IsPmlsOn { get; set; } // Primary Minus Limit Switch activated
-        public static bool IsSplsOn { get; set; } // Secondary Plus Limit Switch activated
-        public static bool IsSmlsOn { get; set; } // Secondary Minus Limit Switch activated
-        public static bool IsPhsOn { get; set; } // Primary Homing Switch activated
-        public static bool IsShsOn { get; set; } // Secondary Homing Switch activated
-        #endregion
-
-        #region Non-bool parameters
-        public static double RightAsc { get; set; } // Scope Right Ascension [h]
-        public static double Declination { get; set; } // Scope Declination [deg]
-        public static double Altitude { get; set; } // Scope Altitude [deg]
-        public static double Azimuth { get; set; } // Scope Azimuth [deg]
-        public static double SiderealTime { get; set; } // Scope Sidereal Time [h]
-        public static double JulianDate { get; set; } // Scope JD [d]
-        public static double Time { get; set; } // Scope Time [h]
-        #endregion
-
         internal static bool ParseScopeStatus(string[] data)
         {
             /* 0  - int    BoolParms
@@ -452,11 +441,11 @@ namespace RPCC.Comms
              * 9  - double Time
              * 10 - // double AirMass
              * 11 - string Message
-             * 
+             *
              * Example: 128;3,2447519;0,024984;-32,938628;0,000614;0;0;15,24479;2460178,05422338;18,30121139;-1,86;_
              */
 
-            int buffBoolData = int.Parse(data[0]);
+            var buffBoolData = int.Parse(data[0]);
             IsInit = (buffBoolData & 1) > 0;
             IsTracking = (buffBoolData & 2) > 0;
             IsSlewing = (buffBoolData & 4) > 0;
@@ -479,8 +468,41 @@ namespace RPCC.Comms
             SiderealTime = double.Parse(data[7]);
             JulianDate = double.Parse(data[8]);
             Time = double.Parse(data[9]);
+            Airmass = double.Parse(data[10]);
 
             return true;
         }
+
+        #region Bool parameters
+
+        public static bool IsInit { get; set; } // Scope is initialized
+        public static bool IsTracking { get; set; } // Scope is tracking
+        public static bool IsSlewing { get; set; } // Scope is slewing
+        public static bool IsParking { get; set; } // Scope is parking
+        public static bool IsParked { get; set; } // Scope is parked
+        public static bool IsLookingEast { get; set; } // Scope is "Looking East" (GEM)
+        public static bool IsInBlinky { get; set; } // BrushlessController is in Blinky mode, one or both axis's
+        public static bool IsCommFault { get; set; } // Communication fault between SiTechExe and BrushlessController
+        public static bool IsPplsOn { get; set; } // Primary Plus Limit Switch activated
+        public static bool IsPmlsOn { get; set; } // Primary Minus Limit Switch activated
+        public static bool IsSplsOn { get; set; } // Secondary Plus Limit Switch activated
+        public static bool IsSmlsOn { get; set; } // Secondary Minus Limit Switch activated
+        public static bool IsPhsOn { get; set; } // Primary Homing Switch activated
+        public static bool IsShsOn { get; set; } // Secondary Homing Switch activated
+
+        #endregion
+
+        #region Non-bool parameters
+
+        public static double RightAsc { get; set; } // Scope Right Ascension [h]
+        public static double Declination { get; set; } // Scope Declination [deg]
+        public static double Altitude { get; set; } // Scope Altitude [deg]
+        public static double Azimuth { get; set; } // Scope Azimuth [deg]
+        public static double SiderealTime { get; set; } // Scope Sidereal Time [h]
+        public static double JulianDate { get; set; } // Scope JD [d]   
+        public static double Time { get; set; } // Scope Time [h]
+        public static double Airmass { get; set; } // Airmass
+
+        #endregion
     }
 }

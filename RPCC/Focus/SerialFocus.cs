@@ -7,46 +7,37 @@ using RPCC.Utils;
 namespace RPCC.Focus
 
 {
-    public class SerialFocus
+    public static class SerialFocus
     {
         private static readonly Timer ComTimer = new Timer(); //timer for Serial port communication delay
-        private readonly SerialPort _serialPort = new SerialPort();
-        // private readonly Logger Logger;
-        // private readonly Settings Settings;
+        private static readonly SerialPort SerialPort = new SerialPort();
 
-        internal SerialFocus()
+        static SerialFocus()
         {
-            // Logger = logger;
-            // Settings = settings;
             Switches = new BitArray(8);
         }
 
-        public int CurrentPosition { get; private set; }
-
-        public int SpeedFast { get; private set; }
-
-        public int SpeedSlow { get; private set; }
-
-        public BitArray Switches { get; private set; }
-
-        public bool TransmissionEnabled { get; private set; }
-
+        public static int CurrentPosition { get; private set; }
+        public static int SpeedFast { get; private set; }
+        public static int SpeedSlow { get; private set; }
+        public static BitArray Switches { get; private set; }
+        public static bool TransmissionEnabled { get; private set; }
         //timer for waiting of reply from mc
-        private void OnTimedEvent_Com(object sender, ElapsedEventArgs e)
+        private static void OnTimedEvent_Com(object sender, ElapsedEventArgs e)
         {
             ComTimer.Stop();
             TransmissionEnabled = true;
         }
 
         //serial port reader
-        private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        private static void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             ComTimer.Stop(); //stop timer
 
             var indata = "#";
             try
             {
-                indata = _serialPort.ReadLine(); //read answer [1ap=1234]
+                indata = SerialPort.ReadLine(); //read answer [1ap=1234]
                 // Logger.AddLogEntry("get msg "+indata);
             }
             catch
@@ -74,6 +65,7 @@ namespace RPCC.Focus
                         bits[i] = bits[bits.Count - i - 1];
                         bits[bits.Count - i - 1] = buf;
                     }
+
                     dig = int.Parse(indata.Substring(5, 3));
                 }
                 else
@@ -106,7 +98,7 @@ namespace RPCC.Focus
 
             try
             {
-                indata = _serialPort.ReadExisting(); //cleaning
+                indata = SerialPort.ReadExisting(); //cleaning
             }
             catch
             {
@@ -116,55 +108,55 @@ namespace RPCC.Focus
             TransmissionEnabled = true; //enable transmission
         }
 
-        public void Set_Speed_Fast(int steps)
+        public static void Set_Speed_Fast(int steps)
         {
             var s = "2ssf=" + steps;
             Write2Serial(s);
         }
 
-        public void Set_Speed_Slow(int steps)
+        public static void Set_Speed_Slow(int steps)
         {
             var s = "2sss=" + steps;
             Write2Serial(s);
         }
 
-        public void Set_Zero()
+        public static void Set_Zero()
         {
             var s = "2szp";
             Write2Serial(s);
         }
 
-        public void FRun_To(int steps)
+        public static void FRun_To(int steps)
         {
             var s = "2rfa=" + steps;
             Write2Serial(s);
         }
 
-        public void SRun_To(int steps)
+        public static void SRun_To(int steps)
         {
             var s = "2rsl=" + steps;
             Write2Serial(s);
         }
 
-        public void Stop()
+        public static void Stop()
         {
             Logger.AddLogEntry("SERIAL FOCUS: stop");
             Write2Serial("2rst");
         }
 
-        private void Open_Port()
+        private static void Open_Port()
         {
-            _serialPort.PortName = "COM" + Settings.FocusComId;
-            _serialPort.BaudRate = 9600;
-            _serialPort.DataBits = 8;
+            SerialPort.PortName = "COM" + Settings.FocusComId;
+            SerialPort.BaudRate = 9600;
+            SerialPort.DataBits = 8;
             try
             {
-                _serialPort.Open();
-                if (!_serialPort.IsOpen) return;
-                _serialPort.ReadTimeout = 500;
-                _serialPort.NewLine = "\0";
-                _serialPort.ReceivedBytesThreshold = 6;
-                _serialPort.DiscardInBuffer(); // чистить порт после открытия
+                SerialPort.Open();
+                if (!SerialPort.IsOpen) return;
+                SerialPort.ReadTimeout = 500;
+                SerialPort.NewLine = "\0";
+                SerialPort.ReceivedBytesThreshold = 6;
+                SerialPort.DiscardInBuffer(); // чистить порт после открытия
                 // Logger.AddLogEntry("SerialPort Focus opened");
                 TransmissionEnabled = true;
             }
@@ -175,13 +167,13 @@ namespace RPCC.Focus
             }
         }
 
-        public void Close_Port()
+        public static void Close_Port()
         {
             try
             {
                 ComTimer.Stop();
                 TransmissionEnabled = false;
-                _serialPort.Close();
+                SerialPort.Close();
                 Logger.AddLogEntry("SERIAL FOCUS: closed");
             }
             catch (Exception ex)
@@ -191,38 +183,38 @@ namespace RPCC.Focus
             }
         }
 
-        public bool Init()
+        public static bool Init()
         {
             ComTimer.Elapsed += OnTimedEvent_Com;
             ComTimer.Interval = 1000; // ожидание ответа микроконтроллера 1000мс
-            _serialPort.DataReceived += SerialPort_DataReceived;
+            SerialPort.DataReceived += SerialPort_DataReceived;
             // ComTimer.Start();
             Open_Port();
             return TransmissionEnabled;
         }
 
         //send command without answer
-        public void Write2Serial(string command)
+        public static void Write2Serial(string command)
         {
-            if (!_serialPort.IsOpen || !TransmissionEnabled) return;
+            if (!SerialPort.IsOpen || !TransmissionEnabled) return;
             // Logger.AddLogEntry("send msg: " + command);
             if (command[1] == 'r' || command[1] == 's') //if run command
             {
                 TransmissionEnabled = false;
-                _serialPort.WriteLine(command);
+                SerialPort.WriteLine(command);
                 TransmissionEnabled = true;
             }
 
             if (command[1] == 'g') //if question
             {
-                _serialPort.DiscardInBuffer(); //clear input buffer
-                _serialPort.WriteLine(command); //send question
+                SerialPort.DiscardInBuffer(); //clear input buffer
+                SerialPort.WriteLine(command); //send question
                 TransmissionEnabled = false; //disable transmission of next command
                 ComTimer.Start(); //start 1000 ms timer for waiting
             }
         }
 
-        public void UpdateData()
+        public static void UpdateData()
         {
             Write2Serial("2gcp");
             Write2Serial("2gsf");
