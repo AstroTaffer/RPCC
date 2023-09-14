@@ -53,7 +53,6 @@ namespace RPCC.Focus
             GetImForFocus(_shift);
         }
         
-            
         private static void CamFocusCallBack(string focusImPath)
         {
             if (_task.Status != 1) 
@@ -70,6 +69,7 @@ namespace RPCC.Focus
                 Logger.AddLogEntry("FOCUS: Autofocus disable, exit");
                 SerialFocus.FRun_To(-1 * _sumShift);
                 FwhmBest = 0;
+                //TODO doExp();
                 return;
             }
             switch (_phase)
