@@ -29,9 +29,9 @@ namespace RPCC.Focus
 
         public GetDataFromFits(string path2Fits)
         {
+            var fits = new Fits(path2Fits);
             var outputFile = path2Fits.Replace("fits", "cat");
             _path2Cat = outputFile;
-            var fits = new Fits(path2Fits);
             var hdu = (ImageHDU) fits.GetHDU(0);
             Focus = hdu.Header.GetIntValue("FOCUS");
             try

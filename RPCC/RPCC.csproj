@@ -87,7 +87,7 @@
             <HintPath>..\packages\ASCOM.Exception.Library.6.6.1\lib\net35\ASCOM.Exceptions.dll</HintPath>
         </Reference>
         <Reference Include="ASCOM.Tools, Version=1.0.108.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
-            <HintPath>..\packages\ASCOM.Tools.1.0.108\lib\netstandard2.0\ASCOM.Tools.dll</HintPath>
+          <HintPath>..\packages\ASCOM.Tools.1.0.108\lib\netstandard2.0\ASCOM.Tools.dll</HintPath>
         </Reference>
         <Reference Include="CSharpFITS_v1.1, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
             <HintPath>..\packages\CSharpFITS.1.1\lib\Net20\CSharpFITS_v1.1.dll</HintPath>

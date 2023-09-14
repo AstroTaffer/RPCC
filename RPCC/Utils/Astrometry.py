@@ -22,7 +22,7 @@ def Astrometry(path, files, C):
             # read file, copy data and header
             hdulist = fits.open(item, 'update', memmap=False)
             # del hdulist[0].header['COMMENT']
-            Header = hdulist[0].header.copy()
+            Header = hdulist[0].header
             Data = hdulist[0].data.copy()
             # hdulist.verify('fix')
             # gaussian convolution
@@ -60,13 +60,15 @@ def Astrometry(path, files, C):
                                                     scale_upper=1.5,
                                                     scale_units='arcsecperpix'
                                                     )
-            hdu = fits.PrimaryHDU(hdulist[0].data, Header + wcs_header)
-            hdu.writeto(path2save + '\\' + name, overwrite=True)
+            # hdu = fits.PrimaryHDU(hdulist[0].data, Header + wcs_header)
+            hdulist[0].header = Header + wcs_header
             hdulist.close()
+            # hdu.writeto(path2save + '\\' + name, overwrite=True)
+            # hdu.writeto(item, overwrite=True)
             print('done')
         except Exception as e:
             print(e)
-    return path2save
+    return path
 
 # paths = [r'D:\RoboPhot Data\Raw Images\2023_09 FLI\2023_09_06 GSC2314–0530\i',
 #          r'D:\RoboPhot Data\Raw Images\2023_09 FLI\2023_09_06 GSC2314–0530\r']
