@@ -44,6 +44,8 @@ namespace RPCC.Cams
             if (cams.Length > 0)
             {
                 if (!InitializeCameras()) isAllGood = false;
+                _camsTimer.Elapsed += CamsTimerTick;
+                _camsTimer.Start();
                 resetUi();
                 return isAllGood;
             }
@@ -193,9 +195,6 @@ namespace RPCC.Cams
                 }
             }
 
-            _camsTimer.Elapsed += CamsTimerTick;
-            _camsTimer.Start();
-
             return isAllGood;
         }
 
@@ -250,7 +249,9 @@ namespace RPCC.Cams
         #region Status
         static private void CamsTimerTick(object sender, ElapsedEventArgs e)
         {
+            _camsTimer.Stop();
             GetCamsStatus();
+            _camsTimer.Start();
         }
 
         static internal void GetCamsStatus()
@@ -272,7 +273,7 @@ namespace RPCC.Cams
                 errorStatus += NativeMethods.FLIGetDeviceStatus(cam.handle, out int deviceStatus);
 
 
-                // Further testing required. In case of bugs use GetCamsStatusAlt() instead
+                // TODO: Further testing required. In case of bugs use GetCamsStatusAlt() instead.
                 switch (deviceStatus)
                 {
                     case 0x00:
@@ -306,7 +307,9 @@ namespace RPCC.Cams
 
         static private void CamsTimerTickAlt(object sender, ElapsedEventArgs e)
         {
-
+            _camsTimer.Stop();
+            GetCamsStatusAlt();
+            _camsTimer.Start();
         }
 
         static internal void GetCamsStatusAlt()
@@ -359,6 +362,27 @@ namespace RPCC.Cams
                 {
                     cam.status = "ERROR";
                 }
+            }
+        }
+        #endregion
+
+        #region Lock & Unlock cameras
+        // Technically if method "1" manages to lock camera "A" and method "2" manages to lock camera "B"
+        // (almost) simultaneously, it would lead to a deadlock. But since foreach loop guarantees specific order
+        // this should not be possible to achive even in the worst scenario, right? Right? Anyway, if a deadlock occurs,
+        // create your own single object to lock() to and go in peace.
+        private static void LockCameras()
+        {
+            foreach (var cam in cams)
+            {
+                NativeMethods.FLILockDevice(cam.handle);
+            }
+        }
+        private static void UnlockCameras()
+        {
+            foreach (var cam in cams)
+            {
+                NativeMethods.FLIUnlockDevice(cam.handle);
             }
         }
         #endregion
