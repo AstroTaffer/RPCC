@@ -13,15 +13,20 @@ namespace RPCC.Cams
         // camerasDomain = bitwise OR of 0x02 (USB interface) and 0x100 (Camera device)
         private const int _camDomain = 0x02 | 0x100;
 
-        private static readonly Timer _camsTimer = new Timer(1000);
-
         internal static ObservationTask loadedTask = new ObservationTask();
         internal static CameraDevice[] cams = Array.Empty<CameraDevice>();
 
+        private static readonly Timer _camsTimer = new Timer(1000);
+
+        internal delegate void CallMainForm();
+        internal static CallMainForm resetUi;
+
         #region Connect & Disconnect
-        static internal void ReconnectCameras()
+        static internal bool ReconnectCameras()
         {
-            DisconnectCameras();
+            bool isAllGood;
+
+            isAllGood = DisconnectCameras();
 
             DeviceName[] camerasNames = EnumerateCameras(_camDomain);
 
@@ -36,12 +41,19 @@ namespace RPCC.Cams
             }
             Logger.AddLogEntry($"{cams.Length} cameras found");
 
-            if (cams.Length > 0) InitializeCameras();
+            if (cams.Length > 0)
+            {
+                if (!InitializeCameras()) isAllGood = false;
+                resetUi();
+                return isAllGood;
+            }
+            return false;
         }
         
-        static private void InitializeCameras()
+        static private bool InitializeCameras()
         {
             int errorLastFliCmd;
+            bool isAllGood = true;
 
             // imageArea = [ul_x, ul_y, lr_x, lr_y]
             // Note that ul_x and ul_y are absolute (don't take hbin or vbin into account)
@@ -56,6 +68,7 @@ namespace RPCC.Cams
                     Logger.AddLogEntry($"WARNING Unable to connect to camera {i + 1}");
                     // -1 = FLI_INVALID_DEVICE
                     cams[i].handle = -1;
+                    isAllGood = false;
                     continue;
                 }
 
@@ -66,6 +79,7 @@ namespace RPCC.Cams
                 {
                     Logger.AddLogEntry($"WARNING Unable to get camera {i + 1} serial number");
                     cams[i].serialNumber = "ERROR";
+                    isAllGood = false;
                 }
                 else cams[i].serialNumber = camSn.ToString();
 
@@ -85,26 +99,54 @@ namespace RPCC.Cams
 
                 // unchecked((int)0xffffffff) = FLI_FAN_SPEED_ON
                 errorLastFliCmd = NativeMethods.FLISetFanSpeed(cams[i].handle, unchecked((int)0xffffffff));
-                if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to turn on camera {i + 1} fan");
+                if (errorLastFliCmd != 0)
+                {
+                    Logger.AddLogEntry($"WARNING Unable to turn on camera {i + 1} fan");
+                    isAllGood = false;
+                }
 
                 // 1 = FLI_MODE_16BIT
                 errorLastFliCmd = NativeMethods.FLISetBitDepth(cams[i].handle, 1);
-                if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} bit depth");
+                if (errorLastFliCmd != 0)
+                {
+                    Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} bit depth");
+                    isAllGood = false;
+                }
 
                 // 0x0001 = FLI_BGFLUSH_START
                 errorLastFliCmd = NativeMethods.FLIControlBackgroundFlush(cams[i].handle, 0x0001);
-                if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to turn on camera {i + 1} background flush");
+                if (errorLastFliCmd != 0)
+                {
+                    Logger.AddLogEntry($"WARNING Unable to turn on camera {i + 1} background flush");
+                    isAllGood = false;
+                }
 
                 errorLastFliCmd = NativeMethods.FLISetNFlushes(cams[i].handle, Settings.NumFlushes);
-                if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} number of flushes");
+                if (errorLastFliCmd != 0)
+                {
+                    Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} number of flushes");
+                    isAllGood = false;
+                }
 
                 errorLastFliCmd = NativeMethods.FLISetTemperature(cams[i].handle, Settings.CamTemp);
-                if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} temperature");
+                if (errorLastFliCmd != 0)
+                {
+                    Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} temperature");
+                    isAllGood = false;
+                }
 
                 errorLastFliCmd = NativeMethods.FLISetVBin(cams[i].handle, Settings.CamBin);
-                if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} vbin");
+                if (errorLastFliCmd != 0) {
+                    Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} vbin");
+                    isAllGood = false;
+                }
+
                 errorLastFliCmd = NativeMethods.FLISetHBin(cams[i].handle, Settings.CamBin);
-                if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} hbin");
+                if (errorLastFliCmd != 0)
+                {
+                    Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} hbin");
+                    isAllGood = false;
+                }
                 
                 if (i == 0)
                 {
@@ -123,7 +165,11 @@ namespace RPCC.Cams
                 }
 
                 errorLastFliCmd = NativeMethods.FLISetImageArea(cams[i].handle, imageArea[0], imageArea[1], imageArea[2], imageArea[3]);
-                if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} image area");
+                if (errorLastFliCmd != 0)
+                {
+                    Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} image area");
+                    isAllGood = false;
+                }
 
                 switch (Settings.CamRoMode)
                 {
@@ -135,16 +181,28 @@ namespace RPCC.Cams
                     case "500KHz":
                         errorLastFliCmd = NativeMethods.FLISetCameraMode(cams[i].handle, 1);
                         break;
+                    default:
+                        Logger.AddLogEntry($"WARNING Unknown readout mode {Settings.CamRoMode}");
+                        isAllGood = false;
+                        break;
                 }
-                if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} readout mode");
+                if (errorLastFliCmd != 0)
+                {
+                    Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} readout mode");
+                    isAllGood = false;
+                }
             }
 
             _camsTimer.Elapsed += CamsTimerTick;
             _camsTimer.Start();
+
+            return isAllGood;
         }
 
-        static internal void DisconnectCameras()
+        static internal bool DisconnectCameras()
         {
+            bool isAllGood = true;
+
             _camsTimer.Stop();
             _camsTimer.Elapsed -= CamsTimerTick;
 
@@ -152,22 +210,47 @@ namespace RPCC.Cams
             for (int i = 0; i < cams.Length; i++)
             {
                 errorLastFliCmd = NativeMethods.FLICancelExposure(cams[i].handle);
-                if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to cancel camera {i + 1} exposure");
-                
+                if (errorLastFliCmd != 0)
+                {
+                    Logger.AddLogEntry($"WARNING Unable to cancel camera {i + 1} exposure");
+                    isAllGood = false;
+                }
+
+                // 0x0000 = FLI_BGFLUSH_STOP
+                NativeMethods.FLIControlBackgroundFlush(cams[i].handle, 0x0000);
+                if (errorLastFliCmd != 0)
+                {
+                    Logger.AddLogEntry($"WARNING Unable to turn off camera {i + 1} background flush");
+                    isAllGood = false;
+                }
+
                 // 0x00 = FLI_FAN_SPEED_OFF
                 errorLastFliCmd = NativeMethods.FLISetFanSpeed(cams[i].handle, 0x00);
-                if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to stop camera {i + 1} cooler");
+                if (errorLastFliCmd != 0)
+                {
+                    Logger.AddLogEntry($"WARNING Unable to stop camera {i + 1} cooler");
+                    isAllGood = false;
+                }
                 
                 errorLastFliCmd = NativeMethods.FLIClose(cams[i].handle);
-                if (errorLastFliCmd != 0) Logger.AddLogEntry($"WARNING Unable to close camera {i + 1} handle");
+                if (errorLastFliCmd != 0)
+                {
+                    Logger.AddLogEntry($"WARNING Unable to close camera {i + 1} handle");
+                    isAllGood = false;
+                }
             }
+
+            cams = Array.Empty<CameraDevice>();
+            resetUi();
+
+            return isAllGood;
         }
         #endregion
 
         #region Status
         static private void CamsTimerTick(object sender, ElapsedEventArgs e)
         {
-
+            GetCamsStatus();
         }
 
         static internal void GetCamsStatus()
@@ -177,7 +260,6 @@ namespace RPCC.Cams
             foreach (var cam in cams)
             {
                 errorStatus = 0;
-                cam.remTime = 0;
 
                 // 0x0000 = FLI_TEMPERATURE_CCD
                 errorStatus = NativeMethods.FLIReadTemperature(cam.handle, 0x0000, out cam.ccdTemp);
@@ -189,7 +271,64 @@ namespace RPCC.Cams
 
                 errorStatus += NativeMethods.FLIGetDeviceStatus(cam.handle, out int deviceStatus);
 
-                // I don't know why it's done this way. Someday I'll run corresponding tests and find out. Someday.
+
+                // Further testing required. In case of bugs use GetCamsStatusAlt() instead
+                switch (deviceStatus)
+                {
+                    case 0x00:
+                        cam.status = "IDLE";
+                        break;
+                    case 0x01:
+                        cam.status = "WF TRIGGER";
+                        break;
+                    case 0x02:
+                        cam.status = "EXPOSING";
+                        errorStatus += NativeMethods.FLIGetExposureStatus(cam.handle, out cam.remTime);
+                        break;
+                    case -2147483645:
+                        cam.status = "READING CCD";
+                        break;
+                    case -2147483648:
+                        cam.status = "DATA READY";
+                        break;
+                    default:
+                        cam.status = "UNKNOWN";
+                        Logger.AddLogEntry($"WARNING Unknown status {deviceStatus}");
+                        break;
+                }
+
+                if (errorStatus != 0)
+                {
+                    cam.status = "ERROR";
+                }
+            }
+        }
+
+        static private void CamsTimerTickAlt(object sender, ElapsedEventArgs e)
+        {
+
+        }
+
+        static internal void GetCamsStatusAlt()
+        {
+            int errorStatus;
+
+            foreach (var cam in cams)
+            {
+                errorStatus = 0;
+
+                // 0x0000 = FLI_TEMPERATURE_CCD
+                errorStatus = NativeMethods.FLIReadTemperature(cam.handle, 0x0000, out cam.ccdTemp);
+
+                // 0x0001 = FLI_TEMPERATURE_BASE
+                errorStatus += NativeMethods.FLIReadTemperature(cam.handle, 0x0001, out cam.baseTemp);
+
+                errorStatus += NativeMethods.FLIGetCoolerPower(cam.handle, out cam.coolerPwr);
+
+                errorStatus += NativeMethods.FLIGetDeviceStatus(cam.handle, out int deviceStatus);
+
+                // There is no proper documentation on how to use FLIGetDeviceStatus command
+                // But this solution have been working so far, so I'm leaving it here as a backup
                 deviceStatus &= 0x03;
                 switch (deviceStatus)
                 {
@@ -212,6 +351,7 @@ namespace RPCC.Cams
                         break;
                     default:
                         cam.status = "UNKNOWN";
+                        Logger.AddLogEntry($"WARNING Unknown status {deviceStatus}");
                         break;
                 }
 

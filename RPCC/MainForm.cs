@@ -30,7 +30,6 @@ namespace RPCC
         //private bool _isCurrentImageLoaded;
         //private bool _isZoomModeActivated;
 
-        //private readonly CameraControl _cameraControl;
         //private int _idleCamNum;
 
         private readonly CameraFocus _cameraFocus;
@@ -54,7 +53,6 @@ namespace RPCC
 
             _isFirstLoad = true;
 
-            // Logger = new Logger(listBoxLogs);
             Logger.logBox = listBoxLogs;
             Logger.AddLogEntry("Application launched");
 
@@ -62,8 +60,8 @@ namespace RPCC
             Settings.LoadXmlConfig("SettingsDefault.xml");
 
             // Hardware controls
-            //_cameraControl = new CameraControl();
             _cameraFocus = new CameraFocus();
+            CameraControl.resetUi = ResetCamsUi;
 
             // MeteoDome connect
             // _weatherDc = new WeatherDataCollector();
@@ -101,14 +99,14 @@ namespace RPCC
             Tasker.SetHeader();
             Tasker.LoadTasksFromXml();
 
-            timerClock.Start();
+            timerUi.Start();
             comboBoxImgType.SelectedIndex = 0;
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             
-            timerClock.Stop();
+            timerUi.Stop();
             
             Tasker.SaveTasksToXml();
 
@@ -116,7 +114,7 @@ namespace RPCC
             _donutsSocket.Disconnect();
             SiTechExeSocket.Disconnect();
 
-            //_cameraControl.DisconnectCameras();
+            CameraControl.DisconnectCameras();
             
             _cameraFocus.SerialFocus.Close_Port();
             _cameraFocus.DeFocus = 0;
@@ -125,35 +123,34 @@ namespace RPCC
             FocusTimer.Dispose();
         }
 
-        private void TimerClock_Tick(object sender, EventArgs e)
+        private void TimerUiUpdate(object sender, EventArgs e)
         {
-            tSStatusClock.Text = @"UTC: " + DateTime.UtcNow.ToString("yyyy-MM-ddTHH-mm-ss.fff");
-            
-            //_cameraControl.GetStatus();
-            //switch (_cameraControl.cameras.Length)
-            //{
-            //    case 3:
-            //        labelCam3CcdTemp.Text = $@"CCD Temp: {_cameraControl.cameras[2].ccdTemp}";
-            //        labelCam3BaseTemp.Text = $@"Base Temp: {_cameraControl.cameras[2].baseTemp}";
-            //        labelCam3CoolerPwr.Text = $@"Cooler Power: {_cameraControl.cameras[2].coolerPwr} %";
-            //        labelCam3Status.Text = $@"Status: {_cameraControl.cameras[2].status}";
-            //        labelCam3RemTime.Text = $@"Remaining: {_cameraControl.cameras[2].remTime / 1000}";
-            //        goto case 2;
-            //    case 2:
-            //        labelCam2CcdTemp.Text = $@"CCD Temp: {_cameraControl.cameras[1].ccdTemp}";
-            //        labelCam2BaseTemp.Text = $@"Base Temp: {_cameraControl.cameras[1].baseTemp}";
-            //        labelCam2CoolerPwr.Text = $@"Cooler Power: {_cameraControl.cameras[1].coolerPwr} %";
-            //        labelCam2Status.Text = $@"Status: {_cameraControl.cameras[1].status}";
-            //        labelCam2RemTime.Text = $@"Remaining: {_cameraControl.cameras[1].remTime / 1000}";
-            //        goto case 1;
-            //    case 1:
-            //        labelCam1CcdTemp.Text = $@"CCD Temp: {_cameraControl.cameras[0].ccdTemp}";
-            //        labelCam1BaseTemp.Text = $@"Base Temp: {_cameraControl.cameras[0].baseTemp}";
-            //        labelCam1CoolerPwr.Text = $@"Cooler Power: {_cameraControl.cameras[0].coolerPwr}  %";
-            //        labelCam1Status.Text = $@"Status: {_cameraControl.cameras[0].status}";
-            //        labelCam1RemTime.Text = $@"Remaining: {_cameraControl.cameras[0].remTime / 1000}";
-            //        break;
-            //}
+            tSStatusClock.Text = @"UTC: " + DateTime.UtcNow.ToString("yyyy-MM-ddTHH-mm-ss");
+
+            switch (CameraControl.cams.Length)
+            {
+                case 3:
+                    labelCam3CcdTemp.Text = $"CCD Temp: {CameraControl.cams[2].ccdTemp:F3}";
+                    labelCam3BaseTemp.Text = $"Base Temp: {CameraControl.cams[2].baseTemp:F3}";
+                    labelCam3CoolerPwr.Text = $"Cooler Power: {CameraControl.cams[2].coolerPwr} %";
+                    labelCam3Status.Text = $"Status: {CameraControl.cams[2].status}";
+                    labelCam3RemTime.Text = $"Remaining: {CameraControl.cams[2].remTime / 1000}";
+                    goto case 2;
+                case 2:
+                    labelCam2CcdTemp.Text = $"CCD Temp: {CameraControl.cams[1].ccdTemp:F3}";
+                    labelCam2BaseTemp.Text = $"Base Temp: {CameraControl.cams[1].baseTemp:F3}";
+                    labelCam2CoolerPwr.Text = $"Cooler Power: {CameraControl.cams[1].coolerPwr} %";
+                    labelCam2Status.Text = $"Status: {CameraControl.cams[1].status}";
+                    labelCam2RemTime.Text = $"Remaining: {CameraControl.cams[1].remTime / 1000}";
+                    goto case 1;
+                case 1:
+                    labelCam1CcdTemp.Text = $"CCD Temp: {CameraControl.cams[0].ccdTemp:F3}";
+                    labelCam1BaseTemp.Text = $"Base Temp: {CameraControl.cams[0].baseTemp:F3}";
+                    labelCam1CoolerPwr.Text = $"Cooler Power: {CameraControl.cams[0].coolerPwr} %";
+                    labelCam1Status.Text = $"Status: {CameraControl.cams[0].status}";
+                    labelCam1RemTime.Text = $"Remaining: {CameraControl.cams[0].remTime / 1000}";
+                    break;
+            }
 
             //_idleCamNum = 0;
             //for (int i = 0; i < _cameraControl.cameras.Length; i++)
@@ -209,37 +206,76 @@ namespace RPCC
             //    }
             //}
         }
+        
+        internal void ResetCamsUi()
+        {
+            // Camera 1
+            groupBoxCam1.Enabled = false;
+            radioButtonViewCam1.Enabled = false;
+            labelCam1Model.Text = "Model:";
+            labelCam1Sn.Text = "Serial Num:";
+            labelCam1Filter.Text = "Filter:";
+            labelCam1CcdTemp.Text = "CCD Temp:";
+            labelCam1BaseTemp.Text = "Base Temp:";
+            labelCam1CoolerPwr.Text = "Cooler Power:";
+            labelCam1Status.Text = "Status:";
+            labelCam1RemTime.Text = "Remaining:";
+
+            // Camera 2
+            groupBoxCam2.Enabled = false;
+            radioButtonViewCam2.Enabled = false;
+            labelCam2Model.Text = "Model:";
+            labelCam2Sn.Text = "Serial Num:";
+            labelCam2Filter.Text = "Filter:";
+            labelCam2CcdTemp.Text = "CCD Temp:";
+            labelCam2BaseTemp.Text = "Base Temp:";
+            labelCam2CoolerPwr.Text = "Cooler Power:";
+            labelCam2Status.Text = "Status:";
+            labelCam2RemTime.Text = "Remaining:";
+
+            // Camera 3
+            groupBoxCam3.Enabled = false;
+            radioButtonViewCam3.Enabled = false;
+            labelCam3Model.Text = "Model:";
+            labelCam3Sn.Text = "Serial Num:";
+            labelCam3Filter.Text = "Filter:";
+            labelCam3CcdTemp.Text = "CCD Temp:";
+            labelCam3BaseTemp.Text = "Base Temp:";
+            labelCam3CoolerPwr.Text = "Cooler Power:";
+            labelCam3Status.Text = "Status:";
+            labelCam3RemTime.Text = "Remaining:";
+
+            switch (CameraControl.cams.Length)
+            {
+                case 3:
+                    groupBoxCam3.Enabled = true;
+                    radioButtonViewCam3.Enabled = true;
+                    labelCam3Model.Text = $"Model: {CameraControl.cams[2].modelName}";
+                    labelCam3Sn.Text = $"Serial Num: {CameraControl.cams[2].serialNumber}";
+                    labelCam3Filter.Text = $"Filter: {CameraControl.cams[2].filter}";
+                    goto case 2;
+                case 2:
+                    groupBoxCam2.Enabled = true;
+                    radioButtonViewCam2.Enabled = true;
+                    labelCam2Model.Text = $"Model: {CameraControl.cams[1].modelName}";
+                    labelCam2Sn.Text = $"Serial Num: {CameraControl.cams[1].serialNumber}";
+                    labelCam2Filter.Text = $"Filter: {CameraControl.cams[1].filter}";
+                    goto case 1;
+                case 1:
+                    groupBoxCam1.Enabled = true;
+                    radioButtonViewCam1.Enabled = true;
+                    labelCam1Model.Text = $"Model: {CameraControl.cams[0].modelName}";
+                    labelCam1Sn.Text = $"Serial Num: {CameraControl.cams[0].serialNumber}";
+                    labelCam1Filter.Text = $"Filter: {CameraControl.cams[0].filter}";
+                    break;
+            }
+        }
         #endregion
 
         #region Launch Menu
         private void FindCamerasToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            //_cameraControl.LaunchCameras();
-
-            //switch (_cameraControl.cameras.Length)
-            //{
-            //    case 3:
-            //        groupBoxCam3.Enabled = true;
-            //        radioButtonViewCam3.Enabled = true;
-            //        labelCam3Model.Text = $@"Model: {_cameraControl.cameras[2].modelName}";
-            //        labelCam3Sn.Text = $@"Serial Num: {_cameraControl.cameras[2].serialNumber}";
-            //        labelCam3Filter.Text = $@"Filter: {_cameraControl.cameras[2].filter}";
-            //        goto case 2;
-            //    case 2:
-            //        groupBoxCam2.Enabled = true;
-            //        radioButtonViewCam2.Enabled = true;
-            //        labelCam2Model.Text = $@"Model: {_cameraControl.cameras[1].modelName}";
-            //        labelCam2Sn.Text = $@"Serial Num: {_cameraControl.cameras[1].serialNumber}";
-            //        labelCam2Filter.Text = $@"Filter: {_cameraControl.cameras[1].filter}";
-            //        goto case 1;
-            //    case 1:
-            //        groupBoxCam1.Enabled = true;
-            //        radioButtonViewCam1.Enabled = true;
-            //        labelCam1Model.Text = $@"Model: {_cameraControl.cameras[0].modelName}";
-            //        labelCam1Sn.Text = $@"Serial Num: {_cameraControl.cameras[0].serialNumber}";
-            //        labelCam1Filter.Text = $@"Filter: {_cameraControl.cameras[0].filter}";
-            //        break;
-            //}
+            CameraControl.ReconnectCameras();
         }
 
         private void FindFocusToolStripMenuItem_Click(object sender, EventArgs e)

@@ -57,7 +57,7 @@
             this.contextMenuStripLogs = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.clearToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.timerClock = new System.Windows.Forms.Timer(this.components);
+            this.timerUi = new System.Windows.Forms.Timer(this.components);
             this.saveFileDialogConfig = new System.Windows.Forms.SaveFileDialog();
             this.openFileDialogConfig = new System.Windows.Forms.OpenFileDialog();
             this.panelFitsImage = new System.Windows.Forms.Panel();
@@ -190,8 +190,8 @@
             // tSStatusClock
             // 
             this.tSStatusClock.Name = "tSStatusClock";
-            this.tSStatusClock.Size = new System.Drawing.Size(158, 17);
-            this.tSStatusClock.Text = "yyyy-MM-ddTHH-mm-ss.fff";
+            this.tSStatusClock.Size = new System.Drawing.Size(143, 17);
+            this.tSStatusClock.Text = "yyyy-MM-ddTHH-mm-ss";
             // 
             // menuStrip
             // 
@@ -389,10 +389,10 @@
             this.saveToolStripMenuItem.Text = "Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.SaveToolStripMenuItem_Click);
             // 
-            // timerClock
+            // timerUi
             // 
-            this.timerClock.Interval = 1000;
-            this.timerClock.Tick += new System.EventHandler(this.TimerClock_Tick);
+            this.timerUi.Interval = 1000;
+            this.timerUi.Tick += new System.EventHandler(this.TimerUiUpdate);
             // 
             // saveFileDialogConfig
             // 
@@ -1300,7 +1300,7 @@
         private System.Windows.Forms.ToolStripMenuItem debugToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem loadTestImageToolStripMenuItem;
         private System.Windows.Forms.GroupBox groupBoxLogs;
-        private System.Windows.Forms.Timer timerClock;
+        private System.Windows.Forms.Timer timerUi;
         private System.Windows.Forms.ListBox listBoxLogs;
         private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
