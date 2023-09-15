@@ -2,6 +2,7 @@
 using System.Timers;
 using System.Windows.Forms;
 using ASCOM.Tools;
+using RPCC.Cams;
 using RPCC.Comms;
 using RPCC.Focus;
 using RPCC.Utils;
@@ -109,15 +110,14 @@ namespace RPCC.Tasks
 
         private static void StartDoLight()
         {
-            _currentTask.Status = 1;
-            Logger.AddLogEntry($"Start task# {_currentTask.TaskNumber}, type: {_currentTask.FrameType}");
+           
             _isObserve = true;
             SiTechExeSocket.GoTo(_currentTask.Ra, _currentTask.Dec, true); //проверять доехал ли
             //если доехал, то начинаем снимать 
-            //prepare to image
+            if (!CameraControl.PrepareToObs(_currentTask)) return;
+            _currentTask.Status = 1;
+            Logger.AddLogEntry($"Start task# {_currentTask.TaskNumber}, type: {_currentTask.FrameType}");
             //doExp()
-            // навести монтировку в нужную точку (проверка на доступность)
-            // начать делать экспозиции (автофокус опционален)
         }
 
         private static void CamCallback(string fitsPath)
