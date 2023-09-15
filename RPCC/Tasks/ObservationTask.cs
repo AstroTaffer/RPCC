@@ -53,17 +53,17 @@ namespace RPCC.Tasks
         public string Filters { get; set; } = "g r i";
 
 //in pix
-        public short Xbin { get; set; } = 1;
+        public int Xbin { get; set; } = 1;
 
-        public short Ybin { get; set; } = 1;
+        public int Ybin { get; set; } = 1;
 
-        public short XSubframeStart { get; set; } = 0;
-
-        public short YSubframeStart { get; set; } = 0;
-
-        public short XSubframeEnd { get; set; } = 2047;
-
-        public short YSubframeEnd { get; set; } = 2047;
+        // public short XSubframeStart { get; set; } = 0;
+        //
+        // public short YSubframeStart { get; set; } = 0;
+        //
+        // public short XSubframeEnd { get; set; } = 2047;
+        //
+        // public short YSubframeEnd { get; set; } = 2047;
 
 //in hours
         public float Duration { get; set; }

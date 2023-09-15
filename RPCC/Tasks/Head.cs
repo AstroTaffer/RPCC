@@ -114,7 +114,7 @@ namespace RPCC.Tasks
             _isObserve = true;
             SiTechExeSocket.GoTo(_currentTask.Ra, _currentTask.Dec, true); //проверять доехал ли
             //если доехал, то начинаем снимать 
-
+            //prepare to image
             //doExp()
             // навести монтировку в нужную точку (проверка на доступность)
             // начать делать экспозиции (автофокус опционален)

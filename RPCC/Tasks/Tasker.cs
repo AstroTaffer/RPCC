@@ -20,7 +20,7 @@ namespace RPCC.Tasks
         {
             "N", "RaDecJ2000", "t_{Added}", @"t_{Run}", @"t_{Fin}", "Duration",
             "Exp", "Done", "All", "t_{Last exp}", "Filters", "Object", "Status", "Observer", "Frame type",
-            "Xbin", "XSubframeStart", "XSubframeEnd", "Ybin", "YSubframeStart", "YSubframeEnd"
+            "Xbin", "Ybin"
         };
 //gri
 
@@ -54,12 +54,8 @@ namespace RPCC.Tasks
             dataGridViewTasker.Columns[13].Width = 120;
             dataGridViewTasker.Columns[14].Width = 80;
 
-            dataGridViewTasker.Columns[15].Visible = false;
-            dataGridViewTasker.Columns[16].Visible = false;
-            dataGridViewTasker.Columns[17].Visible = false;
-            dataGridViewTasker.Columns[18].Visible = false;
-            dataGridViewTasker.Columns[19].Visible = false;
-            dataGridViewTasker.Columns[20].Visible = false;
+            // dataGridViewTasker.Columns[15].Visible = false;
+            // dataGridViewTasker.Columns[18].Visible = false;
 
             foreach (DataGridViewColumn column in dataGridViewTasker.Columns)
                 column.SortMode = DataGridViewColumnSortMode.NotSortable;
@@ -154,11 +150,7 @@ namespace RPCC.Tasks
             dataRow[Header[13]] = task.Observer;
             dataRow[Header[14]] = task.FrameType;
             dataRow[Header[15]] = task.Xbin;
-            dataRow[Header[16]] = task.XSubframeStart;
-            dataRow[Header[17]] = task.XSubframeEnd;
             dataRow[Header[18]] = task.Ybin;
-            dataRow[Header[19]] = task.YSubframeStart;
-            dataRow[Header[20]] = task.YSubframeEnd;
 
             DataTable.Rows.InsertAt(dataRow, 0);
             SaveTasksToXml();
@@ -185,11 +177,7 @@ namespace RPCC.Tasks
                 row.Cells[13].Value = task.Observer;
                 row.Cells[14].Value = task.FrameType;
                 row.Cells[15].Value = task.Xbin;
-                row.Cells[16].Value = task.XSubframeStart;
-                row.Cells[17].Value = task.XSubframeEnd;
                 row.Cells[18].Value = task.Ybin;
-                row.Cells[19].Value = task.YSubframeStart;
-                row.Cells[20].Value = task.YSubframeEnd;
             }
 
             PaintTable();
@@ -221,11 +209,7 @@ namespace RPCC.Tasks
                 task.Observer = row.Cells[13].Value.ToString();
                 task.FrameType = row.Cells[14].Value.ToString();
                 task.Xbin = Convert.ToInt16(row.Cells[15].Value);
-                task.XSubframeStart = Convert.ToInt16(row.Cells[16].Value);
-                task.XSubframeEnd = Convert.ToInt16(row.Cells[17].Value);
                 task.Ybin = Convert.ToInt16(row.Cells[18].Value);
-                task.YSubframeStart = Convert.ToInt16(row.Cells[19].Value);
-                task.YSubframeEnd = Convert.ToInt16(row.Cells[20].Value);
                 break;
             }
 
@@ -250,11 +234,7 @@ namespace RPCC.Tasks
             task.Observer = row.Cells[13].Value.ToString();
             task.FrameType = row.Cells[14].Value.ToString();
             task.Xbin = Convert.ToInt16(row.Cells[15].Value);
-            task.XSubframeStart = Convert.ToInt16(row.Cells[16].Value);
-            task.XSubframeEnd = Convert.ToInt16(row.Cells[17].Value);
             task.Ybin = Convert.ToInt16(row.Cells[18].Value);
-            task.YSubframeStart = Convert.ToInt16(row.Cells[19].Value);
-            task.YSubframeEnd = Convert.ToInt16(row.Cells[20].Value);
 
             return task;
         }

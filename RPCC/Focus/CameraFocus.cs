@@ -50,6 +50,7 @@ namespace RPCC.Focus
             _sumShift += _shift;
             Logger.AddLogEntry("FOCUS: SumShift=" + _sumShift);
             _focCycles++;
+            //TODO prepare to focus image
             GetImForFocus(_shift);
         }
         

@@ -47,5 +47,13 @@ namespace RPCC.Utils
             return Math.Acos(Math.Sin(tarDec)*Math.Sin(moonDec) +
                              Math.Cos(tarDec)*Math.Cos(moonDec) * Math.Cos(moonRa-tarRa))*180/Math.PI;
         }
+
+        public static bool CheckElevateLimit(double ra, double dec, DateTime time)
+        {
+            Trans.SetJ2000(ra, dec);
+            Trans.JulianDateUTC = Utilities.JulianDateFromDateTime(time);
+            var el = Trans.ElevationTopocentric;
+            return el >= 30;
+        }
     }
 }

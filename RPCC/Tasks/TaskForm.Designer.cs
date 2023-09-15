@@ -57,15 +57,6 @@ namespace RPCC.Tasks
             this.labelExp = new System.Windows.Forms.Label();
             this.textBoxExpN = new System.Windows.Forms.TextBox();
             this.labelExpN = new System.Windows.Forms.Label();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.textBoxYend = new System.Windows.Forms.TextBox();
-            this.labelYend = new System.Windows.Forms.Label();
-            this.textBoxYstart = new System.Windows.Forms.TextBox();
-            this.labelYstart = new System.Windows.Forms.Label();
-            this.textBoxXend = new System.Windows.Forms.TextBox();
-            this.labelXend = new System.Windows.Forms.Label();
-            this.textBoxXstart = new System.Windows.Forms.TextBox();
-            this.labelXstart = new System.Windows.Forms.Label();
             this.groupBoxFilters = new System.Windows.Forms.GroupBox();
             this.checkBoxFili = new System.Windows.Forms.CheckBox();
             this.checkBoxFilr = new System.Windows.Forms.CheckBox();
@@ -77,7 +68,6 @@ namespace RPCC.Tasks
             this.groupBoxFrame.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox2.SuspendLayout();
-            this.groupBox1.SuspendLayout();
             this.groupBoxFilters.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -172,12 +162,11 @@ namespace RPCC.Tasks
             // 
             this.groupBoxFrame.Controls.Add(this.groupBox3);
             this.groupBoxFrame.Controls.Add(this.groupBox2);
-            this.groupBoxFrame.Controls.Add(this.groupBox1);
             this.groupBoxFrame.Controls.Add(this.groupBoxFilters);
             this.groupBoxFrame.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (204)));
             this.groupBoxFrame.Location = new System.Drawing.Point(12, 180);
             this.groupBoxFrame.Name = "groupBoxFrame";
-            this.groupBoxFrame.Size = new System.Drawing.Size(433, 294);
+            this.groupBoxFrame.Size = new System.Drawing.Size(433, 200);
             this.groupBoxFrame.TabIndex = 1;
             this.groupBoxFrame.TabStop = false;
             this.groupBoxFrame.Text = "Frames";
@@ -188,9 +177,9 @@ namespace RPCC.Tasks
             this.groupBox3.Controls.Add(this.labelYbin);
             this.groupBox3.Controls.Add(this.textBoxXbin);
             this.groupBox3.Controls.Add(this.labelXbin);
-            this.groupBox3.Location = new System.Drawing.Point(9, 123);
+            this.groupBox3.Location = new System.Drawing.Point(247, 25);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(102, 162);
+            this.groupBox3.Size = new System.Drawing.Size(102, 160);
             this.groupBox3.TabIndex = 27;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Binning";
@@ -239,21 +228,21 @@ namespace RPCC.Tasks
             this.groupBox2.Controls.Add(this.labelExpN);
             this.groupBox2.Location = new System.Drawing.Point(8, 25);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(415, 92);
+            this.groupBox2.Size = new System.Drawing.Size(233, 160);
             this.groupBox2.TabIndex = 26;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Exposures";
             // 
             // textBoxDuration
             // 
-            this.textBoxDuration.Location = new System.Drawing.Point(183, 50);
+            this.textBoxDuration.Location = new System.Drawing.Point(14, 118);
             this.textBoxDuration.Name = "textBoxDuration";
             this.textBoxDuration.Size = new System.Drawing.Size(93, 26);
             this.textBoxDuration.TabIndex = 30;
             // 
             // labelDuration
             // 
-            this.labelDuration.Location = new System.Drawing.Point(183, 23);
+            this.labelDuration.Location = new System.Drawing.Point(14, 91);
             this.labelDuration.Name = "labelDuration";
             this.labelDuration.Size = new System.Drawing.Size(93, 23);
             this.labelDuration.TabIndex = 29;
@@ -261,7 +250,7 @@ namespace RPCC.Tasks
             // 
             // labelFrameType
             // 
-            this.labelFrameType.Location = new System.Drawing.Point(302, 22);
+            this.labelFrameType.Location = new System.Drawing.Point(113, 91);
             this.labelFrameType.Name = "labelFrameType";
             this.labelFrameType.Size = new System.Drawing.Size(107, 23);
             this.labelFrameType.TabIndex = 28;
@@ -271,7 +260,7 @@ namespace RPCC.Tasks
             // 
             this.comboBoxFrameType.FormattingEnabled = true;
             this.comboBoxFrameType.Items.AddRange(new object[] {"Light", "Dark", "Flat", "Bias"});
-            this.comboBoxFrameType.Location = new System.Drawing.Point(302, 48);
+            this.comboBoxFrameType.Location = new System.Drawing.Point(113, 117);
             this.comboBoxFrameType.Name = "comboBoxFrameType";
             this.comboBoxFrameType.Size = new System.Drawing.Size(107, 28);
             this.comboBoxFrameType.TabIndex = 27;
@@ -281,15 +270,15 @@ namespace RPCC.Tasks
             // 
             this.comboBoxExp.FormattingEnabled = true;
             this.comboBoxExp.Items.AddRange(new object[] {"2", "5", "10", "15", "20", "30", "50", "80", "120", "180"});
-            this.comboBoxExp.Location = new System.Drawing.Point(85, 49);
+            this.comboBoxExp.Location = new System.Drawing.Point(113, 49);
             this.comboBoxExp.Name = "comboBoxExp";
-            this.comboBoxExp.Size = new System.Drawing.Size(92, 28);
+            this.comboBoxExp.Size = new System.Drawing.Size(107, 28);
             this.comboBoxExp.TabIndex = 15;
             this.comboBoxExp.Text = "2";
             // 
             // labelExp
             // 
-            this.labelExp.Location = new System.Drawing.Point(85, 23);
+            this.labelExp.Location = new System.Drawing.Point(115, 23);
             this.labelExp.Name = "labelExp";
             this.labelExp.Size = new System.Drawing.Size(92, 23);
             this.labelExp.TabIndex = 14;
@@ -299,7 +288,7 @@ namespace RPCC.Tasks
             // 
             this.textBoxExpN.Location = new System.Drawing.Point(14, 50);
             this.textBoxExpN.Name = "textBoxExpN";
-            this.textBoxExpN.Size = new System.Drawing.Size(65, 26);
+            this.textBoxExpN.Size = new System.Drawing.Size(93, 26);
             this.textBoxExpN.TabIndex = 13;
             this.textBoxExpN.Text = "2";
             // 
@@ -311,95 +300,14 @@ namespace RPCC.Tasks
             this.labelExpN.TabIndex = 12;
             this.labelExpN.Text = "Number";
             // 
-            // groupBox1
-            // 
-            this.groupBox1.Controls.Add(this.textBoxYend);
-            this.groupBox1.Controls.Add(this.labelYend);
-            this.groupBox1.Controls.Add(this.textBoxYstart);
-            this.groupBox1.Controls.Add(this.labelYstart);
-            this.groupBox1.Controls.Add(this.textBoxXend);
-            this.groupBox1.Controls.Add(this.labelXend);
-            this.groupBox1.Controls.Add(this.textBoxXstart);
-            this.groupBox1.Controls.Add(this.labelXstart);
-            this.groupBox1.Location = new System.Drawing.Point(117, 123);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(232, 163);
-            this.groupBox1.TabIndex = 25;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Subframe";
-            // 
-            // textBoxYend
-            // 
-            this.textBoxYend.Location = new System.Drawing.Point(117, 123);
-            this.textBoxYend.Name = "textBoxYend";
-            this.textBoxYend.Size = new System.Drawing.Size(65, 26);
-            this.textBoxYend.TabIndex = 35;
-            this.textBoxYend.Text = "2047";
-            // 
-            // labelYend
-            // 
-            this.labelYend.Location = new System.Drawing.Point(117, 99);
-            this.labelYend.Name = "labelYend";
-            this.labelYend.Size = new System.Drawing.Size(65, 23);
-            this.labelYend.TabIndex = 34;
-            this.labelYend.Text = "YEnd";
-            // 
-            // textBoxYstart
-            // 
-            this.textBoxYstart.Location = new System.Drawing.Point(46, 123);
-            this.textBoxYstart.Name = "textBoxYstart";
-            this.textBoxYstart.Size = new System.Drawing.Size(65, 26);
-            this.textBoxYstart.TabIndex = 33;
-            this.textBoxYstart.Text = "0";
-            // 
-            // labelYstart
-            // 
-            this.labelYstart.Location = new System.Drawing.Point(46, 99);
-            this.labelYstart.Name = "labelYstart";
-            this.labelYstart.Size = new System.Drawing.Size(65, 23);
-            this.labelYstart.TabIndex = 32;
-            this.labelYstart.Text = "YStart";
-            // 
-            // textBoxXend
-            // 
-            this.textBoxXend.Location = new System.Drawing.Point(117, 55);
-            this.textBoxXend.Name = "textBoxXend";
-            this.textBoxXend.Size = new System.Drawing.Size(65, 26);
-            this.textBoxXend.TabIndex = 29;
-            this.textBoxXend.Text = "2047";
-            // 
-            // labelXend
-            // 
-            this.labelXend.Location = new System.Drawing.Point(117, 29);
-            this.labelXend.Name = "labelXend";
-            this.labelXend.Size = new System.Drawing.Size(65, 23);
-            this.labelXend.TabIndex = 28;
-            this.labelXend.Text = "XEnd";
-            // 
-            // textBoxXstart
-            // 
-            this.textBoxXstart.Location = new System.Drawing.Point(46, 55);
-            this.textBoxXstart.Name = "textBoxXstart";
-            this.textBoxXstart.Size = new System.Drawing.Size(65, 26);
-            this.textBoxXstart.TabIndex = 27;
-            this.textBoxXstart.Text = "0";
-            // 
-            // labelXstart
-            // 
-            this.labelXstart.Location = new System.Drawing.Point(46, 29);
-            this.labelXstart.Name = "labelXstart";
-            this.labelXstart.Size = new System.Drawing.Size(65, 23);
-            this.labelXstart.TabIndex = 26;
-            this.labelXstart.Text = "XStart";
-            // 
             // groupBoxFilters
             // 
             this.groupBoxFilters.Controls.Add(this.checkBoxFili);
             this.groupBoxFilters.Controls.Add(this.checkBoxFilr);
             this.groupBoxFilters.Controls.Add(this.checkBoxFilg);
-            this.groupBoxFilters.Location = new System.Drawing.Point(356, 123);
+            this.groupBoxFilters.Location = new System.Drawing.Point(355, 25);
             this.groupBoxFilters.Name = "groupBoxFilters";
-            this.groupBoxFilters.Size = new System.Drawing.Size(67, 163);
+            this.groupBoxFilters.Size = new System.Drawing.Size(67, 160);
             this.groupBoxFilters.TabIndex = 24;
             this.groupBoxFilters.TabStop = false;
             this.groupBoxFilters.Text = "Filters";
@@ -439,7 +347,7 @@ namespace RPCC.Tasks
             // 
             // buttonAdd
             // 
-            this.buttonAdd.Location = new System.Drawing.Point(12, 489);
+            this.buttonAdd.Location = new System.Drawing.Point(12, 397);
             this.buttonAdd.Name = "buttonAdd";
             this.buttonAdd.Size = new System.Drawing.Size(86, 31);
             this.buttonAdd.TabIndex = 2;
@@ -449,7 +357,7 @@ namespace RPCC.Tasks
             // 
             // buttonCancel
             // 
-            this.buttonCancel.Location = new System.Drawing.Point(104, 489);
+            this.buttonCancel.Location = new System.Drawing.Point(104, 397);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(86, 31);
             this.buttonCancel.TabIndex = 3;
@@ -459,7 +367,7 @@ namespace RPCC.Tasks
             // 
             // buttonDelete
             // 
-            this.buttonDelete.Location = new System.Drawing.Point(359, 489);
+            this.buttonDelete.Location = new System.Drawing.Point(359, 397);
             this.buttonDelete.Name = "buttonDelete";
             this.buttonDelete.Size = new System.Drawing.Size(86, 31);
             this.buttonDelete.TabIndex = 4;
@@ -471,7 +379,7 @@ namespace RPCC.Tasks
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(455, 541);
+            this.ClientSize = new System.Drawing.Size(455, 448);
             this.Controls.Add(this.buttonDelete);
             this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.buttonAdd);
@@ -487,8 +395,6 @@ namespace RPCC.Tasks
             this.groupBox3.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
             this.groupBoxFilters.ResumeLayout(false);
             this.ResumeLayout(false);
         }
@@ -505,8 +411,6 @@ namespace RPCC.Tasks
         private System.Windows.Forms.ComboBox comboBoxFrameType;
         private System.Windows.Forms.Button buttonAdd;
 
-        private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.Label labelYend;
         private System.Windows.Forms.GroupBox groupBox2;
 
         private System.Windows.Forms.GroupBox groupBoxFilters;
@@ -515,17 +419,9 @@ namespace RPCC.Tasks
         private System.Windows.Forms.CheckBox checkBoxFilr;
         private System.Windows.Forms.CheckBox checkBoxFili;
 
-        private System.Windows.Forms.TextBox textBoxXend;
-
-        private System.Windows.Forms.Label labelXstart;
-        private System.Windows.Forms.TextBox textBoxXstart;
-        private System.Windows.Forms.Label labelXend;
-        private System.Windows.Forms.TextBox textBoxYstart;
-        private System.Windows.Forms.Label labelYstart;
         private System.Windows.Forms.TextBox textBoxYbin;
         private System.Windows.Forms.Label labelYbin;
 
-        private System.Windows.Forms.TextBox textBoxYend;
         private System.Windows.Forms.Label labelFrameType;
 
         private System.Windows.Forms.TextBox textBoxXbin;

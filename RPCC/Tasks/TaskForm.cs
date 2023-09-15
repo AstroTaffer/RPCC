@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
+using RPCC.Utils;
 
 namespace RPCC.Tasks
 {
@@ -29,11 +30,7 @@ namespace RPCC.Tasks
                 textBoxObject.Text = _task.Object;
                 textBoxObserver.Text = _task.Observer;
                 textBoxXbin.Text = _task.Xbin.ToString();
-                textBoxXstart.Text = _task.XSubframeStart.ToString();
-                textBoxXend.Text = _task.XSubframeEnd.ToString();
                 textBoxYbin.Text = _task.Ybin.ToString();
-                textBoxYstart.Text = _task.YSubframeStart.ToString();
-                textBoxYend.Text = _task.YSubframeEnd.ToString();
                 textBoxDateTime.Text = _task.TimeStart.ToString(CultureInfo.CurrentCulture);
                 textBoxExpN.Text = _task.AllFrames.ToString(CultureInfo.CurrentCulture);
 
@@ -73,6 +70,13 @@ namespace RPCC.Tasks
             _task.ComputeRaDec(textBoxCoords.Text);
             _task.TimeAdd = DateTime.UtcNow;
             _task.TimeStart = DateTime.Parse(textBoxDateTime.Text);
+//todo libsofa
+            // if (!CoordinatesManager.CheckElevateLimit(_task.Ra, _task.Dec, _task.TimeStart))
+            // {
+            //     MessageBox.Show(@"Target under elevation limit", @"OK", MessageBoxButtons.OK);
+            //     return;
+            // }
+            
             _task.Exp = short.Parse(comboBoxExp.Text);
 
             if (textBoxDuration.Text == "")
@@ -91,11 +95,7 @@ namespace RPCC.Tasks
             _task.Observer = textBoxObserver.Text;
             _task.Status = 0;
             _task.Xbin = short.Parse(textBoxXbin.Text);
-            _task.XSubframeStart = short.Parse(textBoxXstart.Text);
-            _task.XSubframeEnd = short.Parse(textBoxXend.Text);
             _task.Ybin = short.Parse(textBoxYbin.Text);
-            _task.YSubframeStart = short.Parse(textBoxYstart.Text);
-            _task.YSubframeEnd = short.Parse(textBoxYend.Text);
 
             _task.Filters = fil;
             _task.FrameType = comboBoxFrameType.Text;
