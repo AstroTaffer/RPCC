@@ -13,8 +13,6 @@ namespace RPCC.Utils
         ///     Чтение и запись конфигурационных файлов
         /// </summary>
 
-        // private readonly Logger Logger;
-
         #region Analysis and Plotting
 
         /// <summary>
@@ -236,11 +234,6 @@ namespace RPCC.Utils
 
         #endregion
 
-        // internal Settings()
-        // {
-        //     // Logger = logger;
-        // }
-
         #region ConfigIO
         internal static void LoadXmlConfig(string fileName)
         {
@@ -446,8 +439,8 @@ namespace RPCC.Utils
                     new XElement("сamRoMode", "500KHz")),
                 
                 new XElement("survey",
-                    new XElement("mainOutFolder", "D:\\RoboPhot Data\\Images")),
-                  //new XElement("mainOutFolder", Directory.GetCurrentDirectory())),
+                    new XElement("mainOutFolder", Directory.Exists("D:\\RoboPhot Data\\Images") ?
+                    "D:\\RoboPhot Data\\Images" : Directory.GetCurrentDirectory())),
 
                 new XElement("comms",
                     new XElement("focusComId", 10),
