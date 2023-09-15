@@ -13,8 +13,6 @@ namespace RPCC.Utils
         ///     Чтение и запись конфигурационных файлов
         /// </summary>
 
-        // private readonly Logger Logger;
-
         #region Analysis and Plotting
 
         /// <summary>
@@ -235,11 +233,6 @@ namespace RPCC.Utils
         }
 
         #endregion
-
-        // internal Settings()
-        // {
-        //     // Logger = logger;
-        // }
 
         #region ConfigIO
         internal static void LoadXmlConfig(string fileName)

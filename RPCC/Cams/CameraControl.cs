@@ -171,12 +171,12 @@ namespace RPCC.Cams
                 }
 
                 // 0x00 = FLI_FAN_SPEED_OFF
-                errorLastFliCmd = NativeMethods.FLISetFanSpeed(cams[i].handle, 0x00);
-                if (errorLastFliCmd != 0)
-                {
-                    Logger.AddLogEntry($"WARNING Unable to stop camera {i + 1} cooler");
-                    isAllGood = false;
-                }
+                //errorLastFliCmd = NativeMethods.FLISetFanSpeed(cams[i].handle, 0x00);
+                //if (errorLastFliCmd != 0)
+                //{
+                //    Logger.AddLogEntry($"WARNING Unable to stop camera {i + 1} cooler");
+                //    isAllGood = false;
+                //}
                 
                 errorLastFliCmd = NativeMethods.FLIClose(cams[i].handle);
                 if (errorLastFliCmd != 0)
