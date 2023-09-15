@@ -446,8 +446,8 @@ namespace RPCC.Utils
                     new XElement("сamRoMode", "500KHz")),
                 
                 new XElement("survey",
-                  //new XElement("mainOutFolder", "D:\\RoboPhot Data\\Images")),
-                  new XElement("mainOutFolder", Directory.GetCurrentDirectory())),
+                  new XElement("mainOutFolder", Directory.Exists("D:\\RoboPhot Data\\Images") ? 
+                  "D:\\RoboPhot Data\\Images" : Directory.GetCurrentDirectory())),
 
                 new XElement("comms",
                     new XElement("focusComId", 10),
