@@ -8,9 +8,10 @@ namespace RPCC.Utils
     public static class CoordinatesManager
     {
         public static readonly Transform Trans = new Transform();
-        public static Object3 Moon;
-        public static Object3 Sun;
-        public static OnSurface Observatory;
+
+        private static readonly Object3 Moon;
+        // public static Object3 Sun;
+        private static readonly OnSurface Observatory;
 
         static CoordinatesManager()
         {
@@ -28,9 +29,9 @@ namespace RPCC.Utils
             Moon.Number = Body.Moon;
             Moon.Type = ObjectType.MajorPlanetSunOrMoon;
 
-            Sun.Name = "Sun";
-            Sun.Number = Body.Sun;
-            Sun.Type = ObjectType.MajorPlanetSunOrMoon;
+            // Sun.Name = "Sun";
+            // Sun.Number = Body.Sun;
+            // Sun.Type = ObjectType.MajorPlanetSunOrMoon;
         }
 
         public static double CalculateObjectDistance2Moon(ObservationTask task)
@@ -51,6 +52,8 @@ namespace RPCC.Utils
         public static bool CheckElevateLimit(double ra, double dec, DateTime time)
         {
             Trans.SetJ2000(ra, dec);
+            // Trans.JulianDateUTC = Novas.JulianDate((short) time.Year, 
+            //     (short) time.Month, (short) time.Day, time.Hour+time.Minute/60d + time.Second/3600d);
             Trans.JulianDateUTC = Utilities.JulianDateFromDateTime(time);
             var el = Trans.ElevationTopocentric;
             return el >= 30;

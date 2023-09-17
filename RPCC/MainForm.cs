@@ -73,8 +73,7 @@ namespace RPCC
             // Create timer for focus loop
             FocusTimer.Elapsed += OnTimedEvent_Clock;
             FocusTimer.Interval = 1000;
-            FocusTimer.Start();
-
+            
             // HACK: For the love of god stop exiting the program when something is not connected!
             // Call FindFocusToolStripMenuItem_Click
 
@@ -92,6 +91,7 @@ namespace RPCC
             Tasker.SetHeader();
             Tasker.LoadTasksFromXml();
 
+            FocusTimer.Start();
             timerUi.Start();
             comboBoxImgType.SelectedIndex = 0;
         }

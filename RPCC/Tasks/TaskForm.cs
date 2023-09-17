@@ -70,12 +70,11 @@ namespace RPCC.Tasks
             _task.ComputeRaDec(textBoxCoords.Text);
             _task.TimeAdd = DateTime.UtcNow;
             _task.TimeStart = DateTime.Parse(textBoxDateTime.Text);
-//todo libsofa
-            // if (!CoordinatesManager.CheckElevateLimit(_task.Ra, _task.Dec, _task.TimeStart))
-            // {
-            //     MessageBox.Show(@"Target under elevation limit", @"OK", MessageBoxButtons.OK);
-            //     return;
-            // }
+            if (!CoordinatesManager.CheckElevateLimit(_task.Ra, _task.Dec, _task.TimeStart))
+            {
+                MessageBox.Show(@"Target under elevation limit", @"OK", MessageBoxButtons.OK);
+                return;
+            }
             
             _task.Exp = short.Parse(comboBoxExp.Text);
 

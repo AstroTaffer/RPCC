@@ -80,14 +80,47 @@
     <Reference Include="alglib.net, Version=3.19.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\alglib.net.3.19.0\lib\net48\alglib.net.dll</HintPath>
     </Reference>
+    <Reference Include="ASCOM.Astrometry, Version=6.0.0.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
+      <HintPath>..\packages\ASCOM.Platform.6.5.2\lib\net40\ASCOM.Astrometry.dll</HintPath>
+    </Reference>
+    <Reference Include="ASCOM.Attributes, Version=6.0.0.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
+      <HintPath>..\packages\ASCOM.Platform.6.5.2\lib\net40\ASCOM.Attributes.dll</HintPath>
+    </Reference>
+    <Reference Include="ASCOM.Cache, Version=6.0.0.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
+      <HintPath>..\packages\ASCOM.Platform.6.5.2\lib\net40\ASCOM.Cache.dll</HintPath>
+    </Reference>
+    <Reference Include="ASCOM.Com, Version=1.0.108.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
+      <HintPath>..\packages\ASCOM.Com.Components.1.0.108\lib\netstandard2.0\ASCOM.Com.dll</HintPath>
+    </Reference>
     <Reference Include="ASCOM.Common, Version=1.0.108.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
       <HintPath>..\packages\ASCOM.Common.Components.1.0.108\lib\netstandard2.0\ASCOM.Common.dll</HintPath>
     </Reference>
+    <Reference Include="ASCOM.Controls, Version=6.0.0.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
+      <HintPath>..\packages\ASCOM.Platform.6.5.2\lib\net40\ASCOM.Controls.dll</HintPath>
+    </Reference>
+    <Reference Include="ASCOM.DeviceInterfaces, Version=6.0.0.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
+      <HintPath>..\packages\ASCOM.Platform.6.5.2\lib\net40\ASCOM.DeviceInterfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="ASCOM.DriverAccess, Version=6.0.0.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
+      <HintPath>..\packages\ASCOM.Platform.6.5.2\lib\net40\ASCOM.DriverAccess.dll</HintPath>
+    </Reference>
     <Reference Include="ASCOM.Exceptions, Version=6.0.0.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
-      <HintPath>..\packages\ASCOM.Exception.Library.6.6.1\lib\net35\ASCOM.Exceptions.dll</HintPath>
+      <HintPath>..\packages\ASCOM.Platform.6.5.2\lib\net40\ASCOM.Exceptions.dll</HintPath>
+    </Reference>
+    <Reference Include="ASCOM.Internal.Extensions, Version=6.0.0.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
+      <HintPath>..\packages\ASCOM.Platform.6.5.2\lib\net40\ASCOM.Internal.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="ASCOM.SettingsProvider, Version=6.0.0.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
+      <HintPath>..\packages\ASCOM.Platform.6.5.2\lib\net40\ASCOM.SettingsProvider.dll</HintPath>
     </Reference>
     <Reference Include="ASCOM.Tools, Version=1.0.108.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
       <HintPath>..\packages\ASCOM.Tools.1.0.108\lib\netstandard2.0\ASCOM.Tools.dll</HintPath>
+    </Reference>
+    <Reference Include="ASCOM.Utilities, Version=6.0.0.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
+      <HintPath>..\packages\ASCOM.Platform.6.5.2\lib\net40\ASCOM.Utilities.dll</HintPath>
+    </Reference>
+    <Reference Include="ASCOM.Utilities.Video, Version=6.1.0.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
+      <HintPath>..\packages\ASCOM.Platform.6.5.2\lib\net40\ASCOM.Utilities.Video.dll</HintPath>
     </Reference>
     <Reference Include="CSharpFITS_v1.1, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\CSharpFITS.1.1\lib\Net20\CSharpFITS_v1.1.dll</HintPath>
@@ -97,6 +130,9 @@
     </Reference>
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=6.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.6.0.0\lib\net461\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Win32.Registry, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Win32.Registry.5.0.0\lib\net461\Microsoft.Win32.Registry.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="System" />
@@ -113,6 +149,12 @@
     </Reference>
     <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.6.0.0\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Security.AccessControl, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Security.AccessControl.5.0.0\lib\net461\System.Security.AccessControl.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Security.Principal.Windows, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Security.Principal.Windows.5.0.0\lib\net461\System.Security.Principal.Windows.dll</HintPath>
     </Reference>
     <Reference Include="System.Text.Encodings.Web, Version=6.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Text.Encodings.Web.6.0.0\lib\net461\System.Text.Encodings.Web.dll</HintPath>
@@ -311,8 +353,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Utils\Astrometry.py" />
+    <Content Include="Utils\cio_ra.bin" />
     <Content Include="Utils\FastPhotometry.py" />
     <Content Include="Utils\fwhm_script.py" />
+    <Content Include="Utils\JPLEPH" />
+    <Content Include="Utils\libnovas.dll" />
+    <Content Include="Utils\libsofa.dll" />
     <Content Include="Utils\Photometry_Utils.py" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
