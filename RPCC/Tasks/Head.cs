@@ -22,10 +22,13 @@ namespace RPCC.Tasks
         private static bool _isObserve;
         private static bool _isDoFlats;
         private static bool _isDoDarks;
+        private static bool _isOnPause;
         private static DateTime _lastDarksTime; //TODO add in .cfg
         private static DateTime _lastFlatsTime; //TODO add in .cfg
         private static readonly short[] DarkExps = {2, 5, 10, 15, 20, 30, 50, 80, 120, 180};
 
+        //TODO ADD PAUSE 
+        
         public static void StartThinking()
         {
             ThinkingTimer.Elapsed += Thinking;
@@ -41,6 +44,13 @@ namespace RPCC.Tasks
             }
 
             //end cum
+
+            if (_isOnPause & WeatherDataCollector.Obs)
+            {
+                _isOnPause = false;
+                //doExp();
+            }
+            
             if (!_isObserve & !_isDoDarks & !_isDoFlats & WeatherDataCollector.Flat &
                 ((DateTime.UtcNow - _lastFlatsTime).TotalDays > TotalDays2ReMakeCalibrationFrames)) StartDoFlats();
 
@@ -109,8 +119,7 @@ namespace RPCC.Tasks
         }
 
         private static void StartDoLight()
-        {
-           
+        {   
             _isObserve = true;
             SiTechExeSocket.GoTo(_currentTask.Ra, _currentTask.Dec, true); //проверять доехал ли
             //если доехал, то начинаем снимать 
@@ -128,7 +137,14 @@ namespace RPCC.Tasks
                 var fitsAnalysis = new GetDataFromFits(fitsPath);
                 if (fitsAnalysis.CheckFocused() || !CameraFocus.IsAutoFocus)
                 {
-                    //doExp()
+                    if (WeatherDataCollector.Obs)
+                    {
+                        //doExp()
+                    }
+                    else
+                    {
+                        _isOnPause = true;
+                    }
                 }
                 else
                 {
