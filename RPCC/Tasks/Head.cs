@@ -38,16 +38,20 @@ namespace RPCC.Tasks
 
         private static void Thinking(object sender, ElapsedEventArgs e)
         {
-            if (WeatherDataCollector.Sun >= 90)
+            if (!CameraControl.isConnected & WeatherDataCollector.Sun >= 90)
             {
-                //start cum + условие на работу камеры
+                CameraControl.ReconnectCameras();
             }
 
-            //end cum
+            if (CameraControl.isConnected & WeatherDataCollector.Sun < 89)
+            {
+                CameraControl.DisconnectCameras();
+            }
 
             if (_isOnPause & WeatherDataCollector.Obs)
             {
                 _isOnPause = false;
+                
                 //doExp();
             }
             
@@ -126,7 +130,8 @@ namespace RPCC.Tasks
             if (!CameraControl.PrepareToObs(_currentTask)) return;
             _currentTask.Status = 1;
             Logger.AddLogEntry($"Start task# {_currentTask.TaskNumber}, type: {_currentTask.FrameType}");
-            //doExp()
+            CameraControl.PrepareToObs(_currentTask);
+            //TODO doExp()
         }
 
         private static void CamCallback(string fitsPath)
@@ -139,7 +144,7 @@ namespace RPCC.Tasks
                 {
                     if (WeatherDataCollector.Obs)
                     {
-                        //doExp()
+                        //TODO doExp()
                     }
                     else
                     {
@@ -187,6 +192,7 @@ namespace RPCC.Tasks
             _isDoFlats = true;
             //TODO FLAT
             SiTechExeSocket.GoTo(task.Ra, task.Dec, true); //проверять доехал ли
+            CameraControl.PrepareToObs(task);
             // начать делать экспозиции (автофокус выкл)
         }
 
@@ -220,6 +226,7 @@ namespace RPCC.Tasks
         {
             Logger.AddLogEntry($"Start task# {task.TaskNumber}, type: {task.FrameType}");
             _isDoDarks = true;
+            CameraControl.PrepareToObs(task);
             //TODO DARK
             // начать делать экспозиции (автофокус выкл)
         }
