@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using RPCC.Cams;
 using RPCC.Comms;
 using RPCC.Tasks;
 using RPCC.Utils;
@@ -37,6 +38,7 @@ namespace RPCC.Focus
         public static void StartAutoFocus(ObservationTask observationTask)
         {
             _task = observationTask;
+            _task.FrameType = "focus";
             _focCycles = 0; //
             _focBadFrames = 0; //
             Frames.Clear();
@@ -50,12 +52,12 @@ namespace RPCC.Focus
             _sumShift += _shift;
             Logger.AddLogEntry("FOCUS: SumShift=" + _sumShift);
             _focCycles++;
-            //TODO prepare to focus image
+            CameraControl.PrepareToObs(_task);
             GetImForFocus(_shift);
         }
         
             
-        private static void CamFocusCallBack(string focusImPath)
+        public static void CamFocusCallBack(string focusImPath)
         {
             if (_task.Status != 1) 
             {
@@ -69,7 +71,7 @@ namespace RPCC.Focus
             if (!IsAutoFocus)
             {
                 Logger.AddLogEntry("FOCUS: Autofocus disable, exit");
-                SerialFocus.FRun_To(-1 * _sumShift);
+                ReturnFocusAndExit();
                 FwhmBest = 0;
                 return;
             }
@@ -93,6 +95,7 @@ namespace RPCC.Focus
             }
         }
 
+        #region Phases
         private static void PhaseOne(string focusImPath)
         {
             if (IsZenith)
@@ -113,9 +116,8 @@ namespace RPCC.Focus
             if (!Frames.Last().Status)
             {
                 Logger.AddLogEntry("FOCUS: FWHM information is not available, return focus and exit");
-                SerialFocus.FRun_To(-1 * _sumShift);
                 FwhmBest = 0;
-                //TODO doExp();
+                ReturnFocusAndExit();
                 return;
             }
             
@@ -129,7 +131,7 @@ namespace RPCC.Focus
                     if (IsZenith)
                     {
                         Logger.AddLogEntry("FOCUS: Bad frames limit at Zenith, exit");
-                        //TODO doExp();
+                        ReturnFocusAndExit();
                         return;
                     }
                     Logger.AddLogEntry("FOCUS: Bad frames limit, repoint to Zenith");
@@ -162,9 +164,8 @@ namespace RPCC.Focus
             if (_focBadFrames >= MaxFocBadFrames)
             {
                 Logger.AddLogEntry("FOCUS: can't defocus, bad frames limit, return focus and exit");
-                SerialFocus.FRun_To(-1 * _sumShift);
+                ReturnFocusAndExit();
                 FwhmBest = 0;
-                //TODO doExp();
                 return;
             }
 
@@ -172,9 +173,8 @@ namespace RPCC.Focus
             if (Frames.Last().Fwhm < 6.0)
             {
                 Logger.AddLogEntry($"FOCUS: can't defocus after {MaxFocCycles} iterations, return focus and exit");
-                SerialFocus.FRun_To(-1 * _sumShift);
                 FwhmBest = 0;
-                //TODO doExp();
+                ReturnFocusAndExit();
                 return; //что-то сломалось, выходим
             }
 
@@ -199,9 +199,8 @@ namespace RPCC.Focus
             if (!Frames.Last().Status)
             {
                 Logger.AddLogEntry("FWHM information is not available, return focus and exit");
-                SerialFocus.FRun_To(-1 * _sumShift);
                 FwhmBest = 0;
-                //TODO doExp();
+                ReturnFocusAndExit();
                 return;
             }
 
@@ -215,7 +214,7 @@ namespace RPCC.Focus
                     if (IsZenith)
                     {
                         Logger.AddLogEntry("FOCUS: Bad frames limit at Zenith, exit");
-                        //TODO doExp();
+                        ReturnFocusAndExit();
                         return;
                     }
 
@@ -245,13 +244,8 @@ namespace RPCC.Focus
             if (fwhm < 2.2 || _oldFwhm < fwhm || Math.Abs(_oldFwhm - fwhm) < 0.2)
             {
                 Logger.AddLogEntry("FOCUS: image is focused");
-                if (DeFocus != 0)
-                {
-                    Logger.AddLogEntry("FOCUS: defocus to " + DeFocus);
-                    SerialFocus.FRun_To(DeFocus);
-                }
                 FwhmBest = Frames.Last().Fwhm;
-                //TODO doExp();
+                FocusingDone();
                 return;
             }
             if(_focCycles < MaxFocCycles && _focBadFrames < MaxFocBadFrames)
@@ -260,10 +254,9 @@ namespace RPCC.Focus
                 //сдвиг считаем как 45*(FWHM-1.5), тогда должны дойти до фокуса за 4-5 шагов.
                 _shift = (short) (Math.Sign(_shift) * 45 * (fwhm - 1.5));
                 _sumShift += _shift;
-                GetImForFocus(_shift);
                 Logger.AddLogEntry("FOCUS: SumShift=" + _sumShift);
                 _focCycles++;
-                //TODO doExp();
+                GetImForFocus(_shift);
                 return;
             }
             
@@ -274,18 +267,16 @@ namespace RPCC.Focus
             if (_task.Status != 1 || !IsAutoFocus)
             {
                 Logger.AddLogEntry("FOCUS: aborted, return focus and exit");
-                SerialFocus.FRun_To(-1 * _sumShift);
                 FwhmBest = 0;
-                //TODO doExp();
+                ReturnFocusAndExit();
                 return;
             }
 
             if (_focBadFrames >= MaxFocBadFrames)
             {
                 Logger.AddLogEntry("FOCUS: Bad frames limit, return focus and exit");
-                SerialFocus.FRun_To(-1 * _sumShift);
                 FwhmBest = 0;
-                //TODO doExp();
+                ReturnFocusAndExit();
                 return;
             }
             
@@ -317,14 +308,7 @@ namespace RPCC.Focus
             {
                 FwhmBest = testShot.Fwhm;
                 Logger.AddLogEntry("FOCUS: image is focused");
-                if (DeFocus == 0)
-                {
-                    //TODO doExp();
-                    return;
-                }
-                Logger.AddLogEntry("FOCUS: defocus to " + DeFocus);
-                SerialFocus.FRun_To(DeFocus);
-                //TODO doExp();
+                FocusingDone();
                 return;
             }
             
@@ -380,14 +364,7 @@ namespace RPCC.Focus
             {
                 FwhmBest = testShot.Fwhm;
                 Logger.AddLogEntry("FOCUS: image is focused");
-                if (DeFocus == 0)
-                {
-                    //TODO doExp();
-                    return;
-                }
-                Logger.AddLogEntry("FOCUS: defocus to " + DeFocus);
-                SerialFocus.FRun_To(DeFocus);
-                //TODO doExp();
+                FocusingDone();
                 return;
             }
 
@@ -396,6 +373,9 @@ namespace RPCC.Focus
             FwhmBest = 0;
         }
 
+        #endregion
+
+        #region Utils
         private static void Repoint4Focus()
         {
             IsZenith = true;
@@ -406,12 +386,29 @@ namespace RPCC.Focus
         private static void GetImForFocus(int z)
         {
             SerialFocus.FRun_To(z);
-            // TODO get im
-            // CamCtrl.MakeFocusIm();
-            // return new GetDataFromFits("path", true);
+            CameraControl.Expose();
         }
 
+        private static void ReturnFocusAndExit()
+        {
+            SerialFocus.FRun_To(-1 * _sumShift);
+            FocusingDone();
+        }
 
+        private static void FocusingDone()
+        {
+            if (DeFocus != 0)
+            {
+                Logger.AddLogEntry("FOCUS: defocus to " + DeFocus);
+                SerialFocus.FRun_To(DeFocus);
+            }
+            _task.FrameType = "light";
+            CameraControl.PrepareToObs(_task);
+            CameraControl.Expose();
+        }
+        
+        #endregion
+        
         #region Curve
 
         private static int Curve_fitting(IReadOnlyList<int> zs, List<double> fwhms, double minC = -203.950)

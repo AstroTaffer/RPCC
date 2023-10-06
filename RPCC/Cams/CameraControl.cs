@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Timers;
+using RPCC.Focus;
 
 namespace RPCC.Cams
 {
@@ -459,6 +460,13 @@ namespace RPCC.Cams
         #endregion
 
         #region Expose & Read Frames
+
+        internal static void Expose()
+        {
+            
+            // Head.CamCallback();
+            // CameraFocus.CamFocusCallBack();
+        }
         #endregion
 
         #region Lock & Unlock cameras

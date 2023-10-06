@@ -119,6 +119,7 @@ namespace RPCC.Tasks
             _isObserve = false;
             _isDoDarks = false;
             _isDoFlats = false;
+            _isOnPause = false;
             _currentTask = null;
         }
 
@@ -131,10 +132,10 @@ namespace RPCC.Tasks
             _currentTask.Status = 1;
             Logger.AddLogEntry($"Start task# {_currentTask.TaskNumber}, type: {_currentTask.FrameType}");
             CameraControl.PrepareToObs(_currentTask);
-            //TODO doExp()
+            CameraControl.Expose();
         }
 
-        private static void CamCallback(string fitsPath)
+        public static void CamCallback(string fitsPath)
         {
             if (_currentTask.TimeEnd > DateTime.UtcNow)
             {
