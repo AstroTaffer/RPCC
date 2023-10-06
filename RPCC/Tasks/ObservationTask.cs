@@ -47,7 +47,7 @@ namespace RPCC.Tasks
 
         public int TaskNumber { get; set; }
 
-//light, dark, flat
+//light, dark, flat, focus
         public string FrameType { get; set; }
 
         public string Filters { get; set; } = "g r i";

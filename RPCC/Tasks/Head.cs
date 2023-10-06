@@ -15,7 +15,6 @@ namespace RPCC.Tasks
         private const short TotalMinutes2StartTask = 5; //TODO add in .cfg
         private const short TotalDays2ReMakeCalibrationFrames = 30; //TODO add in .cfg
         private const short FlatExp = 2; // in s 
-
         private const short FlatDarkQuantity = 10; //TODO add in .cfg
         private static readonly Timer ThinkingTimer = new Timer();
         private static ObservationTask _currentTask;
@@ -27,7 +26,6 @@ namespace RPCC.Tasks
         private static DateTime _lastFlatsTime; //TODO add in .cfg
         private static readonly short[] DarkExps = {2, 5, 10, 15, 20, 30, 50, 80, 120, 180};
 
-        //TODO ADD PAUSE 
         
         public static void StartThinking()
         {
@@ -51,15 +49,14 @@ namespace RPCC.Tasks
             if (_isOnPause & WeatherDataCollector.Obs)
             {
                 _isOnPause = false;
-                
-                //doExp();
+                CameraControl.Expose();
             }
             
             if (!_isObserve & !_isDoDarks & !_isDoFlats & WeatherDataCollector.Flat &
-                ((DateTime.UtcNow - _lastFlatsTime).TotalDays > TotalDays2ReMakeCalibrationFrames)) StartDoFlats();
+                ((DateTime.UtcNow - _lastFlatsTime).TotalDays > TotalDays2ReMakeCalibrationFrames)) PrepareAndStartDoFlats();
 
             if (!_isObserve & !_isDoDarks & !_isDoFlats & !WeatherDataCollector.Obs &
-                ((DateTime.UtcNow - _lastDarksTime).TotalDays > TotalDays2ReMakeCalibrationFrames)) StartDoDarks();
+                ((DateTime.UtcNow - _lastDarksTime).TotalDays > TotalDays2ReMakeCalibrationFrames)) PrepareAndStartDoDarks();
 
             foreach (DataGridViewRow row in Tasker.dataGridViewTasker.Rows)
             {
@@ -72,7 +69,7 @@ namespace RPCC.Tasks
                 {
                     if (bufTask.Status == 1)
                     {
-                        EndTask(_currentTask.DoneFrames < _currentTask.AllFrames ? (short) 5 : (short) 2, _currentTask);
+                        EndTask(_currentTask.DoneFrames < _currentTask.AllFrames ? (short) 5 : (short) 2);
                     }
                     else
                     {
@@ -108,14 +105,14 @@ namespace RPCC.Tasks
         {
             Tasker.UpdateTaskInTable(_currentTask);
             if (_currentTask.FrameType == "light") StartDoLight();
-            if (_currentTask.FrameType == "dark") StartDoDark(_currentTask);
-            if (_currentTask.FrameType == "flat") StartDoFlats(_currentTask);
+            if (_currentTask.FrameType == "dark") StartDoDark();
+            if (_currentTask.FrameType == "flat") StartDoFlats();
         }
 
-        private static void EndTask(short endStatus, ObservationTask task)
+        private static void EndTask(short endStatus)
         {
-            task.Status = endStatus;
-            Tasker.UpdateTaskInTable(task);
+            _currentTask.Status = endStatus;
+            Tasker.UpdateTaskInTable(_currentTask);
             _isObserve = false;
             _isDoDarks = false;
             _isDoFlats = false;
@@ -128,108 +125,112 @@ namespace RPCC.Tasks
             _isObserve = true;
             SiTechExeSocket.GoTo(_currentTask.Ra, _currentTask.Dec, true); //проверять доехал ли
             //если доехал, то начинаем снимать 
-            if (!CameraControl.PrepareToObs(_currentTask)) return;
             _currentTask.Status = 1;
             Logger.AddLogEntry($"Start task# {_currentTask.TaskNumber}, type: {_currentTask.FrameType}");
-            CameraControl.PrepareToObs(_currentTask);
+            if (!CameraControl.PrepareToObs(_currentTask)) return;  //не удалось подготовиться к наблюдению  
             CameraControl.Expose();
         }
 
         public static void CamCallback(string fitsPath)
         {
-            if (_currentTask.TimeEnd > DateTime.UtcNow)
+            if (_currentTask.FrameType == "light")
             {
-                Tasker.UpdateTaskInTable(_currentTask);
-                var fitsAnalysis = new GetDataFromFits(fitsPath);
-                if (fitsAnalysis.CheckFocused() || !CameraFocus.IsAutoFocus)
+                if (_currentTask.TimeEnd > DateTime.UtcNow)
                 {
-                    if (WeatherDataCollector.Obs)
+                    Tasker.UpdateTaskInTable(_currentTask);
+                    var fitsAnalysis = new GetDataFromFits(fitsPath);
+                    if (fitsAnalysis.CheckFocused() || !CameraFocus.IsAutoFocus)
                     {
-                        //TODO doExp()
+                        if (WeatherDataCollector.Obs) CameraControl.Expose();
+                        else _isOnPause = true;
                     }
-                    else
-                    {
-                        _isOnPause = true;
-                    }
+                    else CameraFocus.StartAutoFocus(_currentTask);
+                    
+                    //asinc doAstrometry() 
+                    //asinc doDonuts()
+                    
                 }
-                else
-                {
-                    CameraFocus.StartAutoFocus(_currentTask);
-                }
-                
-                //asinc doAstrometry() 
-                //asinc doDonuts()
-                return;
+                else EndTask(_currentTask.DoneFrames < _currentTask.AllFrames ? (short) 5 : (short) 2);
             }
-
-            EndTask(_currentTask.DoneFrames < _currentTask.AllFrames ? (short) 5 : (short) 2, _currentTask);
+            else
+            {
+                if (_currentTask.DoneFrames < _currentTask.AllFrames)
+                {
+                    CameraControl.Expose();
+                    _currentTask.DoneFrames++;
+                }
+                else EndTask(2);
+            }
         }
 
         #region Flats
 
-        private static void StartDoFlats()
+        private static void PrepareAndStartDoFlats()
         {
-            var flatTask = new ObservationTask();
-            flatTask.Exp = FlatExp;
-            flatTask.TaskNumber = Tasker.GetTasksLen();
-            flatTask.TimeAdd = DateTime.UtcNow;
-            flatTask.TimeStart = DateTime.UtcNow;
-            flatTask.TimeEnd = DateTime.UtcNow.AddMinutes(FlatExp * FlatDarkQuantity / 6.0);
-            flatTask.AllFrames = FlatDarkQuantity;
+            var flatTask = new ObservationTask
+            {
+                Exp = FlatExp,
+                TaskNumber = Tasker.GetTasksLen(),
+                TimeAdd = DateTime.UtcNow,
+                TimeStart = DateTime.UtcNow,
+                TimeEnd = DateTime.UtcNow.AddMinutes(FlatExp * FlatDarkQuantity / 6.0),
+                AllFrames = FlatDarkQuantity,
+                Status = 1,
+                FrameType = "flat"
+            };
             flatTask.Duration = (float) (flatTask.TimeEnd - flatTask.TimeStart).TotalHours;
-            flatTask.Status = 1;
-            flatTask.FrameType = "flat";
             var zenRaDec = SiTechExeSocket.GoToAltAz(180, 90);
             flatTask.ComputeRaDec($"{Utilities.HoursToHMS(zenRaDec[0])} " +
                                   $"{Utilities.DegreesToDMS(zenRaDec[1])}");
             Tasker.AddTask(flatTask);
-            StartDoFlats(flatTask);
+            _currentTask = flatTask;
+            StartDoFlats();
             _lastFlatsTime = DateTime.UtcNow;
         }
 
-        private static void StartDoFlats(ObservationTask task)
+        private static void StartDoFlats()
         {
-            Logger.AddLogEntry($"Start task# {task.TaskNumber}, type: {task.FrameType}");
+            Logger.AddLogEntry($"Start task# {_currentTask.TaskNumber}, type: {_currentTask.FrameType}");
             _isDoFlats = true;
-            //TODO FLAT
-            SiTechExeSocket.GoTo(task.Ra, task.Dec, true); //проверять доехал ли
-            CameraControl.PrepareToObs(task);
-            // начать делать экспозиции (автофокус выкл)
+            SiTechExeSocket.GoTo(_currentTask.Ra, _currentTask.Dec, true); //проверять доехал ли
+            CameraControl.PrepareToObs(_currentTask);
+            CameraControl.Expose();
         }
 
         #endregion
 
         #region Dark
 
-        private static void StartDoDarks()
+        private static void PrepareAndStartDoDarks()
         {
-            foreach (var exp in DarkExps)
-            {
-                var darkTask = new ObservationTask();
-                darkTask.TaskNumber = Tasker.GetTasksLen();
-                darkTask.FrameType = "dark";
-                darkTask.Exp = exp;
-                darkTask.Status = 1;
-                darkTask.AllFrames = FlatDarkQuantity;
-                darkTask.TimeAdd = DateTime.UtcNow;
-                darkTask.TimeStart = DateTime.UtcNow;
+            foreach (var exp in DarkExps)//TODO 
+            { 
+                var darkTask = new ObservationTask
+                {
+                    TaskNumber = Tasker.GetTasksLen(),
+                    FrameType = "dark",
+                    Exp = exp,
+                    Status = 1,
+                    AllFrames = FlatDarkQuantity,
+                    TimeAdd = DateTime.UtcNow,
+                    TimeStart = DateTime.UtcNow
+                };
                 darkTask.TimeEnd = darkTask.TimeStart.AddMinutes((short) (FlatDarkQuantity * exp / 60) + 3);
                 darkTask.Duration = (float) (darkTask.TimeEnd - darkTask.TimeStart).TotalHours;
                 Tasker.AddTask(darkTask);
-
-                StartDoDark(darkTask);
+                _currentTask = darkTask;
+                StartDoDark();
             }
 
             _lastDarksTime = DateTime.UtcNow;
         }
 
-        private static void StartDoDark(ObservationTask task)
+        private static void StartDoDark()
         {
-            Logger.AddLogEntry($"Start task# {task.TaskNumber}, type: {task.FrameType}");
+            Logger.AddLogEntry($"Start task# {_currentTask.TaskNumber}, type: {_currentTask.FrameType}");
             _isDoDarks = true;
-            CameraControl.PrepareToObs(task);
-            //TODO DARK
-            // начать делать экспозиции (автофокус выкл)
+            CameraControl.PrepareToObs(_currentTask);
+            CameraControl.Expose();
         }
 
         #endregion
