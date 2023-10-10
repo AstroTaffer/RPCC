@@ -120,29 +120,41 @@ namespace RPCC
         {
             tSStatusClock.Text = @"UTC: " + DateTime.UtcNow.ToString("yyyy-MM-ddTHH-mm-ss");
 
-            switch (CameraControl.cams.Length)
+            try
             {
-                case 3:
-                    labelCam3CcdTemp.Text = $"CCD Temp: {CameraControl.cams[2].ccdTemp:F3}";
-                    labelCam3BaseTemp.Text = $"Base Temp: {CameraControl.cams[2].baseTemp:F3}";
-                    labelCam3CoolerPwr.Text = $"Cooler Power: {CameraControl.cams[2].coolerPwr} %";
-                    labelCam3Status.Text = $"Status: {CameraControl.cams[2].status}";
-                    labelCam3RemTime.Text = $"Remaining: {CameraControl.cams[2].remTime / 1000}";
-                    goto case 2;
-                case 2:
-                    labelCam2CcdTemp.Text = $"CCD Temp: {CameraControl.cams[1].ccdTemp:F3}";
-                    labelCam2BaseTemp.Text = $"Base Temp: {CameraControl.cams[1].baseTemp:F3}";
-                    labelCam2CoolerPwr.Text = $"Cooler Power: {CameraControl.cams[1].coolerPwr} %";
-                    labelCam2Status.Text = $"Status: {CameraControl.cams[1].status}";
-                    labelCam2RemTime.Text = $"Remaining: {CameraControl.cams[1].remTime / 1000}";
-                    goto case 1;
-                case 1:
-                    labelCam1CcdTemp.Text = $"CCD Temp: {CameraControl.cams[0].ccdTemp:F3}";
-                    labelCam1BaseTemp.Text = $"Base Temp: {CameraControl.cams[0].baseTemp:F3}";
-                    labelCam1CoolerPwr.Text = $"Cooler Power: {CameraControl.cams[0].coolerPwr} %";
-                    labelCam1Status.Text = $"Status: {CameraControl.cams[0].status}";
-                    labelCam1RemTime.Text = $"Remaining: {CameraControl.cams[0].remTime / 1000}";
-                    break;
+                switch (CameraControl.cams.Length)
+                {
+                    case 3:
+                        labelCam3CcdTemp.Text = $"CCD Temp: {CameraControl.cams[2].ccdTemp:F3}";
+                        labelCam3BaseTemp.Text = $"Base Temp: {CameraControl.cams[2].baseTemp:F3}";
+                        labelCam3CoolerPwr.Text = $"Cooler Power: {CameraControl.cams[2].coolerPwr} %";
+                        labelCam3Status.Text = $"Status: {CameraControl.cams[2].status}";
+                        labelCam3RemTime.Text = $"Remaining: {CameraControl.cams[2].remTime / 1000}";
+                        goto case 2;
+                    case 2:
+                        labelCam2CcdTemp.Text = $"CCD Temp: {CameraControl.cams[1].ccdTemp:F3}";
+                        labelCam2BaseTemp.Text = $"Base Temp: {CameraControl.cams[1].baseTemp:F3}";
+                        labelCam2CoolerPwr.Text = $"Cooler Power: {CameraControl.cams[1].coolerPwr} %";
+                        labelCam2Status.Text = $"Status: {CameraControl.cams[1].status}";
+                        labelCam2RemTime.Text = $"Remaining: {CameraControl.cams[1].remTime / 1000}";
+                        goto case 1;
+                    case 1:
+                        labelCam1CcdTemp.Text = $"CCD Temp: {CameraControl.cams[0].ccdTemp:F3}";
+                        labelCam1BaseTemp.Text = $"Base Temp: {CameraControl.cams[0].baseTemp:F3}";
+                        labelCam1CoolerPwr.Text = $"Cooler Power: {CameraControl.cams[0].coolerPwr} %";
+                        labelCam1Status.Text = $"Status: {CameraControl.cams[0].status}";
+                        labelCam1RemTime.Text = $"Remaining: {CameraControl.cams[0].remTime / 1000}";
+                        break;
+                }
+            }
+            catch (IndexOutOfRangeException)
+            {
+                Logger.AddLogEntry("WARNING Cameras list has been reset while updating GUI");
+                // If the cameras have been disconnected when we were updating the labels,
+                // IndexOutOfRangeException will be raised and silenced. It's not the best solution,
+                // but Monitor.Enter will stop the GUI thread and Monitor.TryEnter may cause some
+                // loops to be skipped if GUI timer and Cams timer would elapse at the same time.
+                // Though I think it's really unlikely. Use Monitor.TryEnter in case of bugs.
             }
 
             //_idleCamNum = 0;
