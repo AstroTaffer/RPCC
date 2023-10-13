@@ -29,6 +29,7 @@ namespace RPCC.Focus
 
         public GetDataFromFits(string path2Fits)
         {
+            if (string.IsNullOrEmpty(path2Fits)) return;
             var fits = new Fits(path2Fits);
             var outputFile = path2Fits.Replace("fits", "cat");
             _path2Cat = outputFile;

@@ -56,9 +56,16 @@ namespace RPCC.Focus
             GetImForFocus(_shift);
         }
         
-            
-        public static void CamFocusCallBack(string focusImPath)
+        public static void CamFocusCallback()
         {
+            var focusImPath = CameraControl.cams.Last().latestImageFilename;
+            if (string.IsNullOrEmpty(focusImPath))
+            {
+                Logger.AddLogEntry("CamFocusCallback: no data available, stop obs");
+                _task.FrameType = "light";
+                Head.EndTask(5);
+                return;
+            }
             if (_task.Status != 1) 
             {
                 Logger.AddLogEntry("FOCUS: task ended, return focus and exit");
@@ -386,7 +393,7 @@ namespace RPCC.Focus
         private static void GetImForFocus(int z)
         {
             SerialFocus.FRun_To(z);
-            CameraControl.Expose();
+            CameraControl.StartExposure();
         }
 
         private static void ReturnFocusAndExit()
@@ -404,7 +411,7 @@ namespace RPCC.Focus
             }
             _task.FrameType = "light";
             CameraControl.PrepareToObs(_task);
-            CameraControl.Expose();
+            CameraControl.StartExposure();
         }
         
         #endregion

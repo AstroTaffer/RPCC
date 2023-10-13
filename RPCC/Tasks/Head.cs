@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Timers;
 using System.Windows.Forms;
 using ASCOM.Tools;
@@ -116,7 +117,7 @@ namespace RPCC.Tasks
             if (_currentTask.FrameType == "flat") StartDoFlats();
         }
 
-        private static void EndTask(short endStatus)
+        public static void EndTask(short endStatus)
         {
             _currentTask.Status = endStatus;
             Tasker.UpdateTaskInTable(_currentTask);
@@ -138,14 +139,29 @@ namespace RPCC.Tasks
             CameraControl.StartExposure();
         }
 
-        public static void CamCallback(string fitsPath)
+        public static void CamCallback()
         {
+            GetDataFromFits fitsAnalysis = null;
+            
             if (_currentTask.FrameType == "light")
             {
                 if (_currentTask.TimeEnd > DateTime.UtcNow)
                 {
                     Tasker.UpdateTaskInTable(_currentTask);
-                    var fitsAnalysis = new GetDataFromFits(fitsPath);
+                    foreach (var cam in CameraControl.cams)
+                    {
+                        if (!string.IsNullOrEmpty(cam.latestImageFilename))
+                        {
+                            fitsAnalysis =  new GetDataFromFits(cam.latestImageFilename); //TODO распараллелить
+                        }
+                    }
+
+                    if (fitsAnalysis == null)
+                    {
+                        Logger.AddLogEntry("CamCallback: no data available, stop obs");
+                        EndTask(5);
+                        return;
+                    }
                     if (fitsAnalysis.CheckFocused() || !CameraFocus.IsAutoFocus)
                     {
                         if (WeatherDataCollector.Obs) CameraControl.StartExposure();

@@ -235,7 +235,7 @@ namespace RPCC.Cams
                     switch (loadedTask.FrameType)
                     {
                         case "Focus":
-                            CameraFocus.CamFocusCallBack();
+                            CameraFocus.CamFocusCallback();
                             break;
                         default:
                             Head.CamCallback();
