@@ -22,23 +22,12 @@ namespace RPCC
         ///     Логика работы основной формы программы
         ///     Обработка команд пользователя с помощью вызова готовых функций
         /// </summary>
-        // private readonly Logger Logger;
-        // private Settings Settings;
-
-        //private ushort[][] _currentImage;        
         //private GeneralImageStat _currentImageGStat;
         //private bool _isCurrentImageLoaded;
         //private bool _isZoomModeActivated;
 
-        //private int _idleCamNum;
-
         private readonly WeatherSocket _domeSocket;
-        // private readonly WeatherDataCollector _weatherDc;
-        
         private readonly DonutsSocket _donutsSocket;
-        
-        // private readonly SiTechExeSocket SiTechExeSocket;
-        // private readonly MountDataCollector _mountDc;
 
         private static readonly System.Timers.Timer FocusTimer = new System.Timers.Timer();
 
@@ -156,60 +145,6 @@ namespace RPCC
                 // loops to be skipped if GUI timer and Cams timer would elapse at the same time.
                 // Though I think it's really unlikely. Use Monitor.TryEnter in case of bugs.
             }
-
-            //_idleCamNum = 0;
-            //for (int i = 0; i < _cameraControl.cameras.Length; i++)
-            //{
-            //    if (_cameraControl.cameras[i].status == "IDLE")
-            //    {
-            //        _idleCamNum++;
-            //        if (_cameraControl.cameras[i].isExposing)
-            //        {
-            //            // Image ready
-
-            //            // TODO: Move to separate thread
-            //            RpccFits imageFits = _cameraControl.ReadImage(_cameraControl.cameras[i]);
-
-            //            imageFits.SaveFitsFile(_cameraControl, _cameraFocus.SerialFocus.CurrentPosition, i);
-
-            //            if (i == _cameraControl.task.viewCamIndex)
-            //            {
-            //                _isCurrentImageLoaded = false;
-            //                _currentImage = imageFits.data;
-            //                _currentImageGStat = new GeneralImageStat(_currentImage);
-            //                Logger.AddLogEntry($"Min: {_currentImageGStat.min}; " +
-            //                    $"Max: {_currentImageGStat.max}; " +
-            //                    $"Mean: {_currentImageGStat.mean:0.##}; " +
-            //                    $"SD: {_currentImageGStat.sd:0.##}");
-            //                PlotFitsImage();
-            //                _isCurrentImageLoaded = true;
-            //            }
-
-            //            // TODO: AUTOFOCUS, check quality
-            //            // _cameraFocus.AutoFocus();
-            //            _cameraControl.cameras[i].isExposing = false;
-            //        }
-            //    }
-            //}
-
-            //if (_idleCamNum == _cameraControl.cameras.Length)
-            //{
-            //    if (_cameraControl.task.framesNum > 1)
-            //    {
-            //        _cameraControl.task.framesNum--;
-            //        numericUpDownSequence.Value = _cameraControl.task.framesNum;
-            //        _cameraControl.StartExposure();
-            //    }
-            //    else if (!buttonSurveyStart.Enabled)
-            //    {
-            //        buttonSurveyStart.Enabled = true;
-            //        comboBoxImgType.Enabled = true;
-            //        numericUpDownSequence.Enabled = true;
-            //        numericUpDownExpTime.Enabled = true;
-            //        updateCamerasSettingsToolStripMenuItem.Enabled = true;
-            //        Logger.AddLogEntry("Survey finished");
-            //    }
-            //}
         }
         
         internal void ResetCamsUi()

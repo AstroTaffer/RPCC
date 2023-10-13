@@ -1,9 +1,12 @@
-﻿using RPCC.Tasks;
+﻿using ASCOM.Tools;
+using RPCC.Focus;
+using RPCC.Tasks;
 using RPCC.Utils;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks;
 using System.Timers;
 
 namespace RPCC.Cams
@@ -18,12 +21,14 @@ namespace RPCC.Cams
         private static readonly Timer _camsTimer = new Timer(1000);
         internal delegate void CallMainForm();
         internal static CallMainForm resetUi;
+        private static readonly List<Task> _readyImagesProcessList = new List<Task>();
+
+        internal static CameraDevice[] cams = Array.Empty<CameraDevice>();
+        internal static ObservationTask loadedTask = new ObservationTask();
 
         internal static bool isConnected = false;
-        internal static bool isFocusing = false;
-
-        private static ObservationTask _loadedTask = new ObservationTask();
-        internal static CameraDevice[] cams = Array.Empty<CameraDevice>();
+        private static bool _isExposing = false;
+        private static int _readyCamNum;
 
         #region Connect & Disconnect
         static internal bool ReconnectCameras()
@@ -207,11 +212,41 @@ namespace RPCC.Cams
             lock (_camsLocker)
             {
                 GetCamsStatus();
+
+                _readyCamNum = 0;
+                for (int i = 0; i < cams.Length; i++)
+                {
+                    switch (cams[i].status)
+                    {
+                        case "DATA READY":
+                            _readyImagesProcessList.Add(Task.Run(() => ProcessCapturedImage(i)));
+                            goto case "IDLE";
+                        case "IDLE":
+                            _readyCamNum++;
+                            break;
+                    }
+                }
+                Task.WaitAll(_readyImagesProcessList.ToArray());
+                if (_readyImagesProcessList.Count > 0) _readyImagesProcessList.Clear();
+
+                if (_isExposing && _readyCamNum == cams.Length)
+                {
+                    _isExposing = false;
+                    switch (loadedTask.FrameType)
+                    {
+                        case "Focus":
+                            CameraFocus.CamFocusCallBack();
+                            break;
+                        default:
+                            Head.CamCallback();
+                            break;
+                    }
+                }
             }
             if (isConnected) _camsTimer.Start();
         }
 
-        static internal void GetCamsStatus()
+        static private void GetCamsStatus()
         {
             int errorStatus;
             int deviceStatus;
@@ -254,68 +289,6 @@ namespace RPCC.Cams
                 }
 
                 if (errorStatus != 0) cams[i].status = "ERROR";
-            }
-        }
-
-        static private void CamsTimerTickAlt(object sender, ElapsedEventArgs e)
-        {
-            _camsTimer.Stop();
-            lock (_camsLocker)
-            {
-                GetCamsStatusAlt();
-            }
-            if (isConnected) _camsTimer.Start();
-        }
-
-        static internal void GetCamsStatusAlt()
-        {
-            int errorStatus;
-            int deviceStatus;
-
-            for (int i = 0; i < cams.Length; i++)
-            {
-                // 0x0000 = FLI_TEMPERATURE_CCD
-                errorStatus = NativeMethods.FLIReadTemperature(cams[i].handle, 0x0000, out cams[i].ccdTemp);
-
-                // 0x0001 = FLI_TEMPERATURE_BASE
-                errorStatus += NativeMethods.FLIReadTemperature(cams[i].handle, 0x0001, out cams[i].baseTemp);
-
-                errorStatus += NativeMethods.FLIGetCoolerPower(cams[i].handle, out cams[i].coolerPwr);
-
-                errorStatus += NativeMethods.FLIGetDeviceStatus(cams[i].handle, out deviceStatus);
-
-                // There is no proper documentation on how to use FLIGetDeviceStatus command
-                // But this solution have been working so far, so I'm leaving it here as a backup
-                deviceStatus &= 0x03;
-                switch (deviceStatus)
-                {
-                    // 0x00 = FLI_CAMERA_STATUS_IDLE
-                    case 0x00:
-                        cams[i].status = "IDLE";
-                        break;
-                    // 0x01 = FLI_CAMERA_STATUS_WAITING_FOR_TRIGGER
-                    case 0x01:
-                        cams[i].status = "WF TRIGGER";
-                        break;
-                    // 0x02 = FLI_CAMERA_STATUS_EXPOSING
-                    case 0x02:
-                        cams[i].status = "EXPOSING";
-                        errorStatus += NativeMethods.FLIGetExposureStatus(cams[i].handle, out cams[i].remTime);
-                        break;
-                    // 0x03 = FLI_CAMERA_STATUS_READING_CCD
-                    case 0x03:
-                        cams[i].status = "READING CCD";
-                        break;
-                    default:
-                        cams[i].status = "UNKNOWN";
-                        Logger.AddLogEntry($"WARNING Unknown status {deviceStatus}");
-                        break;
-                }
-
-                if (errorStatus != 0)
-                {
-                    cams[i].status = "ERROR";
-                }
             }
         }
         #endregion
@@ -462,12 +435,51 @@ namespace RPCC.Cams
                 }
             }
 
-            if (isAllGood) _loadedTask = task;
+            if (isAllGood) loadedTask = task;
             return isAllGood;
         }
         #endregion
 
         #region Expose & Read Frames
+        internal static bool StartExposure()
+        {
+            bool isAllGood = true;
+            int errorLastFliCmd;
+
+            lock (_camsLocker)
+            {
+                for (int i = 0; i < cams.Length; i++)
+                {
+                    cams[i].latestImageFilename = "";
+
+                    if (!cams[i].isSelected) continue;
+
+                    errorLastFliCmd = NativeMethods.FLIExposeFrame(cams[i].handle);
+                    cams[i].expStartDt = DateTime.UtcNow;
+                    cams[i].expStartJd = Utilities.JulianDateFromDateTime(cams[i].expStartDt);
+                    if (errorLastFliCmd != 0)
+                    {
+                        Logger.AddLogEntry($"WARNING Unable to start camera {i + 1} exposure");
+                        isAllGood = false;
+                    }
+                }
+                _isExposing = true;
+            }
+
+            return isAllGood;
+
+        }
+
+        private static void ProcessCapturedImage(int camId)
+        {
+            // Read image
+            // latestImageData
+
+            // Save image
+            //latestImageFilename
+
+            // Plot image (here?)
+        }
         #endregion
 
         // It just works
@@ -559,8 +571,9 @@ namespace RPCC.Cams
 
         // exposure
         internal bool isSelected;
-        internal bool isExposing;
         internal DateTime expStartDt;
         internal double expStartJd;
+        internal string latestImageFilename;
+        internal ushort[][] latestImageData;
     }
 }

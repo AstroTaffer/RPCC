@@ -50,7 +50,7 @@ namespace RPCC.Tasks
             if (_isOnPause & (_isObserve || _isDoDarks || _isDoFlats) & WeatherDataCollector.Obs)
             {
                 _isOnPause = false;
-                CameraControl.Expose();
+                CameraControl.StartExposure();
             }
 
             if (CameraControl.isConnected & !_isObserve & !_isDoDarks & !_isDoFlats)
@@ -135,7 +135,7 @@ namespace RPCC.Tasks
             _currentTask.Status = 1;
             Logger.AddLogEntry($"Start task# {_currentTask.TaskNumber}, type: {_currentTask.FrameType}");
             if (!CameraControl.PrepareToObs(_currentTask)) return;  //не удалось подготовиться к наблюдению  
-            CameraControl.Expose();
+            CameraControl.StartExposure();
         }
 
         public static void CamCallback(string fitsPath)
@@ -148,7 +148,7 @@ namespace RPCC.Tasks
                     var fitsAnalysis = new GetDataFromFits(fitsPath);
                     if (fitsAnalysis.CheckFocused() || !CameraFocus.IsAutoFocus)
                     {
-                        if (WeatherDataCollector.Obs) CameraControl.Expose();
+                        if (WeatherDataCollector.Obs) CameraControl.StartExposure();
                         else _isOnPause = true;
                     }
                     else CameraFocus.StartAutoFocus(_currentTask);
@@ -163,7 +163,7 @@ namespace RPCC.Tasks
             {
                 if (_currentTask.DoneFrames < _currentTask.AllFrames)
                 {
-                    CameraControl.Expose();
+                    CameraControl.StartExposure();
                     _currentTask.DoneFrames++;
                 }
                 else
@@ -209,7 +209,7 @@ namespace RPCC.Tasks
                 _isDoFlats = true;
                 SiTechExeSocket.GoTo(_currentTask.Ra, _currentTask.Dec, true); //проверять доехал ли
                 if (!CameraControl.PrepareToObs(_currentTask)) return; //не удалось подготовиться к наблюдению  
-                CameraControl.Expose();
+                CameraControl.StartExposure();
             }
             else
             {
@@ -253,7 +253,7 @@ namespace RPCC.Tasks
             Logger.AddLogEntry($"Start task# {_currentTask.TaskNumber}, type: {_currentTask.FrameType}");
             _isDoDarks = true;
             if (!CameraControl.PrepareToObs(_currentTask)) return;  //не удалось подготовиться к наблюдению  
-            CameraControl.Expose();
+            CameraControl.StartExposure();
         }
         #endregion
     }
