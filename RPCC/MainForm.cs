@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
-using System.Text;
 using System.Threading;
 using System.Windows.Forms;
-using System.Threading.Tasks;
 using System.Timers;
-
 using RPCC.Cams;
 using RPCC.Focus;
 using RPCC.Utils;

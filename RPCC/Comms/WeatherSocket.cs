@@ -11,10 +11,6 @@ namespace RPCC.Comms
 {
     internal class WeatherSocket
     {
-        // private readonly Logger Logger;
-        // private readonly Settings Settings;
-        // private readonly WeatherDataCollector _collector;
-
         private readonly Timer _meteoTimer;
         private TcpClient _client;
         private IPEndPoint _endPoint;

@@ -1,20 +1,21 @@
-﻿using ASCOM.Tools;
-using RPCC.Focus;
-using RPCC.Tasks;
-using RPCC.Utils;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
+using ASCOM.Tools;
+using RPCC.Focus;
+using RPCC.Tasks;
+using RPCC.Utils;
 
 namespace RPCC.Cams
 {
     internal static class CameraControl
     {
-        // camerasDomain = bitwise OR of 0x02 (USB interface) and 0x100 (Camera device)
-        private const int _camDomain = 0x02 | 0x100;
+        // _camsDomain = bitwise OR of 0x02 (USB interface) and 0x100 (Camera device)
+        private const int _camsDomain = 0x02 | 0x100;
         private static readonly int[] _imageArea = new int[4];
         private static readonly object _camsLocker;
 
@@ -39,7 +40,7 @@ namespace RPCC.Cams
 
             lock (_camsLocker)
             {
-                DeviceName[] camerasNames = EnumerateCameras(_camDomain);
+                DeviceName[] camerasNames = EnumerateCameras(_camsDomain);
 
                 cams = new CameraDevice[camerasNames.Length];
                 for (int i = 0; i < cams.Length; i++)
@@ -77,7 +78,7 @@ namespace RPCC.Cams
 
             for (int i = 0; i < cams.Length; i++)
             {
-                errorLastFliCmd = NativeMethods.FLIOpen(out cams[i].handle, cams[i].fileName, _camDomain);
+                errorLastFliCmd = NativeMethods.FLIOpen(out cams[i].handle, cams[i].fileName, _camsDomain);
                 if (errorLastFliCmd != 0)
                 {
                     Logger.AddLogEntry($"WARNING Unable to connect to camera {i + 1}");
@@ -150,6 +151,16 @@ namespace RPCC.Cams
                     isAllGood = false;
                 }
             }
+
+            // Sort cameras by ascending filters' wavelengths
+            string[] filterOrder = { "g", "r", "i" };
+            cams = cams.OrderBy(cam =>
+            {
+                int index = Array.IndexOf(filterOrder, cam.filter);
+                Console.WriteLine($"Sorting! Filer {cam.filter} => Index {index}");
+                if (index == -1) return int.MaxValue;
+                return index;
+            }).ToArray();
 
             return isAllGood;
         }
@@ -226,8 +237,11 @@ namespace RPCC.Cams
                             break;
                     }
                 }
-                Task.WaitAll(_readyImagesProcessList.ToArray());
-                if (_readyImagesProcessList.Count > 0) _readyImagesProcessList.Clear();
+                if (_readyImagesProcessList.Count > 0)
+                {
+                    Task.WaitAll(_readyImagesProcessList.ToArray());
+                    _readyImagesProcessList.Clear();
+                }
 
                 if (_isExposing && _readyCamNum == cams.Length)
                 {
@@ -463,22 +477,50 @@ namespace RPCC.Cams
                         isAllGood = false;
                     }
                 }
-                _isExposing = true;
+                if (cams.Length > 0) _isExposing = true;
             }
 
             return isAllGood;
-
         }
 
         private static void ProcessCapturedImage(int camId)
         {
-            // Read image
-            // latestImageData
+            RpccFits latestImage = ReadImage(cams[camId]);
+            cams[camId].latestImageData = latestImage.data;
 
-            // Save image
-            //latestImageFilename
+            // PlotImage (async)
 
-            // Plot image (here?)
+            cams[camId].latestImageFilename = latestImage.SaveFitsFile(cams[camId]);
+        }
+
+        private static RpccFits ReadImage(CameraDevice cam)
+        {
+            bool isAllGood = true;
+            int imageWidth = _imageArea[2] - _imageArea[0];
+            int imageHeight = _imageArea[3] - _imageArea[1];
+
+            RpccFits imageFits = new RpccFits
+            {
+                data = new ushort[imageHeight][]
+            };
+
+            // There is an FLIGrabFrame command. Would be nice to try it out.
+            for (int i = 0; i < imageHeight; i++)
+            {
+                imageFits.data[i] = new ushort[imageWidth];
+                if (ReadImageRow(cam.handle, imageFits.data[i]) != 0) isAllGood = false;
+            }
+            if (!isAllGood) Logger.AddLogEntry($"ERROR Unable to read frame from {cam.serialNumber} camera");
+
+            // TODO: Mirror image
+
+            return imageFits;
+        }
+
+        private static int ReadImageRow(int camHandle, ushort[] buff)
+        {
+            IntPtr buffWidth = new IntPtr(buff.Length);
+            return NativeMethods.FLIGrabRow(camHandle, buff, buffWidth);
         }
         #endregion
 

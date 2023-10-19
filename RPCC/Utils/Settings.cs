@@ -6,7 +6,7 @@ using System.Xml.Linq;
 
 namespace RPCC.Utils
 {
-    internal  class Settings
+    internal static class Settings
     {
         /// <summary>
         ///     Настройки приложения
