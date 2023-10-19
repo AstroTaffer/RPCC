@@ -268,7 +268,7 @@ namespace RPCC.Cams
                 case "Dark":
                     // If you'll need more precise output for CamTemp, make sure to set decimal separator (use Culture?)
                     outName = $"{camCtrl.task.framesType}_{camCtrl.cameras[camNum].expStartDt:yyyy-MM-ddTHH-mm-ss}_" +
-                        $"B={Settings.CamBin}_F={camCtrl.cameras[camNum].filter}_E={camCtrl.task.framesExpTime}_T={Settings.CamTemp:F0}.fits";
+                        $"B={Settings.CamBin}_F={camCtrl.cameras[camNum].filter}_E={camCtrl.task.framesExpTime / 1000}_T={Settings.CamTemp:F0}.fits";
                     break;
                 default:
                     outName = $"{camCtrl.task.framesType}_{camCtrl.cameras[camNum].filter}_{camCtrl.cameras[camNum].expStartDt:yyyy-MM-ddTHH-mm-ss}.fits";
