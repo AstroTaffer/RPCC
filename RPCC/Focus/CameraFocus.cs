@@ -34,11 +34,12 @@ namespace RPCC.Focus
         private static List<int> _zs;
         private const int CriticalShift = 2000 / N;
         private static short _frameCounter;
+        private const string Focus = "Focus";
 
         public static void StartAutoFocus(ObservationTask observationTask)
         {
             _task = observationTask;
-            _task.FrameType = "focus";
+            _task.FrameType = Focus;
             _focCycles = 0; //
             _focBadFrames = 0; //
             Frames.Clear();
