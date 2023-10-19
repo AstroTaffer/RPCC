@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Timers;
 using System.Windows.Forms;
 using ASCOM.Tools;
@@ -28,6 +27,9 @@ namespace RPCC.Tasks
         private static DateTime _lastFlatsTime; //TODO add in .cfg
         private static readonly short[] DarkExps = {2, 5, 10, 15, 20, 30, 50, 80, 120, 180};
         private static List<ObservationTask> darks;
+        private const string Dark = "Dark";
+        private const string Flat = "Flat";
+        private const string Light = "Object";
         
         public static void StartThinking()
         {
@@ -112,9 +114,9 @@ namespace RPCC.Tasks
         private static void StartTask()
         {
             Tasker.UpdateTaskInTable(_currentTask);
-            if (_currentTask.FrameType == "light") StartDoLight();
-            if (_currentTask.FrameType == "dark") StartDoDark();
-            if (_currentTask.FrameType == "flat") StartDoFlats();
+            if (_currentTask.FrameType == Light) StartDoLight();
+            if (_currentTask.FrameType == Dark) StartDoDark();
+            if (_currentTask.FrameType == Flat) StartDoFlats();
         }
 
         public static void EndTask(short endStatus)
@@ -143,7 +145,7 @@ namespace RPCC.Tasks
         {
             GetDataFromFits fitsAnalysis = null;
             
-            if (_currentTask.FrameType == "light")
+            if (_currentTask.FrameType == Light)
             {
                 if (_currentTask.TimeEnd > DateTime.UtcNow)
                 {
@@ -185,7 +187,7 @@ namespace RPCC.Tasks
                 else
                 {
                     EndTask(2);
-                    if (!(_currentTask.FrameType == "dark" & darks.Count > 0)) return;
+                    if (!(_currentTask.FrameType == Dark & darks.Count > 0)) return;
                     _currentTask = darks[0];
                     darks.RemoveAt(0);
                     StartDoDark();
@@ -205,7 +207,7 @@ namespace RPCC.Tasks
                 TimeEnd = DateTime.UtcNow.AddMinutes(FlatExp * FlatDarkQuantity / 6.0),
                 AllFrames = FlatDarkQuantity,
                 Status = 1,
-                FrameType = "flat"
+                FrameType = Flat
             };
             flatTask.Duration = (float) (flatTask.TimeEnd - flatTask.TimeStart).TotalHours;
             var zenRaDec = SiTechExeSocket.GoToAltAz(180, 90);
@@ -246,7 +248,7 @@ namespace RPCC.Tasks
                 var darkTask = new ObservationTask
                 {
                     TaskNumber = Tasker.GetTasksLen(),
-                    FrameType = "dark",
+                    FrameType = Dark,
                     Exp = exp,
                     Status = 1,
                     AllFrames = FlatDarkQuantity,
