@@ -191,6 +191,8 @@ namespace RPCC.Utils
         private static int _meteoDomeTcpIpPort;
         private static int _donutsTcpIpPort;
         private static int _siTechExeTcpIpPort;
+        public static DateTime _lastDarksTime;
+        public static DateTime _lastFlatsTime;
 
         public static int FocusComId
         {
@@ -283,6 +285,8 @@ namespace RPCC.Utils
                 CamRoMode = (string)config.Root.Element("cameras").Element("сamRoMode");
 
                 MainOutFolder = (string)config.Root.Element("survey").Element("mainOutFolder");
+                _lastDarksTime = (DateTime)config.Root.Element("survey").Element("LastDarksTime");
+                _lastFlatsTime = (DateTime)config.Root.Element("survey").Element("LastFlatsTime");
 
                 FocusComId = (int)config.Root.Element("comms").Element("focusComId");
                 MeteoDomeTcpIpPort = (int)config.Root.Element("comms").Element("meteoDomeTcpIpPort");
@@ -406,7 +410,9 @@ namespace RPCC.Utils
                     new XElement("сamRoMode", CamRoMode)),
                 
                 new XElement("survey",
-                    new XElement("mainOutFolder", MainOutFolder)),
+                    new XElement("mainOutFolder", MainOutFolder),
+                    new XElement("LastDarksTime", _lastDarksTime), 
+                    new XElement("LastFlatsTime", _lastFlatsTime)),
 
                 new XElement("comms",
                     new XElement("focusComId", FocusComId),
@@ -440,7 +446,9 @@ namespace RPCC.Utils
                 
                 new XElement("survey",
                   new XElement("mainOutFolder", Directory.Exists("D:\\RoboPhot Data\\Images") ? 
-                  "D:\\RoboPhot Data\\Images" : Directory.GetCurrentDirectory())),
+                  "D:\\RoboPhot Data\\Images" : Directory.GetCurrentDirectory()),
+                  new XElement("LastDarksTime", _lastDarksTime), 
+                  new XElement("LastFlatsTime", _lastFlatsTime)),
 
                 new XElement("comms",
                     new XElement("focusComId", 10),

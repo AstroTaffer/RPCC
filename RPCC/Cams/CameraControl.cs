@@ -17,7 +17,7 @@ namespace RPCC.Cams
         // _camsDomain = bitwise OR of 0x02 (USB interface) and 0x100 (Camera device)
         private const int _camsDomain = 0x02 | 0x100;
         private static readonly int[] _imageArea = new int[4];
-        private static readonly object _camsLocker;
+        public static readonly object _camsLocker = new object();   
 
         private static readonly Timer _camsTimer = new Timer(1000);
         internal delegate void CallMainForm();
@@ -227,10 +227,11 @@ namespace RPCC.Cams
                 _readyCamNum = 0;
                 for (int i = 0; i < cams.Length; i++)
                 {
-                    switch (cams[i].status)
+                    int indx = i;
+                    switch (cams[indx].status)
                     {
-                        case "DATA READY":
-                            _readyImagesProcessList.Add(Task.Run(() => ProcessCapturedImage(i)));
+                        case "DATA READY":  
+                            _readyImagesProcessList.Add(Task.Run(() => ProcessCapturedImage(indx)));
                             goto case "IDLE";
                         case "IDLE":
                             _readyCamNum++;

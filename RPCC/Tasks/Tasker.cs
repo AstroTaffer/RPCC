@@ -18,7 +18,7 @@ namespace RPCC.Tasks
 
         public static readonly string[] Header =
         {
-            "N", "RaDecJ2000", "t_{Added}", @"t_{Run}", @"t_{Fin}", "Duration",
+            "N", "RaDecJ2000", "t_{Added}", @"t_{Run}", @"t_{Fin}", "Duration (h)",
             "Exp", "Done", "All", "t_{Last exp}", "Filters", "Object", "Status", "Observer", "Frame type",
             "Xbin", "Ybin"
         };
@@ -150,7 +150,7 @@ namespace RPCC.Tasks
             dataRow[Header[13]] = task.Observer;
             dataRow[Header[14]] = task.FrameType;
             dataRow[Header[15]] = task.Xbin;
-            dataRow[Header[18]] = task.Ybin;
+            dataRow[Header[16]] = task.Ybin;
 
             DataTable.Rows.InsertAt(dataRow, 0);
             SaveTasksToXml();
@@ -160,7 +160,7 @@ namespace RPCC.Tasks
         {
             foreach (DataGridViewRow row in dataGridViewTasker.Rows)
             {
-                if (!ReferenceEquals(row.Cells[0].Value.ToString(), task.TaskNumber.ToString())) continue;
+                if (!string.Equals(row.Cells[0].Value.ToString(), task.TaskNumber.ToString())) continue;
                 row.Cells[0].Value = task.TaskNumber;
                 row.Cells[1].Value = task.RaDec;
                 row.Cells[2].Value = task.TimeAdd;
@@ -177,7 +177,7 @@ namespace RPCC.Tasks
                 row.Cells[13].Value = task.Observer;
                 row.Cells[14].Value = task.FrameType;
                 row.Cells[15].Value = task.Xbin;
-                row.Cells[18].Value = task.Ybin;
+                row.Cells[16].Value = task.Ybin;
             }
 
             PaintTable();
@@ -194,9 +194,12 @@ namespace RPCC.Tasks
             var task = new ObservationTask();
             foreach (DataGridViewRow row in dataGridViewTasker.Rows)
             {
-                if (!ReferenceEquals(row.Cells[0].Value.ToString(), taskNumber)) continue;
+                if (!string.Equals(row.Cells[0].Value.ToString(), taskNumber)) continue;
                 task.TaskNumber = Convert.ToInt32(row.Cells[0].Value);
-                task.ComputeRaDec(row.Cells[1].Value.ToString());
+                if (!string.IsNullOrEmpty(row.Cells[1].Value.ToString()))
+                {
+                    task.ComputeRaDec(row.Cells[1].Value.ToString());
+                }
                 task.TimeAdd = DateTime.Parse(row.Cells[2].Value.ToString());
                 task.TimeStart = DateTime.Parse(row.Cells[3].Value.ToString());
                 task.TimeEnd = DateTime.Parse(row.Cells[4].Value.ToString());
@@ -209,7 +212,7 @@ namespace RPCC.Tasks
                 task.Observer = row.Cells[13].Value.ToString();
                 task.FrameType = row.Cells[14].Value.ToString();
                 task.Xbin = Convert.ToInt16(row.Cells[15].Value);
-                task.Ybin = Convert.ToInt16(row.Cells[18].Value);
+                task.Ybin = Convert.ToInt16(row.Cells[16].Value);
                 break;
             }
 
@@ -221,7 +224,10 @@ namespace RPCC.Tasks
             var task = new ObservationTask();
             var row = dataGridViewTasker.Rows[rowIndex];
             task.TaskNumber = Convert.ToInt32(row.Cells[0].Value);
-            task.ComputeRaDec(row.Cells[1].Value.ToString());
+            if (!string.IsNullOrEmpty(row.Cells[1].Value.ToString()))
+            {
+                task.ComputeRaDec(row.Cells[1].Value.ToString());
+            }
             task.TimeAdd = DateTime.Parse(row.Cells[2].Value.ToString());
             task.TimeStart = DateTime.Parse(row.Cells[3].Value.ToString());
             task.TimeEnd = DateTime.Parse(row.Cells[4].Value.ToString());
@@ -234,7 +240,7 @@ namespace RPCC.Tasks
             task.Observer = row.Cells[13].Value.ToString();
             task.FrameType = row.Cells[14].Value.ToString();
             task.Xbin = Convert.ToInt16(row.Cells[15].Value);
-            task.Ybin = Convert.ToInt16(row.Cells[18].Value);
+            task.Ybin = Convert.ToInt16(row.Cells[16].Value);
 
             return task;
         }

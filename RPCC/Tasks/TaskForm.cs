@@ -24,7 +24,18 @@ namespace RPCC.Tasks
             }
             else
             {
-                _task = Tasker.GetTaskByRowIndex(_rowIndex);
+                try
+                {
+                    _task = Tasker.GetTaskByRowIndex(_rowIndex);
+                }
+                catch
+                {
+                    Tasker.DeleteTaskByRowIndex(_rowIndex);
+                    Tasker.PaintTable();
+                    Close();
+                    return;
+                }
+                
 
                 textBoxCoords.Text = _task.RaDec;
                 textBoxObject.Text = _task.Object;
@@ -48,6 +59,12 @@ namespace RPCC.Tasks
 
         private void buttonAdd_Click(object sender, EventArgs e)
         {
+            if (_task.Status > 0)
+            {
+                MessageBox.Show(@"Can't add task", @"OK", MessageBoxButtons.OK);
+                buttonCancel_Click(sender, e);
+                return;
+            }
             if (MessageBox.Show(@"Are you sure you want to add this task?", @"confirmation",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Information) != DialogResult.Yes) return;
             AddTask(sender, e);
@@ -55,6 +72,7 @@ namespace RPCC.Tasks
 
         private void AddTask(object sender, EventArgs e)
         {
+            
             var fil = "";
             if (checkBoxFilg.Checked) fil += "g ";
             if (checkBoxFilr.Checked) fil += "r ";
@@ -67,40 +85,51 @@ namespace RPCC.Tasks
                 return;
             }
 
-            _task.ComputeRaDec(textBoxCoords.Text);
-            _task.TimeAdd = DateTime.UtcNow;
-            _task.TimeStart = DateTime.Parse(textBoxDateTime.Text);
-            if (!CoordinatesManager.CheckElevateLimit(_task.Ra, _task.Dec, _task.TimeStart))
+            try
             {
-                MessageBox.Show(@"Target under elevation limit", @"OK", MessageBoxButtons.OK);
-                return;
-            }
-            
-            _task.Exp = short.Parse(comboBoxExp.Text);
+                _task.ComputeRaDec(textBoxCoords.Text);
+                _task.TimeAdd = DateTime.UtcNow;
+                _task.TimeStart = DateTime.Parse(textBoxDateTime.Text);
+                if (!CoordinatesManager.CheckElevateLimit(_task.Ra, _task.Dec, _task.TimeStart))
+                {
+                    MessageBox.Show(@"Target under elevation limit", @"OK", MessageBoxButtons.OK);
+                    return;
+                }
 
-            if (textBoxDuration.Text == "")
+                _task.Exp = short.Parse(comboBoxExp.Text);
+
+                if (textBoxDuration.Text == "")
+                {
+                    _task.AllFrames = short.Parse(textBoxExpN.Text);
+                    _task.Duration = _task.Exp * _task.AllFrames / 60f / 60 + 0.05f;
+                }
+                else
+                {
+                    if (float.TryParse(textBoxDuration.Text, out var buf))
+                    {
+                        _task.Duration = buf;
+                        _task.AllFrames = Convert.ToInt16(_task.Duration * 60f * 60f / _task.Exp);
+                    }
+
+                }
+
+                _task.TimeEnd = _task.TimeStart.AddHours(_task.Duration);
+                _task.Object = textBoxObject.Text;
+                _task.Observer = textBoxObserver.Text;
+                _task.Status = 0;
+                _task.Xbin = short.Parse(textBoxXbin.Text);
+                _task.Ybin = short.Parse(textBoxYbin.Text);
+
+                _task.Filters = fil;
+                _task.FrameType = comboBoxFrameType.Text;
+                if (!_isNewTask) Tasker.DeleteTaskByRowIndex(_rowIndex);
+                Tasker.AddTask(_task);
+            }
+            catch
             {
-                _task.AllFrames = short.Parse(textBoxExpN.Text);
-                _task.Duration = _task.Exp * _task.AllFrames / 60f / 60 + 0.05f;
-            }
-            else
-            {
-                _task.Duration = float.Parse(textBoxDuration.Text);
-                _task.AllFrames = Convert.ToInt16(_task.Duration * 60f * 60f / _task.Exp);
+                Logger.AddLogEntry("Can't add task");
             }
 
-            _task.TimeEnd = _task.TimeStart.AddHours(_task.Duration);
-            _task.Object = textBoxObject.Text;
-            _task.Observer = textBoxObserver.Text;
-            _task.Status = 0;
-            _task.Xbin = short.Parse(textBoxXbin.Text);
-            _task.Ybin = short.Parse(textBoxYbin.Text);
-
-            _task.Filters = fil;
-            _task.FrameType = comboBoxFrameType.Text;
-
-            if (!_isNewTask) Tasker.DeleteTaskByRowIndex(_rowIndex);
-            Tasker.AddTask(_task);
             buttonCancel_Click(sender, e);
         }
 
@@ -122,6 +151,7 @@ namespace RPCC.Tasks
                     MessageBoxButtons.YesNo, MessageBoxIcon.Information) != DialogResult.Yes) return;
             _task.Status = 3;
             Tasker.UpdateTaskInTable(_task);
+            Logger.AddLogEntry($"Task #{_task.TaskNumber} rejected");
             buttonCancel_Click(sender, e);
         }
     }

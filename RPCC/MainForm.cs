@@ -78,6 +78,7 @@ namespace RPCC
             FocusTimer.Start();
             timerUi.Start();
             comboBoxImgType.SelectedIndex = 0;
+            Head.StartThinking();
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -183,25 +184,34 @@ namespace RPCC
             switch (CameraControl.cams.Length)
             {
                 case 3:
-                    groupBoxCam3.Enabled = true;
-                    radioButtonViewCam3.Enabled = true;
-                    labelCam3Model.Text = $"Model: {CameraControl.cams[2].modelName}";
-                    labelCam3Sn.Text = $"Serial Num: {CameraControl.cams[2].serialNumber}";
-                    labelCam3Filter.Text = $"Filter: {CameraControl.cams[2].filter}";
+                    groupBoxCam3.Invoke((MethodInvoker) delegate
+                    {
+                        groupBoxCam3.Enabled = true;
+                        radioButtonViewCam3.Enabled = true;
+                       labelCam3Model.Text = $"Model: {CameraControl.cams[2].modelName}";
+                       labelCam3Sn.Text = $"Serial Num: {CameraControl.cams[2].serialNumber}";
+                       labelCam3Filter.Text = $"Filter: {CameraControl.cams[2].filter}"; 
+                    });
                     goto case 2;
                 case 2:
-                    groupBoxCam2.Enabled = true;
-                    radioButtonViewCam2.Enabled = true;
-                    labelCam2Model.Text = $"Model: {CameraControl.cams[1].modelName}";
-                    labelCam2Sn.Text = $"Serial Num: {CameraControl.cams[1].serialNumber}";
-                    labelCam2Filter.Text = $"Filter: {CameraControl.cams[1].filter}";
+                    groupBoxCam2.Invoke((MethodInvoker) delegate
+                    {
+                        groupBoxCam2.Enabled = true;
+                        radioButtonViewCam2.Enabled = true;
+                        labelCam2Model.Text = $"Model: {CameraControl.cams[1].modelName}";
+                        labelCam2Sn.Text = $"Serial Num: {CameraControl.cams[1].serialNumber}";
+                        labelCam2Filter.Text = $"Filter: {CameraControl.cams[1].filter}";
+                    });
                     goto case 1;
                 case 1:
-                    groupBoxCam1.Enabled = true;
-                    radioButtonViewCam1.Enabled = true;
-                    labelCam1Model.Text = $"Model: {CameraControl.cams[0].modelName}";
-                    labelCam1Sn.Text = $"Serial Num: {CameraControl.cams[0].serialNumber}";
-                    labelCam1Filter.Text = $"Filter: {CameraControl.cams[0].filter}";
+                    groupBoxCam1.Invoke((MethodInvoker) delegate
+                    {
+                        groupBoxCam1.Enabled = true;
+                        radioButtonViewCam1.Enabled = true;
+                        labelCam1Model.Text = $"Model: {CameraControl.cams[0].modelName}";
+                        labelCam1Sn.Text = $"Serial Num: {CameraControl.cams[0].serialNumber}";
+                        labelCam1Filter.Text = $"Filter: {CameraControl.cams[0].filter}";
+                    });
                     break;
             }
         }
@@ -606,15 +616,15 @@ namespace RPCC
             // MessageBox.Show(e.RowIndex.ToString());
             if (e.RowIndex == -1) return;
             var taskForm = new TaskForm(false, e.RowIndex);
-            taskForm.Show();
+            taskForm?.Show();
         }
 
-        private void DataGridViewTasker_VisibleChanged(object sender, EventArgs e)
-        {
-            if (!_isFirstLoad || !dataGridViewTasker.Visible) return;
-            _isFirstLoad = false;
-            Tasker.PaintTable();
-        }
+        // private void DataGridViewTasker_VisibleChanged(object sender, EventArgs e)
+        // {
+        //     if (!_isFirstLoad || !dataGridViewTasker.Visible) return;
+        //     _isFirstLoad = false;
+        //     Tasker.PaintTable();
+        // }
         #endregion
     }
 }

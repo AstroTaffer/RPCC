@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Timers;
 using RPCC.Utils;
 
 namespace RPCC.Comms
@@ -15,19 +16,16 @@ namespace RPCC.Comms
         private IPEndPoint _endPoint;
         private NetworkStream _stream;
         private StreamReader _streamReader;
-
         private StreamWriter _streamWriter;
-
-        // private readonly Logger Logger;
-        // private readonly Settings Settings;
         internal bool isConnected;
+        private static readonly Timer PingPongTimer = new Timer();
 
         internal DonutsSocket()
         {
             StartDonutsPy();
-            // Logger = logger;
-            // Settings = settings;
             isConnected = false;
+            PingPongTimer.Elapsed += Ping;
+            PingPongTimer.Interval = 10000;
         }
 
         internal void Connect()
@@ -52,7 +50,7 @@ namespace RPCC.Comms
                     _streamWriter = new StreamWriter(_stream, Encoding.UTF8);
                     _streamWriter.AutoFlush = true;
                     isConnected = true;
-
+                    PingPongTimer.Start();
                     Logger.AddLogEntry($"Connected to Donuts {_endPoint}");
                 }
                 else
@@ -78,6 +76,7 @@ namespace RPCC.Comms
 
             try
             {
+                PingPongTimer.Stop();
                 ClosePythonScript();
                 _streamWriter.Close();
                 _streamReader.Close();
@@ -151,6 +150,11 @@ namespace RPCC.Comms
         public string PingServer()
         {
             return ExchangeMessages("ping");
+        }
+        
+        private void Ping(object sender, ElapsedEventArgs e)
+        {
+            PingServer();
         }
     }
 }

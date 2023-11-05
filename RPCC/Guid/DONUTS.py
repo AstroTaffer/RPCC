@@ -1,7 +1,20 @@
 import socket
-
+import datetime
+import threading
 import numpy as np
 from donuts import Donuts
+
+time_last_message = 0
+time_wait_sec = 15
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+
+def timer_loop():
+    now = datetime.datetime.utcnow()
+    if time_last_message != 0:
+        if (now - time_last_message).total_seconds() > time_wait_sec:
+            server.close()
+            print('Donuts timeout, closing server')
 
 
 def pars_req(req: str) -> str:
@@ -23,8 +36,11 @@ def pars_req(req: str) -> str:
 
 
 def handle_client(reader, writer):
+    t = threading.Timer(time_wait_sec, timer_loop)
+    t.start()
     while True:
         request = reader.readline()
+        time_last_message = datetime.datetime.utcnow()
         if request == 'quit\n':
             break
         if (request is not None) and (request != '') and ('\ufeff' not in request):
@@ -35,11 +51,9 @@ def handle_client(reader, writer):
 
 
 def run_server():
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind((socket.gethostname(), 3030))
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  # реюз порта
     server.listen(1)
-
     # while True:
     client_socket, _ = server.accept()
     # client_socket.settimeout(60)

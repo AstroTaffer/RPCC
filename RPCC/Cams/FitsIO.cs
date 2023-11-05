@@ -280,8 +280,15 @@ namespace RPCC.Cams
                     break;
             }
             cursor.Add(new HeaderCard("SUN-ZD", WeatherDataCollector.Sun, "Sun zenith distance [deg]"));
-            cursor.Add(new HeaderCard("MOONPHAS",
-                Utilities.MoonIllumination(cam.expStartJd), "illuminated fraction of the Moon"));
+            try
+            {
+                cursor.Add(new HeaderCard("MOONPHAS",
+                                Utilities.MoonIllumination(cam.expStartJd), "illuminated fraction of the Moon"));
+            } catch (Exception ex)
+            {
+                Logger.AddLogEntry($"FitsIO error: {ex}");
+            }
+            
             switch (CameraControl.loadedTask.FrameType)
             {
                 case "Object":
