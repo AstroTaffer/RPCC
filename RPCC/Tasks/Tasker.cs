@@ -53,9 +53,8 @@ namespace RPCC.Tasks
             dataGridViewTasker.Columns[12].Width = 60;
             dataGridViewTasker.Columns[13].Width = 120;
             dataGridViewTasker.Columns[14].Width = 80;
-
-            // dataGridViewTasker.Columns[15].Visible = false;
-            // dataGridViewTasker.Columns[18].Visible = false;
+            dataGridViewTasker.Columns[15].Width = 40;
+            dataGridViewTasker.Columns[16].Width = 40;
 
             foreach (DataGridViewColumn column in dataGridViewTasker.Columns)
                 column.SortMode = DataGridViewColumnSortMode.NotSortable;
@@ -166,7 +165,7 @@ namespace RPCC.Tasks
                 row.Cells[2].Value = task.TimeAdd;
                 row.Cells[3].Value = task.TimeStart;
                 row.Cells[4].Value = task.TimeEnd;
-                row.Cells[5].Value = task.Duration;
+                row.Cells[5].Value = Math.Round(task.Duration, 2);
                 row.Cells[6].Value = task.Exp;
                 row.Cells[7].Value = task.DoneFrames;
                 row.Cells[8].Value = task.AllFrames;
@@ -205,7 +204,10 @@ namespace RPCC.Tasks
                 task.TimeEnd = DateTime.Parse(row.Cells[4].Value.ToString());
                 task.Duration = float.Parse(row.Cells[5].Value.ToString());
                 task.Exp = Convert.ToInt16(row.Cells[6].Value);
+                task.DoneFrames = Convert.ToInt16(row.Cells[7].Value);
                 task.AllFrames = Convert.ToInt16(row.Cells[8].Value);
+                task.TimeLastExp = (string.IsNullOrEmpty(row.Cells[9].Value.ToString()) ? 
+                    new DateTime() : DateTime.Parse(row.Cells[9].Value.ToString()));
                 task.Filters = row.Cells[10].Value.ToString();
                 task.Object = row.Cells[11].Value.ToString();
                 task.Status = Convert.ToInt16(row.Cells[12].Value);
