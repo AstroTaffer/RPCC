@@ -27,6 +27,7 @@ namespace RPCC
         private static readonly System.Timers.Timer FocusTimer = new System.Timers.Timer();
 
         private bool _isFirstLoad;
+        public static bool IsTaskFormOpen;
 
         #region General
         public MainForm()
@@ -607,8 +608,14 @@ namespace RPCC
         private void AddToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // Logger.AddLogEntry("Add Task click");
-            var taskForm = new TaskForm(true);
-            taskForm.Show();
+            if (!IsTaskFormOpen)
+            {
+                IsTaskFormOpen = true;
+               var taskForm = new TaskForm(true);
+               taskForm.Show(); 
+               
+            }
+            
         }
 
         private void DataGridViewTasker_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)

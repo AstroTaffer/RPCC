@@ -47,15 +47,15 @@ namespace RPCC.Tasks
 
         public int TaskNumber { get; set; }
 
-//Object, Dark, Flat, Focus
+//Object, Dark, Flat, Focus, Test, bias
         public string FrameType { get; set; }
 
         public string Filters { get; set; } = "g r i";
 
 //in pix
-        public int Xbin { get; set; } = 1;
+        public int Xbin { get; set; } = 2;
 
-        public int Ybin { get; set; } = 1;
+        public int Ybin { get; set; } = 2;
 
         // public short XSubframeStart { get; set; } = 0;
         //
@@ -74,6 +74,11 @@ namespace RPCC.Tasks
             var radec = RaDec.Split(' ');
             Ra = Utilities.HMSToHours(radec[0]);
             Dec = Utilities.DMSToDegrees(radec[1]);
+        }
+
+        public void Update()
+        {
+            Tasker.UpdateTaskFromTable(this);
         }
     }
 }

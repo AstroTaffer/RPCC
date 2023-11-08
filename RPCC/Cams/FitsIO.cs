@@ -63,7 +63,7 @@ namespace RPCC.Cams
             
             FillInHeader(cam, newHeader);
 
-            string outDir = $"{Settings.MainOutFolder}\\{DateTime.Now.AddHours(-12):yyyy-MM-dd} " +
+            string outDir = $"{Settings.MainOutFolder}\\{DateTime.Now.AddHours(-12):yyyy-MM-dd}_" +
                 $"{(string.IsNullOrEmpty(CameraControl.loadedTask.Object) ? "UNKNOWN" : CameraControl.loadedTask.Object)}\\";
             switch (CameraControl.loadedTask.FrameType)
             {
@@ -295,9 +295,17 @@ namespace RPCC.Cams
                     
                     goto case "Flat";
                 case "Flat":
-                    cursor.Add(new HeaderCard("MOONANGL",
-                        CoordinatesManager.CalculateObjectDistance2Moon(CameraControl.loadedTask),
-                        "angle between target and Moon [deg]"));
+                    try
+                    {
+                        cursor.Add(new HeaderCard("MOONANGL",
+                            CoordinatesManager.CalculateObjectDistance2Moon(CameraControl.loadedTask),
+                            "angle between target and Moon [deg]"));
+                    }
+                    catch (ASCOM.HelperException exception)
+                    {
+                        Logger.AddLogEntry(exception.Message);
+                    }
+                    
                     break;
             }
             #endregion

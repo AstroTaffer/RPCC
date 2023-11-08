@@ -33,45 +33,75 @@ namespace RPCC.Focus
             var fits = new Fits(path2Fits);
             var outputFile = path2Fits.Replace("fits", "cat");
             _path2Cat = outputFile;
-            var hdu = (ImageHDU) fits.GetHDU(0);
-            Focus = hdu.Header.GetIntValue("FOCUS");
+
             try
             { 
-                if (!File.Exists(outputFile)) Sex(path2Fits, outputFile);
-                GetTable();
-                
-                StarsNum = GetStarsNum();
-                Ell = GetEllipticity();
-                Fwhm = GetMedianFwhm();
-                Quality = CheckImageQuality();
-
+                if (!File.Exists(outputFile))
+                {
+                    FileStream fs = File.Create(outputFile);
+                    fs.Close();
+                    Sex(path2Fits, outputFile);
+                }
+                // GetTable();
+                // StarsNum = GetStarsNum();
+                // Ell = GetEllipticity();
+                // Fwhm = GetMedianFwhm();
+                // Quality = CheckImageQuality();
+                try
+                {
+                    GetTable();
+                    StarsNum = GetStarsNum();
+                    Ell = GetEllipticity();
+                    Fwhm = GetMedianFwhm();
+                    Quality = CheckImageQuality();
+                }
+                catch (ArgumentOutOfRangeException e)
+                {
+                    Console.WriteLine(e);
+                    Sex(path2Fits, outputFile);
+                    GetTable();
+                    StarsNum = GetStarsNum();
+                    Ell = GetEllipticity();
+                    Fwhm = GetMedianFwhm();
+                    Quality = CheckImageQuality();
+                }
+                var hdu = (ImageHDU) fits.GetHDU(0);
+                Focus = hdu.Header.GetIntValue("FOCUS");
                 var cursor = hdu.Header.GetCursor();
                 cursor.Key = "END";
                 cursor.Add(new HeaderCard("SEXFWHM", Fwhm, "Sextractor median FWHM"));
                 cursor.Add(new HeaderCard("SEXELL", Ell, "Sextractor median ellipticity"));
                 cursor.Add(new HeaderCard("SEXNSTAR", StarsNum, "Stars in sextractor catalog"));
                 cursor.Add(new HeaderCard("QUALITY", Quality, "Quality control flag"));
-                hdu.Rewrite();
                 fits.Close();
                 Status = true;
             }
             catch (Exception e)
             {
                 Status = false;
+                Console.WriteLine(e);
                 Logger.AddLogEntry("Can't do SExtract");
             }
         }
         
         private static void Sex(string inputFile, string outputFile)
         {
+            
             var cwd = Directory.GetCurrentDirectory();
+            // cwd = cwd.Replace(":", "");
+            // inputFile = inputFile.Replace(":", "");
+            // outputFile = outputFile.Replace(":", "");
+            // cwd = cwd.Replace("\\", "\\\\");
             var sex = cwd + @"\Sex\Extract.exe ";
             var dSex = " -c " + cwd + @"\Sex\default.sex";
             var dPar = " -PARAMETERS_NAME " + cwd + @"\Sex\default.par";
-            var dFilt = " -FILTER_NAME " + cwd + @"\Sex\tophat_2.5_3x3.conv";
+            var dFilt = " -FILTER_NAME " + cwd + @"\Sex\tophat_2.5_3x3.conv" ;
             var nnw = " -STARNNW_NAME " + cwd + @"\Sex\default.nnw";
 
-            var shell = sex + inputFile + dSex + dPar + dFilt + nnw + " -CATALOG_NAME " + outputFile;
+            // var shell = sex + inputFile + dSex + dPar + dFilt + nnw + " -CATALOG_NAME " + outputFile;
+            var shell = sex + "\"" + inputFile + "\"" + dSex + dPar + dFilt + nnw + " -CATALOG_NAME " + "\"" + outputFile + "\"";
+            // shell = shell.Replace(":", "");
+            // shell = shell.Replace("\\", "\\\\");
             Console.WriteLine(shell);
 
             var processStartInfo = new ProcessStartInfo

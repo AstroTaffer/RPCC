@@ -178,8 +178,8 @@ namespace RPCC.Tasks
                 row.Cells[15].Value = task.Xbin;
                 row.Cells[16].Value = task.Ybin;
             }
-
             PaintTable();
+            SaveTasksToXml();
         }
 
         public static void DeleteTaskByRowIndex(int rowIndex)
@@ -220,6 +220,36 @@ namespace RPCC.Tasks
 
             return task;
         }
+    
+        public static void UpdateTaskFromTable(ObservationTask task)
+        {
+            foreach (DataGridViewRow row in dataGridViewTasker.Rows)
+            {
+                if (!Equals(row.Cells[0].Value, task.TaskNumber)) continue;
+                task.TaskNumber = Convert.ToInt32(row.Cells[0].Value);
+                if (!string.IsNullOrEmpty(row.Cells[1].Value.ToString()))
+                {
+                    task.ComputeRaDec(row.Cells[1].Value.ToString());
+                }
+                task.TimeAdd = DateTime.Parse(row.Cells[2].Value.ToString());
+                task.TimeStart = DateTime.Parse(row.Cells[3].Value.ToString());
+                task.TimeEnd = DateTime.Parse(row.Cells[4].Value.ToString());
+                task.Duration = float.Parse(row.Cells[5].Value.ToString());
+                task.Exp = Convert.ToInt16(row.Cells[6].Value);
+                task.DoneFrames = Convert.ToInt16(row.Cells[7].Value);
+                task.AllFrames = Convert.ToInt16(row.Cells[8].Value);
+                task.TimeLastExp = (string.IsNullOrEmpty(row.Cells[9].Value.ToString()) ? 
+                    new DateTime() : DateTime.Parse(row.Cells[9].Value.ToString()));
+                task.Filters = row.Cells[10].Value.ToString();
+                task.Object = row.Cells[11].Value.ToString();
+                task.Status = Convert.ToInt16(row.Cells[12].Value);
+                task.Observer = row.Cells[13].Value.ToString();
+                task.FrameType = row.Cells[14].Value.ToString();
+                task.Xbin = Convert.ToInt16(row.Cells[15].Value);
+                task.Ybin = Convert.ToInt16(row.Cells[16].Value);
+                break;
+            }
+        }
 
         public static ObservationTask GetTaskByRowIndex(int rowIndex)
         {
@@ -235,6 +265,7 @@ namespace RPCC.Tasks
             task.TimeEnd = DateTime.Parse(row.Cells[4].Value.ToString());
             task.Duration = float.Parse(row.Cells[5].Value.ToString());
             task.Exp = Convert.ToInt16(row.Cells[6].Value);
+            task.DoneFrames = Convert.ToInt16(row.Cells[7].Value);
             task.AllFrames = Convert.ToInt16(row.Cells[8].Value);
             task.Filters = row.Cells[10].Value.ToString();
             task.Object = dataGridViewTasker.Rows[rowIndex].Cells[11].Value.ToString();

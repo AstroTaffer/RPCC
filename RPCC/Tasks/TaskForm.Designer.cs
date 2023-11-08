@@ -190,7 +190,7 @@ namespace RPCC.Tasks
             this.textBoxYbin.Name = "textBoxYbin";
             this.textBoxYbin.Size = new System.Drawing.Size(65, 26);
             this.textBoxYbin.TabIndex = 35;
-            this.textBoxYbin.Text = "1";
+            this.textBoxYbin.Text = "2";
             // 
             // labelYbin
             // 
@@ -206,7 +206,7 @@ namespace RPCC.Tasks
             this.textBoxXbin.Name = "textBoxXbin";
             this.textBoxXbin.Size = new System.Drawing.Size(65, 26);
             this.textBoxXbin.TabIndex = 33;
-            this.textBoxXbin.Text = "1";
+            this.textBoxXbin.Text = "2";
             // 
             // labelXbin
             // 
@@ -259,12 +259,12 @@ namespace RPCC.Tasks
             // comboBoxFrameType
             // 
             this.comboBoxFrameType.FormattingEnabled = true;
-            this.comboBoxFrameType.Items.AddRange(new object[] {"Light", "Dark", "Flat", "Bias"});
+            this.comboBoxFrameType.Items.AddRange(new object[] {"Object", "Dark", "Flat", "Bias"});
             this.comboBoxFrameType.Location = new System.Drawing.Point(113, 117);
             this.comboBoxFrameType.Name = "comboBoxFrameType";
             this.comboBoxFrameType.Size = new System.Drawing.Size(107, 28);
             this.comboBoxFrameType.TabIndex = 27;
-            this.comboBoxFrameType.Text = "Light";
+            this.comboBoxFrameType.Text = "Object";
             // 
             // comboBoxExp
             // 

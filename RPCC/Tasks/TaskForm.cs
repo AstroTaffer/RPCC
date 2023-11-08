@@ -36,7 +36,6 @@ namespace RPCC.Tasks
                     return;
                 }
                 
-
                 textBoxCoords.Text = _task.RaDec;
                 textBoxObject.Text = _task.Object;
                 textBoxObserver.Text = _task.Observer;
@@ -113,7 +112,7 @@ namespace RPCC.Tasks
 
                 }
 
-                _task.TimeEnd = _task.TimeStart.AddHours(_task.Duration);
+                _task.TimeEnd = _task.TimeStart + TimeSpan.FromHours(_task.Duration);
                 _task.Object = textBoxObject.Text;
                 _task.Observer = textBoxObserver.Text;
                 _task.Status = 0;
@@ -122,8 +121,8 @@ namespace RPCC.Tasks
 
                 _task.Filters = fil;
                 _task.FrameType = comboBoxFrameType.Text;
-                if (!_isNewTask) Tasker.DeleteTaskByRowIndex(_rowIndex);
-                Tasker.AddTask(_task);
+                if (!_isNewTask) Tasker.UpdateTaskInTable(_task);
+                else Tasker.AddTask(_task);
             }
             catch
             {
@@ -136,6 +135,7 @@ namespace RPCC.Tasks
         private void buttonCancel_Click(object sender, EventArgs e)
         {
             Tasker.PaintTable();
+            MainForm.IsTaskFormOpen = false;
             Close();
         }
 
