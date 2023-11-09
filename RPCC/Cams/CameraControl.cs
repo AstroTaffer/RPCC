@@ -470,6 +470,10 @@ namespace RPCC.Cams
 
             lock (_camsLocker)
             {
+                var dt = DateTime.UtcNow;
+                var jd = Utilities.JulianDateFromDateTime(DateTime.UtcNow);
+                CoordinatesManager.CalculateObjectDistance2Moon(loadedTask);
+                CoordinatesManager.MoonIllumination = Utilities.MoonIllumination(jd);
                 for (int i = 0; i < cams.Length; i++)
                 {
                     cams[i].latestImageFilename = "";

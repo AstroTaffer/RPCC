@@ -8,10 +8,12 @@ namespace RPCC.Utils
     public static class CoordinatesManager
     {
         public static readonly Transform Trans = new Transform();
-
-        private static readonly Object3 Moon;
+        public static double ObjectDistance2Moon;
+        public static double MoonIllumination;
+        private static readonly Object3 Moon;   
         // public static Object3 Sun;
         private static readonly OnSurface Observatory;
+        
 
         static CoordinatesManager()
         {
@@ -34,7 +36,7 @@ namespace RPCC.Utils
             // Sun.Type = ObjectType.MajorPlanetSunOrMoon;
         }
 
-        public static double CalculateObjectDistance2Moon(ObservationTask task)
+        public static void CalculateObjectDistance2Moon(ObservationTask task)
         {
             var jd = Utilities.JulianDateUtc;
             double moonRa = 0, moonDec = 0, moonDist = 0;   
@@ -45,8 +47,10 @@ namespace RPCC.Utils
 
             var tarRa = task.Ra * 15 * Math.PI / 180;
             var tarDec = task.Dec * Math.PI / 180;
-            return Math.Acos(Math.Sin(tarDec)*Math.Sin(moonDec) +
-                             Math.Cos(tarDec)*Math.Cos(moonDec) * Math.Cos(moonRa-tarRa))*180/Math.PI;
+            ObjectDistance2Moon = Math.Acos(Math.Sin(tarDec)*Math.Sin(moonDec) +
+                                            Math.Cos(tarDec)*Math.Cos(moonDec) * Math.Cos(moonRa-tarRa))*180/Math.PI;
+            // return Math.Acos(Math.Sin(tarDec)*Math.Sin(moonDec) +
+            //                  Math.Cos(tarDec)*Math.Cos(moonDec) * Math.Cos(moonRa-tarRa))*180/Math.PI;
         }
 
         public static bool CheckElevateLimit(double ra, double dec, DateTime time)

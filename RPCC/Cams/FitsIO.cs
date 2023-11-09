@@ -280,14 +280,8 @@ namespace RPCC.Cams
                     break;
             }
             cursor.Add(new HeaderCard("SUN-ZD", WeatherDataCollector.Sun, "Sun zenith distance [deg]"));
-            try
-            {
-                cursor.Add(new HeaderCard("MOONPHAS",
-                                Utilities.MoonIllumination(cam.expStartJd), "illuminated fraction of the Moon"));
-            } catch (Exception ex)
-            {
-                Logger.AddLogEntry($"FitsIO error: {ex}");
-            }
+            cursor.Add(new HeaderCard("MOONPHAS", 
+                CoordinatesManager.MoonIllumination, "illuminated fraction of the Moon"));
             
             switch (CameraControl.loadedTask.FrameType)
             {
@@ -295,16 +289,9 @@ namespace RPCC.Cams
                     
                     goto case "Flat";
                 case "Flat":
-                    try
-                    {
-                        cursor.Add(new HeaderCard("MOONANGL",
-                            CoordinatesManager.CalculateObjectDistance2Moon(CameraControl.loadedTask),
-                            "angle between target and Moon [deg]"));
-                    }
-                    catch (ASCOM.HelperException exception)
-                    {
-                        Logger.AddLogEntry(exception.Message);
-                    }
+                    cursor.Add(new HeaderCard("MOONANGL",
+                        CoordinatesManager.ObjectDistance2Moon,
+                        "angle between target and Moon [deg]"));
                     
                     break;
             }
