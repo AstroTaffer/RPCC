@@ -303,8 +303,8 @@ namespace RPCC.Comms
         }
 
         // [RA] = h, [DEC] = deg
-        internal static async void GoTo(double ra, double dec, bool isJ2K)
-        {
+        internal static async Task<bool> GoTo(double ra, double dec, bool isJ2K)
+        {  
             var response = await ExchangeMessagesAsync($"GoTo {ra} {dec}{(isJ2K ? " J2K" : "")}");
             if (CheckResponse(response, $"GoTo {ra} {dec}{(isJ2K ? " J2K" : "")}"))
             {
@@ -312,13 +312,22 @@ namespace RPCC.Comms
                 if (message == "_GoTo Accepted")
                 {
                     // TODO: Do stuff if good
+                    while (MountDataCollector.IsSlewing)
+                    {
+                        System.Threading.Thread.Sleep(1000);
+                    }
+                    return true;
                 }
                 else
                 {
                     Logger.AddLogEntry($"WARNING Unable to go to {ra} {dec}{(isJ2K ? " J2K" : "")}: {message}");
                     // TODO: Do stuff if bad
+                    
+                    // return false;
                 }
             }
+
+            return false;
         }
 
         internal static double[] GoToAltAz(double az, double el)

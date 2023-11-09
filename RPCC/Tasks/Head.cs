@@ -35,31 +35,18 @@ namespace RPCC.Tasks
         public static void StartThinking()
         {
             ThinkingTimer.Elapsed += Thinking;
-            ThinkingTimer.Interval = 10000; //думать раз в минуту TODO
-            
-            // Thinking(null, null);
+            ThinkingTimer.Interval = 10000; //думать раз в минуту?
         }
 
         private static void Thinking(object sender, ElapsedEventArgs e)
         {
             ThinkingTimer.Stop();
-            
             _currentTask?.Update();
             
             if (!CameraControl.isConnected)
             {
                 CameraControl.ReconnectCameras();
             }
-            
-            // if (!CameraControl.isConnected & WeatherDataCollector.Sun >= 90)
-            // {
-            //     CameraControl.ReconnectCameras();
-            // }
-            //
-            // if (CameraControl.isConnected & WeatherDataCollector.Sun < 89)
-            // {
-            //     CameraControl.DisconnectCameras();
-            // }
 
             if (_isOnPause)
             {
@@ -115,7 +102,6 @@ namespace RPCC.Tasks
                                 break;
                             }
                         }
-;
                     }
                     // continue;
                 }
@@ -158,19 +144,21 @@ namespace RPCC.Tasks
                 ThinkingTimer.Start();
                 return;
             }
+            
+            ThinkingTimer.Start();
             //а если нашлась и время до начала менее 5 минут, то стартуем 
             if ((_currentTask.TimeStart - DateTime.UtcNow).TotalMinutes < TotalMinutes2StartTask &
                 !_isDoDarks & !_isDoFlats & !_isObserve & CameraControl.isConnected)
             {
-                // if (MountDataCollector.IsParking) TODO
-                // {
-                //     ThinkingTimer.Start();
-                //     return;
-                // }
-                // if (MountDataCollector.IsParked)
-                // {
-                //     SiTechExeSocket.Unpark();
-                // }
+                _currentTask.Status = 1;
+                Tasker.UpdateTaskInTable(_currentTask);
+                
+                if (MountDataCollector.IsParked)
+                {
+                    
+                    SiTechExeSocket.Unpark();
+                }
+                
                 switch (_currentTask.FrameType)
                 {
                     case Light:
@@ -205,20 +193,31 @@ namespace RPCC.Tasks
                 }
                 
             }
-            ThinkingTimer.Start();
         }
 
         private static void StartDoTest()
         {
             _isObserve = true;
-            SiTechExeSocket.GoTo(_currentTask.Ra, _currentTask.Dec, true); //проверять доехал ли
-            //если доехал, то начинаем снимать 
-            _currentTask.Status = 1;
-            Logger.AddLogEntry($"Start task# {_currentTask.TaskNumber}, type: {_currentTask.FrameType}");
-            if (!CameraControl.PrepareToObs(_currentTask)) return;  //не удалось подготовиться к наблюдению  
-            _currentTask.Filters = CheckFil();
-            Tasker.UpdateTaskInTable(_currentTask);
-            CameraControl.StartExposure();
+            if (SiTechExeSocket.GoTo(_currentTask.Ra, _currentTask.Dec, true).Result)
+            {
+                if (CameraControl.PrepareToObs(_currentTask))
+                {
+                    Logger.AddLogEntry($"Start task# {_currentTask.TaskNumber}, type: {_currentTask.FrameType}");
+                    _currentTask.Filters = CheckFil();
+                    Tasker.UpdateTaskInTable(_currentTask);
+                    CameraControl.StartExposure();
+                    return;
+                }
+                else
+                {
+                    Logger.AddLogEntry($"WARNING: can't start task #{_currentTask.TaskNumber}, error while prepare to observe");
+                }
+            }
+            else
+            {
+                Logger.AddLogEntry($"WARNING: can't start task #{_currentTask.TaskNumber}, error while GOTO");
+            }
+            EndTask(4);
         }
 
         public static void EndTask(short endStatus)
@@ -229,24 +228,40 @@ namespace RPCC.Tasks
             _isDoDarks = false;
             _isDoFlats = false;
             _isOnPause = false;
-            // _currentTask = null; TODO
-            // if (!MountDataCollector.IsParked)
-            // {
-            //     SiTechExeSocket.Park();
-            // }
+            _currentTask = null;
+            if (!MountDataCollector.IsParked)
+            {
+                SiTechExeSocket.Park();
+            }
         }
 
         private static void StartDoLight()
         {   
             _isObserve = true;
-            SiTechExeSocket.GoTo(_currentTask.Ra, _currentTask.Dec, true); //проверять доехал ли
-            //если доехал, то начинаем снимать 
-            _currentTask.Status = 1;
-            Logger.AddLogEntry($"Start task# {_currentTask.TaskNumber}, type: {_currentTask.FrameType}");
-            if (!CameraControl.PrepareToObs(_currentTask)) return;  //не удалось подготовиться к наблюдению  
-            _currentTask.Filters = CheckFil();
-            Tasker.UpdateTaskInTable(_currentTask);
-            CameraControl.StartExposure();
+            if (SiTechExeSocket.GoTo(_currentTask.Ra, _currentTask.Dec, true).Result) //проверять доехал ли
+            {
+                // _currentTask.Status = 1;
+                Logger.AddLogEntry($"Start task# {_currentTask.TaskNumber}, type: {_currentTask.FrameType}");
+                if (CameraControl.PrepareToObs(_currentTask))
+                {
+                    _currentTask.Filters = CheckFil();
+                    Tasker.UpdateTaskInTable(_currentTask);
+                    CameraControl.StartExposure();
+                    //если доехал, то начинаем снимать 
+                    return;
+                }
+                else
+                {
+                    Logger.AddLogEntry($"WARNING: can't start task #{_currentTask.TaskNumber}, error while prepare to observe");
+                }
+                //не удалось подготовиться к наблюдению  
+                
+            }
+            else
+            {
+                Logger.AddLogEntry($"WARNING: can't start task #{_currentTask.TaskNumber}, error while GOTO");
+            }
+            EndTask(4);
         }
 
         public static void CamCallback()
@@ -301,7 +316,6 @@ namespace RPCC.Tasks
                     else
                     {
                         EndTask(_currentTask.DoneFrames < _currentTask.AllFrames ? (short) 5 : (short) 2);
-                        _currentTask = null;
                     }
                     break;
                 }
@@ -314,7 +328,7 @@ namespace RPCC.Tasks
                     else
                     {
                         EndTask(2);
-                        _currentTask = null;
+
                     }
                     break;
                 }
@@ -344,7 +358,6 @@ namespace RPCC.Tasks
                         }
                         else
                         {
-                            _currentTask = null;
                             Settings._lastDarksTime = DateTime.UtcNow;
                             Settings.SaveXmlConfig("SettingsDefault.xml");
                         }
@@ -368,7 +381,7 @@ namespace RPCC.Tasks
                     else
                     {
                         EndTask(2);
-                        _currentTask = null;
+
                         Settings._lastFlatsTime = DateTime.UtcNow;
                         Settings.SaveXmlConfig("SettingsDefault.xml");
                     }
@@ -391,14 +404,12 @@ namespace RPCC.Tasks
                 FrameType = Flat,
                 Observer = "AUTO_FLAT"
             };
-            // flatTask.Duration = (float) Math.Round((flatTask.TimeEnd - flatTask.TimeStart).TotalHours, 2);
             var zenRaDec = SiTechExeSocket.GoToAltAz(180, 90);
             flatTask.ComputeRaDec($"{Utilities.HoursToHMS(zenRaDec[0])} " +
                                   $"{Utilities.DegreesToDMS(zenRaDec[1])}");
             Tasker.AddTask(flatTask);
             _currentTask = flatTask;
             StartDoFlats();
-            // _lastFlatsTime = DateTime.UtcNow;
         }
 
         private static void StartDoFlats()
@@ -407,26 +418,34 @@ namespace RPCC.Tasks
             {
                 _isDoFlats = true;
                 Logger.AddLogEntry($"Start task# {_currentTask.TaskNumber}, type: {_currentTask.FrameType}");
-                SiTechExeSocket.GoTo(_currentTask.Ra, _currentTask.Dec, true); //проверять доехал ли
-                if (!CameraControl.PrepareToObs(_currentTask))
+                if (SiTechExeSocket.GoTo(_currentTask.Ra, _currentTask.Dec, true).Result)
                 {
-                    _isDoFlats = false;
-                    _currentTask.Status = 4;
-                    _currentTask = null;
-                    return; //не удалось подготовиться к наблюдению
+                    if (CameraControl.PrepareToObs(_currentTask))
+                    {
+                        _currentTask.Status = 1;
+                        _currentTask.Filters = CheckFil();
+                        _currentTask.TimeStart = DateTime.UtcNow;
+                        _currentTask.TimeEnd = DateTime.UtcNow.AddSeconds((short) (_currentTask.Exp + 50));
+                        _currentTask.Duration = (float) Math.Round((_currentTask.TimeEnd - _currentTask.TimeStart).TotalHours, 2);
+                        Tasker.UpdateTaskInTable(_currentTask);
+                        CameraControl.StartExposure();
+                        return; //не удалось подготовиться к наблюдению
+                    }
+                    else
+                    {
+                        Logger.AddLogEntry($"WARNING: can't start task #{_currentTask.TaskNumber}, error while prepare to observe");
+                    }
                 }
-                _currentTask.Status = 1;
-                _currentTask.Filters = CheckFil();
-                _currentTask.TimeStart = DateTime.UtcNow;
-                _currentTask.TimeEnd = DateTime.UtcNow.AddSeconds((short) (_currentTask.Exp + 50));
-                _currentTask.Duration = (float) Math.Round((_currentTask.TimeEnd - _currentTask.TimeStart).TotalHours, 2);
-                Tasker.UpdateTaskInTable(_currentTask);
-                CameraControl.StartExposure();
+                else
+                {
+                    Logger.AddLogEntry($"WARNING: can't start task #{_currentTask.TaskNumber}, error while GOTO");
+                }
             }
             else
             {
                 Logger.AddLogEntry($"Can't start task# {_currentTask.TaskNumber}, type: {_currentTask.FrameType}, no dusk");
             }
+            EndTask(4);
         }
 
         #endregion
@@ -435,10 +454,8 @@ namespace RPCC.Tasks
 
         private static void PrepareAndStartDoDarks()
         {
-            // var l = 0;
             foreach (var exp in DarkExps)
             {
-                // l += exp;
                 var darkTask = new ObservationTask
                 {
                     TaskNumber = Tasker.GetTasksLen(),
@@ -447,13 +464,11 @@ namespace RPCC.Tasks
                     Status = 0,
                     AllFrames = FlatDarkQuantity,
                     TimeAdd = DateTime.UtcNow,
-                    // TimeStart = DateTime.UtcNow.AddSeconds(l + 180), 
                     Observer = "AUTO_DARK"
                 };
                 Tasker.AddTask(darkTask);
                 Darks.Add(darkTask);
             }
-            // Settings._lastDarksTime = DateTime.UtcNow;
             _currentTask = Darks[0];
             Darks.RemoveAt(0);
             StartDoDark();
@@ -463,18 +478,36 @@ namespace RPCC.Tasks
         {
             _isDoDarks = true;
             Logger.AddLogEntry($"Start task# {_currentTask.TaskNumber}, type: {_currentTask.FrameType}");
-            if (!CameraControl.PrepareToObs(_currentTask))
+            if (CameraControl.PrepareToObs(_currentTask))
             {
-                _isDoDarks = false;
-                return;  //не удалось подготовиться к наблюдению
+                 _currentTask.Status = 1;
+                 _currentTask.Filters = CheckFil();
+                 _currentTask.TimeStart = DateTime.UtcNow;
+                 _currentTask.TimeEnd = DateTime.UtcNow.AddSeconds((short) (_currentTask.Exp + 50));
+                 _currentTask.Duration = (float) Math.Round((_currentTask.TimeEnd - _currentTask.TimeStart).TotalHours, 2);
+                 Tasker.UpdateTaskInTable(_currentTask);
+                 CameraControl.StartExposure();
+                 return;
             }
-            _currentTask.Status = 1;
-            _currentTask.Filters = CheckFil();
-            _currentTask.TimeStart = DateTime.UtcNow;
-            _currentTask.TimeEnd = DateTime.UtcNow.AddSeconds((short) (_currentTask.Exp + 50));
-            _currentTask.Duration = (float) Math.Round((_currentTask.TimeEnd - _currentTask.TimeStart).TotalHours, 2);
-            Tasker.UpdateTaskInTable(_currentTask);
-            CameraControl.StartExposure();
+            else
+            {
+                Logger.AddLogEntry($"WARNING: can't start task #{_currentTask.TaskNumber}, error while prepare to observe");
+            }
+
+
+            if (Darks.Count>0)
+            {
+                _currentTask.Status = 4;
+                Tasker.UpdateTaskInTable(_currentTask);
+                _currentTask = Darks[0];
+                Darks.RemoveAt(0);
+                StartDoDark();
+            }
+            else
+            {
+                EndTask(4);
+            }
+
         }
         #endregion
 
