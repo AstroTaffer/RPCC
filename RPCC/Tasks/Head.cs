@@ -30,6 +30,7 @@ namespace RPCC.Tasks
         private static double CD1_2 = 100;
         private static bool _isLookingEastLastCd;
         private const double PulseGuideVelocity = 2; //sec in sec TODO add in .cfg
+        public static bool isThinking;
 
         private static readonly short[] DarkExps = {2, 5, 10, 15, 20, 30, 50, 80, 120, 180};
         private static readonly List<ObservationTask> Darks = new List<ObservationTask>();
@@ -137,6 +138,7 @@ namespace RPCC.Tasks
                 }
                 Tasker.UpdateTaskInTable(bufTask);
                 
+                
                 if (bufTask.Status > 0) continue; // если не ждет наблюдения, то идем дальше
                 
                 if (_isObserve || _isDoDarks || _isDoFlats) continue; // если уже идет задание, то ждем минуту
@@ -154,7 +156,7 @@ namespace RPCC.Tasks
             }
             
             //если после проверки таблицы не нашлась таска на выполнение, то уходим на следующую минуту
-            if (_currentTask == null || _isObserve || _isDoDarks || _isDoFlats)
+            if (_currentTask == null || _isObserve || _isDoDarks || _isDoFlats || !isThinking)
             {
                 ThinkingTimer.Start();
                 return;

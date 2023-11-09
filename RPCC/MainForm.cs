@@ -82,6 +82,7 @@ namespace RPCC
             Head.StartThinking();
             if (checkBoxHead.Checked)
             {
+                Head.isThinking = true;
                 Head.ThinkingTimer.Start();
                 comboBoxImgType.Enabled = false;
                 buttonSurveyStart.Enabled = false;
@@ -656,6 +657,8 @@ namespace RPCC
             {
                 Head.ThinkingTimer.Stop();
             }
+
+            Head.isThinking = checkBoxHead.Checked;
             comboBoxImgType.Enabled = !checkBoxHead.Checked;
             buttonSurveyStart.Enabled = !checkBoxHead.Checked;
             buttonSurveyStop.Enabled = !checkBoxHead.Checked;
