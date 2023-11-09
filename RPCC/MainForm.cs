@@ -102,7 +102,7 @@ namespace RPCC
             Tasker.SaveTasksToXml();
 
             _domeSocket.Disconnect();
-            _donutsSocket.Disconnect();
+            DonutsSocket.Disconnect();
             SiTechExeSocket.Disconnect();
 
             CameraControl.DisconnectCameras();
@@ -530,20 +530,20 @@ namespace RPCC
             Settings.RestoreDefaultXmlConfig();
         }
 
-        private void SocketToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Logger.AddLogEntry("Test donuts");
-            Logger.AddLogEntry(_donutsSocket.PingServer());
-            
-            var cwd = Directory.GetCurrentDirectory();
-            var refFile = cwd + "\\Guid\\2023-04-07T17-56-16.918_EAST_V.fits";
-            var testFile = cwd + "\\Guid\\2023-04-07T18-00-24.167_EAST_V.fits";
-            var req = refFile + ";" + testFile;
-            // Logger.AddLogEntry(req);
-            var outPut = _donutsSocket.GetGuideCorrection(req);
-            if (outPut == null) return;
-            Logger.AddLogEntry("shifts = " + outPut[0] + "x " + outPut[1] + "y ");
-        }
+        // private void SocketToolStripMenuItem_Click(object sender, EventArgs e)
+        // {
+        //     Logger.AddLogEntry("Test donuts");
+        //     Logger.AddLogEntry(_donutsSocket.PingServer());
+        //     
+        //     var cwd = Directory.GetCurrentDirectory();
+        //     var refFile = cwd + "\\Guid\\2023-04-07T17-56-16.918_EAST_V.fits";
+        //     var testFile = cwd + "\\Guid\\2023-04-07T18-00-24.167_EAST_V.fits";
+        //     var req = refFile + ";" + testFile;
+        //     // Logger.AddLogEntry(req);
+        //     var outPut = _donutsSocket.GetGuideCorrection(req);
+        //     if (outPut == null) return;
+        //     Logger.AddLogEntry("shifts = " + outPut[0] + "x " + outPut[1] + "y ");
+        // }
         #endregion
 
         #region Focus

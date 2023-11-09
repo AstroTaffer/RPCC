@@ -12,25 +12,25 @@ namespace RPCC.Comms
 {
     public class DonutsSocket
     {
-        private TcpClient _client;
-        private IPEndPoint _endPoint;
-        private NetworkStream _stream;
-        private StreamReader _streamReader;
-        private StreamWriter _streamWriter;
-        internal bool isConnected;
+        private static TcpClient _client;
+        private static IPEndPoint _endPoint;
+        private static NetworkStream _stream;
+        private static StreamReader _streamReader;
+        private static StreamWriter _streamWriter;
+        public static bool IsConnected;
         private static readonly Timer PingPongTimer = new Timer();
 
         internal DonutsSocket()
         {
             StartDonutsPy();
-            isConnected = false;
+            IsConnected = false;
             PingPongTimer.Elapsed += Ping;
             PingPongTimer.Interval = 1000;
         }
 
         internal void Connect()
         {
-            if (isConnected)
+            if (IsConnected)
             {
                 Logger.AddLogEntry("WARNING Already connected to Donuts");
                 return;
@@ -49,14 +49,14 @@ namespace RPCC.Comms
                     _streamReader = new StreamReader(_stream, Encoding.UTF8);
                     _streamWriter = new StreamWriter(_stream, Encoding.UTF8);
                     _streamWriter.AutoFlush = true;
-                    isConnected = true;
+                    IsConnected = true;
                     PingPongTimer.Start();
                     Logger.AddLogEntry($"Connected to Donuts {_endPoint}");
                 }
                 else
                 {
                     Logger.AddLogEntry("Can't connect to Donuts");
-                    isConnected = false;
+                    IsConnected = false;
                 }
             }
             catch (Exception ex) when (ex is SocketException || ex is IOException)
@@ -66,9 +66,9 @@ namespace RPCC.Comms
             }
         }
 
-        internal void Disconnect()
+        internal static void Disconnect()
         {
-            if (!isConnected)
+            if (!IsConnected)
             {
                 Logger.AddLogEntry("WARNING Already disconnected from Donuts");
                 return;
@@ -84,7 +84,7 @@ namespace RPCC.Comms
                 _client.Close();
                 _client.Dispose();
                 Logger.AddLogEntry("Disconnected from Donuts");
-                isConnected = false;
+                IsConnected = false;
             }
             catch (Exception ex) when (ex is SocketException || ex is IOException)
             {
@@ -96,9 +96,9 @@ namespace RPCC.Comms
             }
         }
 
-        internal string ExchangeMessages(string request)
+        internal static string ExchangeMessages(string request)
         {
-            if (!isConnected)
+            if (!IsConnected)
             {
                 Logger.AddLogEntry("WARNING Unable to exchange messages with Donuts: not connected to Donuts");
                 return null;
@@ -118,17 +118,17 @@ namespace RPCC.Comms
             }
         }
 
-        public float[] GetGuideCorrection(string req)
+        public static float[] GetGuideCorrection(string req)
         {
             var response = ExchangeMessages(req);
             if (!(response is null) && response != "")
-                return response == "fail" ? new float[] {0, 0} : response.Split(' ').Select(float.Parse).ToArray();
+                return response == "fail" ? new float[] {0, 0} : response.Split('_').Select(float.Parse).ToArray();
             Logger.AddLogEntry("WARNING Disconnecting from Donuts");
             Disconnect();
             return null;
         }
 
-        private void ClosePythonScript()
+        private static void ClosePythonScript()
         {
             _streamWriter.WriteLine("quit");
         }

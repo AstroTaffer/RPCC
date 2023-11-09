@@ -4,6 +4,7 @@ using System.Linq;
 using System.Timers;
 using System.Windows.Forms;
 using ASCOM.Tools;
+using nom.tam.fits;
 using RPCC.Cams;
 using RPCC.Comms;
 using RPCC.Focus;
@@ -24,6 +25,11 @@ namespace RPCC.Tasks
         private static bool _isDoFlats;
         private static bool _isDoDarks;
         private static bool _isOnPause;
+        private static string _firstFrame;
+        private static double CD1_1 = 100;
+        private static double CD1_2 = 100;
+        private static bool _isLookingEastLastCd;
+        private const double PulseGuideVelocity = 2; //sec in sec TODO add in .cfg
 
         private static readonly short[] DarkExps = {2, 5, 10, 15, 20, 30, 50, 80, 120, 180};
         private static readonly List<ObservationTask> Darks = new List<ObservationTask>();
@@ -48,25 +54,34 @@ namespace RPCC.Tasks
                 CameraControl.ReconnectCameras();
             }
 
-            if (_isOnPause)
+            if (_isOnPause & !(_currentTask is null))
             {
-                if (_isObserve & WeatherDataCollector.Obs)
+                if (_isObserve & WeatherDataCollector.Obs |
+                    _isDoDarks & !WeatherDataCollector.Obs |
+                    _isDoFlats & WeatherDataCollector.Flat)
                 {
                     _isOnPause = false;
+                    Logger.AddLogEntry($"Unpause task #{_currentTask.TaskNumber}");
                     CameraControl.StartExposure();
                 }
+            }
 
-                if (_isDoDarks & !WeatherDataCollector.Obs)
+            if (!string.IsNullOrEmpty(_firstFrame))
+            {
+                //Если матрицы еще нет, ориентируемся на первый кадр, если есть, ловим решенный кадр по свежее
+                var fits = new Fits(CD1_1 > 99 | CD1_2 > 99 ? _firstFrame : CameraControl.cams.Last().latestImageFilename);
+                var hdu = (ImageHDU) fits.GetHDU(0);
+                try
                 {
-                    _isOnPause = false;
-                    CameraControl.StartExposure();
+                    CD1_1 = hdu.Header.GetDoubleValue("CD1_1");
+                    CD1_2 = hdu.Header.GetDoubleValue("CD1_2");
+                    _isLookingEastLastCd = MountDataCollector.IsLookingEast;
                 }
-
-                if (_isDoFlats & WeatherDataCollector.Flat)
+                catch
                 {
-                    _isOnPause = false;
-                    CameraControl.StartExposure();
+                    
                 }
+                fits.Close();
             }
 
             if (CameraControl.isConnected & !_isObserve & !_isDoDarks & !_isDoFlats)
@@ -229,6 +244,7 @@ namespace RPCC.Tasks
             _isDoFlats = false;
             _isOnPause = false;
             _currentTask = null;
+            _firstFrame = null;
             if (!MountDataCollector.IsParked)
             {
                 SiTechExeSocket.Park();
@@ -302,16 +318,52 @@ namespace RPCC.Tasks
                             EndTask(5);
                             return;
                         }
-                        if (fitsAnalysis.CheckFocused() || !CameraFocus.IsAutoFocus)
+
+                        if (!WeatherDataCollector.Obs)
                         {
-                            if (WeatherDataCollector.Obs) CameraControl.StartExposure();
-                            else _isOnPause = true;
+                            Logger.AddLogEntry($"Weather is bad, pause task #{_currentTask.TaskNumber}");
+                            _isOnPause = true;
+                            // return;
                         }
-                        else CameraFocus.StartAutoFocus(_currentTask);
-                    
-                        //asinc doAstrometry() 
-                        //asinc doDonuts()
-                    
+                        else
+                        {
+                            if (CameraFocus.IsAutoFocus)
+                            {
+                                if (!fitsAnalysis.CheckFocused())
+                                {
+                                    CameraFocus.StartAutoFocus(_currentTask);
+                                }
+                                else
+                                {
+                                    CameraControl.StartExposure();
+                                }
+                            }
+                        }
+                        if (_firstFrame is null)
+                        {
+                            _firstFrame = CameraControl.cams.Last().latestImageFilename;
+                        }
+                        else
+                        {
+                             if (DonutsSocket.IsConnected & CD1_1 < 100 & CD1_2 < 100)
+                             {
+                                 var req = $"{_firstFrame}_{CameraControl.cams.Last().latestImageFilename}";
+                                 var correction = DonutsSocket.GetGuideCorrection(req);
+
+                                 correction[0] = (float) (correction[0] * CD1_1) * 60 * 60;
+                                 correction[1] = (float) (correction[1] * CD1_2) * 60 * 60;
+                                 //arcsec
+                                 //x = north
+                                 //y = east
+                                 if (!(_isLookingEastLastCd & MountDataCollector.IsLookingEast))
+                                 {
+                                      correction[0] *= -1;
+                                      correction[1] *= -1;
+                                 }
+                                 SiTechExeSocket.PulseGuide(correction[0] > 0 ? "N" : "S", (int) (correction[0]*1e3/PulseGuideVelocity));
+                                 SiTechExeSocket.PulseGuide(correction[1] > 0 ? "E" : "W", (int) (correction[1]*1e3/PulseGuideVelocity));
+                             }
+                        }
                     }
                     else
                     {

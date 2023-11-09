@@ -51,7 +51,6 @@
             this.debugToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.restoreDefaultConfigFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loadTestImageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.testDonToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBoxLogs = new System.Windows.Forms.GroupBox();
             this.listBoxLogs = new System.Windows.Forms.ListBox();
             this.contextMenuStripLogs = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -300,7 +299,7 @@
             // 
             // debugToolStripMenuItem
             // 
-            this.debugToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.restoreDefaultConfigFileToolStripMenuItem, this.loadTestImageToolStripMenuItem, this.testDonToolStripMenuItem});
+            this.debugToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.restoreDefaultConfigFileToolStripMenuItem, this.loadTestImageToolStripMenuItem});
             this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
             this.debugToolStripMenuItem.Size = new System.Drawing.Size(54, 20);
             this.debugToolStripMenuItem.Text = "Debug";
@@ -318,13 +317,6 @@
             this.loadTestImageToolStripMenuItem.Size = new System.Drawing.Size(209, 22);
             this.loadTestImageToolStripMenuItem.Text = "Load test image";
             this.loadTestImageToolStripMenuItem.Click += new System.EventHandler(this.LoadTestImageToolStripMenuItem_Click);
-            // 
-            // testDonToolStripMenuItem
-            // 
-            this.testDonToolStripMenuItem.Name = "testDonToolStripMenuItem";
-            this.testDonToolStripMenuItem.Size = new System.Drawing.Size(209, 22);
-            this.testDonToolStripMenuItem.Text = "Test Don";
-            this.testDonToolStripMenuItem.Click += new System.EventHandler(this.SocketToolStripMenuItem_Click);
             // 
             // groupBoxLogs
             // 
@@ -1304,7 +1296,6 @@
         private System.Windows.Forms.Button buttonSurveyStop;
         private System.Windows.Forms.Button buttonSurveyStart;
         private System.Windows.Forms.ComboBox comboBoxImgType;
-        private System.Windows.Forms.ToolStripMenuItem testDonToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem findFocusToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem reconnectSocketToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem reconnectMeteoDomeToolStripMenuItem;
