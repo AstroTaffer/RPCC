@@ -59,6 +59,7 @@ namespace RPCC.Focus
         
         public static void CamFocusCallback()
         {
+            Head.Guiding();
             var focusImPath = CameraControl.cams.Last().latestImageFilename;
             if (string.IsNullOrEmpty(focusImPath))
             {
@@ -410,7 +411,7 @@ namespace RPCC.Focus
                 Logger.AddLogEntry("FOCUS: defocus to " + DeFocus);
                 SerialFocus.FRun_To(DeFocus);
             }
-            _task.FrameType = "light";
+            _task.FrameType = Head.Light;
             CameraControl.PrepareToObs(_task);
             CameraControl.StartExposure();
         }

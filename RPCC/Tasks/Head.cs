@@ -30,7 +30,7 @@ namespace RPCC.Tasks
         private static double CD1_2 = 100;
         private static bool _isLookingEastLastCd;
         private const double PulseGuideVelocity = 2; //sec in sec TODO add in .cfg
-        public static bool isThinking;
+        public static bool IsThinking;
 
         private static readonly short[] DarkExps = {2, 5, 10, 15, 20, 30, 50, 80, 120, 180};
         private static readonly List<ObservationTask> Darks = new List<ObservationTask>();
@@ -156,7 +156,7 @@ namespace RPCC.Tasks
             }
             
             //если после проверки таблицы не нашлась таска на выполнение, то уходим на следующую минуту
-            if (_currentTask == null || _isObserve || _isDoDarks || _isDoFlats || !isThinking)
+            if (_currentTask == null || _isObserve || _isDoDarks || _isDoFlats || !IsThinking)
             {
                 ThinkingTimer.Start();
                 return;
@@ -306,6 +306,8 @@ namespace RPCC.Tasks
                 {
                     if (_currentTask.TimeEnd > DateTime.UtcNow)
                     {
+                        Guiding();
+                        
                         foreach (var cam in CameraControl.cams)
                         {
                             if (!string.IsNullOrEmpty(cam.latestImageFilename))
@@ -341,31 +343,7 @@ namespace RPCC.Tasks
                                 }
                             }
                         }
-                        if (_firstFrame is null)
-                        {
-                            _firstFrame = CameraControl.cams.Last().latestImageFilename;
-                        }
-                        else
-                        {
-                             if (DonutsSocket.IsConnected & CD1_1 < 100 & CD1_2 < 100)
-                             {
-                                 var req = $"{_firstFrame}_{CameraControl.cams.Last().latestImageFilename}";
-                                 var correction = DonutsSocket.GetGuideCorrection(req);
-
-                                 correction[0] = (float) (correction[0] * CD1_1) * 60 * 60;
-                                 correction[1] = (float) (correction[1] * CD1_2) * 60 * 60;
-                                 //arcsec
-                                 //x = north
-                                 //y = east
-                                 if (!(_isLookingEastLastCd & MountDataCollector.IsLookingEast))
-                                 {
-                                      correction[0] *= -1;
-                                      correction[1] *= -1;
-                                 }
-                                 SiTechExeSocket.PulseGuide(correction[0] > 0 ? "N" : "S", (int) (correction[0]*1e3/PulseGuideVelocity));
-                                 SiTechExeSocket.PulseGuide(correction[1] > 0 ? "E" : "W", (int) (correction[1]*1e3/PulseGuideVelocity));
-                             }
-                        }
+                        
                     }
                     else
                     {
@@ -443,6 +421,35 @@ namespace RPCC.Tasks
                 }
             }
             
+        }
+
+        public static void Guiding()
+        {
+            if (_firstFrame is null)
+            {
+                _firstFrame = CameraControl.cams.Last().latestImageFilename;
+            }
+            else
+            {
+                if (DonutsSocket.IsConnected & CD1_1 < 100 & CD1_2 < 100)
+                {
+                    var req = $"{_firstFrame}_{CameraControl.cams.Last().latestImageFilename}";
+                    var correction = DonutsSocket.GetGuideCorrection(req);
+
+                    correction[0] = (float) (correction[0] * CD1_1 * 60 * 60);
+                    correction[1] = (float) (correction[1] * CD1_2 * 60 * 60);
+                    //arcsec
+                    //x = north
+                    //y = east
+                    if (!(_isLookingEastLastCd & MountDataCollector.IsLookingEast))
+                    {
+                        correction[0] *= -1;
+                        correction[1] *= -1;
+                    }
+                    SiTechExeSocket.PulseGuide(correction[0] > 0 ? "N" : "S", (int) (correction[0]*1e3/PulseGuideVelocity));
+                    SiTechExeSocket.PulseGuide(correction[1] > 0 ? "E" : "W", (int) (correction[1]*1e3/PulseGuideVelocity));
+                }
+            }
         }
 
         #region Flats
