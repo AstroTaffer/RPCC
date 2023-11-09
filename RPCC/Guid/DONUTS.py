@@ -5,7 +5,7 @@ import numpy as np
 from donuts import Donuts
 
 time_last_message = 0
-time_wait_sec = 15
+time_wait_sec = 3
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 

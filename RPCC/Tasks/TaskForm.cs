@@ -71,13 +71,14 @@ namespace RPCC.Tasks
 
         private void AddTask(object sender, EventArgs e)
         {
-            
+            _task.FrameType = comboBoxFrameType.Text;
             var fil = "";
             if (checkBoxFilg.Checked) fil += "g ";
             if (checkBoxFilr.Checked) fil += "r ";
             if (checkBoxFili.Checked) fil += "i";
 
-            if (textBoxCoords.Text == "" || textBoxDateTime.Text == "" || comboBoxExp.Text == "" ||
+            if ((textBoxCoords.Text == "" & _task.FrameType == Head.Light) 
+                || textBoxDateTime.Text == "" || comboBoxExp.Text == "" ||
                 comboBoxFrameType.Text == "" || fil == "")
             {
                 MessageBox.Show(@"Blank data, can't add task", @"OK", MessageBoxButtons.OK);
@@ -86,21 +87,25 @@ namespace RPCC.Tasks
 
             try
             {
-                _task.ComputeRaDec(textBoxCoords.Text);
                 _task.TimeAdd = DateTime.UtcNow;
                 _task.TimeStart = DateTime.Parse(textBoxDateTime.Text);
-                if (!CoordinatesManager.CheckElevateLimit(_task.Ra, _task.Dec, _task.TimeStart))
+                
+                if (_task.FrameType == Head.Light)
                 {
-                    MessageBox.Show(@"Target under elevation limit", @"OK", MessageBoxButtons.OK);
-                    return;
+                    _task.ComputeRaDec(textBoxCoords.Text);
+                    if (!CoordinatesManager.CheckElevateLimit(_task.Ra, _task.Dec, _task.TimeStart))
+                    {
+                        MessageBox.Show(@"Target under elevation limit", @"OK", MessageBoxButtons.OK);
+                        return;
+                    }
                 }
-
+                
                 _task.Exp = short.Parse(comboBoxExp.Text);
 
                 if (textBoxDuration.Text == "")
                 {
                     _task.AllFrames = short.Parse(textBoxExpN.Text);
-                    _task.Duration = _task.Exp * _task.AllFrames / 60f / 60 + 0.05f;
+                    _task.Duration = (float) Math.Round(_task.Exp * _task.AllFrames / 60f / 60 + 0.05f, 2);
                 }
                 else
                 {
@@ -120,7 +125,7 @@ namespace RPCC.Tasks
                 _task.Ybin = short.Parse(textBoxYbin.Text);
 
                 _task.Filters = fil;
-                _task.FrameType = comboBoxFrameType.Text;
+                
                 if (!_isNewTask) Tasker.UpdateTaskInTable(_task);
                 else Tasker.AddTask(_task);
             }
@@ -135,8 +140,14 @@ namespace RPCC.Tasks
         private void buttonCancel_Click(object sender, EventArgs e)
         {
             Tasker.PaintTable();
-            MainForm.IsTaskFormOpen = false;
             Close();
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            
+            MainForm.IsTaskFormOpen = false;
+            base.OnClosed(e);
         }
 
         private void buttonDelete_Click(object sender, EventArgs e)

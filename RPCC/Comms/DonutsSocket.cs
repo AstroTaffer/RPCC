@@ -25,7 +25,7 @@ namespace RPCC.Comms
             StartDonutsPy();
             isConnected = false;
             PingPongTimer.Elapsed += Ping;
-            PingPongTimer.Interval = 10000;
+            PingPongTimer.Interval = 1000;
         }
 
         internal void Connect()

@@ -18,7 +18,7 @@ namespace RPCC.Tasks
         private const short TotalDays2ReMakeCalibrationFrames = 30; //TODO add in .cfg
         private const short FlatExp = 2; // in s 
         private const short FlatDarkQuantity = 10; //TODO add in .cfg
-        private static readonly Timer ThinkingTimer = new Timer();
+        public static readonly Timer ThinkingTimer = new Timer();
         private static ObservationTask _currentTask;
         private static bool _isObserve;
         private static bool _isDoFlats;
@@ -27,16 +27,16 @@ namespace RPCC.Tasks
 
         private static readonly short[] DarkExps = {2, 5, 10, 15, 20, 30, 50, 80, 120, 180};
         private static readonly List<ObservationTask> Darks = new List<ObservationTask>();
-        private const string Dark = "Dark";
-        private const string Flat = "Flat";
-        private const string Light = "Object";
-        private const string Test = "Test";
-        
+        public const string Dark = "Dark";
+        public const string Flat = "Flat";
+        public const string Light = "Object";
+        public const string Test = "Test";
+
         public static void StartThinking()
         {
             ThinkingTimer.Elapsed += Thinking;
             ThinkingTimer.Interval = 10000; //думать раз в минуту TODO
-            ThinkingTimer.Start();
+            
             // Thinking(null, null);
         }
 
@@ -60,8 +60,6 @@ namespace RPCC.Tasks
             // {
             //     CameraControl.DisconnectCameras();
             // }
-            
-            // Logger.AddLogEntry($"Last darks time {Settings._lastDarksTime}");
 
             if (_isOnPause)
             {
@@ -119,7 +117,7 @@ namespace RPCC.Tasks
                         }
 ;
                     }
-                    continue;
+                    // continue;
                 }
                 else
                 {
@@ -141,16 +139,11 @@ namespace RPCC.Tasks
                 if (bufTask.Status > 0) continue; // если не ждет наблюдения, то идем дальше
                 
                 if (_isObserve || _isDoDarks || _isDoFlats) continue; // если уже идет задание, то ждем минуту
-                // Далее выбираем таску для наблюдения 
-                // if (!WeatherDataCollector.Obs) {
-                //     continue; // если нельзя наблюдать, то ждем минуту
-                // }
 
                 //выбираем таску 
                 if (_currentTask is null)
                 {
                     _currentTask = bufTask;
-                    // ThinkingTimer.Start();
                     continue;
                 }
 
@@ -228,14 +221,6 @@ namespace RPCC.Tasks
             CameraControl.StartExposure();
         }
 
-        // private static void StartTask()
-        // {
-        //     
-        //     if (_currentTask.FrameType == Light & WeatherDataCollector.Obs) StartDoLight();
-        //     if (_currentTask.FrameType == Dark & !WeatherDataCollector.Obs) StartDoDark();
-        //     if (_currentTask.FrameType == Flat & WeatherDataCollector.Flat) StartDoFlats();
-        // }
-
         public static void EndTask(short endStatus)
         {
             _currentTask.Status = endStatus;
@@ -244,7 +229,7 @@ namespace RPCC.Tasks
             _isDoDarks = false;
             _isDoFlats = false;
             _isOnPause = false;
-            // _currentTask = null;
+            // _currentTask = null; TODO
             // if (!MountDataCollector.IsParked)
             // {
             //     SiTechExeSocket.Park();

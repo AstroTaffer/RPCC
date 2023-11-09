@@ -206,7 +206,6 @@
     <Compile Include="Tasks\TaskForm.Designer.cs">
       <DependentUpon>TaskForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Tests.cs" />
     <Compile Include="Utils\CoordinatesManager.cs" />
     <Compile Include="Utils\Logger.cs" />
     <Compile Include="Utils\Settings.cs" />

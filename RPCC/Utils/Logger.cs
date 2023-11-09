@@ -6,29 +6,24 @@ namespace RPCC.Utils
 {
     public static class Logger
     {
-        internal static ListBox logBox;
-
-        // internal Logger(ListBox listBox)
-        // {
-        //     LogBox= listBox;
-        // }
-
+        internal static ListBox LogBox;
+        
         internal static void AddLogEntry(string entry)
         {
-            if (logBox.Items.Count >= 1024)
+            if (LogBox.Items.Count >= 1024)
             {
                 SaveLogs();
                 ClearLogs();
-                logBox.Items.Insert(0, $"{DateTime.UtcNow:G} Logs have been saved and cleaned");
+                LogBox.Items.Insert(0, $"{DateTime.UtcNow:G} Logs have been saved and cleaned");
             }
 
             try
             {
-                logBox.Items.Insert(0, $"{DateTime.UtcNow:G} {entry}");
+                LogBox.Items.Insert(0, $"{DateTime.UtcNow:G} {entry}");
             }
             catch
             {
-                logBox.Invoke((MethodInvoker) delegate { logBox.Items.Insert(0, $"{DateTime.UtcNow:G} {entry}"); });
+                LogBox.Invoke((MethodInvoker) delegate { LogBox.Items.Insert(0, $"{DateTime.UtcNow:G} {entry}"); });
             }
         }
 
@@ -38,18 +33,18 @@ namespace RPCC.Utils
             if (!Directory.Exists(logsDir)) Directory.CreateDirectory(logsDir);
             var logsFileName = $"Logs {DateTime.UtcNow:yyyy-MM-ddTHH-mm-ss}.txt";
             var sw = new StreamWriter($"{logsDir}\\{logsFileName}");
-            foreach (string item in logBox.Items) sw.WriteLine(item);
+            foreach (string item in LogBox.Items) sw.WriteLine(item);
             sw.Close();
         }
 
         internal static void ClearLogs()
         {
-            logBox.Items.Clear();
+            LogBox.Items.Clear();
         }
 
         internal static void CopyLogItem()
         {
-            if (logBox.SelectedItems.Count > 0) Clipboard.SetText(logBox.SelectedItem.ToString());
+            if (LogBox.SelectedItems.Count > 0) Clipboard.SetText(LogBox.SelectedItem.ToString());
         }
     }
 }

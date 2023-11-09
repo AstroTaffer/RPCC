@@ -36,7 +36,7 @@ namespace RPCC
 
             _isFirstLoad = true;
 
-            Logger.logBox = listBoxLogs;
+            Logger.LogBox = listBoxLogs;
             Logger.AddLogEntry("Application launched");
 
             Settings.LoadXmlConfig("SettingsDefault.xml");
@@ -80,6 +80,18 @@ namespace RPCC
             timerUi.Start();
             comboBoxImgType.SelectedIndex = 0;
             Head.StartThinking();
+            if (checkBoxHead.Checked)
+            {
+                Head.ThinkingTimer.Start();
+                comboBoxImgType.Enabled = false;
+                buttonSurveyStart.Enabled = false;
+                buttonSurveyStop.Enabled = false;
+                numericUpDownSequence.Enabled = false;
+                numericUpDownExpTime.Enabled = false;
+                textBoxObjectDec.Enabled = false;
+                textBoxObjectRa.Enabled = false;
+                textBoxObjectName.Enabled = false;
+            }
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -633,5 +645,25 @@ namespace RPCC
         //     Tasker.PaintTable();
         // }
         #endregion
+
+        private void checkBoxHead_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBoxHead.Checked)
+            {
+                Head.ThinkingTimer.Start();
+            }
+            else
+            {
+                Head.ThinkingTimer.Stop();
+            }
+            comboBoxImgType.Enabled = !checkBoxHead.Checked;
+            buttonSurveyStart.Enabled = !checkBoxHead.Checked;
+            buttonSurveyStop.Enabled = !checkBoxHead.Checked;
+            numericUpDownSequence.Enabled = !checkBoxHead.Checked;
+            numericUpDownExpTime.Enabled = !checkBoxHead.Checked;
+            textBoxObjectDec.Enabled = !checkBoxHead.Checked;
+            textBoxObjectRa.Enabled = !checkBoxHead.Checked;
+            textBoxObjectName.Enabled = !checkBoxHead.Checked;
+        }
     }
 }
