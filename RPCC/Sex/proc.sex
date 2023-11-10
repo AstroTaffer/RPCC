@@ -1,4 +1,4 @@
-# Default configuration file for SExtractor V1.2b14 - > 2.0
+﻿# Default configuration file for SExtractor V1.2b14 - > 2.0
 # EB 26/10/97
 # (*) indicates parameters which can be omitted from this config file.
 
@@ -13,9 +13,9 @@ PARAMETERS_NAME default.par     # name of the file containing catalog contents
 
 DETECT_TYPE	CCD			# "CCD" or "PHOTO" (*)
 FLAG_IMAGE	flag.fits	# filename for an input FLAG-image
-DETECT_MINAREA	2		# minimum number of pixels above threshold
-DETECT_THRESH	2.0		# <sigmas> or <threshold>,<ZP> in mag.arcsec-2
-ANALYSIS_THRESH	2.0		# <sigmas> or <threshold>,<ZP> in mag.arcsec-2
+DETECT_MINAREA	4		# minimum number of pixels above threshold
+DETECT_THRESH	10.0		# <sigmas> or <threshold>,<ZP> in mag.arcsec-2
+ANALYSIS_THRESH	10.0		# <sigmas> or <threshold>,<ZP> in mag.arcsec-2
 	
 FILTER	Y				# apply filter for detection ("Y" or "N")?
 FILTER_NAME	tophat_2.5_3x3.conv      # name of the file containing the filter
@@ -31,25 +31,25 @@ MASK_TYPE	CORRECT		# type of detection MASKing: can be one of
 
 #------------------------------ Photometry -----------------------------------
 
-PHOT_APERTURES	8.0 # 3.0 8.0		# MAG_APER aperture diameter(s) in pixels
-PHOT_AUTOPARAMS	4, 4	# MAG_AUTO parameters: <Kron_fact>,<min_radius>
+PHOT_APERTURES	6.0		# MAG_APER aperture diameter(s) in pixels
+PHOT_AUTOPARAMS	7, 7	# MAG_AUTO parameters: <Kron_fact>,<min_radius>
 
 SATUR_LEVEL     50000.0         # level (in ADUs) at which arises saturation
 
-#MAG_ZEROPOINT	15.3276		# magnitude zero-point
+MAG_ZEROPOINT	15.3276		# magnitude zero-point
 MAG_ZEROPOINT	23.3		# magnitude zero-point
 MAG_GAMMA	1.0		# gamma of emulsion (for photographic scans)
-GAIN            1.0             # detector gain in e-/ADU.
-PIXEL_SCALE     0             # size of pixel in arcsec (0=use FITS WCS info).
+GAIN            1.1             # detector gain in e-/ADU.
+PIXEL_SCALE     1.3             # size of pixel in arcsec (0=use FITS WCS info).
 
 #------------------------- Star/Galaxy Separation ----------------------------
 
-SEEING_FWHM	9		# stellar FWHM in arcsec
+SEEING_FWHM	5.5		# stellar FWHM in arcsec
 STARNNW_NAME	default.nnw	# Neural-Network_Weight table filename
 
 #------------------------------ Background -----------------------------------
 
-BACK_SIZE	50		# Background mesh: <size> or <width>,<height>
+BACK_SIZE	20		# Background mesh: <size> or <width>,<height>
 BACK_FILTERSIZE	3		# Background filter: <size> or <width>,<height>
 
 BACKPHOTO_TYPE	GLOBAL		# can be "GLOBAL" or "LOCAL" (*)
@@ -61,7 +61,7 @@ CHECKIMAGE_TYPE	NONE		# can be one of "NONE", "BACKGROUND",
 				# "MINIBACKGROUND", "-BACKGROUND", "OBJECTS",
 				# "-OBJECTS", "SEGMENTATION", "APERTURES",
 				# or "FILTERED" (*)
-CHECKIMAGE_NAME	aper.fit, back.fit, seg.fit, obj.fit, filt.fit	# Filename for the check-image (*)
+CHECKIMAGE_NAME	back.fit  # Filename for the check-image (*)
 
 #--------------------- Memory (change with caution!) -------------------------
 
@@ -71,7 +71,7 @@ MEMORY_BUFSIZE	512		# number of lines in buffer
 
 #----------------------------- Miscellaneous ---------------------------------
 
-VERBOSE_TYPE	QUIET		# can be "QUIET", "NORMAL" or "FULL" (*)
+VERBOSE_TYPE	FULL		# can be "QUIET", "NORMAL" or "FULL" (*)
 
 #------------------------------- New Stuff -----------------------------------
 

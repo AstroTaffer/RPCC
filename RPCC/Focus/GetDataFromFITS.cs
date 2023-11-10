@@ -18,6 +18,8 @@ namespace RPCC.Focus
         private const double MaxEll = 0.25;
         private const int MinStars = 20;
         private const double FwhmFocused = 3.0;
+        private const double MinLimitFwhm = 1.0;
+        private const double MaxLimitFwhm = 20.0;
         private readonly string _path2Cat;
         private List<List<double>> _sortTable;
         public bool Status { get; }
@@ -35,13 +37,9 @@ namespace RPCC.Focus
             _path2Cat = outputFile;
 
             try
-            { 
-                if (!File.Exists(outputFile))
-                {
-                    FileStream fs = File.Create(outputFile);
-                    fs.Close();
-                    Sex(path2Fits, outputFile);
-                }
+            {
+                Sex(path2Fits, outputFile);
+               
                 // GetTable();
                 // StarsNum = GetStarsNum();
                 // Ell = GetEllipticity();
@@ -84,24 +82,21 @@ namespace RPCC.Focus
             }
         }
         
-        private static void Sex(string inputFile, string outputFile)
+        public static void Sex(string inputFile, string outputFile)
         {
-            
+            if (!File.Exists(outputFile))
+            {
+                FileStream fs = File.Create(outputFile);
+                fs.Close();
+            }
             var cwd = Directory.GetCurrentDirectory();
-            // cwd = cwd.Replace(":", "");
-            // inputFile = inputFile.Replace(":", "");
-            // outputFile = outputFile.Replace(":", "");
-            // cwd = cwd.Replace("\\", "\\\\");
             var sex = cwd + @"\Sex\Extract.exe ";
-            var dSex = " -c " + cwd + @"\Sex\default.sex";
-            var dPar = " -PARAMETERS_NAME " + cwd + @"\Sex\default.par";
+            var dSex = " -c " + cwd + @"\Sex\proc.sex";
+            var dPar = " -PARAMETERS_NAME " + cwd + @"\Sex\proc.par";
             var dFilt = " -FILTER_NAME " + cwd + @"\Sex\tophat_2.5_3x3.conv" ;
             var nnw = " -STARNNW_NAME " + cwd + @"\Sex\default.nnw";
 
-            // var shell = sex + inputFile + dSex + dPar + dFilt + nnw + " -CATALOG_NAME " + outputFile;
-            var shell = sex + "\"" + inputFile + "\"" + dSex + dPar + dFilt + nnw + " -CATALOG_NAME " + "\"" + outputFile + "\"";
-            // shell = shell.Replace(":", "");
-            // shell = shell.Replace("\\", "\\\\");
+            var shell = sex + inputFile + dSex + dPar + dFilt + nnw + " -CATALOG_NAME " + outputFile;
             Console.WriteLine(shell);
 
             var processStartInfo = new ProcessStartInfo
@@ -131,6 +126,10 @@ namespace RPCC.Focus
                 var line = reader.ReadLine();
                 if (line?[0] == '#') continue;
                 var row = line?.Split(' ').Where(t => t.Length >= 1).Select(Convert.ToDouble).ToList();
+                if (row?[3] > MaxLimitFwhm | row?[3] < MinLimitFwhm)
+                {
+                    continue;
+                }
                 table.Add(row);
             }
 
@@ -187,12 +186,12 @@ namespace RPCC.Focus
 
         public double GetEllipticity()
         {
-            return _sortTable[1].Median();
+            return _sortTable[4].Median();
         }
 
         public double GetMedianFwhm()
         {
-            return _sortTable[0].Median();
+            return _sortTable[3].Median();
         }
         
         public bool CheckImageQuality()

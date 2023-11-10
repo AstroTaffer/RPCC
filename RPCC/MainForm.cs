@@ -26,7 +26,7 @@ namespace RPCC
 
         private static readonly System.Timers.Timer FocusTimer = new System.Timers.Timer();
 
-        private bool _isFirstLoad;
+        // private bool _isFirstLoad;
         public static bool IsTaskFormOpen;
 
         #region General
@@ -34,7 +34,7 @@ namespace RPCC
         {
             InitializeComponent();
 
-            _isFirstLoad = true;
+            // _isFirstLoad = true;
 
             Logger.LogBox = listBoxLogs;
             Logger.AddLogEntry("Application launched");
