@@ -63,7 +63,8 @@ namespace RPCC.Cams
             
             FillInHeader(cam, newHeader);
 
-            string outDir = $"{Settings.MainOutFolder}\\{DateTime.Now.AddHours(-12):yyyy-MM-dd}_" +
+            DateTime outDateTime = DateTime.Now.AddHours(-12);
+            string outDir = $"{Settings.MainOutFolder}\\{outDateTime.Year}\\{outDateTime:yyyy-MM-dd}\\" +
                 $"{(string.IsNullOrEmpty(CameraControl.loadedTask.Object) ? "UNKNOWN" : CameraControl.loadedTask.Object)}\\";
             switch (CameraControl.loadedTask.FrameType)
             {

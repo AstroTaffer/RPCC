@@ -16,8 +16,8 @@ namespace RPCC.Focus
     public class GetDataFromFits
     {
         private const double MaxEll = 0.25;
-        private const int MinStars = 20;
-        private const double FwhmFocused = 3.0;
+        private const int MinStars = 100;
+        private const double FwhmFocused = 4.0;
         private const double MinLimitFwhm = 1.0;
         private const double MaxLimitFwhm = 20.0;
         private readonly string _path2Cat;
@@ -32,7 +32,7 @@ namespace RPCC.Focus
         public GetDataFromFits(string path2Fits)
         {
             if (string.IsNullOrEmpty(path2Fits)) return;
-            var fits = new Fits(path2Fits);
+
             var outputFile = path2Fits.Replace("fits", "cat");
             _path2Cat = outputFile;
 
@@ -40,29 +40,13 @@ namespace RPCC.Focus
             {
                 Sex(path2Fits, outputFile);
                
-                // GetTable();
-                // StarsNum = GetStarsNum();
-                // Ell = GetEllipticity();
-                // Fwhm = GetMedianFwhm();
-                // Quality = CheckImageQuality();
-                try
-                {
-                    GetTable();
-                    StarsNum = GetStarsNum();
-                    Ell = GetEllipticity();
-                    Fwhm = GetMedianFwhm();
-                    Quality = CheckImageQuality();
-                }
-                catch (ArgumentOutOfRangeException e)
-                {
-                    Console.WriteLine(e);
-                    Sex(path2Fits, outputFile);
-                    GetTable();
-                    StarsNum = GetStarsNum();
-                    Ell = GetEllipticity();
-                    Fwhm = GetMedianFwhm();
-                    Quality = CheckImageQuality();
-                }
+                GetTable();
+                StarsNum = GetStarsNum();
+                Ell = GetEllipticity();
+                Fwhm = GetMedianFwhm();
+                Quality = CheckImageQuality();
+                
+                var fits = new Fits(path2Fits);
                 var hdu = (ImageHDU) fits.GetHDU(0);
                 Focus = hdu.Header.GetIntValue("FOCUS");
                 var cursor = hdu.Header.GetCursor();
@@ -206,17 +190,26 @@ namespace RPCC.Focus
             if (StarsNum < MinStars)
             {
                 //мало звезд на обоих кадрах, игнорируем, скорее всего облако. Но может обе в диком дефокусе!
-                Logger.AddLogEntry("FOCUS: Few stars on both images");
+                Logger.AddLogEntry("FOCUS: Few stars");
                 return false;
             }
 
-            Logger.AddLogEntry("FOCUS: Focus image is ok!");
+            // Logger.AddLogEntry("FOCUS: Focus image is ok!");
             return true;
         }
         
         public bool CheckFocused()
         {
             return Fwhm < FwhmFocused;
+        }
+
+        public void PrintData()
+        {
+            Console.WriteLine($"stars num {StarsNum}");
+            Console.WriteLine($"Ell {Ell}");
+            Console.WriteLine($"FWHM {Fwhm}");
+            Console.WriteLine($"quality {Quality}");
+            Console.WriteLine($"focused {CheckFocused()}");
         }
     }
 }

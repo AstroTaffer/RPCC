@@ -168,6 +168,8 @@ namespace RPCC.Utils
         /// </summary>
 
         private static string _mainOutFolder;
+        private static DateTime _lastDarksTime;
+        private static DateTime _lastFlatsTime;
 
         public static string MainOutFolder
         {
@@ -179,6 +181,9 @@ namespace RPCC.Utils
                 // Alternative - if (!Exists) CreateDirectory
             }
         }
+
+        public static DateTime LastDarksTime { get; set; }
+        public static DateTime LastFlatsTime { get; set; }
         #endregion
 
         #region Comms
@@ -191,8 +196,6 @@ namespace RPCC.Utils
         private static int _meteoDomeTcpIpPort;
         private static int _donutsTcpIpPort;
         private static int _siTechExeTcpIpPort;
-        public static DateTime _lastDarksTime;
-        public static DateTime _lastFlatsTime;
 
         public static int FocusComId
         {
@@ -261,6 +264,8 @@ namespace RPCC.Utils
 
                       config.Root.Elements("survey").Any() &&
                       config.Root.Elements("survey").Elements("mainOutFolder").Any() &&
+                      config.Root.Elements("survey").Elements("lastDarksTime").Any() &&
+                      config.Root.Elements("survey").Elements("lastFlatsTime").Any() &&
 
                       config.Root.Elements("comms").Any() &&
                       config.Root.Elements("comms").Elements("focusComId").Any() &&
@@ -285,8 +290,8 @@ namespace RPCC.Utils
                 CamRoMode = (string)config.Root.Element("cameras").Element("сamRoMode");
 
                 MainOutFolder = (string)config.Root.Element("survey").Element("mainOutFolder");
-                _lastDarksTime = (DateTime)config.Root.Element("survey").Element("LastDarksTime");
-                _lastFlatsTime = (DateTime)config.Root.Element("survey").Element("LastFlatsTime");
+                LastDarksTime = (DateTime)config.Root.Element("survey").Element("lastDarksTime");
+                LastFlatsTime = (DateTime)config.Root.Element("survey").Element("lastFlatsTime");
 
                 FocusComId = (int)config.Root.Element("comms").Element("focusComId");
                 MeteoDomeTcpIpPort = (int)config.Root.Element("comms").Element("meteoDomeTcpIpPort");
@@ -411,8 +416,8 @@ namespace RPCC.Utils
                 
                 new XElement("survey",
                     new XElement("mainOutFolder", MainOutFolder),
-                    new XElement("LastDarksTime", _lastDarksTime), 
-                    new XElement("LastFlatsTime", _lastFlatsTime)),
+                    new XElement("LastDarksTime", LastDarksTime), 
+                    new XElement("LastFlatsTime", LastFlatsTime)),
 
                 new XElement("comms",
                     new XElement("focusComId", FocusComId),
@@ -447,8 +452,8 @@ namespace RPCC.Utils
                 new XElement("survey",
                   new XElement("mainOutFolder", Directory.Exists("D:\\RoboPhot Data\\Images") ? 
                   "D:\\RoboPhot Data\\Images" : Directory.GetCurrentDirectory()),
-                  new XElement("LastDarksTime", _lastDarksTime), 
-                  new XElement("LastFlatsTime", _lastFlatsTime)),
+                  new XElement("LastDarksTime", LastDarksTime), 
+                  new XElement("LastFlatsTime", LastFlatsTime)),
 
                 new XElement("comms",
                     new XElement("focusComId", 10),

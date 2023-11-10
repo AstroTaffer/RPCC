@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using RPCC.Focus;
 
 namespace RPCC
@@ -7,9 +8,16 @@ namespace RPCC
     {
         public static void TestSex()
         {
-            var inputF = "C:\\Users\\User\\RiderProjects\\RPCC\\RPCC\\Sex\\GPX-TF16E-48_r_2023-11-09T17-35-16.fits";
-            var outputF = inputF.Replace("fits", "cat");
-            GetDataFromFits.Sex(inputF, outputF);
+            var inp = "D:\\RoboPhotData\\Images\\2023-11-09_GPX-TF16E-48\\RAW\\i\\new";
+            string[] paths = Directory.GetFiles(inp, "*.fits");
+            foreach (var path in paths)
+            {
+                // var outputF = path.Replace("fits", "cat");
+                var buf = new GetDataFromFits(path);
+                buf.PrintData();
+                // Console.ReadKey();
+            }
+            
         }
     }
 }

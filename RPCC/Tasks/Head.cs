@@ -88,10 +88,10 @@ namespace RPCC.Tasks
             if (CameraControl.isConnected & !_isObserve & !_isDoDarks & !_isDoFlats)
             {
                 if (WeatherDataCollector.Flat &
-                                ((DateTime.UtcNow - Settings._lastFlatsTime).TotalDays > TotalDays2ReMakeCalibrationFrames)) PrepareAndStartDoFlats();
+                                ((DateTime.UtcNow - Settings.LastFlatsTime).TotalDays > TotalDays2ReMakeCalibrationFrames)) PrepareAndStartDoFlats();
                 
                 if (!WeatherDataCollector.Obs &
-                                ((DateTime.UtcNow - Settings._lastDarksTime).TotalDays > TotalDays2ReMakeCalibrationFrames)) PrepareAndStartDoDarks();
+                                ((DateTime.UtcNow - Settings.LastDarksTime).TotalDays > TotalDays2ReMakeCalibrationFrames)) PrepareAndStartDoDarks();
             }
 
             foreach (DataGridViewRow row in Tasker.dataGridViewTasker.Rows)
@@ -306,7 +306,7 @@ namespace RPCC.Tasks
                 {
                     if (_currentTask.TimeEnd > DateTime.UtcNow)
                     {
-                        Guiding();
+                        // Guiding();
                         
                         foreach (var cam in CameraControl.cams)
                         {
@@ -341,6 +341,10 @@ namespace RPCC.Tasks
                                 {
                                     CameraControl.StartExposure();
                                 }
+                            }
+                            else
+                            {
+                                CameraControl.StartExposure();
                             }
                         }
                         
@@ -390,7 +394,7 @@ namespace RPCC.Tasks
                         }
                         else
                         {
-                            Settings._lastDarksTime = DateTime.UtcNow;
+                            Settings.LastDarksTime = DateTime.UtcNow;
                             Settings.SaveXmlConfig("SettingsDefault.xml");
                         }
                     }
@@ -414,7 +418,7 @@ namespace RPCC.Tasks
                     {
                         EndTask(2);
 
-                        Settings._lastFlatsTime = DateTime.UtcNow;
+                        Settings.LastFlatsTime = DateTime.UtcNow;
                         Settings.SaveXmlConfig("SettingsDefault.xml");
                     }
                     break;
