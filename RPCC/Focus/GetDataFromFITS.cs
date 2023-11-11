@@ -17,7 +17,7 @@ namespace RPCC.Focus
     {
         private const double MaxEll = 0.25;
         private const int MinStars = 100;
-        private const double FwhmFocused = 4.0;
+        private const double FwhmFocused = 3.0;
         private const double MinLimitFwhm = 1.0;
         private const double MaxLimitFwhm = 20.0;
         private readonly string _path2Cat;
@@ -25,12 +25,12 @@ namespace RPCC.Focus
         public bool Status { get; }
         public int Focus { get; }
         public double Fwhm { get; }
-        private double Ell { get; }
+        public double Ell { get; }
         private double StarsNum { get; }
         private bool Quality { set; get; }
 
-        public GetDataFromFits(string path2Fits)
-        {
+        public GetDataFromFits(string path2Fits, bool updateFits = true)
+        {   
             if (string.IsNullOrEmpty(path2Fits)) return;
 
             var outputFile = path2Fits.Replace("fits", "cat");
@@ -38,24 +38,33 @@ namespace RPCC.Focus
 
             try
             {
-                Sex(path2Fits, outputFile);
-               
+                if (!File.Exists(outputFile))
+                {
+                    FileStream fs = File.Create(outputFile);
+                    fs.Close();
+                    Sex(path2Fits, outputFile);
+                }
+                
                 GetTable();
                 StarsNum = GetStarsNum();
                 Ell = GetEllipticity();
                 Fwhm = GetMedianFwhm();
                 Quality = CheckImageQuality();
-                
-                var fits = new Fits(path2Fits);
-                var hdu = (ImageHDU) fits.GetHDU(0);
-                Focus = hdu.Header.GetIntValue("FOCUS");
-                var cursor = hdu.Header.GetCursor();
-                cursor.Key = "END";
-                cursor.Add(new HeaderCard("SEXFWHM", Fwhm, "Sextractor median FWHM"));
-                cursor.Add(new HeaderCard("SEXELL", Ell, "Sextractor median ellipticity"));
-                cursor.Add(new HeaderCard("SEXNSTAR", StarsNum, "Stars in sextractor catalog"));
-                cursor.Add(new HeaderCard("QUALITY", Quality, "Quality control flag"));
-                fits.Close();
+
+                if (updateFits)
+                {
+                    var fits = new Fits(path2Fits);
+                    var hdu = (ImageHDU) fits.GetHDU(0);
+                    Focus = hdu.Header.GetIntValue("FOCUS");
+                    var cursor = hdu.Header.GetCursor();
+                    cursor.Key = "END";
+                    cursor.Add(new HeaderCard("SEXFWHM", Fwhm, "Sextractor median FWHM"));
+                    cursor.Add(new HeaderCard("SEXELL", Ell, "Sextractor median ellipticity"));
+                    cursor.Add(new HeaderCard("SEXNSTAR", StarsNum, "Stars in sextractor catalog"));
+                    cursor.Add(new HeaderCard("QUALITY", Quality, "Quality control flag"));
+                    fits.Close();
+                }
+
                 Status = true;
             }
             catch (Exception e)
@@ -68,11 +77,7 @@ namespace RPCC.Focus
         
         public static void Sex(string inputFile, string outputFile)
         {
-            if (!File.Exists(outputFile))
-            {
-                FileStream fs = File.Create(outputFile);
-                fs.Close();
-            }
+            
             var cwd = Directory.GetCurrentDirectory();
             var sex = cwd + @"\Sex\Extract.exe ";
             var dSex = " -c " + cwd + @"\Sex\proc.sex";
@@ -183,14 +188,14 @@ namespace RPCC.Focus
             if (Ell > MaxEll)
             {
                 // игнорируем
-                Logger.AddLogEntry("FOCUS: Images stretched");
+                // Logger.AddLogEntry("FOCUS: Images stretched");
                 return false;
             }
 
             if (StarsNum < MinStars)
             {
                 //мало звезд на обоих кадрах, игнорируем, скорее всего облако. Но может обе в диком дефокусе!
-                Logger.AddLogEntry("FOCUS: Few stars");
+                // Logger.AddLogEntry("FOCUS: Few stars");
                 return false;
             }
 

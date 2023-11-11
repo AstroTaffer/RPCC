@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
+using RPCC.Comms;
 using RPCC.Utils;
 
 namespace RPCC.Tasks
@@ -21,6 +22,7 @@ namespace RPCC.Tasks
             if (_isNewTask)
             {
                 _task.TaskNumber = Tasker.GetTasksLen();
+                textBoxCoords.Text = $@"{ASCOM.Tools.Utilities.HoursToHMS(MountDataCollector.RightAsc)} {ASCOM.Tools.Utilities.DegreesToDMS(MountDataCollector.Declination)}";
             }
             else
             {
@@ -90,7 +92,7 @@ namespace RPCC.Tasks
                 _task.TimeAdd = DateTime.UtcNow;
                 _task.TimeStart = DateTime.Parse(textBoxDateTime.Text);
                 
-                if (_task.FrameType == Head.Light)
+                if (_task.FrameType == Head.Light || _task.FrameType == Head.Test)
                 {
                     _task.ComputeRaDec(textBoxCoords.Text);
                     if (!CoordinatesManager.CheckElevateLimit(_task.Ra, _task.Dec, _task.TimeStart))
@@ -113,6 +115,11 @@ namespace RPCC.Tasks
                     {
                         _task.Duration = buf;
                         _task.AllFrames = Convert.ToInt16(_task.Duration * 60f * 60f / _task.Exp);
+                    }
+                    else
+                    {
+                        MessageBox.Show(@"Can't calc duration", @"OK", MessageBoxButtons.OK);
+                        return;
                     }
 
                 }

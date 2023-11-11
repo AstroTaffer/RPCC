@@ -259,7 +259,7 @@ namespace RPCC.Tasks
             // comboBoxFrameType
             // 
             this.comboBoxFrameType.FormattingEnabled = true;
-            this.comboBoxFrameType.Items.AddRange(new object[] {"Object", "Dark", "Flat", "Bias"});
+            this.comboBoxFrameType.Items.AddRange(new object[] {"Object", "Dark", "Flat", "Test", "Bias"});
             this.comboBoxFrameType.Location = new System.Drawing.Point(113, 117);
             this.comboBoxFrameType.Name = "comboBoxFrameType";
             this.comboBoxFrameType.Size = new System.Drawing.Size(107, 28);

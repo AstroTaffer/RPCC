@@ -157,7 +157,7 @@ namespace RPCC.Cams
             cams = cams.OrderBy(cam =>
             {
                 int index = Array.IndexOf(filterOrder, cam.filter);
-                Console.WriteLine($"Sorting! Filer {cam.filter} => Index {index}");
+                // Console.WriteLine($"Sorting! Filer {cam.filter} => Index {index}");
                 if (index == -1) return int.MaxValue;
                 return index;
             }).ToArray();
