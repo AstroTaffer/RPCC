@@ -123,27 +123,27 @@ namespace RPCC.Comms
             }
         }
 
-        //internal static async Task<string[]> ExchangeMessagesAsync(string request)
-        //{
-        //    if (!_isConnected)
-        //    {
-        //        Logger.AddLogEntry("WARNING Unable to exchange messages with SiTechExe: not connected");
-        //        return null;
-        //    }
+        internal static async Task<string[]> ExchangeMessagesAsync(string request)
+        {
+            if (!_isConnected)
+            {
+                Logger.AddLogEntry("WARNING Unable to exchange messages with SiTechExe: not connected");
+                return null;
+            }
 
-        //    try
-        //    {
-        //        await _streamWriter.WriteLineAsync(request);
-        //        var response = (await _streamReader.ReadLineAsync()).Split(';');
-        //        MountDataCollector.ParseScopeStatus(response);
-        //        return response;
-        //    }
-        //    catch (Exception ex) when (ex is SocketException || ex is IOException)
-        //    {
-        //        Logger.AddLogEntry($"WARNING Unable to exchange messages with SiTechExe: {ex.Message}");
-        //        return null;
-        //    }
-        //}
+            try
+            {
+                await _streamWriter.WriteLineAsync(request);
+                var response = (await _streamReader.ReadLineAsync()).Split(';');
+                MountDataCollector.ParseScopeStatus(response);
+                return response;
+            }
+            catch (Exception ex) when (ex is SocketException || ex is IOException)
+            {
+                Logger.AddLogEntry($"WARNING Unable to exchange messages with SiTechExe: {ex.Message}");
+                return null;
+            }
+        }
 
         internal static string[] ExchangeMessages(string request)
         {
