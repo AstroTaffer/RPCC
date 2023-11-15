@@ -77,7 +77,8 @@ namespace RPCC.Comms
                     _isConnected = true;
 
                     // The very first sent command will never be recognized, so we send some nonsense, literally
-                    await ExchangeMessagesAsync("Nonsense");
+                    ExchangeMessages("Nonsense");
+                    //await ExchangeMessagesAsync("Nonsense");
                     ReadScopeStatus();
                     _mountTimer.Start();
 
@@ -122,7 +123,29 @@ namespace RPCC.Comms
             }
         }
 
-        internal static async Task<string[]> ExchangeMessagesAsync(string request)
+        //internal static async Task<string[]> ExchangeMessagesAsync(string request)
+        //{
+        //    if (!_isConnected)
+        //    {
+        //        Logger.AddLogEntry("WARNING Unable to exchange messages with SiTechExe: not connected");
+        //        return null;
+        //    }
+
+        //    try
+        //    {
+        //        await _streamWriter.WriteLineAsync(request);
+        //        var response = (await _streamReader.ReadLineAsync()).Split(';');
+        //        MountDataCollector.ParseScopeStatus(response);
+        //        return response;
+        //    }
+        //    catch (Exception ex) when (ex is SocketException || ex is IOException)
+        //    {
+        //        Logger.AddLogEntry($"WARNING Unable to exchange messages with SiTechExe: {ex.Message}");
+        //        return null;
+        //    }
+        //}
+
+        internal static string[] ExchangeMessages(string request)
         {
             if (!_isConnected)
             {
@@ -132,8 +155,8 @@ namespace RPCC.Comms
 
             try
             {
-                await _streamWriter.WriteLineAsync(request);
-                var response = (await _streamReader.ReadLineAsync()).Split(';');
+                _streamWriter.WriteLine(request);
+                var response = _streamReader.ReadLine().Split(';');
                 MountDataCollector.ParseScopeStatus(response);
                 return response;
             }
@@ -174,9 +197,10 @@ namespace RPCC.Comms
 
         #region SiTechExe Commands
 
-        internal static async void ReadScopeStatus()
+        internal static void ReadScopeStatus()
         {
-            var response = await ExchangeMessagesAsync("ReadScopeStatus");
+            var response = ExchangeMessages("ReadScopeStatus");
+            //var response = await ExchangeMessagesAsync("ReadScopeStatus");
             if (CheckResponse(response, "ReadScopeStatus"))
             {
                 var message = response[response.Length - 1];
@@ -192,9 +216,10 @@ namespace RPCC.Comms
             }
         }
 
-        internal static async void Abort()
+        internal static void Abort()
         {
-            var response = await ExchangeMessagesAsync("Abort");
+            var response = ExchangeMessages("Abort");
+            //var response = await ExchangeMessagesAsync("Abort");
             if (CheckResponse(response, "Abort"))
             {
                 var message = response[response.Length - 1];
@@ -210,9 +235,10 @@ namespace RPCC.Comms
             }
         }
 
-        internal static async void MotorsToBlinky()
+        internal static void MotorsToBlinky()
         {
-            var response = await ExchangeMessagesAsync("MotorsToBlinky");
+            var response = ExchangeMessages("MotorsToBlinky");
+            //var response = await ExchangeMessagesAsync("MotorsToBlinky");
             if (CheckResponse(response, "MotorsToBlinky"))
             {
                 var message = response[response.Length - 1];
@@ -228,9 +254,10 @@ namespace RPCC.Comms
             }
         }
 
-        internal static async void MotorsToAuto()
+        internal static void MotorsToAuto()
         {
-            var response = await ExchangeMessagesAsync("MotorsToAuto");
+            var response = ExchangeMessages("MotorsToAuto");
+            //var response = await ExchangeMessagesAsync("MotorsToAuto");
             if (CheckResponse(response, "MotorsToAuto"))
             {
                 var message = response[response.Length - 1];
@@ -246,9 +273,10 @@ namespace RPCC.Comms
             }
         }
 
-        internal static async void Park()
+        internal static void Park()
         {
-            var response = await ExchangeMessagesAsync("Park");
+            var response = ExchangeMessages("Park");
+            //var response = await ExchangeMessagesAsync("Park");
             if (CheckResponse(response, "Park"))
             {
                 var message = response[response.Length - 1];
@@ -265,9 +293,10 @@ namespace RPCC.Comms
         }
 
         // HACK: Apparently, it takes ~5 seconds to Unpark the scope
-        internal static async void Unpark()
+        internal static void Unpark()
         {
-            var response = await ExchangeMessagesAsync("UnPark");
+            var response = ExchangeMessages("UnPark");
+            //var response = await ExchangeMessagesAsync("UnPark");
             if (CheckResponse(response, "UnPark"))
             {
                 var message = response[response.Length - 1];
@@ -284,9 +313,10 @@ namespace RPCC.Comms
         }
 
         // HACK: After completing GoToPark command the scope won't be "parked", but won't be tracking either
-        internal static async void GoToPark(int parkLocNum)
+        internal static void GoToPark(int parkLocNum)
         {
-            var response = await ExchangeMessagesAsync($"GoToPark {parkLocNum}");
+            var response = ExchangeMessages($"GoToPark {parkLocNum}");
+            //var response = await ExchangeMessagesAsync($"GoToPark {parkLocNum}");
             if (CheckResponse(response, $"GoToPark {parkLocNum}"))
             {
                 var message = response[response.Length - 1];
@@ -303,9 +333,10 @@ namespace RPCC.Comms
         }
 
         // [RA] = h, [DEC] = deg
-        internal static async Task<bool> GoTo(double ra, double dec, bool isJ2K)
+        internal static bool GoTo(double ra, double dec, bool isJ2K)
         {  
-            var response = await ExchangeMessagesAsync($"GoTo {ra} {dec}{(isJ2K ? " J2K" : "")}");
+            var response = ExchangeMessages($"GoTo {ra} {dec}{(isJ2K ? " J2K" : "")}");
+            //var response = await ExchangeMessagesAsync($"GoTo {ra} {dec}{(isJ2K ? " J2K" : "")}");
             if (CheckResponse(response, $"GoTo {ra} {dec}{(isJ2K ? " J2K" : "")}"))
             {
                 var message = response[response.Length - 1];
@@ -341,11 +372,12 @@ namespace RPCC.Comms
 
         // Valid directions: N (to North Celestial Pole), S (to South Celestial Pole), W (clockwise), E (counterclockwise)
         // [distance] == arcseconds
-        internal static async void Jog(string direction, int distance)
+        internal static void Jog(string direction, int distance)
         {
             if (direction == "N" || direction == "S" || direction == "E" || direction == "W")
             {
-                var response = await ExchangeMessagesAsync($"JogArcSeconds {direction} {distance}");
+                var response = ExchangeMessages($"JogArcSeconds {direction} {distance}");
+                //var response = await ExchangeMessagesAsync($"JogArcSeconds {direction} {distance}");
                 if (CheckResponse(response, $"JogArcSeconds {direction} {distance}"))
                 {
                     var message = response[response.Length - 1];
@@ -368,7 +400,7 @@ namespace RPCC.Comms
 
         // Valid directions: N (to North Celestial Pole), S (to South Celestial Pole), W (clockwise), E (counterclockwise)
         // [time] == msec
-        internal static async void PulseGuide(string direction, int time)
+        internal static void PulseGuide(string direction, int time)
         {
             if (direction == "N" || direction == "S" || direction == "E" || direction == "W")
             {
@@ -376,16 +408,20 @@ namespace RPCC.Comms
                 switch (direction)
                 {
                     case "N":
-                        response = await ExchangeMessagesAsync($"PulseGuide 0 {time}");
+                        response = ExchangeMessages($"PulseGuide 0 {time}");
+                        //response = await ExchangeMessagesAsync($"PulseGuide 0 {time}");
                         break;
                     case "S":
-                        response = await ExchangeMessagesAsync($"PulseGuide 1 {time}");
+                        response = ExchangeMessages($"PulseGuide 1 {time}");
+                        //response = await ExchangeMessagesAsync($"PulseGuide 1 {time}");
                         break;
                     case "E":
-                        response = await ExchangeMessagesAsync($"PulseGuide 2 {time}");
+                        response = ExchangeMessages($"PulseGuide 2 {time}");
+                        //response = await ExchangeMessagesAsync($"PulseGuide 2 {time}");
                         break;
                     case "W":
-                        response = await ExchangeMessagesAsync($"PulseGuide 3 {time}");
+                        response = ExchangeMessages($"PulseGuide 3 {time}");
+                        //response = await ExchangeMessagesAsync($"PulseGuide 3 {time}");
                         break;
                 }
 
@@ -410,10 +446,12 @@ namespace RPCC.Comms
         }
 
         // [raRate] = [decRate] = [arcsec/sec]
-        internal static async void SetTrackMode(bool shouldTrack, double raRate = 0.0, double decRate = 0.0)
+        internal static void SetTrackMode(bool shouldTrack, double raRate = 0.0, double decRate = 0.0)
         {
-            var response = await ExchangeMessagesAsync(
+            var response = ExchangeMessages(
                 $"SetTrackMode {(shouldTrack ? 1 : 0)} {(raRate == 0.0 && decRate == 0.0 ? 0 : 1)} {raRate} {decRate}");
+            //var response = await ExchangeMessagesAsync(
+            //    $"SetTrackMode {(shouldTrack ? 1 : 0)} {(raRate == 0.0 && decRate == 0.0 ? 0 : 1)} {raRate} {decRate}");
             if (CheckResponse(response,
                     $"SetTrackMode {(shouldTrack ? 1 : 0)} {(raRate == 0.0 && decRate == 0.0 ? 0 : 1)} {raRate} {decRate}"))
             {

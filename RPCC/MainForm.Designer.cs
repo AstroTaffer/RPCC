@@ -50,7 +50,6 @@
             this.saveConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.debugToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.restoreDefaultConfigFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.loadTestImageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBoxLogs = new System.Windows.Forms.GroupBox();
             this.listBoxLogs = new System.Windows.Forms.ListBox();
             this.contextMenuStripLogs = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -86,34 +85,14 @@
             this.labelCam3Filter = new System.Windows.Forms.Label();
             this.labelCam3Sn = new System.Windows.Forms.Label();
             this.labelCam3Model = new System.Windows.Forms.Label();
-            this.radioButtonViewCam3 = new System.Windows.Forms.RadioButton();
-            this.radioButtonViewCam2 = new System.Windows.Forms.RadioButton();
-            this.radioButtonViewCam1 = new System.Windows.Forms.RadioButton();
             this.groupBoxSurvey = new System.Windows.Forms.GroupBox();
             this.checkBoxHead = new System.Windows.Forms.CheckBox();
-            this.textBoxObjectDec = new System.Windows.Forms.TextBox();
-            this.textBoxObjectRa = new System.Windows.Forms.TextBox();
-            this.textBoxObjectName = new System.Windows.Forms.TextBox();
-            this.labelObjectDec = new System.Windows.Forms.Label();
-            this.labelObjectRa = new System.Windows.Forms.Label();
-            this.labelObjectName = new System.Windows.Forms.Label();
             this.buttonSurveyStop = new System.Windows.Forms.Button();
-            this.buttonSurveyStart = new System.Windows.Forms.Button();
-            this.numericUpDownSequence = new System.Windows.Forms.NumericUpDown();
-            this.labelSequence = new System.Windows.Forms.Label();
-            this.numericUpDownExpTime = new System.Windows.Forms.NumericUpDown();
-            this.labelExpTime = new System.Windows.Forms.Label();
-            this.comboBoxImgType = new System.Windows.Forms.ComboBox();
-            this.labelImgType = new System.Windows.Forms.Label();
             this.tabControlMain = new System.Windows.Forms.TabControl();
             this.tabPageInfo = new System.Windows.Forms.TabPage();
             this.tabPageTasks = new System.Windows.Forms.TabPage();
             this.dataGridTasks = new System.Windows.Forms.DataGrid();
             this.tabPageCams = new System.Windows.Forms.TabPage();
-            this.groupBoxImageAnalysis = new System.Windows.Forms.GroupBox();
-            this.pictureBoxProfile = new System.Windows.Forms.PictureBox();
-            this.panelFitsImage = new System.Windows.Forms.Panel();
-            this.pictureBoxFits = new System.Windows.Forms.PictureBox();
             this.groupBoxInfo = new System.Windows.Forms.GroupBox();
             this.labelFocusPos = new System.Windows.Forms.Label();
             this.labelEndSwitch = new System.Windows.Forms.Label();
@@ -129,11 +108,24 @@
             this.numericUpDownSetDefoc = new System.Windows.Forms.NumericUpDown();
             this.labelSetDefocus = new System.Windows.Forms.Label();
             this.checkBoxAutoFocus = new System.Windows.Forms.CheckBox();
+            this.tabPageImages = new System.Windows.Forms.TabPage();
+            this.groupBoxImage3 = new System.Windows.Forms.GroupBox();
+            this.pictureBoxProfile3 = new System.Windows.Forms.PictureBox();
+            this.panelImage3 = new System.Windows.Forms.Panel();
+            this.pictureBoxImage3 = new System.Windows.Forms.PictureBox();
+            this.groupBoxImage2 = new System.Windows.Forms.GroupBox();
+            this.pictureBoxProfile2 = new System.Windows.Forms.PictureBox();
+            this.panelImage2 = new System.Windows.Forms.Panel();
+            this.pictureBoxImage2 = new System.Windows.Forms.PictureBox();
+            this.groupBoxImage1 = new System.Windows.Forms.GroupBox();
+            this.pictureBoxProfile1 = new System.Windows.Forms.PictureBox();
+            this.panelImage1 = new System.Windows.Forms.Panel();
+            this.pictureBoxImage1 = new System.Windows.Forms.PictureBox();
             this.contextMenuStripTasker = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.addToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dataGridTextBoxColumn1 = new System.Windows.Forms.DataGridTextBoxColumn();
             this.dataGridTextBoxColumn2 = new System.Windows.Forms.DataGridTextBoxColumn();
-            ((System.ComponentModel.ISupportInitialize) (this.dataGridViewTasker)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewTasker)).BeginInit();
             this.statusStrip.SuspendLayout();
             this.menuStrip.SuspendLayout();
             this.groupBoxLogs.SuspendLayout();
@@ -142,22 +134,29 @@
             this.groupBoxCam2.SuspendLayout();
             this.groupBoxCam3.SuspendLayout();
             this.groupBoxSurvey.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownSequence)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownExpTime)).BeginInit();
             this.tabControlMain.SuspendLayout();
             this.tabPageInfo.SuspendLayout();
             this.tabPageTasks.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize) (this.dataGridTasks)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridTasks)).BeginInit();
             this.tabPageCams.SuspendLayout();
-            this.groupBoxImageAnalysis.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize) (this.pictureBoxProfile)).BeginInit();
-            this.panelFitsImage.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize) (this.pictureBoxFits)).BeginInit();
             this.groupBoxInfo.SuspendLayout();
             this.groupBoxFocusSettings.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownRun)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownRun)).BeginInit();
             this.groupBoxAutoFocus.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownSetDefoc)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownSetDefoc)).BeginInit();
+            this.tabPageImages.SuspendLayout();
+            this.groupBoxImage3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxProfile3)).BeginInit();
+            this.panelImage3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage3)).BeginInit();
+            this.groupBoxImage2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxProfile2)).BeginInit();
+            this.panelImage2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage2)).BeginInit();
+            this.groupBoxImage1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxProfile1)).BeginInit();
+            this.panelImage1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage1)).BeginInit();
             this.contextMenuStripTasker.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -178,7 +177,8 @@
             // 
             // statusStrip
             // 
-            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {this.tSStatusClock});
+            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tSStatusClock});
             this.statusStrip.Location = new System.Drawing.Point(0, 549);
             this.statusStrip.Name = "statusStrip";
             this.statusStrip.Size = new System.Drawing.Size(1140, 22);
@@ -194,7 +194,10 @@
             // 
             // menuStrip
             // 
-            this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {this.launchToolStripMenuItem, this.optionsToolStripMenuItem, this.debugToolStripMenuItem});
+            this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.launchToolStripMenuItem,
+            this.optionsToolStripMenuItem,
+            this.debugToolStripMenuItem});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
             this.menuStrip.Size = new System.Drawing.Size(1140, 24);
@@ -203,7 +206,10 @@
             // 
             // launchToolStripMenuItem
             // 
-            this.launchToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.findCamerasToolStripMenuItem, this.findFocusToolStripMenuItem, this.reconnectSocketToolStripMenuItem});
+            this.launchToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.findCamerasToolStripMenuItem,
+            this.findFocusToolStripMenuItem,
+            this.reconnectSocketToolStripMenuItem});
             this.launchToolStripMenuItem.Name = "launchToolStripMenuItem";
             this.launchToolStripMenuItem.Size = new System.Drawing.Size(58, 20);
             this.launchToolStripMenuItem.Text = "Launch";
@@ -224,7 +230,12 @@
             // 
             // reconnectSocketToolStripMenuItem
             // 
-            this.reconnectSocketToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.reconnectMeteoDomeToolStripMenuItem, this.reconnectDonutsToolStripMenuItem, this.reconnectSiTechExeToolStripMenuItem, this.toolStripSeparator1, this.reconnectAllToolStripMenuItem});
+            this.reconnectSocketToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.reconnectMeteoDomeToolStripMenuItem,
+            this.reconnectDonutsToolStripMenuItem,
+            this.reconnectSiTechExeToolStripMenuItem,
+            this.toolStripSeparator1,
+            this.reconnectAllToolStripMenuItem});
             this.reconnectSocketToolStripMenuItem.Name = "reconnectSocketToolStripMenuItem";
             this.reconnectSocketToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
             this.reconnectSocketToolStripMenuItem.Text = "Reconnect socket";
@@ -264,7 +275,11 @@
             // 
             // optionsToolStripMenuItem
             // 
-            this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.settingsToolStripMenuItem, this.updateCamerasSettingsToolStripMenuItem, this.loadConfigToolStripMenuItem, this.saveConfigToolStripMenuItem});
+            this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.settingsToolStripMenuItem,
+            this.updateCamerasSettingsToolStripMenuItem,
+            this.loadConfigToolStripMenuItem,
+            this.saveConfigToolStripMenuItem});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             this.optionsToolStripMenuItem.Text = "Options";
@@ -299,7 +314,8 @@
             // 
             // debugToolStripMenuItem
             // 
-            this.debugToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.restoreDefaultConfigFileToolStripMenuItem, this.loadTestImageToolStripMenuItem});
+            this.debugToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.restoreDefaultConfigFileToolStripMenuItem});
             this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
             this.debugToolStripMenuItem.Size = new System.Drawing.Size(54, 20);
             this.debugToolStripMenuItem.Text = "Debug";
@@ -311,20 +327,13 @@
             this.restoreDefaultConfigFileToolStripMenuItem.Text = "Restore default config file";
             this.restoreDefaultConfigFileToolStripMenuItem.Click += new System.EventHandler(this.RestoreDefaultConfigFileToolStripMenuItem_Click);
             // 
-            // loadTestImageToolStripMenuItem
-            // 
-            this.loadTestImageToolStripMenuItem.Name = "loadTestImageToolStripMenuItem";
-            this.loadTestImageToolStripMenuItem.Size = new System.Drawing.Size(209, 22);
-            this.loadTestImageToolStripMenuItem.Text = "Load test image";
-            this.loadTestImageToolStripMenuItem.Click += new System.EventHandler(this.LoadTestImageToolStripMenuItem_Click);
-            // 
             // groupBoxLogs
             // 
             this.groupBoxLogs.Controls.Add(this.listBoxLogs);
             this.groupBoxLogs.Dock = System.Windows.Forms.DockStyle.Left;
             this.groupBoxLogs.Location = new System.Drawing.Point(3, 3);
             this.groupBoxLogs.Name = "groupBoxLogs";
-            this.groupBoxLogs.Size = new System.Drawing.Size(803, 493);
+            this.groupBoxLogs.Size = new System.Drawing.Size(1121, 493);
             this.groupBoxLogs.TabIndex = 2;
             this.groupBoxLogs.TabStop = false;
             this.groupBoxLogs.Text = "Logs";
@@ -337,13 +346,15 @@
             this.listBoxLogs.HorizontalScrollbar = true;
             this.listBoxLogs.Location = new System.Drawing.Point(3, 16);
             this.listBoxLogs.Name = "listBoxLogs";
-            this.listBoxLogs.Size = new System.Drawing.Size(797, 474);
+            this.listBoxLogs.Size = new System.Drawing.Size(1115, 474);
             this.listBoxLogs.TabIndex = 0;
             this.listBoxLogs.DoubleClick += new System.EventHandler(this.ListBoxLogs_DoubleClick);
             // 
             // contextMenuStripLogs
             // 
-            this.contextMenuStripLogs.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {this.clearToolStripMenuItem, this.saveToolStripMenuItem});
+            this.contextMenuStripLogs.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.clearToolStripMenuItem,
+            this.saveToolStripMenuItem});
             this.contextMenuStripLogs.Name = "contextMenuStrip1";
             this.contextMenuStripLogs.Size = new System.Drawing.Size(102, 48);
             // 
@@ -649,64 +660,13 @@
             this.labelCam3Model.TabIndex = 16;
             this.labelCam3Model.Text = "Model:";
             // 
-            // radioButtonViewCam3
-            // 
-            this.radioButtonViewCam3.AutoSize = true;
-            this.radioButtonViewCam3.Enabled = false;
-            this.radioButtonViewCam3.Location = new System.Drawing.Point(9, 181);
-            this.radioButtonViewCam3.Name = "radioButtonViewCam3";
-            this.radioButtonViewCam3.Size = new System.Drawing.Size(96, 17);
-            this.radioButtonViewCam3.TabIndex = 3;
-            this.radioButtonViewCam3.Text = "View Camera 3";
-            this.radioButtonViewCam3.UseVisualStyleBackColor = true;
-            // 
-            // radioButtonViewCam2
-            // 
-            this.radioButtonViewCam2.AutoSize = true;
-            this.radioButtonViewCam2.Enabled = false;
-            this.radioButtonViewCam2.Location = new System.Drawing.Point(9, 158);
-            this.radioButtonViewCam2.Name = "radioButtonViewCam2";
-            this.radioButtonViewCam2.Size = new System.Drawing.Size(96, 17);
-            this.radioButtonViewCam2.TabIndex = 2;
-            this.radioButtonViewCam2.Text = "View Camera 2";
-            this.radioButtonViewCam2.UseVisualStyleBackColor = true;
-            // 
-            // radioButtonViewCam1
-            // 
-            this.radioButtonViewCam1.AutoSize = true;
-            this.radioButtonViewCam1.Checked = true;
-            this.radioButtonViewCam1.Enabled = false;
-            this.radioButtonViewCam1.Location = new System.Drawing.Point(9, 135);
-            this.radioButtonViewCam1.Name = "radioButtonViewCam1";
-            this.radioButtonViewCam1.Size = new System.Drawing.Size(96, 17);
-            this.radioButtonViewCam1.TabIndex = 1;
-            this.radioButtonViewCam1.TabStop = true;
-            this.radioButtonViewCam1.Text = "View Camera 1";
-            this.radioButtonViewCam1.UseVisualStyleBackColor = true;
-            // 
             // groupBoxSurvey
             // 
             this.groupBoxSurvey.Controls.Add(this.checkBoxHead);
-            this.groupBoxSurvey.Controls.Add(this.textBoxObjectDec);
-            this.groupBoxSurvey.Controls.Add(this.textBoxObjectRa);
-            this.groupBoxSurvey.Controls.Add(this.textBoxObjectName);
-            this.groupBoxSurvey.Controls.Add(this.labelObjectDec);
-            this.groupBoxSurvey.Controls.Add(this.labelObjectRa);
-            this.groupBoxSurvey.Controls.Add(this.labelObjectName);
-            this.groupBoxSurvey.Controls.Add(this.radioButtonViewCam3);
             this.groupBoxSurvey.Controls.Add(this.buttonSurveyStop);
-            this.groupBoxSurvey.Controls.Add(this.radioButtonViewCam2);
-            this.groupBoxSurvey.Controls.Add(this.buttonSurveyStart);
-            this.groupBoxSurvey.Controls.Add(this.radioButtonViewCam1);
-            this.groupBoxSurvey.Controls.Add(this.numericUpDownSequence);
-            this.groupBoxSurvey.Controls.Add(this.labelSequence);
-            this.groupBoxSurvey.Controls.Add(this.numericUpDownExpTime);
-            this.groupBoxSurvey.Controls.Add(this.labelExpTime);
-            this.groupBoxSurvey.Controls.Add(this.comboBoxImgType);
-            this.groupBoxSurvey.Controls.Add(this.labelImgType);
             this.groupBoxSurvey.Location = new System.Drawing.Point(8, 167);
             this.groupBoxSurvey.Name = "groupBoxSurvey";
-            this.groupBoxSurvey.Size = new System.Drawing.Size(462, 231);
+            this.groupBoxSurvey.Size = new System.Drawing.Size(235, 91);
             this.groupBoxSurvey.TabIndex = 10;
             this.groupBoxSurvey.TabStop = false;
             this.groupBoxSurvey.Text = "Survey";
@@ -715,65 +675,17 @@
             // 
             this.checkBoxHead.Checked = true;
             this.checkBoxHead.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxHead.Location = new System.Drawing.Point(199, 106);
+            this.checkBoxHead.Location = new System.Drawing.Point(9, 21);
             this.checkBoxHead.Name = "checkBoxHead";
             this.checkBoxHead.Size = new System.Drawing.Size(70, 25);
             this.checkBoxHead.TabIndex = 28;
             this.checkBoxHead.Text = "Head";
             this.checkBoxHead.UseVisualStyleBackColor = true;
-            this.checkBoxHead.CheckedChanged += new System.EventHandler(this.checkBoxHead_CheckedChanged);
-            // 
-            // textBoxObjectDec
-            // 
-            this.textBoxObjectDec.Location = new System.Drawing.Point(291, 77);
-            this.textBoxObjectDec.Name = "textBoxObjectDec";
-            this.textBoxObjectDec.Size = new System.Drawing.Size(165, 20);
-            this.textBoxObjectDec.TabIndex = 27;
-            // 
-            // textBoxObjectRa
-            // 
-            this.textBoxObjectRa.Location = new System.Drawing.Point(291, 47);
-            this.textBoxObjectRa.Name = "textBoxObjectRa";
-            this.textBoxObjectRa.Size = new System.Drawing.Size(165, 20);
-            this.textBoxObjectRa.TabIndex = 26;
-            // 
-            // textBoxObjectName
-            // 
-            this.textBoxObjectName.Location = new System.Drawing.Point(291, 17);
-            this.textBoxObjectName.Name = "textBoxObjectName";
-            this.textBoxObjectName.Size = new System.Drawing.Size(165, 20);
-            this.textBoxObjectName.TabIndex = 25;
-            // 
-            // labelObjectDec
-            // 
-            this.labelObjectDec.AutoSize = true;
-            this.labelObjectDec.Location = new System.Drawing.Point(199, 80);
-            this.labelObjectDec.Name = "labelObjectDec";
-            this.labelObjectDec.Size = new System.Drawing.Size(66, 13);
-            this.labelObjectDec.TabIndex = 24;
-            this.labelObjectDec.Text = "Object DEC:";
-            // 
-            // labelObjectRa
-            // 
-            this.labelObjectRa.AutoSize = true;
-            this.labelObjectRa.Location = new System.Drawing.Point(199, 50);
-            this.labelObjectRa.Name = "labelObjectRa";
-            this.labelObjectRa.Size = new System.Drawing.Size(59, 13);
-            this.labelObjectRa.TabIndex = 23;
-            this.labelObjectRa.Text = "Object RA:";
-            // 
-            // labelObjectName
-            // 
-            this.labelObjectName.AutoSize = true;
-            this.labelObjectName.Location = new System.Drawing.Point(199, 20);
-            this.labelObjectName.Name = "labelObjectName";
-            this.labelObjectName.Size = new System.Drawing.Size(72, 13);
-            this.labelObjectName.TabIndex = 22;
-            this.labelObjectName.Text = "Object Name:";
+            this.checkBoxHead.CheckedChanged += new System.EventHandler(this.CheckBoxHead_CheckedChanged);
             // 
             // buttonSurveyStop
             // 
-            this.buttonSurveyStop.Location = new System.Drawing.Point(97, 106);
+            this.buttonSurveyStop.Location = new System.Drawing.Point(154, 19);
             this.buttonSurveyStop.Name = "buttonSurveyStop";
             this.buttonSurveyStop.Size = new System.Drawing.Size(75, 23);
             this.buttonSurveyStop.TabIndex = 7;
@@ -781,76 +693,12 @@
             this.buttonSurveyStop.UseVisualStyleBackColor = true;
             this.buttonSurveyStop.Click += new System.EventHandler(this.ButtonSurveyStop_Click);
             // 
-            // buttonSurveyStart
-            // 
-            this.buttonSurveyStart.Location = new System.Drawing.Point(9, 106);
-            this.buttonSurveyStart.Name = "buttonSurveyStart";
-            this.buttonSurveyStart.Size = new System.Drawing.Size(75, 23);
-            this.buttonSurveyStart.TabIndex = 6;
-            this.buttonSurveyStart.Text = "Start";
-            this.buttonSurveyStart.UseVisualStyleBackColor = true;
-            this.buttonSurveyStart.Click += new System.EventHandler(this.ButtonSurveyStart_Click);
-            // 
-            // numericUpDownSequence
-            // 
-            this.numericUpDownSequence.Location = new System.Drawing.Point(107, 80);
-            this.numericUpDownSequence.Maximum = new decimal(new int[] {1000, 0, 0, 0});
-            this.numericUpDownSequence.Minimum = new decimal(new int[] {1, 0, 0, 0});
-            this.numericUpDownSequence.Name = "numericUpDownSequence";
-            this.numericUpDownSequence.Size = new System.Drawing.Size(65, 20);
-            this.numericUpDownSequence.TabIndex = 5;
-            this.numericUpDownSequence.Value = new decimal(new int[] {1, 0, 0, 0});
-            // 
-            // labelSequence
-            // 
-            this.labelSequence.AutoSize = true;
-            this.labelSequence.Location = new System.Drawing.Point(6, 80);
-            this.labelSequence.Name = "labelSequence";
-            this.labelSequence.Size = new System.Drawing.Size(59, 13);
-            this.labelSequence.TabIndex = 4;
-            this.labelSequence.Text = "Sequence:";
-            // 
-            // numericUpDownExpTime
-            // 
-            this.numericUpDownExpTime.Location = new System.Drawing.Point(107, 50);
-            this.numericUpDownExpTime.Maximum = new decimal(new int[] {300, 0, 0, 0});
-            this.numericUpDownExpTime.Name = "numericUpDownExpTime";
-            this.numericUpDownExpTime.Size = new System.Drawing.Size(65, 20);
-            this.numericUpDownExpTime.TabIndex = 3;
-            // 
-            // labelExpTime
-            // 
-            this.labelExpTime.AutoSize = true;
-            this.labelExpTime.Location = new System.Drawing.Point(6, 50);
-            this.labelExpTime.Name = "labelExpTime";
-            this.labelExpTime.Size = new System.Drawing.Size(80, 13);
-            this.labelExpTime.TabIndex = 2;
-            this.labelExpTime.Text = "Exposure Time:";
-            // 
-            // comboBoxImgType
-            // 
-            this.comboBoxImgType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBoxImgType.FormattingEnabled = true;
-            this.comboBoxImgType.Items.AddRange(new object[] {"Object", "Bias", "Dark", "Flat", "Test"});
-            this.comboBoxImgType.Location = new System.Drawing.Point(107, 17);
-            this.comboBoxImgType.Name = "comboBoxImgType";
-            this.comboBoxImgType.Size = new System.Drawing.Size(65, 21);
-            this.comboBoxImgType.TabIndex = 1;
-            // 
-            // labelImgType
-            // 
-            this.labelImgType.AutoSize = true;
-            this.labelImgType.Location = new System.Drawing.Point(6, 20);
-            this.labelImgType.Name = "labelImgType";
-            this.labelImgType.Size = new System.Drawing.Size(66, 13);
-            this.labelImgType.TabIndex = 0;
-            this.labelImgType.Text = "Image Type:";
-            // 
             // tabControlMain
             // 
             this.tabControlMain.Controls.Add(this.tabPageInfo);
             this.tabControlMain.Controls.Add(this.tabPageTasks);
             this.tabControlMain.Controls.Add(this.tabPageCams);
+            this.tabControlMain.Controls.Add(this.tabPageImages);
             this.tabControlMain.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControlMain.Location = new System.Drawing.Point(0, 24);
             this.tabControlMain.Name = "tabControlMain";
@@ -894,7 +742,6 @@
             // 
             // tabPageCams
             // 
-            this.tabPageCams.Controls.Add(this.groupBoxImageAnalysis);
             this.tabPageCams.Controls.Add(this.groupBoxInfo);
             this.tabPageCams.Controls.Add(this.groupBoxFocusSettings);
             this.tabPageCams.Controls.Add(this.groupBoxAutoFocus);
@@ -909,45 +756,6 @@
             this.tabPageCams.TabIndex = 2;
             this.tabPageCams.Text = "Cams&Focus";
             this.tabPageCams.UseVisualStyleBackColor = true;
-            // 
-            // groupBoxImageAnalysis
-            // 
-            this.groupBoxImageAnalysis.Controls.Add(this.pictureBoxProfile);
-            this.groupBoxImageAnalysis.Controls.Add(this.panelFitsImage);
-            this.groupBoxImageAnalysis.Dock = System.Windows.Forms.DockStyle.Right;
-            this.groupBoxImageAnalysis.Location = new System.Drawing.Point(817, 3);
-            this.groupBoxImageAnalysis.Name = "groupBoxImageAnalysis";
-            this.groupBoxImageAnalysis.Size = new System.Drawing.Size(312, 493);
-            this.groupBoxImageAnalysis.TabIndex = 22;
-            this.groupBoxImageAnalysis.TabStop = false;
-            this.groupBoxImageAnalysis.Text = "Image Analysis";
-            // 
-            // pictureBoxProfile
-            // 
-            this.pictureBoxProfile.BackColor = System.Drawing.SystemColors.Desktop;
-            this.pictureBoxProfile.Location = new System.Drawing.Point(6, 326);
-            this.pictureBoxProfile.Name = "pictureBoxProfile";
-            this.pictureBoxProfile.Size = new System.Drawing.Size(300, 161);
-            this.pictureBoxProfile.TabIndex = 5;
-            this.pictureBoxProfile.TabStop = false;
-            // 
-            // panelFitsImage
-            // 
-            this.panelFitsImage.Controls.Add(this.pictureBoxFits);
-            this.panelFitsImage.Location = new System.Drawing.Point(6, 19);
-            this.panelFitsImage.Name = "panelFitsImage";
-            this.panelFitsImage.Size = new System.Drawing.Size(300, 300);
-            this.panelFitsImage.TabIndex = 4;
-            // 
-            // pictureBoxFits
-            // 
-            this.pictureBoxFits.BackColor = System.Drawing.SystemColors.Desktop;
-            this.pictureBoxFits.Location = new System.Drawing.Point(0, 0);
-            this.pictureBoxFits.Name = "pictureBoxFits";
-            this.pictureBoxFits.Size = new System.Drawing.Size(300, 300);
-            this.pictureBoxFits.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBoxFits.TabIndex = 0;
-            this.pictureBoxFits.TabStop = false;
             // 
             // groupBoxInfo
             // 
@@ -1028,7 +836,7 @@
             // 
             // buttonRun
             // 
-            this.buttonRun.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonRun.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonRun.Enabled = false;
             this.buttonRun.Location = new System.Drawing.Point(244, 25);
             this.buttonRun.Name = "buttonRun";
@@ -1040,7 +848,7 @@
             // 
             // buttonRunStop
             // 
-            this.buttonRunStop.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonRunStop.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonRunStop.Location = new System.Drawing.Point(244, 60);
             this.buttonRunStop.Name = "buttonRunStop";
             this.buttonRunStop.Size = new System.Drawing.Size(74, 29);
@@ -1052,10 +860,22 @@
             // numericUpDownRun
             // 
             this.numericUpDownRun.Enabled = false;
-            this.numericUpDownRun.Increment = new decimal(new int[] {100, 0, 0, 0});
+            this.numericUpDownRun.Increment = new decimal(new int[] {
+            100,
+            0,
+            0,
+            0});
             this.numericUpDownRun.Location = new System.Drawing.Point(138, 25);
-            this.numericUpDownRun.Maximum = new decimal(new int[] {5000, 0, 0, 0});
-            this.numericUpDownRun.Minimum = new decimal(new int[] {5000, 0, 0, -2147483648});
+            this.numericUpDownRun.Maximum = new decimal(new int[] {
+            5000,
+            0,
+            0,
+            0});
+            this.numericUpDownRun.Minimum = new decimal(new int[] {
+            5000,
+            0,
+            0,
+            -2147483648});
             this.numericUpDownRun.Name = "numericUpDownRun";
             this.numericUpDownRun.Size = new System.Drawing.Size(75, 20);
             this.numericUpDownRun.TabIndex = 1;
@@ -1087,8 +907,16 @@
             // numericUpDownSetDefoc
             // 
             this.numericUpDownSetDefoc.Location = new System.Drawing.Point(242, 25);
-            this.numericUpDownSetDefoc.Maximum = new decimal(new int[] {1500, 0, 0, 0});
-            this.numericUpDownSetDefoc.Minimum = new decimal(new int[] {1500, 0, 0, -2147483648});
+            this.numericUpDownSetDefoc.Maximum = new decimal(new int[] {
+            1500,
+            0,
+            0,
+            0});
+            this.numericUpDownSetDefoc.Minimum = new decimal(new int[] {
+            1500,
+            0,
+            0,
+            -2147483648});
             this.numericUpDownSetDefoc.Name = "numericUpDownSetDefoc";
             this.numericUpDownSetDefoc.Size = new System.Drawing.Size(76, 20);
             this.numericUpDownSetDefoc.TabIndex = 15;
@@ -1116,9 +944,140 @@
             this.checkBoxAutoFocus.UseVisualStyleBackColor = true;
             this.checkBoxAutoFocus.CheckedChanged += new System.EventHandler(this.CheckBoxAutoFocus_CheckedChanged);
             // 
+            // tabPageImages
+            // 
+            this.tabPageImages.Controls.Add(this.groupBoxImage3);
+            this.tabPageImages.Controls.Add(this.groupBoxImage2);
+            this.tabPageImages.Controls.Add(this.groupBoxImage1);
+            this.tabPageImages.Location = new System.Drawing.Point(4, 22);
+            this.tabPageImages.Name = "tabPageImages";
+            this.tabPageImages.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageImages.Size = new System.Drawing.Size(1132, 499);
+            this.tabPageImages.TabIndex = 3;
+            this.tabPageImages.Text = "Images";
+            this.tabPageImages.UseVisualStyleBackColor = true;
+            // 
+            // groupBoxImage3
+            // 
+            this.groupBoxImage3.Controls.Add(this.pictureBoxProfile3);
+            this.groupBoxImage3.Controls.Add(this.panelImage3);
+            this.groupBoxImage3.Dock = System.Windows.Forms.DockStyle.Left;
+            this.groupBoxImage3.Location = new System.Drawing.Point(627, 3);
+            this.groupBoxImage3.Name = "groupBoxImage3";
+            this.groupBoxImage3.Size = new System.Drawing.Size(312, 493);
+            this.groupBoxImage3.TabIndex = 25;
+            this.groupBoxImage3.TabStop = false;
+            this.groupBoxImage3.Text = "Camera 3 Image";
+            // 
+            // pictureBoxProfile3
+            // 
+            this.pictureBoxProfile3.BackColor = System.Drawing.SystemColors.Desktop;
+            this.pictureBoxProfile3.Location = new System.Drawing.Point(6, 326);
+            this.pictureBoxProfile3.Name = "pictureBoxProfile3";
+            this.pictureBoxProfile3.Size = new System.Drawing.Size(300, 161);
+            this.pictureBoxProfile3.TabIndex = 5;
+            this.pictureBoxProfile3.TabStop = false;
+            // 
+            // panelImage3
+            // 
+            this.panelImage3.Controls.Add(this.pictureBoxImage3);
+            this.panelImage3.Location = new System.Drawing.Point(6, 19);
+            this.panelImage3.Name = "panelImage3";
+            this.panelImage3.Size = new System.Drawing.Size(300, 300);
+            this.panelImage3.TabIndex = 4;
+            // 
+            // pictureBoxImage3
+            // 
+            this.pictureBoxImage3.BackColor = System.Drawing.SystemColors.Desktop;
+            this.pictureBoxImage3.Location = new System.Drawing.Point(0, 0);
+            this.pictureBoxImage3.Name = "pictureBoxImage3";
+            this.pictureBoxImage3.Size = new System.Drawing.Size(300, 300);
+            this.pictureBoxImage3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBoxImage3.TabIndex = 0;
+            this.pictureBoxImage3.TabStop = false;
+            // 
+            // groupBoxImage2
+            // 
+            this.groupBoxImage2.Controls.Add(this.pictureBoxProfile2);
+            this.groupBoxImage2.Controls.Add(this.panelImage2);
+            this.groupBoxImage2.Dock = System.Windows.Forms.DockStyle.Left;
+            this.groupBoxImage2.Location = new System.Drawing.Point(315, 3);
+            this.groupBoxImage2.Name = "groupBoxImage2";
+            this.groupBoxImage2.Size = new System.Drawing.Size(312, 493);
+            this.groupBoxImage2.TabIndex = 24;
+            this.groupBoxImage2.TabStop = false;
+            this.groupBoxImage2.Text = "Camera 2 Image";
+            // 
+            // pictureBoxProfile2
+            // 
+            this.pictureBoxProfile2.BackColor = System.Drawing.SystemColors.Desktop;
+            this.pictureBoxProfile2.Location = new System.Drawing.Point(6, 326);
+            this.pictureBoxProfile2.Name = "pictureBoxProfile2";
+            this.pictureBoxProfile2.Size = new System.Drawing.Size(300, 161);
+            this.pictureBoxProfile2.TabIndex = 5;
+            this.pictureBoxProfile2.TabStop = false;
+            // 
+            // panelImage2
+            // 
+            this.panelImage2.Controls.Add(this.pictureBoxImage2);
+            this.panelImage2.Location = new System.Drawing.Point(6, 19);
+            this.panelImage2.Name = "panelImage2";
+            this.panelImage2.Size = new System.Drawing.Size(300, 300);
+            this.panelImage2.TabIndex = 4;
+            // 
+            // pictureBoxImage2
+            // 
+            this.pictureBoxImage2.BackColor = System.Drawing.SystemColors.Desktop;
+            this.pictureBoxImage2.Location = new System.Drawing.Point(0, 0);
+            this.pictureBoxImage2.Name = "pictureBoxImage2";
+            this.pictureBoxImage2.Size = new System.Drawing.Size(300, 300);
+            this.pictureBoxImage2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBoxImage2.TabIndex = 0;
+            this.pictureBoxImage2.TabStop = false;
+            // 
+            // groupBoxImage1
+            // 
+            this.groupBoxImage1.Controls.Add(this.pictureBoxProfile1);
+            this.groupBoxImage1.Controls.Add(this.panelImage1);
+            this.groupBoxImage1.Dock = System.Windows.Forms.DockStyle.Left;
+            this.groupBoxImage1.Location = new System.Drawing.Point(3, 3);
+            this.groupBoxImage1.Name = "groupBoxImage1";
+            this.groupBoxImage1.Size = new System.Drawing.Size(312, 493);
+            this.groupBoxImage1.TabIndex = 23;
+            this.groupBoxImage1.TabStop = false;
+            this.groupBoxImage1.Text = "Camera 1 Image";
+            // 
+            // pictureBoxProfile1
+            // 
+            this.pictureBoxProfile1.BackColor = System.Drawing.SystemColors.Desktop;
+            this.pictureBoxProfile1.Location = new System.Drawing.Point(6, 326);
+            this.pictureBoxProfile1.Name = "pictureBoxProfile1";
+            this.pictureBoxProfile1.Size = new System.Drawing.Size(300, 161);
+            this.pictureBoxProfile1.TabIndex = 5;
+            this.pictureBoxProfile1.TabStop = false;
+            // 
+            // panelImage1
+            // 
+            this.panelImage1.Controls.Add(this.pictureBoxImage1);
+            this.panelImage1.Location = new System.Drawing.Point(6, 19);
+            this.panelImage1.Name = "panelImage1";
+            this.panelImage1.Size = new System.Drawing.Size(300, 300);
+            this.panelImage1.TabIndex = 4;
+            // 
+            // pictureBoxImage1
+            // 
+            this.pictureBoxImage1.BackColor = System.Drawing.SystemColors.Desktop;
+            this.pictureBoxImage1.Location = new System.Drawing.Point(0, 0);
+            this.pictureBoxImage1.Name = "pictureBoxImage1";
+            this.pictureBoxImage1.Size = new System.Drawing.Size(300, 300);
+            this.pictureBoxImage1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBoxImage1.TabIndex = 0;
+            this.pictureBoxImage1.TabStop = false;
+            // 
             // contextMenuStripTasker
             // 
-            this.contextMenuStripTasker.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {this.addToolStripMenuItem});
+            this.contextMenuStripTasker.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.addToolStripMenuItem});
             this.contextMenuStripTasker.Name = "contextMenuStripTasker";
             this.contextMenuStripTasker.Size = new System.Drawing.Size(97, 26);
             // 
@@ -1150,13 +1109,13 @@
             this.Controls.Add(this.statusStrip);
             this.Controls.Add(this.menuStrip);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip;
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.Text = "RoboPhot Cameras Controls";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
-            ((System.ComponentModel.ISupportInitialize) (this.dataGridViewTasker)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewTasker)).EndInit();
             this.statusStrip.ResumeLayout(false);
             this.statusStrip.PerformLayout();
             this.menuStrip.ResumeLayout(false);
@@ -1170,29 +1129,36 @@
             this.groupBoxCam3.ResumeLayout(false);
             this.groupBoxCam3.PerformLayout();
             this.groupBoxSurvey.ResumeLayout(false);
-            this.groupBoxSurvey.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownSequence)).EndInit();
-            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownExpTime)).EndInit();
             this.tabControlMain.ResumeLayout(false);
             this.tabPageInfo.ResumeLayout(false);
             this.tabPageTasks.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize) (this.dataGridTasks)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridTasks)).EndInit();
             this.tabPageCams.ResumeLayout(false);
-            this.groupBoxImageAnalysis.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize) (this.pictureBoxProfile)).EndInit();
-            this.panelFitsImage.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize) (this.pictureBoxFits)).EndInit();
             this.groupBoxInfo.ResumeLayout(false);
             this.groupBoxInfo.PerformLayout();
             this.groupBoxFocusSettings.ResumeLayout(false);
             this.groupBoxFocusSettings.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownRun)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownRun)).EndInit();
             this.groupBoxAutoFocus.ResumeLayout(false);
             this.groupBoxAutoFocus.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownSetDefoc)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownSetDefoc)).EndInit();
+            this.tabPageImages.ResumeLayout(false);
+            this.groupBoxImage3.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxProfile3)).EndInit();
+            this.panelImage3.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage3)).EndInit();
+            this.groupBoxImage2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxProfile2)).EndInit();
+            this.panelImage2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage2)).EndInit();
+            this.groupBoxImage1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxProfile1)).EndInit();
+            this.panelImage1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage1)).EndInit();
             this.contextMenuStripTasker.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
+
         }
 
         private System.Windows.Forms.CheckBox checkBoxHead;
@@ -1241,7 +1207,6 @@
         private System.Windows.Forms.ToolStripMenuItem launchToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem findCamerasToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem debugToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem loadTestImageToolStripMenuItem;
         private System.Windows.Forms.GroupBox groupBoxLogs;
         private System.Windows.Forms.Timer timerUi;
         private System.Windows.Forms.ListBox listBoxLogs;
@@ -1252,10 +1217,6 @@
         private System.Windows.Forms.ToolStripMenuItem restoreDefaultConfigFileToolStripMenuItem;
         private System.Windows.Forms.SaveFileDialog saveFileDialogConfig;
         private System.Windows.Forms.OpenFileDialog openFileDialogConfig;
-        private System.Windows.Forms.Panel panelFitsImage;
-        private System.Windows.Forms.PictureBox pictureBoxFits;
-        private System.Windows.Forms.GroupBox groupBoxImageAnalysis;
-        private System.Windows.Forms.PictureBox pictureBoxProfile;
         private System.Windows.Forms.GroupBox groupBoxCam1;
         private System.Windows.Forms.GroupBox groupBoxCam2;
         private System.Windows.Forms.GroupBox groupBoxCam3;
@@ -1284,18 +1245,8 @@
         private System.Windows.Forms.Label labelCam3Sn;
         private System.Windows.Forms.Label labelCam3Model;
         private System.Windows.Forms.ToolStripMenuItem updateCamerasSettingsToolStripMenuItem;
-        private System.Windows.Forms.RadioButton radioButtonViewCam3;
-        private System.Windows.Forms.RadioButton radioButtonViewCam2;
-        private System.Windows.Forms.RadioButton radioButtonViewCam1;
         private System.Windows.Forms.GroupBox groupBoxSurvey;
-        private System.Windows.Forms.NumericUpDown numericUpDownSequence;
-        private System.Windows.Forms.Label labelSequence;
-        private System.Windows.Forms.NumericUpDown numericUpDownExpTime;
-        private System.Windows.Forms.Label labelExpTime;
-        private System.Windows.Forms.Label labelImgType;
         private System.Windows.Forms.Button buttonSurveyStop;
-        private System.Windows.Forms.Button buttonSurveyStart;
-        private System.Windows.Forms.ComboBox comboBoxImgType;
         private System.Windows.Forms.ToolStripMenuItem findFocusToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem reconnectSocketToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem reconnectMeteoDomeToolStripMenuItem;
@@ -1303,12 +1254,19 @@
         private System.Windows.Forms.ToolStripMenuItem reconnectSiTechExeToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem reconnectAllToolStripMenuItem;
-        private System.Windows.Forms.TextBox textBoxObjectDec;
-        private System.Windows.Forms.TextBox textBoxObjectRa;
-        private System.Windows.Forms.TextBox textBoxObjectName;
-        private System.Windows.Forms.Label labelObjectDec;
-        private System.Windows.Forms.Label labelObjectRa;
-        private System.Windows.Forms.Label labelObjectName;
+        private System.Windows.Forms.TabPage tabPageImages;
+        private System.Windows.Forms.GroupBox groupBoxImage3;
+        private System.Windows.Forms.PictureBox pictureBoxProfile3;
+        private System.Windows.Forms.Panel panelImage3;
+        private System.Windows.Forms.PictureBox pictureBoxImage3;
+        private System.Windows.Forms.GroupBox groupBoxImage2;
+        private System.Windows.Forms.PictureBox pictureBoxProfile2;
+        private System.Windows.Forms.Panel panelImage2;
+        private System.Windows.Forms.PictureBox pictureBoxImage2;
+        private System.Windows.Forms.GroupBox groupBoxImage1;
+        private System.Windows.Forms.PictureBox pictureBoxProfile1;
+        private System.Windows.Forms.Panel panelImage1;
+        private System.Windows.Forms.PictureBox pictureBoxImage1;
     }
 }
 

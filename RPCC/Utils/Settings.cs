@@ -88,8 +88,6 @@ namespace RPCC.Utils
         private static string _snCamI;
         private static int _numFlushes;
         private static double _camTemp;
-        private static int _camBin;
-        private static string _camRoMode;
 
         public static string SnCamG
         {
@@ -140,26 +138,6 @@ namespace RPCC.Utils
                 else throw new ArgumentException("Camera temperature must be set in range from -55 to +45 degrees Celsius");
             }
         }
-
-        public static int CamBin
-        {
-            get => _camBin;
-            set
-            {
-                if (value >= 1 && value <= 16) _camBin = value;
-                else throw new ArgumentException("Camera bin factor must be set in range from 1 to 16");
-            }
-        }
-
-        public static string CamRoMode
-        {
-            get => _camRoMode;
-            set
-            {
-                if (value == "2.0 MHz" || value == "500KHz") _camRoMode = value;
-                else throw new ArgumentException("Camera mode must be set to \"2.0 MHz\" or \"500KHz\"");
-            }
-        }
         #endregion
 
         #region Survey
@@ -182,8 +160,23 @@ namespace RPCC.Utils
             }
         }
 
-        public static DateTime LastDarksTime { get; set; }
-        public static DateTime LastFlatsTime { get; set; }
+        public static DateTime LastDarksTime
+        {
+            get => _lastDarksTime;
+            set
+            {
+                _lastDarksTime = value;
+            }
+        }
+
+        public static DateTime LastFlatsTime
+        {
+            get => _lastFlatsTime;
+            set
+            {
+                _lastFlatsTime = value;
+            }
+        }
         #endregion
 
         #region Comms
@@ -259,8 +252,6 @@ namespace RPCC.Utils
                       config.Root.Elements("cameras").Elements("snCamI").Any() &&
                       config.Root.Elements("cameras").Elements("numFlushes").Any() &&
                       config.Root.Elements("cameras").Elements("camTemp").Any() &&
-                      config.Root.Elements("cameras").Elements("camBin").Any() &&
-                      config.Root.Elements("cameras").Elements("сamRoMode").Any() &&
 
                       config.Root.Elements("survey").Any() &&
                       config.Root.Elements("survey").Elements("mainOutFolder").Any() &&
@@ -285,9 +276,6 @@ namespace RPCC.Utils
                 SnCamI = (string)config.Root.Element("cameras").Element("snCamI");
                 NumFlushes = (int)config.Root.Element("cameras").Element("numFlushes");
                 CamTemp = (double)config.Root.Element("cameras").Element("camTemp");
-                CamBin = (int)config.Root.Element("cameras").Element("camBin");
-                var buff = config.Root.Element("cameras");
-                CamRoMode = (string)config.Root.Element("cameras").Element("сamRoMode");
 
                 MainOutFolder = (string)config.Root.Element("survey").Element("mainOutFolder");
                 LastDarksTime = (DateTime)config.Root.Element("survey").Element("lastDarksTime");
@@ -410,9 +398,7 @@ namespace RPCC.Utils
                     new XElement("snCamR", SnCamR),
                     new XElement("snCamI", SnCamI),
                     new XElement("numFlushes", NumFlushes),
-                    new XElement("camTemp", CamTemp),
-                    new XElement("camBin", CamBin),
-                    new XElement("сamRoMode", CamRoMode)),
+                    new XElement("camTemp", CamTemp)),
                 
                 new XElement("survey",
                     new XElement("mainOutFolder", MainOutFolder),
@@ -445,9 +431,7 @@ namespace RPCC.Utils
                     new XElement("snCamR", "ML0892515"),
                     new XElement("snCamI", "ML0742515"),
                     new XElement("numFlushes", 5),
-                    new XElement("camTemp", -30.0),
-                    new XElement("camBin", 2),
-                    new XElement("сamRoMode", "500KHz")),
+                    new XElement("camTemp", -30.0)),
                 
                 new XElement("survey",
                   new XElement("mainOutFolder", Directory.Exists("D:\\RoboPhot Data\\Images") ? 

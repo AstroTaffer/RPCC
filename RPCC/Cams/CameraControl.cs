@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -20,9 +22,11 @@ namespace RPCC.Cams
         public static readonly object _camsLocker = new object();   
 
         private static readonly Timer _camsTimer = new Timer(1000);
-        internal delegate void CallMainForm();
-        internal static CallMainForm resetUi;
         private static readonly List<Task> _readyImagesProcessList = new List<Task>();
+        internal delegate void ResetUi();
+        internal static ResetUi resetUi;
+        internal delegate void ResetPics();
+        internal static ResetPics resetPics;
 
         internal static CameraDevice[] cams = Array.Empty<CameraDevice>();
         internal static ObservationTask loadedTask = new ObservationTask();
@@ -30,6 +34,7 @@ namespace RPCC.Cams
         internal static bool isConnected = false;
         private static bool _isCallbackRequired = false;
         private static int _readyCamNum;
+        internal static int displayCamIndex = -1;
 
         #region Connect & Disconnect
         static internal bool ReconnectCameras()
@@ -48,7 +53,10 @@ namespace RPCC.Cams
                     cams[i] = new CameraDevice
                     {
                         fileName = camerasNames[i].FileName,
-                        modelName = camerasNames[i].ModelName
+                        modelName = camerasNames[i].ModelName,
+                        latestImageData = null,
+                        latestImageFilename = null,
+                        latestImageBitmap = null
                     };
                 }
                 Logger.AddLogEntry($"{cams.Length} cameras found");
@@ -230,15 +238,14 @@ namespace RPCC.Cams
                 _readyCamNum = 0;
                 for (int i = 0; i < cams.Length; i++)
                 {
-                    int indx = i;
-                    if (cams[indx].status == "IDLE")
+                    if (cams[i].status == "IDLE")
                     {
                         _readyCamNum++;
-                        if (cams[indx].isExposing)
+                        if (cams[i].isExposing)
                         {
                             // Image ready
-                            _readyImagesProcessList.Add(Task.Run(() => ProcessCapturedImage(indx)));
-                            cams[indx].isExposing = false;
+                            _readyImagesProcessList.Add(Task.Run(() => ProcessCapturedImage(cams[i])));
+                            cams[i].isExposing = false;
                             _isCallbackRequired = true;
                         }
                     }
@@ -246,20 +253,40 @@ namespace RPCC.Cams
                 if (_readyImagesProcessList.Count > 0)
                 {
                     Task.WaitAll(_readyImagesProcessList.ToArray());
-                    _readyImagesProcessList.Clear();
-                }
 
-                if (_isCallbackRequired && _readyCamNum == cams.Length)
-                {
-                    switch (loadedTask.FrameType)
+                    if (_isCallbackRequired && _readyCamNum == cams.Length)
                     {
-                        case "Focus":
-                            CameraFocus.CamFocusCallback();
-                            break;
-                        default:
-                            Head.CamCallback();
-                            break;
+                        switch (loadedTask.FrameType)
+                        {
+                            case "Focus":
+                                CameraFocus.CamFocusCallback();
+                                break;
+                            default:
+                                Head.CamCallback();
+                                break;
+                        }
+
+                        _readyImagesProcessList.Clear();
+                        for (int i = 0; i < cams.Length; i++)
+                        {
+                            if (!string.IsNullOrEmpty(cams[i].latestImageFilename))
+                            {
+                                _readyImagesProcessList.Add(Task.Run(() => ConstructBitmap(cams[i])));
+                            }
+                        }
+                        Task.WaitAll(_readyImagesProcessList.ToArray());
+
+                        resetPics();
+
+                        for (int i = 0; i < cams.Length; i++)
+                        {
+                            cams[i].latestImageFilename = null;
+                            cams[i].latestImageData = null; // Will be needed for Profile Image plotting
+                            cams[i].latestImageBitmap = null;
+                        }
                     }
+
+                    _readyImagesProcessList.Clear();
                 }
             }
             if (isConnected) _camsTimer.Start();
@@ -268,7 +295,6 @@ namespace RPCC.Cams
         static private void GetCamsStatusAlt()
         {
             int errorStatus;
-            int deviceStatus;
 
             for (int i = 0; i < cams.Length; i++)
             {
@@ -280,7 +306,7 @@ namespace RPCC.Cams
 
                 errorStatus += NativeMethods.FLIGetCoolerPower(cams[i].handle, out cams[i].coolerPwr);
 
-                errorStatus += NativeMethods.FLIGetDeviceStatus(cams[i].handle, out deviceStatus);
+                errorStatus += NativeMethods.FLIGetDeviceStatus(cams[i].handle, out int deviceStatus);
 
                 // There is no proper documentation on how to use FLIGetDeviceStatus command
                 // But this solution have been working so far, so I'm leaving it here as a backup
@@ -315,7 +341,7 @@ namespace RPCC.Cams
         }
         #endregion
 
-        #region Prepare
+        #region Expose Frames
         internal static bool PrepareToObs(ObservationTask task)
         {
             string[] validFrameTypes = { "Object", "Bias", "Dark", "Flat", "Focus", "Test" };
@@ -460,9 +486,7 @@ namespace RPCC.Cams
             if (isAllGood) loadedTask = task;
             return isAllGood;
         }
-        #endregion
-
-        #region Expose & Read Frames
+        
         internal static bool StartExposure()
         {
             bool isAllGood = true;
@@ -476,8 +500,6 @@ namespace RPCC.Cams
                 CoordinatesManager.MoonIllumination = Utilities.MoonIllumination(jd);
                 for (int i = 0; i < cams.Length; i++)
                 {
-                    cams[i].latestImageFilename = "";
-
                     if (!cams[i].isSelected) continue;
 
                     errorLastFliCmd = NativeMethods.FLIExposeFrame(cams[i].handle);
@@ -495,15 +517,16 @@ namespace RPCC.Cams
 
             return isAllGood;
         }
+        #endregion
 
-        private static void ProcessCapturedImage(int camId)
+        #region Read Frames
+        private static void ProcessCapturedImage(CameraDevice cam)
         {
-            RpccFits latestImage = ReadImage(cams[camId]);
-            cams[camId].latestImageData = latestImage.data;
+            // TODO: Add skipping image processing if something goes bad
 
-            // PlotImage (async)
-
-            cams[camId].latestImageFilename = latestImage.SaveFitsFile(cams[camId]);
+            RpccFits latestImage = ReadImage(cam);
+            cam.latestImageData = latestImage.data;
+            cam.latestImageFilename = latestImage.SaveFitsFile(cam);
         }
 
         private static RpccFits ReadImage(CameraDevice cam)
@@ -534,6 +557,25 @@ namespace RPCC.Cams
         {
             IntPtr buffWidth = new IntPtr(buff.Length);
             return NativeMethods.FLIGrabRow(camHandle, buff, buffWidth);
+        }
+
+        private static void ConstructBitmap(CameraDevice cam)
+        {
+            GeneralImageStat stat = new GeneralImageStat();
+            stat.Calculate(cam.latestImageData);
+
+            cam.latestImageBitmap = new Bitmap(cam.latestImageData.Length, cam.latestImageData[0].Length,
+                PixelFormat.Format24bppRgb);
+
+            int pixelColor;
+            for (ushort i = 0; i < cam.latestImageData.Length; i++)
+                for (ushort j = 0; j < cam.latestImageData[i].Length; j++)
+                {
+                    pixelColor = (int)((cam.latestImageData[i][j] - stat.dnrStart) * stat.dnrColorScale);
+                    if (pixelColor < 0) pixelColor = 0;
+                    if (pixelColor > 255) pixelColor = 255;
+                    cam.latestImageBitmap.SetPixel(j, i, Color.FromArgb(pixelColor, pixelColor, pixelColor));
+                }
         }
         #endregion
 
@@ -629,7 +671,10 @@ namespace RPCC.Cams
         internal bool isExposing;
         internal DateTime expStartDt;
         internal double expStartJd;
+
+        // latest image
         internal string latestImageFilename;
         internal ushort[][] latestImageData;
+        internal Bitmap latestImageBitmap;
     }
 }

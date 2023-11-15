@@ -30,22 +30,7 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SettingsForm));
             this.tabControlSettings = new System.Windows.Forms.TabControl();
-            this.tabPageImageAnalysis = new System.Windows.Forms.TabPage();
-            this.numericUpDownAnnulusOuterRadius = new System.Windows.Forms.NumericUpDown();
-            this.numericUpDownAnnulusInnerRadius = new System.Windows.Forms.NumericUpDown();
-            this.numericUpDownApertureRadius = new System.Windows.Forms.NumericUpDown();
-            this.labelAnnulusOuterRadius = new System.Windows.Forms.Label();
-            this.labelAnnulusInnerRadius = new System.Windows.Forms.Label();
-            this.labelApertureRadius = new System.Windows.Forms.Label();
-            this.textBoxUpperBrightnessSd = new System.Windows.Forms.TextBox();
-            this.labelUpperBrightnessSd = new System.Windows.Forms.Label();
-            this.textBoxLowerBrightnessSd = new System.Windows.Forms.TextBox();
-            this.labelLowerBrightnessSd = new System.Windows.Forms.Label();
             this.tabPageCameras = new System.Windows.Forms.TabPage();
-            this.comboBoxReadout = new System.Windows.Forms.ComboBox();
-            this.labelReadout = new System.Windows.Forms.Label();
-            this.numericUpDownBin = new System.Windows.Forms.NumericUpDown();
-            this.labelBin = new System.Windows.Forms.Label();
             this.comboBoxTemp = new System.Windows.Forms.ComboBox();
             this.labelTemp = new System.Windows.Forms.Label();
             this.numericUpDownNumFlushes = new System.Windows.Forms.NumericUpDown();
@@ -69,20 +54,30 @@
             this.labelDonutsTcpIpPort = new System.Windows.Forms.Label();
             this.labelMeteoDomeTcpIpPort = new System.Windows.Forms.Label();
             this.labelFocusComId = new System.Windows.Forms.Label();
+            this.tabPageImageAnalysis = new System.Windows.Forms.TabPage();
+            this.numericUpDownAnnulusOuterRadius = new System.Windows.Forms.NumericUpDown();
+            this.numericUpDownAnnulusInnerRadius = new System.Windows.Forms.NumericUpDown();
+            this.numericUpDownApertureRadius = new System.Windows.Forms.NumericUpDown();
+            this.labelAnnulusOuterRadius = new System.Windows.Forms.Label();
+            this.labelAnnulusInnerRadius = new System.Windows.Forms.Label();
+            this.labelApertureRadius = new System.Windows.Forms.Label();
+            this.textBoxUpperBrightnessSd = new System.Windows.Forms.TextBox();
+            this.labelUpperBrightnessSd = new System.Windows.Forms.Label();
+            this.textBoxLowerBrightnessSd = new System.Windows.Forms.TextBox();
+            this.labelLowerBrightnessSd = new System.Windows.Forms.Label();
             this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonAccept = new System.Windows.Forms.Button();
             this.folderBrowserDialogSetFolder = new System.Windows.Forms.FolderBrowserDialog();
             this.tabControlSettings.SuspendLayout();
-            this.tabPageImageAnalysis.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownAnnulusOuterRadius)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownAnnulusInnerRadius)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownApertureRadius)).BeginInit();
             this.tabPageCameras.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownBin)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownNumFlushes)).BeginInit();
             this.tabPageSurvey.SuspendLayout();
             this.tabPageComms.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownFocusComId)).BeginInit();
+            this.tabPageImageAnalysis.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownAnnulusOuterRadius)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownAnnulusInnerRadius)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownApertureRadius)).BeginInit();
             this.SuspendLayout();
             // 
             // tabControlSettings
@@ -98,128 +93,9 @@
             this.tabControlSettings.Size = new System.Drawing.Size(299, 368);
             this.tabControlSettings.TabIndex = 0;
             // 
-            // tabPageImageAnalysis
-            // 
-            this.tabPageImageAnalysis.BackColor = System.Drawing.SystemColors.Control;
-            this.tabPageImageAnalysis.Controls.Add(this.numericUpDownAnnulusOuterRadius);
-            this.tabPageImageAnalysis.Controls.Add(this.numericUpDownAnnulusInnerRadius);
-            this.tabPageImageAnalysis.Controls.Add(this.numericUpDownApertureRadius);
-            this.tabPageImageAnalysis.Controls.Add(this.labelAnnulusOuterRadius);
-            this.tabPageImageAnalysis.Controls.Add(this.labelAnnulusInnerRadius);
-            this.tabPageImageAnalysis.Controls.Add(this.labelApertureRadius);
-            this.tabPageImageAnalysis.Controls.Add(this.textBoxUpperBrightnessSd);
-            this.tabPageImageAnalysis.Controls.Add(this.labelUpperBrightnessSd);
-            this.tabPageImageAnalysis.Controls.Add(this.textBoxLowerBrightnessSd);
-            this.tabPageImageAnalysis.Controls.Add(this.labelLowerBrightnessSd);
-            this.tabPageImageAnalysis.Location = new System.Drawing.Point(4, 22);
-            this.tabPageImageAnalysis.Name = "tabPageImageAnalysis";
-            this.tabPageImageAnalysis.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageImageAnalysis.Size = new System.Drawing.Size(291, 342);
-            this.tabPageImageAnalysis.TabIndex = 0;
-            this.tabPageImageAnalysis.Text = "Image Analysis";
-            // 
-            // numericUpDownAnnulusOuterRadius
-            // 
-            this.numericUpDownAnnulusOuterRadius.Location = new System.Drawing.Point(234, 192);
-            this.numericUpDownAnnulusOuterRadius.Maximum = new decimal(new int[] {
-            2048,
-            0,
-            0,
-            0});
-            this.numericUpDownAnnulusOuterRadius.Name = "numericUpDownAnnulusOuterRadius";
-            this.numericUpDownAnnulusOuterRadius.Size = new System.Drawing.Size(49, 20);
-            this.numericUpDownAnnulusOuterRadius.TabIndex = 9;
-            // 
-            // numericUpDownAnnulusInnerRadius
-            // 
-            this.numericUpDownAnnulusInnerRadius.Location = new System.Drawing.Point(234, 151);
-            this.numericUpDownAnnulusInnerRadius.Maximum = new decimal(new int[] {
-            2048,
-            0,
-            0,
-            0});
-            this.numericUpDownAnnulusInnerRadius.Name = "numericUpDownAnnulusInnerRadius";
-            this.numericUpDownAnnulusInnerRadius.Size = new System.Drawing.Size(49, 20);
-            this.numericUpDownAnnulusInnerRadius.TabIndex = 8;
-            // 
-            // numericUpDownApertureRadius
-            // 
-            this.numericUpDownApertureRadius.Location = new System.Drawing.Point(234, 112);
-            this.numericUpDownApertureRadius.Maximum = new decimal(new int[] {
-            2048,
-            0,
-            0,
-            0});
-            this.numericUpDownApertureRadius.Name = "numericUpDownApertureRadius";
-            this.numericUpDownApertureRadius.Size = new System.Drawing.Size(49, 20);
-            this.numericUpDownApertureRadius.TabIndex = 7;
-            // 
-            // labelAnnulusOuterRadius
-            // 
-            this.labelAnnulusOuterRadius.AutoSize = true;
-            this.labelAnnulusOuterRadius.Location = new System.Drawing.Point(6, 194);
-            this.labelAnnulusOuterRadius.Name = "labelAnnulusOuterRadius";
-            this.labelAnnulusOuterRadius.Size = new System.Drawing.Size(103, 13);
-            this.labelAnnulusOuterRadius.TabIndex = 6;
-            this.labelAnnulusOuterRadius.Text = "Annulus outer radius";
-            // 
-            // labelAnnulusInnerRadius
-            // 
-            this.labelAnnulusInnerRadius.AutoSize = true;
-            this.labelAnnulusInnerRadius.Location = new System.Drawing.Point(6, 153);
-            this.labelAnnulusInnerRadius.Name = "labelAnnulusInnerRadius";
-            this.labelAnnulusInnerRadius.Size = new System.Drawing.Size(102, 13);
-            this.labelAnnulusInnerRadius.TabIndex = 5;
-            this.labelAnnulusInnerRadius.Text = "Annulus inner radius";
-            // 
-            // labelApertureRadius
-            // 
-            this.labelApertureRadius.AutoSize = true;
-            this.labelApertureRadius.Location = new System.Drawing.Point(6, 114);
-            this.labelApertureRadius.Name = "labelApertureRadius";
-            this.labelApertureRadius.Size = new System.Drawing.Size(78, 13);
-            this.labelApertureRadius.TabIndex = 4;
-            this.labelApertureRadius.Text = "Aperture radius";
-            // 
-            // textBoxUpperBrightnessSd
-            // 
-            this.textBoxUpperBrightnessSd.Location = new System.Drawing.Point(208, 66);
-            this.textBoxUpperBrightnessSd.Name = "textBoxUpperBrightnessSd";
-            this.textBoxUpperBrightnessSd.Size = new System.Drawing.Size(75, 20);
-            this.textBoxUpperBrightnessSd.TabIndex = 3;
-            // 
-            // labelUpperBrightnessSd
-            // 
-            this.labelUpperBrightnessSd.AutoSize = true;
-            this.labelUpperBrightnessSd.Location = new System.Drawing.Point(6, 69);
-            this.labelUpperBrightnessSd.Name = "labelUpperBrightnessSd";
-            this.labelUpperBrightnessSd.Size = new System.Drawing.Size(105, 13);
-            this.labelUpperBrightnessSd.TabIndex = 2;
-            this.labelUpperBrightnessSd.Text = "Upper brightness SD";
-            // 
-            // textBoxLowerBrightnessSd
-            // 
-            this.textBoxLowerBrightnessSd.Location = new System.Drawing.Point(208, 21);
-            this.textBoxLowerBrightnessSd.Name = "textBoxLowerBrightnessSd";
-            this.textBoxLowerBrightnessSd.Size = new System.Drawing.Size(75, 20);
-            this.textBoxLowerBrightnessSd.TabIndex = 1;
-            // 
-            // labelLowerBrightnessSd
-            // 
-            this.labelLowerBrightnessSd.AutoSize = true;
-            this.labelLowerBrightnessSd.Location = new System.Drawing.Point(6, 24);
-            this.labelLowerBrightnessSd.Name = "labelLowerBrightnessSd";
-            this.labelLowerBrightnessSd.Size = new System.Drawing.Size(105, 13);
-            this.labelLowerBrightnessSd.TabIndex = 0;
-            this.labelLowerBrightnessSd.Text = "Lower brightness SD";
-            // 
             // tabPageCameras
             // 
             this.tabPageCameras.BackColor = System.Drawing.SystemColors.Control;
-            this.tabPageCameras.Controls.Add(this.comboBoxReadout);
-            this.tabPageCameras.Controls.Add(this.labelReadout);
-            this.tabPageCameras.Controls.Add(this.numericUpDownBin);
-            this.tabPageCameras.Controls.Add(this.labelBin);
             this.tabPageCameras.Controls.Add(this.comboBoxTemp);
             this.tabPageCameras.Controls.Add(this.labelTemp);
             this.tabPageCameras.Controls.Add(this.numericUpDownNumFlushes);
@@ -236,58 +112,6 @@
             this.tabPageCameras.Size = new System.Drawing.Size(291, 342);
             this.tabPageCameras.TabIndex = 1;
             this.tabPageCameras.Text = "Cameras";
-            // 
-            // comboBoxReadout
-            // 
-            this.comboBoxReadout.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBoxReadout.FormattingEnabled = true;
-            this.comboBoxReadout.Items.AddRange(new object[] {
-            "2.0 MHz",
-            "500KHz"});
-            this.comboBoxReadout.Location = new System.Drawing.Point(183, 294);
-            this.comboBoxReadout.Name = "comboBoxReadout";
-            this.comboBoxReadout.Size = new System.Drawing.Size(100, 21);
-            this.comboBoxReadout.TabIndex = 13;
-            // 
-            // labelReadout
-            // 
-            this.labelReadout.AutoSize = true;
-            this.labelReadout.Location = new System.Drawing.Point(6, 294);
-            this.labelReadout.Name = "labelReadout";
-            this.labelReadout.Size = new System.Drawing.Size(78, 13);
-            this.labelReadout.TabIndex = 12;
-            this.labelReadout.Text = "Readout Mode";
-            // 
-            // numericUpDownBin
-            // 
-            this.numericUpDownBin.Location = new System.Drawing.Point(233, 249);
-            this.numericUpDownBin.Maximum = new decimal(new int[] {
-            16,
-            0,
-            0,
-            0});
-            this.numericUpDownBin.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.numericUpDownBin.Name = "numericUpDownBin";
-            this.numericUpDownBin.Size = new System.Drawing.Size(50, 20);
-            this.numericUpDownBin.TabIndex = 11;
-            this.numericUpDownBin.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            // 
-            // labelBin
-            // 
-            this.labelBin.AutoSize = true;
-            this.labelBin.Location = new System.Drawing.Point(6, 249);
-            this.labelBin.Name = "labelBin";
-            this.labelBin.Size = new System.Drawing.Size(52, 13);
-            this.labelBin.TabIndex = 10;
-            this.labelBin.Text = "Bin factor";
             // 
             // comboBoxTemp
             // 
@@ -524,6 +348,121 @@
             this.labelFocusComId.TabIndex = 0;
             this.labelFocusComId.Text = "Focus COM ID";
             // 
+            // tabPageImageAnalysis
+            // 
+            this.tabPageImageAnalysis.BackColor = System.Drawing.SystemColors.Control;
+            this.tabPageImageAnalysis.Controls.Add(this.numericUpDownAnnulusOuterRadius);
+            this.tabPageImageAnalysis.Controls.Add(this.numericUpDownAnnulusInnerRadius);
+            this.tabPageImageAnalysis.Controls.Add(this.numericUpDownApertureRadius);
+            this.tabPageImageAnalysis.Controls.Add(this.labelAnnulusOuterRadius);
+            this.tabPageImageAnalysis.Controls.Add(this.labelAnnulusInnerRadius);
+            this.tabPageImageAnalysis.Controls.Add(this.labelApertureRadius);
+            this.tabPageImageAnalysis.Controls.Add(this.textBoxUpperBrightnessSd);
+            this.tabPageImageAnalysis.Controls.Add(this.labelUpperBrightnessSd);
+            this.tabPageImageAnalysis.Controls.Add(this.textBoxLowerBrightnessSd);
+            this.tabPageImageAnalysis.Controls.Add(this.labelLowerBrightnessSd);
+            this.tabPageImageAnalysis.Location = new System.Drawing.Point(4, 22);
+            this.tabPageImageAnalysis.Name = "tabPageImageAnalysis";
+            this.tabPageImageAnalysis.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageImageAnalysis.Size = new System.Drawing.Size(291, 342);
+            this.tabPageImageAnalysis.TabIndex = 0;
+            this.tabPageImageAnalysis.Text = "Image Analysis";
+            // 
+            // numericUpDownAnnulusOuterRadius
+            // 
+            this.numericUpDownAnnulusOuterRadius.Location = new System.Drawing.Point(234, 192);
+            this.numericUpDownAnnulusOuterRadius.Maximum = new decimal(new int[] {
+            2048,
+            0,
+            0,
+            0});
+            this.numericUpDownAnnulusOuterRadius.Name = "numericUpDownAnnulusOuterRadius";
+            this.numericUpDownAnnulusOuterRadius.Size = new System.Drawing.Size(49, 20);
+            this.numericUpDownAnnulusOuterRadius.TabIndex = 9;
+            // 
+            // numericUpDownAnnulusInnerRadius
+            // 
+            this.numericUpDownAnnulusInnerRadius.Location = new System.Drawing.Point(234, 151);
+            this.numericUpDownAnnulusInnerRadius.Maximum = new decimal(new int[] {
+            2048,
+            0,
+            0,
+            0});
+            this.numericUpDownAnnulusInnerRadius.Name = "numericUpDownAnnulusInnerRadius";
+            this.numericUpDownAnnulusInnerRadius.Size = new System.Drawing.Size(49, 20);
+            this.numericUpDownAnnulusInnerRadius.TabIndex = 8;
+            // 
+            // numericUpDownApertureRadius
+            // 
+            this.numericUpDownApertureRadius.Location = new System.Drawing.Point(234, 112);
+            this.numericUpDownApertureRadius.Maximum = new decimal(new int[] {
+            2048,
+            0,
+            0,
+            0});
+            this.numericUpDownApertureRadius.Name = "numericUpDownApertureRadius";
+            this.numericUpDownApertureRadius.Size = new System.Drawing.Size(49, 20);
+            this.numericUpDownApertureRadius.TabIndex = 7;
+            // 
+            // labelAnnulusOuterRadius
+            // 
+            this.labelAnnulusOuterRadius.AutoSize = true;
+            this.labelAnnulusOuterRadius.Location = new System.Drawing.Point(6, 194);
+            this.labelAnnulusOuterRadius.Name = "labelAnnulusOuterRadius";
+            this.labelAnnulusOuterRadius.Size = new System.Drawing.Size(103, 13);
+            this.labelAnnulusOuterRadius.TabIndex = 6;
+            this.labelAnnulusOuterRadius.Text = "Annulus outer radius";
+            // 
+            // labelAnnulusInnerRadius
+            // 
+            this.labelAnnulusInnerRadius.AutoSize = true;
+            this.labelAnnulusInnerRadius.Location = new System.Drawing.Point(6, 153);
+            this.labelAnnulusInnerRadius.Name = "labelAnnulusInnerRadius";
+            this.labelAnnulusInnerRadius.Size = new System.Drawing.Size(102, 13);
+            this.labelAnnulusInnerRadius.TabIndex = 5;
+            this.labelAnnulusInnerRadius.Text = "Annulus inner radius";
+            // 
+            // labelApertureRadius
+            // 
+            this.labelApertureRadius.AutoSize = true;
+            this.labelApertureRadius.Location = new System.Drawing.Point(6, 114);
+            this.labelApertureRadius.Name = "labelApertureRadius";
+            this.labelApertureRadius.Size = new System.Drawing.Size(78, 13);
+            this.labelApertureRadius.TabIndex = 4;
+            this.labelApertureRadius.Text = "Aperture radius";
+            // 
+            // textBoxUpperBrightnessSd
+            // 
+            this.textBoxUpperBrightnessSd.Location = new System.Drawing.Point(208, 66);
+            this.textBoxUpperBrightnessSd.Name = "textBoxUpperBrightnessSd";
+            this.textBoxUpperBrightnessSd.Size = new System.Drawing.Size(75, 20);
+            this.textBoxUpperBrightnessSd.TabIndex = 3;
+            // 
+            // labelUpperBrightnessSd
+            // 
+            this.labelUpperBrightnessSd.AutoSize = true;
+            this.labelUpperBrightnessSd.Location = new System.Drawing.Point(6, 69);
+            this.labelUpperBrightnessSd.Name = "labelUpperBrightnessSd";
+            this.labelUpperBrightnessSd.Size = new System.Drawing.Size(105, 13);
+            this.labelUpperBrightnessSd.TabIndex = 2;
+            this.labelUpperBrightnessSd.Text = "Upper brightness SD";
+            // 
+            // textBoxLowerBrightnessSd
+            // 
+            this.textBoxLowerBrightnessSd.Location = new System.Drawing.Point(208, 21);
+            this.textBoxLowerBrightnessSd.Name = "textBoxLowerBrightnessSd";
+            this.textBoxLowerBrightnessSd.Size = new System.Drawing.Size(75, 20);
+            this.textBoxLowerBrightnessSd.TabIndex = 1;
+            // 
+            // labelLowerBrightnessSd
+            // 
+            this.labelLowerBrightnessSd.AutoSize = true;
+            this.labelLowerBrightnessSd.Location = new System.Drawing.Point(6, 24);
+            this.labelLowerBrightnessSd.Name = "labelLowerBrightnessSd";
+            this.labelLowerBrightnessSd.Size = new System.Drawing.Size(105, 13);
+            this.labelLowerBrightnessSd.TabIndex = 0;
+            this.labelLowerBrightnessSd.Text = "Lower brightness SD";
+            // 
             // buttonCancel
             // 
             this.buttonCancel.Anchor = System.Windows.Forms.AnchorStyles.Right;
@@ -567,20 +506,19 @@
             this.Name = "SettingsForm";
             this.Text = "Settings";
             this.tabControlSettings.ResumeLayout(false);
-            this.tabPageImageAnalysis.ResumeLayout(false);
-            this.tabPageImageAnalysis.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownAnnulusOuterRadius)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownAnnulusInnerRadius)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownApertureRadius)).EndInit();
             this.tabPageCameras.ResumeLayout(false);
             this.tabPageCameras.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownBin)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownNumFlushes)).EndInit();
             this.tabPageSurvey.ResumeLayout(false);
             this.tabPageSurvey.PerformLayout();
             this.tabPageComms.ResumeLayout(false);
             this.tabPageComms.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownFocusComId)).EndInit();
+            this.tabPageImageAnalysis.ResumeLayout(false);
+            this.tabPageImageAnalysis.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownAnnulusOuterRadius)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownAnnulusInnerRadius)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownApertureRadius)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -612,10 +550,6 @@
         private System.Windows.Forms.NumericUpDown numericUpDownNumFlushes;
         private System.Windows.Forms.ComboBox comboBoxTemp;
         private System.Windows.Forms.Label labelTemp;
-        private System.Windows.Forms.NumericUpDown numericUpDownBin;
-        private System.Windows.Forms.Label labelBin;
-        private System.Windows.Forms.ComboBox comboBoxReadout;
-        private System.Windows.Forms.Label labelReadout;
         private System.Windows.Forms.TabPage tabPageSurvey;
         private System.Windows.Forms.Label labelMainOutFolder;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialogSetFolder;

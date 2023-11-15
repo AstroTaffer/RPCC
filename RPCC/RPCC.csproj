@@ -235,9 +235,6 @@
     <EmbeddedResource Include="Utils\SettingsForm.resx">
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </EmbeddedResource>
-    <None Include="Cams\TestImage.fits">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="Guid\DONUTS.py">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

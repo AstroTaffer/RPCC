@@ -128,8 +128,8 @@ namespace RPCC.Tasks
                 _task.Object = textBoxObject.Text;
                 _task.Observer = textBoxObserver.Text;
                 _task.Status = 0;
-                _task.Xbin = short.Parse(textBoxXbin.Text);
-                _task.Ybin = short.Parse(textBoxYbin.Text);
+                _task.Xbin = short.Parse(textBoxXbin.Text); // TODO: Бин камер должен быть от 1 до 16
+                _task.Ybin = short.Parse(textBoxYbin.Text); // TODO: Бин камер должен быть от 1 до 16
 
                 _task.Filters = fil;
                 

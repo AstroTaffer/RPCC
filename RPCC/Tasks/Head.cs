@@ -173,7 +173,7 @@ namespace RPCC.Tasks
                     if (MountDataCollector.IsParked)
                     {
                         SiTechExeSocket.Unpark();
-                        Thread.Sleep(5000);
+                        //Thread.Sleep(5000);
                     }
 
                     switch (_currentTask.FrameType)
