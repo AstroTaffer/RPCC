@@ -44,9 +44,7 @@ namespace RPCC.Tasks
             this.labelCoords = new System.Windows.Forms.Label();
             this.groupBoxFrame = new System.Windows.Forms.GroupBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.textBoxYbin = new System.Windows.Forms.TextBox();
             this.labelYbin = new System.Windows.Forms.Label();
-            this.textBoxXbin = new System.Windows.Forms.TextBox();
             this.labelXbin = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.textBoxDuration = new System.Windows.Forms.TextBox();
@@ -64,11 +62,15 @@ namespace RPCC.Tasks
             this.buttonAdd = new System.Windows.Forms.Button();
             this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonDelete = new System.Windows.Forms.Button();
+            this.numericUpDown_xbin = new System.Windows.Forms.NumericUpDown();
+            this.numericUpDown_ybin = new System.Windows.Forms.NumericUpDown();
             this.groupBoxCoords.SuspendLayout();
             this.groupBoxFrame.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBoxFilters.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize) (this.numericUpDown_xbin)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.numericUpDown_ybin)).BeginInit();
             this.SuspendLayout();
             // 
             // groupBoxCoords
@@ -173,9 +175,9 @@ namespace RPCC.Tasks
             // 
             // groupBox3
             // 
-            this.groupBox3.Controls.Add(this.textBoxYbin);
+            this.groupBox3.Controls.Add(this.numericUpDown_ybin);
+            this.groupBox3.Controls.Add(this.numericUpDown_xbin);
             this.groupBox3.Controls.Add(this.labelYbin);
-            this.groupBox3.Controls.Add(this.textBoxXbin);
             this.groupBox3.Controls.Add(this.labelXbin);
             this.groupBox3.Location = new System.Drawing.Point(247, 25);
             this.groupBox3.Name = "groupBox3";
@@ -184,14 +186,6 @@ namespace RPCC.Tasks
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Binning";
             // 
-            // textBoxYbin
-            // 
-            this.textBoxYbin.Location = new System.Drawing.Point(13, 116);
-            this.textBoxYbin.Name = "textBoxYbin";
-            this.textBoxYbin.Size = new System.Drawing.Size(65, 26);
-            this.textBoxYbin.TabIndex = 35;
-            this.textBoxYbin.Text = "2";
-            // 
             // labelYbin
             // 
             this.labelYbin.Location = new System.Drawing.Point(13, 92);
@@ -199,14 +193,6 @@ namespace RPCC.Tasks
             this.labelYbin.Size = new System.Drawing.Size(65, 23);
             this.labelYbin.TabIndex = 34;
             this.labelYbin.Text = "Ybin";
-            // 
-            // textBoxXbin
-            // 
-            this.textBoxXbin.Location = new System.Drawing.Point(13, 51);
-            this.textBoxXbin.Name = "textBoxXbin";
-            this.textBoxXbin.Size = new System.Drawing.Size(65, 26);
-            this.textBoxXbin.TabIndex = 33;
-            this.textBoxXbin.Text = "2";
             // 
             // labelXbin
             // 
@@ -375,6 +361,28 @@ namespace RPCC.Tasks
             this.buttonDelete.UseVisualStyleBackColor = true;
             this.buttonDelete.Click += new System.EventHandler(this.buttonDelete_Click);
             // 
+            // numericUpDown_xbin
+            // 
+            this.numericUpDown_xbin.InterceptArrowKeys = false;
+            this.numericUpDown_xbin.Location = new System.Drawing.Point(11, 49);
+            this.numericUpDown_xbin.Maximum = new decimal(new int[] {16, 0, 0, 0});
+            this.numericUpDown_xbin.Minimum = new decimal(new int[] {1, 0, 0, 0});
+            this.numericUpDown_xbin.Name = "numericUpDown_xbin";
+            this.numericUpDown_xbin.Size = new System.Drawing.Size(78, 26);
+            this.numericUpDown_xbin.TabIndex = 35;
+            this.numericUpDown_xbin.Value = new decimal(new int[] {2, 0, 0, 0});
+            // 
+            // numericUpDown_ybin
+            // 
+            this.numericUpDown_ybin.InterceptArrowKeys = false;
+            this.numericUpDown_ybin.Location = new System.Drawing.Point(11, 117);
+            this.numericUpDown_ybin.Maximum = new decimal(new int[] {16, 0, 0, 0});
+            this.numericUpDown_ybin.Minimum = new decimal(new int[] {1, 0, 0, 0});
+            this.numericUpDown_ybin.Name = "numericUpDown_ybin";
+            this.numericUpDown_ybin.Size = new System.Drawing.Size(78, 26);
+            this.numericUpDown_ybin.TabIndex = 36;
+            this.numericUpDown_ybin.Value = new decimal(new int[] {2, 0, 0, 0});
+            // 
             // TaskForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -392,12 +400,16 @@ namespace RPCC.Tasks
             this.groupBoxCoords.PerformLayout();
             this.groupBoxFrame.ResumeLayout(false);
             this.groupBox3.ResumeLayout(false);
-            this.groupBox3.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             this.groupBoxFilters.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize) (this.numericUpDown_xbin)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.numericUpDown_ybin)).EndInit();
             this.ResumeLayout(false);
         }
+
+        private System.Windows.Forms.NumericUpDown numericUpDown_xbin;
+        private System.Windows.Forms.NumericUpDown numericUpDown_ybin;
 
         private System.Windows.Forms.TextBox textBoxDuration;
         private System.Windows.Forms.Label labelDuration;
@@ -419,12 +431,10 @@ namespace RPCC.Tasks
         private System.Windows.Forms.CheckBox checkBoxFilr;
         private System.Windows.Forms.CheckBox checkBoxFili;
 
-        private System.Windows.Forms.TextBox textBoxYbin;
         private System.Windows.Forms.Label labelYbin;
 
         private System.Windows.Forms.Label labelFrameType;
 
-        private System.Windows.Forms.TextBox textBoxXbin;
         private System.Windows.Forms.Label labelXbin;
 
         private System.Windows.Forms.ComboBox comboBoxExp;

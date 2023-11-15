@@ -41,8 +41,8 @@ namespace RPCC.Tasks
                 textBoxCoords.Text = _task.RaDec;
                 textBoxObject.Text = _task.Object;
                 textBoxObserver.Text = _task.Observer;
-                textBoxXbin.Text = _task.Xbin.ToString();
-                textBoxYbin.Text = _task.Ybin.ToString();
+                numericUpDown_xbin.Value = _task.Xbin;
+                numericUpDown_ybin.Value = _task.Ybin;
                 textBoxDateTime.Text = _task.TimeStart.ToString(CultureInfo.CurrentCulture);
                 textBoxExpN.Text = _task.AllFrames.ToString(CultureInfo.CurrentCulture);
 
@@ -128,8 +128,9 @@ namespace RPCC.Tasks
                 _task.Object = textBoxObject.Text;
                 _task.Observer = textBoxObserver.Text;
                 _task.Status = 0;
-                _task.Xbin = short.Parse(textBoxXbin.Text); // TODO: Бин камер должен быть от 1 до 16
-                _task.Ybin = short.Parse(textBoxYbin.Text); // TODO: Бин камер должен быть от 1 до 16
+
+                _task.Xbin = (int)numericUpDown_xbin.Value;
+                _task.Ybin = (int)numericUpDown_ybin.Value;
 
                 _task.Filters = fil;
                 

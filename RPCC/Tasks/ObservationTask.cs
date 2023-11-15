@@ -53,6 +53,7 @@ namespace RPCC.Tasks
         public string Filters { get; set; } = "g r i";
 
 //in pix
+// Бин камер должен быть от 1 до 16
         public int Xbin { get; set; } = 2;
 
         public int Ybin { get; set; } = 2;

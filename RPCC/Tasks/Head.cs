@@ -225,7 +225,7 @@ namespace RPCC.Tasks
             if (!(Math.Abs(_currentTask.Ra - MountDataCollector.RightAsc) < 1e-3 &
                   Math.Abs(_currentTask.Dec - MountDataCollector.Declination) < 1e-3))
             {
-                if (!SiTechExeSocket.GoTo(_currentTask.Ra, _currentTask.Dec, true).Result)
+                if (!SiTechExeSocket.GoTo(_currentTask.Ra, _currentTask.Dec, true))
                 {
                     Logger.AddLogEntry($"WARNING: can't start task #{_currentTask.TaskNumber}, error while GOTO");
                     EndTask(4);
@@ -267,7 +267,7 @@ namespace RPCC.Tasks
         private static void StartDoLight()
         {   
             _isObserve = true;
-            if (SiTechExeSocket.GoTo(_currentTask.Ra, _currentTask.Dec, true).Result) //проверять доехал ли
+            if (SiTechExeSocket.GoTo(_currentTask.Ra, _currentTask.Dec, true)) //проверять доехал ли
             {
                 _currentTask.Status = 1;
                 Logger.AddLogEntry($"Start task# {_currentTask.TaskNumber}, type: {_currentTask.FrameType}");
@@ -494,7 +494,7 @@ namespace RPCC.Tasks
             {
                 _isDoFlats = true;
                 Logger.AddLogEntry($"Start task# {_currentTask.TaskNumber}, type: {_currentTask.FrameType}");
-                if (SiTechExeSocket.GoTo(_currentTask.Ra, _currentTask.Dec, true).Result)
+                if (SiTechExeSocket.GoTo(_currentTask.Ra, _currentTask.Dec, true))
                 {
                     if (CameraControl.PrepareToObs(_currentTask))
                     {
