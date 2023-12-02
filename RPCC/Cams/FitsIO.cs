@@ -194,13 +194,13 @@ namespace RPCC.Cams
                 "heatsink temperature [C]"));
             cursor.Add(new HeaderCard("COOLPOWR", cam.coolerPwr,
                 "cooler power [%]"));
-            switch (Settings.CamRoMode)
+            switch (CameraControl.loadedTask.FrameType)
             {
-                case "2.0MHz":
+                case "Focus":
                     cursor.Add(new HeaderCard("RATE", 2000.0, "horizontal readout rate [kPix/sec]"));
                     cursor.Add(new HeaderCard("RDNOISE", 14.0, "datasheet readnoise [e]"));
                     break;
-                case "500KHz":
+                default:
                     cursor.Add(new HeaderCard("RATE", 500.0, "horizontal readout rate [kPix/sec]"));
                     cursor.Add(new HeaderCard("RDNOISE", 9.0, "datasheet readnoise [e]"));
                     break;
