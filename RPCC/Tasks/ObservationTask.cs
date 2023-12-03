@@ -40,6 +40,8 @@ namespace RPCC.Tasks
 //0 = Wait, 1 = In progress, 5 = Ended not complete,
 //2 = Ended complete, 3 = Rejected by observer, 4 = Not observed
         public short Status { get; set; } = 0;
+        
+        public string ObjectType { get; set; }
 
         public string Object { get; set; }
 

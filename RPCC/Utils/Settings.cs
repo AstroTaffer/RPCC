@@ -434,8 +434,8 @@ namespace RPCC.Utils
                     new XElement("camTemp", -30.0)),
                 
                 new XElement("survey",
-                  new XElement("mainOutFolder", Directory.Exists("D:\\RoboPhot Data\\Images") ? 
-                  "D:\\RoboPhot Data\\Images" : Directory.GetCurrentDirectory()),
+                  new XElement("mainOutFolder", Directory.Exists("D:") ? 
+                  "D:" : Directory.GetCurrentDirectory()),
                   new XElement("LastDarksTime", LastDarksTime), 
                   new XElement("LastFlatsTime", LastFlatsTime)),
 

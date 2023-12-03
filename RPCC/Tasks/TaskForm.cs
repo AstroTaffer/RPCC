@@ -21,7 +21,7 @@ namespace RPCC.Tasks
             _isNewTask = isNewTask;
             if (_isNewTask)
             {
-                _task.TaskNumber = Tasker.GetTasksLen();
+                // _task.TaskNumber = Tasker.GetTasksLen();
                 textBoxCoords.Text = $@"{ASCOM.Tools.Utilities.HoursToHMS(MountDataCollector.RightAsc)} {ASCOM.Tools.Utilities.DegreesToDMS(MountDataCollector.Declination)}";
             }
             else
@@ -49,6 +49,7 @@ namespace RPCC.Tasks
                 comboBoxExp.Text = _task.Exp.ToString(CultureInfo.CurrentCulture);
                 textBoxDuration.Text = _task.Duration.ToString(CultureInfo.CurrentCulture);
                 comboBoxFrameType.Text = _task.FrameType;
+                comboBoxObjectType.Text = _task.ObjectType;
                 var s = _task.Filters.Split(' ');
                 if (s.Contains("g")) checkBoxFilg.Checked = true;
                 if (s.Contains("r")) checkBoxFilr.Checked = true;
@@ -127,6 +128,7 @@ namespace RPCC.Tasks
                 _task.TimeEnd = _task.TimeStart + TimeSpan.FromHours(_task.Duration);
                 _task.Object = textBoxObject.Text;
                 _task.Observer = textBoxObserver.Text;
+                _task.ObjectType = comboBoxObjectType.Text;
                 _task.Status = 0;
 
                 _task.Xbin = (int)numericUpDown_xbin.Value;
@@ -134,8 +136,16 @@ namespace RPCC.Tasks
 
                 _task.Filters = fil;
                 
-                if (!_isNewTask) Tasker.UpdateTaskInTable(_task);
-                else Tasker.AddTask(_task);
+                if (!_isNewTask)
+                {
+                    DbCommunicate.AddTaskToDb(_task);
+                    Tasker.UpdateTaskInTable(_task);
+                }
+                else
+                {
+                    DbCommunicate.UpdateTaskInDb(_task);
+                    Tasker.AddTask(_task);
+                }
             }
             catch
             {
@@ -169,6 +179,7 @@ namespace RPCC.Tasks
             if (MessageBox.Show(@"Are you sure you want to reject this task?", @"confirmation",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Information) != DialogResult.Yes) return;
             _task.Status = 3;
+            DbCommunicate.UpdateTaskInDb(_task);
             Tasker.UpdateTaskInTable(_task);
             Logger.AddLogEntry($"Task #{_task.TaskNumber} rejected");
             buttonCancel_Click(sender, e);

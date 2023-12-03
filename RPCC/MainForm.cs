@@ -67,11 +67,17 @@ namespace RPCC
             }
             groupBoxFocusSettings.Text = $@"Focus Settings (COMPORT {Settings.FocusComId})";
 
+            if (!DbCommunicate.ConnectToDb())
+            {
+                MessageBox.Show(@"Can't connect to data base", @"OK", MessageBoxButtons.OK);
+                Logger.AddLogEntry(@"Can't connect to data base");
+            }
             Tasker.dataGridViewTasker = dataGridViewTasker;
             Tasker.contextMenuStripTasker = contextMenuStripTasker;
             Tasker.SetHeader();
-            Tasker.LoadTasksFromXml();
-
+            // Tasker.LoadTasksFromXml();
+            DbCommunicate.LoadDbTable();
+            
             FocusTimer.Start();
             timerUi.Start();
             Head.StartThinking();
@@ -87,8 +93,9 @@ namespace RPCC
             
             timerUi.Stop();
             
-            Tasker.SaveTasksToXml();
-
+            // Tasker.SaveTasksToXml();
+            DbCommunicate.DisconnectFromDb();
+            
             _domeSocket.Disconnect();
             DonutsSocket.Disconnect();
             SiTechExeSocket.Disconnect();

@@ -19,7 +19,8 @@ namespace RPCC.Tasks
         public static readonly string[] Header =
         {
             "N", "RaDecJ2000", "t_{Added}", @"t_{Run}", @"t_{Fin}", "Duration (h)",
-            "Exp", "Done", "All", "t_{Last exp}", "Filters", "Object", "Status", "Observer", "Frame type",
+            "Exp", "Done", "All", "t_{Last exp}", "Filter g", "Filter r", "Filter i", 
+            "Object", "Object type", "Status", "Observer", "Frame type",
             "Xbin", "Ybin"
         };
 //gri
@@ -49,12 +50,15 @@ namespace RPCC.Tasks
             dataGridViewTasker.Columns[8].Width = 60;
             dataGridViewTasker.Columns[9].Width = 120;
             dataGridViewTasker.Columns[10].Width = 60;
-            dataGridViewTasker.Columns[11].Width = 120;
+            dataGridViewTasker.Columns[11].Width = 60;
             dataGridViewTasker.Columns[12].Width = 60;
             dataGridViewTasker.Columns[13].Width = 120;
-            dataGridViewTasker.Columns[14].Width = 80;
-            dataGridViewTasker.Columns[15].Width = 40;
-            dataGridViewTasker.Columns[16].Width = 40;
+            dataGridViewTasker.Columns[14].Width = 120;
+            dataGridViewTasker.Columns[15].Width = 60;
+            dataGridViewTasker.Columns[16].Width = 120;
+            dataGridViewTasker.Columns[17].Width = 80;
+            dataGridViewTasker.Columns[18].Width = 40;
+            dataGridViewTasker.Columns[19].Width = 40;
 
             foreach (DataGridViewColumn column in dataGridViewTasker.Columns)
                 column.SortMode = DataGridViewColumnSortMode.NotSortable;
@@ -145,11 +149,12 @@ namespace RPCC.Tasks
             dataRow[Header[9]] = task.TimeLastExp;
             dataRow[Header[10]] = task.Filters;
             dataRow[Header[11]] = task.Object;
-            dataRow[Header[12]] = task.Status;
-            dataRow[Header[13]] = task.Observer;
-            dataRow[Header[14]] = task.FrameType;
-            dataRow[Header[15]] = task.Xbin;
-            dataRow[Header[16]] = task.Ybin;
+            dataRow[Header[12]] = task.ObjectType;
+            dataRow[Header[13]] = task.Status;
+            dataRow[Header[14]] = task.Observer;
+            dataRow[Header[15]] = task.FrameType;
+            dataRow[Header[16]] = task.Xbin;
+            dataRow[Header[17]] = task.Ybin;
 
             DataTable.Rows.InsertAt(dataRow, 0);
             SaveTasksToXml();
@@ -172,20 +177,21 @@ namespace RPCC.Tasks
                 row.Cells[9].Value = task.TimeLastExp;
                 row.Cells[10].Value = task.Filters;
                 row.Cells[11].Value = task.Object;
-                row.Cells[12].Value = task.Status;
+                row.Cells[12].Value = task.ObjectType;
+                row.Cells[13].Value = task.Status;
                 row.Cells[13].Value = task.Observer;
                 row.Cells[14].Value = task.FrameType;
                 row.Cells[15].Value = task.Xbin;
                 row.Cells[16].Value = task.Ybin;
             }
             PaintTable();
-            SaveTasksToXml();
+            // SaveTasksToXml();
         }
 
         public static void DeleteTaskByRowIndex(int rowIndex)
         {
             dataGridViewTasker.Rows.RemoveAt(rowIndex);
-            SaveTasksToXml();
+            // SaveTasksToXml();
         }
 
         public static ObservationTask GetTaskByNumber(string taskNumber)
@@ -210,11 +216,12 @@ namespace RPCC.Tasks
                     new DateTime() : DateTime.Parse(row.Cells[9].Value.ToString()));
                 task.Filters = row.Cells[10].Value.ToString();
                 task.Object = row.Cells[11].Value.ToString();
-                task.Status = Convert.ToInt16(row.Cells[12].Value);
-                task.Observer = row.Cells[13].Value.ToString();
-                task.FrameType = row.Cells[14].Value.ToString();
-                task.Xbin = Convert.ToInt16(row.Cells[15].Value);
-                task.Ybin = Convert.ToInt16(row.Cells[16].Value);
+                task.ObjectType = row.Cells[12].Value.ToString();
+                task.Status = Convert.ToInt16(row.Cells[13].Value);
+                task.Observer = row.Cells[14].Value.ToString();
+                task.FrameType = row.Cells[15].Value.ToString();
+                task.Xbin = Convert.ToInt16(row.Cells[16].Value);
+                task.Ybin = Convert.ToInt16(row.Cells[17].Value);
                 break;
             }
 
@@ -242,11 +249,12 @@ namespace RPCC.Tasks
                     new DateTime() : DateTime.Parse(row.Cells[9].Value.ToString()));
                 task.Filters = row.Cells[10].Value.ToString();
                 task.Object = row.Cells[11].Value.ToString();
-                task.Status = Convert.ToInt16(row.Cells[12].Value);
-                task.Observer = row.Cells[13].Value.ToString();
-                task.FrameType = row.Cells[14].Value.ToString();
-                task.Xbin = Convert.ToInt16(row.Cells[15].Value);
-                task.Ybin = Convert.ToInt16(row.Cells[16].Value);
+                task.ObjectType = row.Cells[12].Value.ToString();
+                task.Status = Convert.ToInt16(row.Cells[13].Value);
+                task.Observer = row.Cells[14].Value.ToString();
+                task.FrameType = row.Cells[15].Value.ToString();
+                task.Xbin = Convert.ToInt16(row.Cells[16].Value);
+                task.Ybin = Convert.ToInt16(row.Cells[17].Value);
                 break;
             }
         }
@@ -269,11 +277,12 @@ namespace RPCC.Tasks
             task.AllFrames = Convert.ToInt16(row.Cells[8].Value);
             task.Filters = row.Cells[10].Value.ToString();
             task.Object = dataGridViewTasker.Rows[rowIndex].Cells[11].Value.ToString();
-            task.Status = Convert.ToInt16(row.Cells[12].Value);
-            task.Observer = row.Cells[13].Value.ToString();
-            task.FrameType = row.Cells[14].Value.ToString();
-            task.Xbin = Convert.ToInt16(row.Cells[15].Value);
-            task.Ybin = Convert.ToInt16(row.Cells[16].Value);
+            task.ObjectType = dataGridViewTasker.Rows[rowIndex].Cells[12].Value.ToString();
+            task.Status = Convert.ToInt16(row.Cells[13].Value);
+            task.Observer = row.Cells[14].Value.ToString();
+            task.FrameType = row.Cells[15].Value.ToString();
+            task.Xbin = Convert.ToInt16(row.Cells[16].Value);
+            task.Ybin = Convert.ToInt16(row.Cells[17].Value);
 
             return task;
         }

@@ -5,6 +5,7 @@ using nom.tam.fits;
 using nom.tam.util;
 using RPCC.Comms;
 using RPCC.Focus;
+using RPCC.Tasks;
 using RPCC.Utils;
 
 namespace RPCC.Cams
@@ -124,6 +125,9 @@ namespace RPCC.Cams
             outStream.Flush();
             outStream.Close();
 
+            DbCommunicate.AddFrameToDb(CameraControl.loadedTask, outFilePath, 
+                MountDataCollector.RightAsc, MountDataCollector.Declination,
+                cam.filter, cam.expStartDt, WeatherDataCollector.Extinction, cam.ccdTemp);
             return outFilePath;
         }
 
