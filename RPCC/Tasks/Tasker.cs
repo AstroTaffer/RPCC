@@ -147,14 +147,16 @@ namespace RPCC.Tasks
             dataRow[Header[7]] = task.DoneFrames;
             dataRow[Header[8]] = task.AllFrames;
             dataRow[Header[9]] = task.TimeLastExp;
-            dataRow[Header[10]] = task.Filters;
-            dataRow[Header[11]] = task.Object;
-            dataRow[Header[12]] = task.ObjectType;
-            dataRow[Header[13]] = task.Status;
-            dataRow[Header[14]] = task.Observer;
-            dataRow[Header[15]] = task.FrameType;
-            dataRow[Header[16]] = task.Xbin;
-            dataRow[Header[17]] = task.Ybin;
+            dataRow[Header[10]] = task.Filters.Contains("g");
+            dataRow[Header[11]] = task.Filters.Contains("r");
+            dataRow[Header[12]] = task.Filters.Contains("i");
+            dataRow[Header[13]] = task.Object;
+            dataRow[Header[14]] = task.ObjectType;
+            dataRow[Header[15]] = task.Status;
+            dataRow[Header[16]] = task.Observer;
+            dataRow[Header[17]] = task.FrameType;
+            dataRow[Header[18]] = task.Xbin;
+            dataRow[Header[19]] = task.Ybin;
 
             DataTable.Rows.InsertAt(dataRow, 0);
             SaveTasksToXml();
@@ -175,14 +177,16 @@ namespace RPCC.Tasks
                 row.Cells[7].Value = task.DoneFrames;
                 row.Cells[8].Value = task.AllFrames;
                 row.Cells[9].Value = task.TimeLastExp;
-                row.Cells[10].Value = task.Filters;
-                row.Cells[11].Value = task.Object;
-                row.Cells[12].Value = task.ObjectType;
-                row.Cells[13].Value = task.Status;
-                row.Cells[13].Value = task.Observer;
-                row.Cells[14].Value = task.FrameType;
-                row.Cells[15].Value = task.Xbin;
-                row.Cells[16].Value = task.Ybin;
+                row.Cells[10].Value = task.Filters.Contains("g");
+                row.Cells[11].Value = task.Filters.Contains("r");
+                row.Cells[12].Value = task.Filters.Contains("i");
+                row.Cells[13].Value = task.Object;
+                row.Cells[14].Value = task.ObjectType;
+                row.Cells[15].Value = task.Status;
+                row.Cells[16].Value = task.Observer;
+                row.Cells[17].Value = task.FrameType;
+                row.Cells[18].Value = task.Xbin;
+                row.Cells[19].Value = task.Ybin;
             }
             PaintTable();
             // SaveTasksToXml();
@@ -214,14 +218,27 @@ namespace RPCC.Tasks
                 task.AllFrames = Convert.ToInt16(row.Cells[8].Value);
                 task.TimeLastExp = (string.IsNullOrEmpty(row.Cells[9].Value.ToString()) ? 
                     new DateTime() : DateTime.Parse(row.Cells[9].Value.ToString()));
-                task.Filters = row.Cells[10].Value.ToString();
-                task.Object = row.Cells[11].Value.ToString();
-                task.ObjectType = row.Cells[12].Value.ToString();
-                task.Status = Convert.ToInt16(row.Cells[13].Value);
-                task.Observer = row.Cells[14].Value.ToString();
-                task.FrameType = row.Cells[15].Value.ToString();
-                task.Xbin = Convert.ToInt16(row.Cells[16].Value);
-                task.Ybin = Convert.ToInt16(row.Cells[17].Value);
+                var f = "";
+                if ((bool)row.Cells[10].Value)
+                {
+                    f += "g ";
+                }
+                if ((bool)row.Cells[11].Value)
+                {
+                    f += "r ";
+                }
+                if ((bool)row.Cells[12].Value)
+                {
+                    f += "i";
+                }
+                task.Filters = f;
+                task.Object = row.Cells[13].Value.ToString();
+                task.ObjectType = row.Cells[14].Value.ToString();
+                task.Status = Convert.ToInt16(row.Cells[15].Value);
+                task.Observer = row.Cells[16].Value.ToString();
+                task.FrameType = row.Cells[17].Value.ToString();
+                task.Xbin = Convert.ToInt16(row.Cells[18].Value);
+                task.Ybin = Convert.ToInt16(row.Cells[19].Value);
                 break;
             }
 
@@ -247,14 +264,28 @@ namespace RPCC.Tasks
                 task.AllFrames = Convert.ToInt16(row.Cells[8].Value);
                 task.TimeLastExp = (string.IsNullOrEmpty(row.Cells[9].Value.ToString()) ? 
                     new DateTime() : DateTime.Parse(row.Cells[9].Value.ToString()));
-                task.Filters = row.Cells[10].Value.ToString();
-                task.Object = row.Cells[11].Value.ToString();
-                task.ObjectType = row.Cells[12].Value.ToString();
-                task.Status = Convert.ToInt16(row.Cells[13].Value);
-                task.Observer = row.Cells[14].Value.ToString();
-                task.FrameType = row.Cells[15].Value.ToString();
-                task.Xbin = Convert.ToInt16(row.Cells[16].Value);
-                task.Ybin = Convert.ToInt16(row.Cells[17].Value);
+                
+                var f = "";
+                if ((bool)row.Cells[10].Value)
+                {
+                    f += "g ";
+                }
+                if ((bool)row.Cells[11].Value)
+                {
+                    f += "r ";
+                }
+                if ((bool)row.Cells[12].Value)
+                {
+                    f += "i";
+                }
+                task.Filters = f;
+                task.Object = row.Cells[13].Value.ToString();
+                task.ObjectType = row.Cells[14].Value.ToString();
+                task.Status = Convert.ToInt16(row.Cells[15].Value);
+                task.Observer = row.Cells[16].Value.ToString();
+                task.FrameType = row.Cells[17].Value.ToString();
+                task.Xbin = Convert.ToInt16(row.Cells[18].Value);
+                task.Ybin = Convert.ToInt16(row.Cells[19].Value);
                 break;
             }
         }
@@ -275,14 +306,27 @@ namespace RPCC.Tasks
             task.Exp = Convert.ToInt16(row.Cells[6].Value);
             task.DoneFrames = Convert.ToInt16(row.Cells[7].Value);
             task.AllFrames = Convert.ToInt16(row.Cells[8].Value);
-            task.Filters = row.Cells[10].Value.ToString();
-            task.Object = dataGridViewTasker.Rows[rowIndex].Cells[11].Value.ToString();
-            task.ObjectType = dataGridViewTasker.Rows[rowIndex].Cells[12].Value.ToString();
-            task.Status = Convert.ToInt16(row.Cells[13].Value);
-            task.Observer = row.Cells[14].Value.ToString();
-            task.FrameType = row.Cells[15].Value.ToString();
-            task.Xbin = Convert.ToInt16(row.Cells[16].Value);
-            task.Ybin = Convert.ToInt16(row.Cells[17].Value);
+            var f = "";
+            if ((bool)row.Cells[10].Value)
+            {
+                f += "g ";
+            }
+            if ((bool)row.Cells[11].Value)
+            {
+                f += "r ";
+            }
+            if ((bool)row.Cells[12].Value)
+            {
+                f += "i";
+            }
+            task.Filters = f;
+            task.Object = dataGridViewTasker.Rows[rowIndex].Cells[13].Value.ToString();
+            task.ObjectType = dataGridViewTasker.Rows[rowIndex].Cells[14].Value.ToString();
+            task.Status = Convert.ToInt16(row.Cells[15].Value);
+            task.Observer = row.Cells[16].Value.ToString();
+            task.FrameType = row.Cells[17].Value.ToString();
+            task.Xbin = Convert.ToInt16(row.Cells[18].Value);
+            task.Ybin = Convert.ToInt16(row.Cells[19].Value);
 
             return task;
         }
