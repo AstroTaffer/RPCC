@@ -402,8 +402,8 @@ namespace RPCC.Utils
                 
                 new XElement("survey",
                     new XElement("mainOutFolder", MainOutFolder),
-                    new XElement("LastDarksTime", LastDarksTime), 
-                    new XElement("LastFlatsTime", LastFlatsTime)),
+                    new XElement("lastDarksTime", LastDarksTime), 
+                    new XElement("lastFlatsTime", LastFlatsTime)),
 
                 new XElement("comms",
                     new XElement("focusComId", FocusComId),
@@ -436,11 +436,12 @@ namespace RPCC.Utils
                 new XElement("survey",
                   new XElement("mainOutFolder", Directory.Exists("D:") ? 
                   "D:" : Directory.GetCurrentDirectory()),
-                  new XElement("LastDarksTime", LastDarksTime), 
-                  new XElement("LastFlatsTime", LastFlatsTime)),
+                  new XElement("lastDarksTime", LastDarksTime), 
+                  new XElement("lastFlatsTime", LastFlatsTime)),
 
                 new XElement("comms",
-                    new XElement("focusComId", 10),
+                    //new XElement("focusComId", 10),  // for monoblock
+                    new XElement("focusComId", 4),  // for server
                     new XElement("meteoDomeTcpIpPort", 8085),
                     new XElement("donutsTcpIpPort", 3030),
                     new XElement("siTechExeTcpIpPort", 8079))
