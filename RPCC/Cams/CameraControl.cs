@@ -495,7 +495,7 @@ namespace RPCC.Cams
             lock (_camsLocker)
             {
                 var dt = DateTime.UtcNow;
-                var jd = Utilities.JulianDateFromDateTime(DateTime.UtcNow);
+                var jd = Utilities.JulianDateFromDateTime(dt);
                 CoordinatesManager.CalculateObjectDistance2Moon(loadedTask);
                 CoordinatesManager.MoonIllumination = Utilities.MoonIllumination(jd);
                 for (int i = 0; i < cams.Length; i++)
@@ -503,7 +503,8 @@ namespace RPCC.Cams
                     if (!cams[i].isSelected) continue;
 
                     errorLastFliCmd = NativeMethods.FLIExposeFrame(cams[i].handle);
-                    cams[i].expStartDt = DateTime.UtcNow;
+                    Logger.AddLogEntry("Exposing");
+                    cams[i].expStartDt = dt;
                     cams[i].expStartJd = Utilities.JulianDateFromDateTime(cams[i].expStartDt);
                     if (errorLastFliCmd != 0)
                     {

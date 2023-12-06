@@ -306,10 +306,18 @@
     <Content Include="Sex\tophat_2.5_3x3.conv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Utils\cio_ra.bin" />
-    <Content Include="Utils\JPLEPH" />
-    <Content Include="Utils\libnovas.dll" />
-    <Content Include="Utils\libsofa.dll" />
+    <Content Include="Utils\cio_ra.bin">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Utils\JPLEPH">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Utils\libnovas.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Utils\libsofa.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

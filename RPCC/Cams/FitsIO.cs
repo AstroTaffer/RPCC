@@ -127,7 +127,7 @@ namespace RPCC.Cams
 
             DbCommunicate.AddFrameToDb(CameraControl.loadedTask, outFilePath, 
                 MountDataCollector.RightAsc, MountDataCollector.Declination,
-                cam.filter, cam.expStartDt, WeatherDataCollector.Extinction, cam.ccdTemp);
+                cam.filter, cam.expStartDt, WeatherDataCollector.Extinction, cam.ccdTemp, cam.serialNumber);
             return outFilePath;
         }
 

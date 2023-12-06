@@ -105,8 +105,12 @@ namespace RPCC.Tasks
 
         public static void PaintTable()
         {
+            if (dataGridViewTasker.Rows.Count == 0)
+            {
+                return;
+            }
             foreach (DataGridViewRow row in dataGridViewTasker.Rows)
-                switch (short.Parse(row.Cells[12].Value.ToString()))
+                switch (short.Parse(row.Cells[15].Value.ToString()))
                 {
                     case 0: // Wait
                         row.DefaultCellStyle.BackColor = Color.White;
@@ -159,7 +163,7 @@ namespace RPCC.Tasks
             dataRow[Header[19]] = task.Ybin;
 
             DataTable.Rows.InsertAt(dataRow, 0);
-            SaveTasksToXml();
+            // SaveTasksToXml();
         }
 
         public static void UpdateTaskInTable(ObservationTask task)
@@ -329,6 +333,44 @@ namespace RPCC.Tasks
             task.Ybin = Convert.ToInt16(row.Cells[19].Value);
 
             return task;
+        }
+
+        public static void GetTaskFromRow(DataRow row, ref ObservationTask task)
+        {
+            // var task = new ObservationTask();
+            task.TaskNumber = Convert.ToInt32(row.ItemArray[0]);
+            if (!string.IsNullOrEmpty(row.ItemArray[1].ToString()))
+            {
+                task.ComputeRaDec(row.ItemArray[1].ToString());
+            }
+            task.TimeAdd = DateTime.Parse(row.ItemArray[2].ToString());
+            task.TimeStart = DateTime.Parse(row.ItemArray[3].ToString());
+            task.TimeEnd = DateTime.Parse(row.ItemArray[4].ToString());
+            task.Duration = float.Parse(row.ItemArray[5].ToString());
+            task.Exp = Convert.ToInt16(row.ItemArray[6]);
+            task.DoneFrames = Convert.ToInt16(row.ItemArray[7]);
+            task.AllFrames = Convert.ToInt16(row.ItemArray[8]);
+            var f = "";
+            if ((bool)row.ItemArray[10])
+            {
+                f += "g ";
+            }
+            if ((bool)row.ItemArray[11])
+            {
+                f += "r ";
+            }
+            if ((bool)row.ItemArray[12])
+            {
+                f += "i";
+            }
+            task.Filters = f;
+            task.Object = row.ItemArray[13].ToString();
+            task.ObjectType = row.ItemArray[14].ToString();
+            task.Status = Convert.ToInt16(row.ItemArray[15]);
+            task.Observer = row.ItemArray[16].ToString();
+            task.FrameType = row.ItemArray[17].ToString();
+            task.Xbin = Convert.ToInt16(row.ItemArray[18]);
+            task.Ybin = Convert.ToInt16(row.ItemArray[19]);
         }
     }
 }

@@ -63,7 +63,7 @@ namespace RPCC.Tasks
         {
             if (_task.Status > 0)
             {
-                MessageBox.Show(@"Can't add task", @"OK", MessageBoxButtons.OK);
+                MessageBox.Show(@"Can't add task, status > 0", @"OK", MessageBoxButtons.OK);
                 buttonCancel_Click(sender, e);
                 return;
             }
@@ -138,18 +138,19 @@ namespace RPCC.Tasks
                 
                 if (!_isNewTask)
                 {
-                    DbCommunicate.AddTaskToDb(_task);
-                    Tasker.UpdateTaskInTable(_task);
+                    DbCommunicate.UpdateTaskInDb(_task);
+                    // Tasker.UpdateTaskInTable(_task);
                 }
                 else
                 {
-                    DbCommunicate.UpdateTaskInDb(_task);
-                    Tasker.AddTask(_task);
+                    DbCommunicate.AddTaskToDb(_task);
+                    // Tasker.AddTask(_task);
                 }
             }
-            catch
+            catch(Exception exception)
             {
                 Logger.AddLogEntry("Can't add task");
+                Logger.AddLogEntry(exception.Message);
             }
 
             buttonCancel_Click(sender, e);
@@ -180,7 +181,7 @@ namespace RPCC.Tasks
                     MessageBoxButtons.YesNo, MessageBoxIcon.Information) != DialogResult.Yes) return;
             _task.Status = 3;
             DbCommunicate.UpdateTaskInDb(_task);
-            Tasker.UpdateTaskInTable(_task);
+            // Tasker.UpdateTaskInTable(_task);
             Logger.AddLogEntry($"Task #{_task.TaskNumber} rejected");
             buttonCancel_Click(sender, e);
         }

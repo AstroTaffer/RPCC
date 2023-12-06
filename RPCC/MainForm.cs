@@ -77,6 +77,7 @@ namespace RPCC
             Tasker.SetHeader();
             // Tasker.LoadTasksFromXml();
             DbCommunicate.LoadDbTable();
+            DbCommunicate.DisconnectFromDb();
             
             FocusTimer.Start();
             timerUi.Start();

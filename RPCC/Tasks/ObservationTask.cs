@@ -79,9 +79,9 @@ namespace RPCC.Tasks
             Dec = Utilities.DMSToDegrees(radec[1]);
         }
 
-        public void Update()
-        {
-            Tasker.UpdateTaskFromTable(this);
-        }
+        // public void Update()
+        // {
+        //     DbCommunicate.UpdateTaskFromDb(this);
+        // }
     }
 }
