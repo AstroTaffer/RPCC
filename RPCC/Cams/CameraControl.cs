@@ -238,14 +238,15 @@ namespace RPCC.Cams
                 _readyCamNum = 0;
                 for (int i = 0; i < cams.Length; i++)
                 {
+                    int indx = i;
                     if (cams[i].status == "IDLE")
                     {
                         _readyCamNum++;
-                        if (cams[i].isExposing)
+                        if (cams[indx].isExposing)
                         {
                             // Image ready
-                            _readyImagesProcessList.Add(Task.Run(() => ProcessCapturedImage(cams[i])));
-                            cams[i].isExposing = false;
+                            _readyImagesProcessList.Add(Task.Run(() => ProcessCapturedImage(cams[indx])));
+                            cams[indx].isExposing = false;
                             _isCallbackRequired = true;
                         }
                     }
@@ -269,9 +270,10 @@ namespace RPCC.Cams
                         _readyImagesProcessList.Clear();
                         for (int i = 0; i < cams.Length; i++)
                         {
-                            if (!string.IsNullOrEmpty(cams[i].latestImageFilename))
+                            int indx = i;
+                            if (!string.IsNullOrEmpty(cams[indx].latestImageFilename))
                             {
-                                _readyImagesProcessList.Add(Task.Run(() => ConstructBitmap(cams[i])));
+                                _readyImagesProcessList.Add(Task.Run(() => ConstructBitmap(cams[indx])));
                             }
                         }
                         Task.WaitAll(_readyImagesProcessList.ToArray());
@@ -503,7 +505,7 @@ namespace RPCC.Cams
                     if (!cams[i].isSelected) continue;
 
                     errorLastFliCmd = NativeMethods.FLIExposeFrame(cams[i].handle);
-                    Logger.AddLogEntry("Exposing");
+                    // Logger.AddLogEntry("Exposing");
                     cams[i].expStartDt = dt;
                     cams[i].expStartJd = Utilities.JulianDateFromDateTime(cams[i].expStartDt);
                     if (errorLastFliCmd != 0)

@@ -38,8 +38,9 @@ namespace RPCC.Comms
 
             _client = new TcpClient();
             var ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
-            var ipAddress = ipHostInfo.AddressList[1];
-            _endPoint = new IPEndPoint(ipAddress, Settings.DonutsTcpIpPort);
+            // var ipAddress = ipHostInfo.AddressList[1];
+            // _endPoint = new IPEndPoint(ipAddress, Settings.DonutsTcpIpPort);
+            _endPoint = new IPEndPoint(IPAddress.Loopback, Settings.DonutsTcpIpPort);
             try
             {
                 _client.Connect(_endPoint.Address, _endPoint.Port);

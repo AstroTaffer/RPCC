@@ -54,8 +54,13 @@ namespace RPCC.Tasks
             {
                 DbCommunicate.UpdateTaskFromDb(ref _currentTask);
             }
-            // DbCommunicate.LoadDbTable();
-            Tasker.PaintTable();
+
+            // if (_currentTask != null & !_isObserve)
+            // {
+            //     _currentTask = null;
+            // }
+            DbCommunicate.LoadDbTable();
+            // Tasker.PaintTable();
             if (!CameraControl.isConnected)
             {
                 CameraControl.ReconnectCameras();
@@ -323,6 +328,7 @@ namespace RPCC.Tasks
                         }
 
                         if (!WeatherDataCollector.Obs)
+                        // if (false)
                         {
                             Logger.AddLogEntry($"Weather is bad, pause task #{_currentTask.TaskNumber}");
                             _isOnPause = true;

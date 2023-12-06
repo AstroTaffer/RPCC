@@ -51,7 +51,8 @@ def handle_client(reader, writer):
 
 
 def run_server():
-    server.bind((socket.gethostname(), 3030))
+    # server.bind((socket.gethostname(), 3030))
+    server.bind(('127.0.0.1', 3030))
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  # реюз порта
     server.listen(1)
     # while True:

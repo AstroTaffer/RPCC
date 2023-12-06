@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Windows.Forms;
 using Npgsql;
 using RPCC.Utils;
 
@@ -64,9 +65,13 @@ namespace RPCC.Tasks
                     {
                         var dt = new DataTable();
                         dt.Load(reader);
-                        Tasker.dataGridViewTasker.DataSource = dt;
+                        Tasker.dataGridViewTasker.Invoke((MethodInvoker)delegate
+                        {
+                            Tasker.dataGridViewTasker.DataSource = dt;
+                            Tasker.PaintTable();
+                        });
                         // Tasker.dataGridViewTasker.ReadOnly = false;
-                        
+
                     }
                     com.Dispose(); 
                 }
@@ -219,8 +224,8 @@ namespace RPCC.Tasks
                     var query = "INSERT INTO robophot_frames (fk_task_id, " +
                                 "frame_path, coord2000, frame_filter, " +
                                 "date_utc, extinction, ccd_temp, camera_sn) VALUES " + 
-                                $"({observationTask.TaskNumber}, {path}, ({ra*360/24}, {dec})::spoint_domen, {fil}, " +
-                                $"{date}::timestamp, {ext}, {temp}, {sn})";
+                                $"({observationTask.TaskNumber}, '{path}', ({ra*360/24}, {dec})::spoint_domen, '{fil}', " +
+                                $"'{date}'::timestamp, {ext}, {temp}, '{sn}')";
                     using (var com = new NpgsqlCommand(query, Con))
                     {
                         com.ExecuteReader();

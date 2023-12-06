@@ -67,17 +67,17 @@ namespace RPCC
             }
             groupBoxFocusSettings.Text = $@"Focus Settings (COMPORT {Settings.FocusComId})";
 
-            if (!DbCommunicate.ConnectToDb())
-            {
-                MessageBox.Show(@"Can't connect to data base", @"OK", MessageBoxButtons.OK);
-                Logger.AddLogEntry(@"Can't connect to data base");
-            }
+            // if (!DbCommunicate.ConnectToDb())
+            // {
+            //     MessageBox.Show(@"Can't connect to data base", @"OK", MessageBoxButtons.OK);
+            //     Logger.AddLogEntry(@"Can't connect to data base");
+            // }
             Tasker.dataGridViewTasker = dataGridViewTasker;
             Tasker.contextMenuStripTasker = contextMenuStripTasker;
             Tasker.SetHeader();
             // Tasker.LoadTasksFromXml();
-            DbCommunicate.LoadDbTable();
-            DbCommunicate.DisconnectFromDb();
+            // DbCommunicate.LoadDbTable();
+            // DbCommunicate.DisconnectFromDb();
             
             FocusTimer.Start();
             timerUi.Start();
@@ -155,47 +155,50 @@ namespace RPCC
         internal void ResetCamsUi()
         {
             // Camera 1
-            groupBoxCam1.Enabled = false;
-            groupBoxImage1.Enabled = false;
-            pictureBoxImage1.Image = null;
-            pictureBoxProfile1.Image = null;
-            labelCam1Model.Text = "Model:";
-            labelCam1Sn.Text = "Serial Num:";
-            labelCam1Filter.Text = "Filter:";
-            labelCam1CcdTemp.Text = "CCD Temp:";
-            labelCam1BaseTemp.Text = "Base Temp:";
-            labelCam1CoolerPwr.Text = "Cooler Power:";
-            labelCam1Status.Text = "Status:";
-            labelCam1RemTime.Text = "Remaining:";
+            groupBoxImage1.Invoke((MethodInvoker)delegate
+            {
+                groupBoxCam1.Enabled = false;
+                groupBoxImage1.Enabled = false;
+                pictureBoxImage1.Image = null;
+                pictureBoxProfile1.Image = null;
+                labelCam1Model.Text = "Model:";
+                labelCam1Sn.Text = "Serial Num:";
+                labelCam1Filter.Text = "Filter:";
+                labelCam1CcdTemp.Text = "CCD Temp:";
+                labelCam1BaseTemp.Text = "Base Temp:";
+                labelCam1CoolerPwr.Text = "Cooler Power:";
+                labelCam1Status.Text = "Status:";
+                labelCam1RemTime.Text = "Remaining:";
 
-            // Camera 2
-            groupBoxCam2.Enabled = false;
-            groupBoxImage2.Enabled = false;
-            pictureBoxImage2.Image = null;
-            pictureBoxProfile2.Image = null;
-            labelCam2Model.Text = "Model:";
-            labelCam2Sn.Text = "Serial Num:";
-            labelCam2Filter.Text = "Filter:";
-            labelCam2CcdTemp.Text = "CCD Temp:";
-            labelCam2BaseTemp.Text = "Base Temp:";
-            labelCam2CoolerPwr.Text = "Cooler Power:";
-            labelCam2Status.Text = "Status:";
-            labelCam2RemTime.Text = "Remaining:";
+                // Camera 2
+                groupBoxCam2.Enabled = false;
+                groupBoxImage2.Enabled = false;
+                pictureBoxImage2.Image = null;
+                pictureBoxProfile2.Image = null;
+                labelCam2Model.Text = "Model:";
+                labelCam2Sn.Text = "Serial Num:";
+                labelCam2Filter.Text = "Filter:";
+                labelCam2CcdTemp.Text = "CCD Temp:";
+                labelCam2BaseTemp.Text = "Base Temp:";
+                labelCam2CoolerPwr.Text = "Cooler Power:";
+                labelCam2Status.Text = "Status:";
+                labelCam2RemTime.Text = "Remaining:";
 
-            // Camera 3
-            groupBoxCam3.Enabled = false;
-            groupBoxImage3.Enabled = false;
-            pictureBoxImage3.Image = null;
-            pictureBoxProfile3.Image = null;
-            labelCam3Model.Text = "Model:";
-            labelCam3Sn.Text = "Serial Num:";
-            labelCam3Filter.Text = "Filter:";
-            labelCam3CcdTemp.Text = "CCD Temp:";
-            labelCam3BaseTemp.Text = "Base Temp:";
-            labelCam3CoolerPwr.Text = "Cooler Power:";
-            labelCam3Status.Text = "Status:";
-            labelCam3RemTime.Text = "Remaining:";
-
+                // Camera 3
+                groupBoxCam3.Enabled = false;
+                groupBoxImage3.Enabled = false;
+                pictureBoxImage3.Image = null;
+                pictureBoxProfile3.Image = null;
+                labelCam3Model.Text = "Model:";
+                labelCam3Sn.Text = "Serial Num:";
+                labelCam3Filter.Text = "Filter:";
+                labelCam3CcdTemp.Text = "CCD Temp:";
+                labelCam3BaseTemp.Text = "Base Temp:";
+                labelCam3CoolerPwr.Text = "Cooler Power:";
+                labelCam3Status.Text = "Status:";
+                labelCam3RemTime.Text = "Remaining:";
+            });
+            
             switch (CameraControl.cams.Length)
             {
                 case 3:
