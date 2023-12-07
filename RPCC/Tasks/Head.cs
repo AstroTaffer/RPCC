@@ -404,10 +404,10 @@ namespace RPCC.Tasks
                         {
                             _isOnPause = true;
                         }
-                        
                     }
                     else
                     {
+                        DbCommunicate.AddMDarkToBd(_currentTask);
                         EndTask(2);
                         if (Darks.Count > 0)
                         {
@@ -435,19 +435,17 @@ namespace RPCC.Tasks
                         {
                             _isOnPause = true;
                         }
-                        
                     }
                     else
                     {
+                        DbCommunicate.AddMDarkToBd(_currentTask);
                         EndTask(2);
-
                         Settings.LastFlatsTime = DateTime.UtcNow;
                         Settings.SaveXmlConfig("SettingsDefault.xml");
                     }
                     break;
                 }
             }
-            
         }
 
         public static void Guiding()

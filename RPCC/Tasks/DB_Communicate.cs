@@ -252,7 +252,6 @@ namespace RPCC.Tasks
         {
             lock (Loc)
             {
-
                 try
                 {
                     var fils = observationTask.Filters.Split(' ');
