@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Data;
+using System.Linq;
 using System.Windows.Forms;
 using Npgsql;
+using RPCC.Cams;
 using RPCC.Utils;
 
 
@@ -189,12 +191,12 @@ namespace RPCC.Tasks
                 lock (Loc)
                 {
                     var query = "UPDATE robophot_tasks " +
-                                    "SET (start_coord2000, " +
-                                    "time_add, time_start, time_end, time_last_exp, " +
-                                    "duration, exp_time, done_frames, all_frames, " +
-                                    "is_filter_g, is_filter_r, is_filter_i, " +
-                                    "object_name, object_type, status, observer, frame_type, x_bin, y_bin) = " +
-                                    $"{TaskQueryBuilder(observationTask)} WHERE task_id = {observationTask.TaskNumber}";
+                                     "SET (start_coord2000, " +
+                                     "time_add, time_start, time_end, time_last_exp, " +
+                                     "duration, exp_time, done_frames, all_frames, " +
+                                     "is_filter_g, is_filter_r, is_filter_i, " +
+                                     "object_name, object_type, status, observer, frame_type, x_bin, y_bin) = " +
+                                     $"{TaskQueryBuilder(observationTask)} WHERE task_id = {observationTask.TaskNumber}";
                     using (var con = ConnectToDb())
                     {
                         using (var com = new NpgsqlCommand(query, con))
@@ -244,6 +246,40 @@ namespace RPCC.Tasks
                 return false;
             }
             return true;
+        }
+
+        public static bool AddMDarkToBd(ObservationTask observationTask)
+        {
+            lock (Loc)
+            {
+
+                try
+                {
+                    var fils = observationTask.Filters.Split(' ');
+                    foreach (var fil in fils)
+                    {
+                        var cam = CameraControl.cams.Last(c => c.filter == fil);
+                        var query = "INSERT INTO robophot_master_frames (m_frame_type, m_frame_filter, fk_task_id, " +
+                                    $"m_camera_sn, m_x_bin, m_y_bin, m_exp_time) VALUES " +
+                                    $"('{observationTask.FrameType}', '{fil}', {observationTask.TaskNumber}, '{cam.serialNumber}'," +
+                                    $"{observationTask.Xbin}, {observationTask.Ybin}, {observationTask.Exp})";
+                        using (var con = ConnectToDb())
+                        {
+                            using (var com = new NpgsqlCommand(query, con))
+                            {
+                                com.ExecuteReader();
+                            }
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    Logger.AddLogEntry("AddFrameToDb error");
+                    Logger.AddLogEntry(e.Message);
+                    return false;
+                }
+                return true;
+            }
         }
         
     }
