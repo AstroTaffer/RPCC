@@ -60,7 +60,7 @@ namespace RPCC.Tasks
 
         private void buttonAdd_Click(object sender, EventArgs e)
         {
-            if (_task.Status > 0)
+            if (_task.Status > 1)
             {
                 MessageBox.Show(@"Can't add task", @"OK", MessageBoxButtons.OK);
                 buttonCancel_Click(sender, e);

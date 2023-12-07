@@ -50,6 +50,10 @@ namespace RPCC.Tasks
         {
             ThinkingTimer.Stop();
             _currentTask?.Update();
+            // if (_currentTask != null)
+            // {
+            //     Tasker.UpdateTaskInTable(_currentTask);
+            // }
             
             if (!CameraControl.isConnected)
             {
@@ -71,19 +75,21 @@ namespace RPCC.Tasks
             if (!string.IsNullOrEmpty(_firstFrame))
             {
                 //Если матрицы еще нет, ориентируемся на первый кадр, если есть, ловим решенный кадр по свежее
-                var fits = new Fits(CD1_1 > 99 | CD1_2 > 99 ? _firstFrame : CameraControl.cams.Last().latestImageFilename);
-                var hdu = (ImageHDU) fits.GetHDU(0);
-                try
+                try 
                 {
+                    var fits = new Fits(CD1_1 > 99 | CD1_2 > 99 ? _firstFrame : CameraControl.cams.Last().latestImageFilename);
+                    var hdu = (ImageHDU) fits.GetHDU(0);
+                
                     CD1_1 = hdu.Header.GetDoubleValue("CD1_1");
                     CD1_2 = hdu.Header.GetDoubleValue("CD1_2");
                     _isLookingEastLastCd = MountDataCollector.IsLookingEast;
+                    fits.Close();
                 }
                 catch
                 {
                     
                 }
-                fits.Close();
+
             }
 
             if (CameraControl.isConnected & !_isObserve & !_isDoDarks & !_isDoFlats)
