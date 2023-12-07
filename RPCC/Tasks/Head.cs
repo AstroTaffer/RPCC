@@ -407,7 +407,7 @@ namespace RPCC.Tasks
                     }
                     else
                     {
-                        DbCommunicate.AddMDarkToBd(_currentTask);
+                        DbCommunicate.AddMFrameToBd(_currentTask);
                         EndTask(2);
                         if (Darks.Count > 0)
                         {
@@ -438,7 +438,7 @@ namespace RPCC.Tasks
                     }
                     else
                     {
-                        DbCommunicate.AddMDarkToBd(_currentTask);
+                        DbCommunicate.AddMFrameToBd(_currentTask);
                         EndTask(2);
                         Settings.LastFlatsTime = DateTime.UtcNow;
                         Settings.SaveXmlConfig("SettingsDefault.xml");

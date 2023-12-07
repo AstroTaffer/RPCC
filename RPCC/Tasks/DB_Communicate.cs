@@ -248,7 +248,7 @@ namespace RPCC.Tasks
             return true;
         }
 
-        public static bool AddMDarkToBd(ObservationTask observationTask)
+        public static bool AddMFrameToBd(ObservationTask observationTask)
         {
             lock (Loc)
             {
@@ -260,7 +260,7 @@ namespace RPCC.Tasks
                         var cam = CameraControl.cams.Last(c => c.filter == fil);
                         var query = "INSERT INTO robophot_master_frames (m_frame_type, m_frame_filter, fk_task_id, " +
                                     $"m_camera_sn, m_x_bin, m_y_bin, m_exp_time) VALUES " +
-                                    $"('{observationTask.FrameType}', '{fil}', {observationTask.TaskNumber}, '{cam.serialNumber}'," +
+                                    $"('m_{observationTask.FrameType}', '{fil}', {observationTask.TaskNumber}, '{cam.serialNumber}'," +
                                     $"{observationTask.Xbin}, {observationTask.Ybin}, {observationTask.Exp})";
                         using (var con = ConnectToDb())
                         {
