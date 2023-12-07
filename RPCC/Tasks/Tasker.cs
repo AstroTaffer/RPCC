@@ -40,7 +40,7 @@ namespace RPCC.Tasks
             dataGridViewTasker.AllowUserToDeleteRows = false;
 
             dataGridViewTasker.Columns[0].Width = 60;
-            dataGridViewTasker.Columns[1].Width = 150;
+            dataGridViewTasker.Columns[1].Width = 180;
             dataGridViewTasker.Columns[2].Width = 120;
             dataGridViewTasker.Columns[3].Width = 120;
             dataGridViewTasker.Columns[4].Width = 120;

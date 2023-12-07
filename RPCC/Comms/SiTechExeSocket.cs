@@ -296,12 +296,17 @@ namespace RPCC.Comms
         internal static void Unpark()
         {
             var response = ExchangeMessages("UnPark");
+            System.Threading.Thread.Sleep(1000);
             //var response = await ExchangeMessagesAsync("UnPark");
             if (CheckResponse(response, "UnPark"))
             {
                 var message = response[response.Length - 1];
                 if (message == "_UnPark Command Successful")
                 {
+                    while (MountDataCollector.IsParking)
+                    {
+                        System.Threading.Thread.Sleep(1000);
+                    }
                     // TODO: Do stuff if good
                 }
                 else

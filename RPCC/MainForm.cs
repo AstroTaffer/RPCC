@@ -95,7 +95,7 @@ namespace RPCC
             timerUi.Stop();
             
             // Tasker.SaveTasksToXml();
-            DbCommunicate.DisconnectFromDb();
+            // DbCommunicate.DisconnectFromDb();
             
             _domeSocket.Disconnect();
             DonutsSocket.Disconnect();

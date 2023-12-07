@@ -28,7 +28,7 @@ def pars_req(req: str) -> str:
 
     try:
         donuts = Donuts(refimage=data[0], image_ext=0, overscan_width=24, prescan_width=24,
-                        border=64, normalise=True, exposure='EXPTIME', subtract_bkg=True, ntiles=32)
+                        border=512, normalise=True, exposure='EXPTIME', subtract_bkg=True, ntiles=32)
         shift_result = donuts.measure_shift(data[1])
         return f'{np.round(shift_result.x.value, 2)}_{np.round(shift_result.y.value, 2)}'
     except:

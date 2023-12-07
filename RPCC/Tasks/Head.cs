@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Threading;
 using System.Timers;
-using System.Windows.Forms;
 using ASCOM.Tools;
 using nom.tam.fits;
 using RPCC.Cams;
@@ -80,29 +78,35 @@ namespace RPCC.Tasks
 
             if (!string.IsNullOrEmpty(_firstFrame))
             {
-                //Если матрицы еще нет, ориентируемся на первый кадр, если есть, ловим решенный кадр по свежее
-                var fits = new Fits(CD1_1 > 99 | CD1_2 > 99 ? _firstFrame : CameraControl.cams.Last().latestImageFilename);
-                var hdu = (ImageHDU) fits.GetHDU(0);
                 try
                 {
+                    //Если матрицы еще нет, ориентируемся на первый кадр, если есть, ловим решенный кадр по свежее
+                    var fits = new Fits(CD1_1 > 99 | CD1_2 > 99
+                        ? _firstFrame
+                        : CameraControl.cams.Last().latestImageFilename);
+                    var hdu = (ImageHDU)fits.GetHDU(0);
+
                     CD1_1 = hdu.Header.GetDoubleValue("CD1_1");
                     CD1_2 = hdu.Header.GetDoubleValue("CD1_2");
                     _isLookingEastLastCd = MountDataCollector.IsLookingEast;
+                    fits.Close();
                 }
                 catch
                 {
-                    
+
                 }
-                fits.Close();
+
             }
 
             if (CameraControl.isConnected & !_isObserve & !_isDoDarks & !_isDoFlats)
             {
                 if (WeatherDataCollector.Flat &
-                                ((DateTime.UtcNow - Settings.LastFlatsTime).TotalDays > TotalDays2ReMakeCalibrationFrames)) PrepareAndStartDoFlats();
-                
+                    ((DateTime.UtcNow - Settings.LastFlatsTime).TotalDays > TotalDays2ReMakeCalibrationFrames))
+                    PrepareAndStartDoFlats();
+
                 if (!WeatherDataCollector.Obs &
-                                ((DateTime.UtcNow - Settings.LastDarksTime).TotalDays > TotalDays2ReMakeCalibrationFrames)) PrepareAndStartDoDarks();
+                    ((DateTime.UtcNow - Settings.LastDarksTime).TotalDays > TotalDays2ReMakeCalibrationFrames))
+                    PrepareAndStartDoDarks();
             }
 
             foreach (DataRow row in DbCommunicate.GetTableForThinking().Rows)
@@ -113,7 +117,7 @@ namespace RPCC.Tasks
                 // то ставим статус пролюблена
                 if (bufTask.TimeEnd < DateTime.UtcNow || string.IsNullOrEmpty(bufTask.FrameType))
                 {
-                    if ((bufTask.FrameType == Light) | ((bufTask.FrameType == Dark | bufTask.FrameType == Flat | 
+                    if ((bufTask.FrameType == Light) | ((bufTask.FrameType == Dark | bufTask.FrameType == Flat |
                                                          bufTask.FrameType == Test) &
                                                         (DateTime.UtcNow - bufTask.TimeEnd).TotalMinutes > 10))
                     {
@@ -121,7 +125,7 @@ namespace RPCC.Tasks
                         {
                             case 1:
                             {
-                                bufTask.Status = bufTask.DoneFrames < bufTask.AllFrames ? (short) 5 : (short) 2;
+                                bufTask.Status = bufTask.DoneFrames < bufTask.AllFrames ? (short)5 : (short)2;
                                 DbCommunicate.UpdateTaskInDb(bufTask);
                                 break;
                             }
@@ -146,67 +150,73 @@ namespace RPCC.Tasks
                                 bufTask.Status = 0;
                                 DbCommunicate.UpdateTaskInDb(bufTask);
                             }
+
                             break;
                         }
                     }
                 }
-                
+
                 if (bufTask.Status > 0) continue; // если не ждет наблюдения, то идем дальше
                 if (_isObserve || _isDoDarks || _isDoFlats) continue; // если уже идет задание, то ждем минуту
                 if (_currentTask is null)
                 {
                     _currentTask = bufTask;
                 }
-            }   
-            
-            ThinkingTimer.Start();
-            //а если нашлась и время до начала менее 5 минут, то стартуем 
-            if (_currentTask is null) return;
-            if (!(!_isObserve & !_isDoDarks & !_isDoFlats & (IsThinking | _currentTask.FrameType == Test) &
-                  (_currentTask.TimeStart - DateTime.UtcNow).TotalMinutes < TotalMinutes2StartTask &
-                  CameraControl.isConnected)) return;
-            if (MountDataCollector.IsParked)
-            {
-                SiTechExeSocket.Unpark();
-                //Thread.Sleep(5000);
             }
 
-            switch (_currentTask.FrameType)
+        
+            //а если нашлась и время до начала менее 5 минут, то стартуем 
+        if (!(_currentTask is null))
+        {
+            if (!_isObserve & !_isDoDarks & !_isDoFlats & (IsThinking | _currentTask.FrameType == Test) &
+                  (_currentTask.TimeStart - DateTime.UtcNow).TotalMinutes < TotalMinutes2StartTask &
+                  CameraControl.isConnected)
             {
-                case Light:
+                if (MountDataCollector.IsParked)
                 {
-                    if (WeatherDataCollector.Obs)
-                    {
-                        StartDoLight();
-                    }
-
-                    break;
+                    SiTechExeSocket.Unpark();
+                    //Thread.Sleep(5000);
                 }
-                case Test:
-                {
-                    StartDoTest();
-                    break;
-                }
-                case Dark:
-                {
-                    if (!WeatherDataCollector.Obs)
-                    {
-                        StartDoDark();
-                    }
 
-                    break;
-                }
-                case Flat:
+                switch (_currentTask.FrameType)
                 {
-                    if (WeatherDataCollector.Flat)
+                    case Light:
                     {
-                        StartDoFlats();
-                    }
+                        if (WeatherDataCollector.Obs)
+                        {
+                            StartDoLight();
+                        }
 
-                    break;
+                        break;
+                    }
+                    case Test:
+                    {
+                        StartDoTest();
+                        break;
+                    }
+                    case Dark:
+                    {
+                        if (!WeatherDataCollector.Obs)
+                        {
+                            StartDoDark();
+                        }
+
+                        break;
+                    }
+                    case Flat:
+                    {
+                        if (WeatherDataCollector.Flat)
+                        {
+                            StartDoFlats();
+                        }
+
+                        break;
+                    }
                 }
             }
         }
+        ThinkingTimer.Start();
+    }
 
         private static void StartDoTest()
         {
@@ -216,6 +226,10 @@ namespace RPCC.Tasks
             if (!(Math.Abs(_currentTask.Ra - MountDataCollector.RightAsc) < 1e-3 &
                   Math.Abs(_currentTask.Dec - MountDataCollector.Declination) < 1e-3))
             {
+                if (MountDataCollector.IsParked)
+                {
+                    SiTechExeSocket.Unpark();
+                }
                 if (!SiTechExeSocket.GoTo(_currentTask.Ra, _currentTask.Dec, true))
                 {
                     Logger.AddLogEntry($"WARNING: can't start task #{_currentTask.TaskNumber}, error while GOTO");
@@ -301,6 +315,10 @@ namespace RPCC.Tasks
                 _isDoFlats = false;
                 _isOnPause = false;
                 _currentTask = null;
+                if (!MountDataCollector.IsParked)
+                {
+                    SiTechExeSocket.Park();
+                }
                 return;
             }
 
