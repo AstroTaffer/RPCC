@@ -205,31 +205,31 @@ namespace RPCC
                     groupBoxCam3.Invoke((MethodInvoker) delegate
                     {
                         groupBoxCam3.Enabled = true;
-                       labelCam3Model.Text = $"Model: {CameraControl.cams[2].modelName}";
+                        groupBoxImage3.Enabled = true;
+                        labelCam3Model.Text = $"Model: {CameraControl.cams[2].modelName}";
                        labelCam3Sn.Text = $"Serial Num: {CameraControl.cams[2].serialNumber}";
                        labelCam3Filter.Text = $"Filter: {CameraControl.cams[2].filter}"; 
                     });
-                    groupBoxImage3.Enabled = false;
                     goto case 2;
                 case 2:
                     groupBoxCam2.Invoke((MethodInvoker) delegate
                     {
                         groupBoxCam2.Enabled = true;
+                        groupBoxImage2.Enabled = true;
                         labelCam2Model.Text = $"Model: {CameraControl.cams[1].modelName}";
                         labelCam2Sn.Text = $"Serial Num: {CameraControl.cams[1].serialNumber}";
                         labelCam2Filter.Text = $"Filter: {CameraControl.cams[1].filter}";
                     });
-                    groupBoxImage2.Enabled = false;
                     goto case 1;
                 case 1:
                     groupBoxCam1.Invoke((MethodInvoker) delegate
                     {
                         groupBoxCam1.Enabled = true;
+                        groupBoxImage1.Enabled = true;
                         labelCam1Model.Text = $"Model: {CameraControl.cams[0].modelName}";
                         labelCam1Sn.Text = $"Serial Num: {CameraControl.cams[0].serialNumber}";
                         labelCam1Filter.Text = $"Filter: {CameraControl.cams[0].filter}";
                     });
-                    groupBoxImage1.Enabled = false;
                     break;
             }
         }

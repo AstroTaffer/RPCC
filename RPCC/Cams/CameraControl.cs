@@ -507,7 +507,7 @@ namespace RPCC.Cams
                     errorLastFliCmd = NativeMethods.FLIExposeFrame(cams[i].handle);
                     // Logger.AddLogEntry("Exposing");
                     cams[i].expStartDt = dt;
-                    cams[i].expStartJd = Utilities.JulianDateFromDateTime(cams[i].expStartDt);
+                    cams[i].expStartJd = jd;
                     if (errorLastFliCmd != 0)
                     {
                         Logger.AddLogEntry($"WARNING Unable to start camera {i + 1} exposure");
