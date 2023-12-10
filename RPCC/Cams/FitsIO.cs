@@ -172,8 +172,8 @@ namespace RPCC.Cams
                         : new HeaderCard("OBJNAME", CameraControl.loadedTask.Object, "object name"));
                     goto case "Flat";
                 case "Flat":
-                    cursor.Add(new HeaderCard("ALPHA", CameraControl.loadedTask.Ra, "target RA [h]"));
-                    cursor.Add(new HeaderCard("DELTA", CameraControl.loadedTask.Dec, "target DEC [deg]"));
+                    cursor.Add(new HeaderCard("ALPHA", MountDataCollector.RightAsc, "scope RA [h]"));
+                    cursor.Add(new HeaderCard("DELTA", MountDataCollector.Declination, "scope DEC [deg]"));
                     cursor.Add(new HeaderCard("EQUINOX", 2000.0, "equinox of ALPHA and DELTA [yr]"));
                     break;
             }
