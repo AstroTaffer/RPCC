@@ -147,10 +147,11 @@ namespace RPCC.Tasks
                         {
                             if (_currentTask is null)
                             {
-                                bufTask.Status = 0;
-                                DbCommunicate.UpdateTaskInDb(bufTask);
+                                // bufTask.Status = 0;
+                                _currentTask = bufTask;
+                                // DbCommunicate.UpdateTaskInDb(_currentTask);
+                                
                             }
-
                             break;
                         }
                     }
@@ -512,7 +513,7 @@ namespace RPCC.Tasks
                         _currentTask.Status = 1;
                         _currentTask.Filters = CheckFil();
                         _currentTask.TimeStart = DateTime.UtcNow;
-                        _currentTask.TimeEnd = DateTime.UtcNow.AddSeconds((short) (_currentTask.Exp + 50));
+                        _currentTask.TimeEnd = DateTime.UtcNow.AddSeconds((short) (FlatDarkQuantity*_currentTask.Exp + 180));
                         _currentTask.Duration = (float) Math.Round((_currentTask.TimeEnd - _currentTask.TimeStart).TotalHours, 2);
                         // Tasker.UpdateTaskInTable(_currentTask);
                         DbCommunicate.UpdateTaskInDb(_currentTask);
@@ -572,7 +573,7 @@ namespace RPCC.Tasks
                  _currentTask.Status = 1;
                  _currentTask.Filters = CheckFil();
                  _currentTask.TimeStart = DateTime.UtcNow;
-                 _currentTask.TimeEnd = DateTime.UtcNow.AddSeconds((short) (_currentTask.Exp + 50));
+                 _currentTask.TimeEnd = DateTime.UtcNow.AddSeconds((short) (FlatDarkQuantity*_currentTask.Exp + 180));
                  _currentTask.Duration = (float) Math.Round((_currentTask.TimeEnd - _currentTask.TimeStart).TotalHours, 2);
                  // Tasker.UpdateTaskInTable(_currentTask);
                  DbCommunicate.UpdateTaskInDb(_currentTask);
