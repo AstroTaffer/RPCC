@@ -329,13 +329,13 @@ namespace RPCC.Tasks
                 {
                     if (_currentTask.TimeEnd > DateTime.UtcNow)
                     {
-                        // Guiding();
+                        Guiding();
                         
                         foreach (var cam in CameraControl.cams)
                         {
                             if (!string.IsNullOrEmpty(cam.latestImageFilename))
                             {
-                                fitsAnalysis =  new GetDataFromFits(cam.latestImageFilename); //TODO распараллелить
+                                fitsAnalysis = new GetDataFromFits(cam.latestImageFilename); //TODO распараллелить
                             }
                         }
 

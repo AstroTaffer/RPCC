@@ -30,7 +30,7 @@ namespace RPCC.Focus
         private bool Quality { set; get; }
 
         public GetDataFromFits(string path2Fits, bool updateFits = true)
-        {   
+        {
             if (string.IsNullOrEmpty(path2Fits)) return;
 
             var outputFile = path2Fits.Replace("fits", "cat");
@@ -66,6 +66,7 @@ namespace RPCC.Focus
                 }
 
                 Status = true;
+                DelOutputs();
             }
             catch (Exception e)
             {
