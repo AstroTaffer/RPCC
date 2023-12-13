@@ -329,7 +329,7 @@ namespace RPCC.Tasks
                 {
                     if (_currentTask.TimeEnd > DateTime.UtcNow)
                     {
-                        Guiding();
+                        // Guiding();
                         
                         foreach (var cam in CameraControl.cams)
                         {

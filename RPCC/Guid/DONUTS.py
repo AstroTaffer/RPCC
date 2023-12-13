@@ -13,8 +13,8 @@ def timer_loop():
     now = datetime.datetime.utcnow()
     if time_last_message != 0:
         if (now - time_last_message).total_seconds() > time_wait_sec:
-            server.close()
             print('Donuts timeout, closing server')
+            server.close()
 
 
 def pars_req(req: str) -> str:
