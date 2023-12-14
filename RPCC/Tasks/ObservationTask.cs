@@ -79,9 +79,31 @@ namespace RPCC.Tasks
             Dec = Utilities.DMSToDegrees(radec[1]);
         }
 
-        // public void Update()
-        // {
-        //     DbCommunicate.UpdateTaskFromDb(this);
-        // }
+        public ObservationTask Copy()
+        {
+            var t = new ObservationTask
+            {
+                Ra = Ra,
+                Dec = Dec,
+                RaDec = RaDec,
+                TimeAdd = TimeAdd,
+                TimeStart = TimeStart,
+                TimeEnd = TimeEnd,
+                TimeLastExp = TimeLastExp,
+                Duration = Duration,
+                Filters = Filters,
+                Exp = Exp,
+                Object = Object,
+                Observer = Observer,
+                Status = Status,
+                Xbin = Xbin,
+                Ybin = Ybin,
+                AllFrames = AllFrames,
+                FrameType = FrameType,
+                DoneFrames = DoneFrames,
+                ObjectType = ObjectType
+            };
+            return t;
+        }
     }
 }

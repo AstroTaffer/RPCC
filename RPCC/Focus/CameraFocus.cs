@@ -27,7 +27,7 @@ namespace RPCC.Focus
         private const int N = 10; //количество точек для построения кривой фокусировки
         private static short _shift = -300; //шаг по фокусу
         private static short _sumShift;
-        private static ObservationTask _task;
+        private static ObservationTask _taskForFocus;
         private static short _phase;
         private static double _oldFwhm;
         private static List<double> _fwhms;
@@ -35,11 +35,18 @@ namespace RPCC.Focus
         private const int CriticalShift = 2000 / N;
         private static short _frameCounter;
         private const string Focus = "Focus";
+        private const short FocusExp = 30;
 
         public static void StartAutoFocus(ObservationTask observationTask)
         {
-            _task = observationTask;
-            _task.FrameType = Focus;
+            Head.isFocusing = true;
+            _taskForFocus = observationTask.Copy();
+            _taskForFocus.FrameType = Focus;
+            if (Head.currentTask.Exp > FocusExp)
+            {
+                _taskForFocus.Exp = FocusExp;
+            }
+            
             _focCycles = 0; //
             _focBadFrames = 0; //
             Frames.Clear();
@@ -53,22 +60,32 @@ namespace RPCC.Focus
             _sumShift += _shift;
             Logger.AddLogEntry("FOCUS: SumShift=" + _sumShift);
             _focCycles++;
-            CameraControl.PrepareToObs(_task);
+            CameraControl.PrepareToObs(_taskForFocus);
             GetImForFocus(_shift);
         }
         
         public static void CamFocusCallback()
         {
-            Head.Guiding();
+            if (Head.isGuid)
+            {
+                Head.Guiding(); 
+            }
+            if (!WeatherDataCollector.Obs)
+            {
+                Logger.AddLogEntry($"Weather is bad, pause task #{_taskForFocus.TaskNumber}");
+                Head.isOnPause = true;
+            }
+            
             var focusImPath = CameraControl.cams.Last().latestImageFilename;
             if (string.IsNullOrEmpty(focusImPath))
             {
                 Logger.AddLogEntry("CamFocusCallback: no data available, stop obs");
-                _task.FrameType = "light";
-                Head.EndTask(5);
+                // _taskForFocus.FrameType = "light";
+                // Head.EndTask(5);
+                ReturnFocusAndExit();
                 return;
             }
-            if (_task.Status != 1) 
+            if (_taskForFocus.Status != 1) 
             {
                 Logger.AddLogEntry("FOCUS: task ended, return focus and exit");
                 SerialFocus.FRun_To(-1 * _sumShift);
@@ -273,7 +290,7 @@ namespace RPCC.Focus
             if (_focBadFrames < MaxFocBadFrames) Logger.AddLogEntry("FOCUS: Foc_Bad_Frames<Max_Foc_Bad_Frames");
 
             //вышли из цикла
-            if (_task.Status != 1 || !IsAutoFocus)
+            if (_taskForFocus.Status != 1 || !IsAutoFocus)
             {
                 Logger.AddLogEntry("FOCUS: aborted, return focus and exit");
                 FwhmBest = 0;
@@ -395,7 +412,10 @@ namespace RPCC.Focus
         private static void GetImForFocus(int z)
         {
             SerialFocus.FRun_To(z);
-            CameraControl.StartExposure();
+            if (!Head.isOnPause)
+            {
+                CameraControl.StartExposure();
+            }
         }
 
         private static void ReturnFocusAndExit()
@@ -411,9 +431,13 @@ namespace RPCC.Focus
                 Logger.AddLogEntry("FOCUS: defocus to " + DeFocus);
                 SerialFocus.FRun_To(DeFocus);
             }
-            _task.FrameType = Head.Light;
-            CameraControl.PrepareToObs(_task);
-            CameraControl.StartExposure();
+            // _taskForFocus.FrameType = Head.Light;
+            Head.isFocusing = false;
+            CameraControl.PrepareToObs(Head.currentTask);
+            if (!Head.isOnPause)
+            {
+                CameraControl.StartExposure();
+            }
         }
         
         #endregion

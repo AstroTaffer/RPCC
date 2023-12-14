@@ -206,6 +206,10 @@ namespace RPCC.Focus
         
         public bool CheckFocused()
         {
+            if (CameraFocus.DeFocus != 0)
+            {
+                return Fwhm < FwhmFocused + 1;
+            }
             return Fwhm < FwhmFocused;
         }
 

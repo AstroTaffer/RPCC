@@ -20,11 +20,12 @@ namespace RPCC.Tasks
         private const short FlatExp = 2; // in s 
         private const short FlatDarkQuantity = 10; //TODO add in .cfg
         public static readonly Timer ThinkingTimer = new Timer();
-        private static ObservationTask _currentTask;
+        public static ObservationTask currentTask;
         private static bool _isObserve;
+        public static bool isFocusing;
         private static bool _isDoFlats;
         private static bool _isDoDarks;
-        private static bool _isOnPause;
+        public static bool isOnPause;
         private static string _firstFrame;
         private static double CD1_1 = 100;
         private static double CD1_2 = 100;
@@ -38,6 +39,7 @@ namespace RPCC.Tasks
         public const string Flat = "Flat";
         public const string Light = "Object";
         public const string Test = "Test";
+        public static bool isGuid = true;
 
         public static void StartThinking()
         {
@@ -48,9 +50,9 @@ namespace RPCC.Tasks
         private static void Thinking(object sender, ElapsedEventArgs e)
         {
             ThinkingTimer.Stop();
-            if (_currentTask != null)
+            if (currentTask != null)
             {
-                DbCommunicate.UpdateTaskFromDb(ref _currentTask);
+                DbCommunicate.UpdateTaskFromDb(ref currentTask);
             }
 
             // if (_currentTask != null & !_isObserve)
@@ -64,14 +66,14 @@ namespace RPCC.Tasks
                 CameraControl.ReconnectCameras();
             }
 
-            if (_isOnPause & !(_currentTask is null))
+            if (isOnPause & !(currentTask is null))
             {
                 if (_isObserve & WeatherDataCollector.Obs |
                     _isDoDarks & !WeatherDataCollector.Obs |
                     _isDoFlats & WeatherDataCollector.Flat)
                 {
-                    _isOnPause = false;
-                    Logger.AddLogEntry($"Unpause task #{_currentTask.TaskNumber}");
+                    isOnPause = false;
+                    Logger.AddLogEntry($"Unpause task #{currentTask.TaskNumber}");
                     CameraControl.StartExposure();
                 }
             }
@@ -145,10 +147,10 @@ namespace RPCC.Tasks
                     {
                         case 1:
                         {
-                            if (_currentTask is null)
+                            if (currentTask is null)
                             {
                                 // bufTask.Status = 0;
-                                _currentTask = bufTask;
+                                currentTask = bufTask;
                                 // DbCommunicate.UpdateTaskInDb(_currentTask);
                                 
                             }
@@ -159,18 +161,18 @@ namespace RPCC.Tasks
 
                 if (bufTask.Status > 0) continue; // если не ждет наблюдения, то идем дальше
                 if (_isObserve || _isDoDarks || _isDoFlats) continue; // если уже идет задание, то ждем минуту
-                if (_currentTask is null)
+                if (currentTask is null)
                 {
-                    _currentTask = bufTask;
+                    currentTask = bufTask;
                 }
             }
 
         
             //а если нашлась и время до начала менее 5 минут, то стартуем 
-        if (!(_currentTask is null))
+        if (!(currentTask is null))
         {
-            if (!_isObserve & !_isDoDarks & !_isDoFlats & (IsThinking | _currentTask.FrameType == Test) &
-                  (_currentTask.TimeStart - DateTime.UtcNow).TotalMinutes < TotalMinutes2StartTask &
+            if (!_isObserve & !_isDoDarks & !_isDoFlats & (IsThinking | currentTask.FrameType == Test) &
+                  (currentTask.TimeStart - DateTime.UtcNow).TotalMinutes < TotalMinutes2StartTask &
                   CameraControl.isConnected)
             {
                 if (MountDataCollector.IsParked)
@@ -179,7 +181,7 @@ namespace RPCC.Tasks
                     //Thread.Sleep(5000);
                 }
 
-                switch (_currentTask.FrameType)
+                switch (currentTask.FrameType)
                 {
                     case Light:
                     {
@@ -222,47 +224,47 @@ namespace RPCC.Tasks
         private static void StartDoTest()
         {
             _isObserve = true;
-            _currentTask.Status = 1;
+            currentTask.Status = 1;
             // DbCommunicate.UpdateTaskInDb(_currentTask);
-            if (!(Math.Abs(_currentTask.Ra - MountDataCollector.RightAsc) < 1e-3 &
-                  Math.Abs(_currentTask.Dec - MountDataCollector.Declination) < 1e-3))
+            if (!(Math.Abs(currentTask.Ra - MountDataCollector.RightAsc) < 1e-3 &
+                  Math.Abs(currentTask.Dec - MountDataCollector.Declination) < 1e-3))
             {
                 if (MountDataCollector.IsParked)
                 {
                     SiTechExeSocket.Unpark();
                 }
-                if (!SiTechExeSocket.GoTo(_currentTask.Ra, _currentTask.Dec, true))
+                if (!SiTechExeSocket.GoTo(currentTask.Ra, currentTask.Dec, true))
                 {
-                    Logger.AddLogEntry($"WARNING: can't start task #{_currentTask.TaskNumber}, error while GOTO");
+                    Logger.AddLogEntry($"WARNING: can't start task #{currentTask.TaskNumber}, error while GOTO");
                     EndTask(4);
                     return;
                 }
             }
             
-            if (CameraControl.PrepareToObs(_currentTask))
+            if (CameraControl.PrepareToObs(currentTask))
             {
-                Logger.AddLogEntry($"Start task# {_currentTask.TaskNumber}, type: {_currentTask.FrameType}");
-                _currentTask.Filters = CheckFil();
-                DbCommunicate.UpdateTaskInDb(_currentTask);
+                Logger.AddLogEntry($"Start task# {currentTask.TaskNumber}, type: {currentTask.FrameType}");
+                currentTask.Filters = CheckFil();
+                DbCommunicate.UpdateTaskInDb(currentTask);
                 CameraControl.StartExposure();
                 return;
             }
             else
             {
-                Logger.AddLogEntry($"WARNING: can't start task #{_currentTask.TaskNumber}, error while prepare to observe");
+                Logger.AddLogEntry($"WARNING: can't start task #{currentTask.TaskNumber}, error while prepare to observe");
             }
             EndTask(4);
         }
 
         public static void EndTask(short endStatus)
         {
-            _currentTask.Status = endStatus;
-            DbCommunicate.UpdateTaskInDb(_currentTask);
+            currentTask.Status = endStatus;
+            DbCommunicate.UpdateTaskInDb(currentTask);
             _isObserve = false;
             _isDoDarks = false;
             _isDoFlats = false;
-            _isOnPause = false;
-            _currentTask = null;
+            isOnPause = false;
+            currentTask = null;
             _firstFrame = null;
             if (!MountDataCollector.IsParked)
             {
@@ -273,49 +275,49 @@ namespace RPCC.Tasks
         private static void StartDoLight()
         {   
             _isObserve = true;
-            if (SiTechExeSocket.GoTo(_currentTask.Ra, _currentTask.Dec, true)) //проверять доехал ли
+            if (SiTechExeSocket.GoTo(currentTask.Ra, currentTask.Dec, true)) //проверять доехал ли
             {
-                _currentTask.Status = 1;
-                Logger.AddLogEntry($"Start task# {_currentTask.TaskNumber}, type: {_currentTask.FrameType}");
-                if (CameraControl.PrepareToObs(_currentTask))
+                currentTask.Status = 1;
+                Logger.AddLogEntry($"Start task# {currentTask.TaskNumber}, type: {currentTask.FrameType}");
+                if (CameraControl.PrepareToObs(currentTask))
                 {
-                    _currentTask.Filters = CheckFil();
+                    currentTask.Filters = CheckFil();
                     // Tasker.UpdateTaskInTable(_currentTask);
-                    DbCommunicate.UpdateTaskInDb(_currentTask);
+                    DbCommunicate.UpdateTaskInDb(currentTask);
                     CameraControl.StartExposure();
                     //если доехал, то начинаем снимать 
                     return;
                 }
                 else
                 {
-                    Logger.AddLogEntry($"WARNING: can't start task #{_currentTask.TaskNumber}, error while prepare to observe");
+                    Logger.AddLogEntry($"WARNING: can't start task #{currentTask.TaskNumber}, error while prepare to observe");
                 }
                 //не удалось подготовиться к наблюдению  
                 
             }
             else
             {
-                Logger.AddLogEntry($"WARNING: can't start task #{_currentTask.TaskNumber}, error while GOTO");
+                Logger.AddLogEntry($"WARNING: can't start task #{currentTask.TaskNumber}, error while GOTO");
             }
             EndTask(4);
         }
 
         public static void CamCallback()
         {
-            DbCommunicate.UpdateTaskFromDb(ref _currentTask);
+            DbCommunicate.UpdateTaskFromDb(ref currentTask);
             GetDataFromFits fitsAnalysis = null;
-            _currentTask.DoneFrames++;
-            _currentTask.TimeLastExp = DateTime.UtcNow;
+            currentTask.DoneFrames++;
+            currentTask.TimeLastExp = DateTime.UtcNow;
             // Tasker.UpdateTaskInTable(_currentTask);
-            DbCommunicate.UpdateTaskInDb(_currentTask);
+            DbCommunicate.UpdateTaskInDb(currentTask);
             
-            if (_currentTask.Status > 1)
+            if (currentTask.Status > 1)
             {
                 _isObserve = false;
                 _isDoDarks = false;
                 _isDoFlats = false;
-                _isOnPause = false;
-                _currentTask = null;
+                isOnPause = false;
+                currentTask = null;
                 if (!MountDataCollector.IsParked)
                 {
                     SiTechExeSocket.Park();
@@ -323,14 +325,18 @@ namespace RPCC.Tasks
                 return;
             }
 
-            switch (_currentTask.FrameType)
+            switch (currentTask.FrameType)
             {
                 case Light:
                 {
-                    if (_currentTask.TimeEnd > DateTime.UtcNow)
+                    if (currentTask.TimeEnd > DateTime.UtcNow)
                     {
-                        // Guiding();
-                        
+                        // 
+                        if (isGuid)
+                        {
+                            Guiding(); 
+                        }
+
                         foreach (var cam in CameraControl.cams)
                         {
                             if (!string.IsNullOrEmpty(cam.latestImageFilename))
@@ -349,8 +355,8 @@ namespace RPCC.Tasks
                         if (!WeatherDataCollector.Obs)
                         // if (false)
                         {
-                            Logger.AddLogEntry($"Weather is bad, pause task #{_currentTask.TaskNumber}");
-                            _isOnPause = true;
+                            Logger.AddLogEntry($"Weather is bad, pause task #{currentTask.TaskNumber}");
+                            isOnPause = true;
                             // return;
                         }
                         else
@@ -359,7 +365,7 @@ namespace RPCC.Tasks
                             {
                                 if (!fitsAnalysis.CheckFocused())
                                 {
-                                    CameraFocus.StartAutoFocus(_currentTask);
+                                    CameraFocus.StartAutoFocus(currentTask);
                                 }
                                 else
                                 {
@@ -375,13 +381,13 @@ namespace RPCC.Tasks
                     }
                     else
                     {
-                        EndTask(_currentTask.DoneFrames < _currentTask.AllFrames ? (short) 5 : (short) 2);
+                        EndTask(currentTask.DoneFrames < currentTask.AllFrames ? (short) 5 : (short) 2);
                     }
                     break;
                 }
                 case Test:
                 {
-                    if (_currentTask.DoneFrames < _currentTask.AllFrames)
+                    if (currentTask.DoneFrames < currentTask.AllFrames)
                     {
                         CameraControl.StartExposure();
                     }
@@ -394,7 +400,7 @@ namespace RPCC.Tasks
                 }
                 case Dark:
                 {
-                    if (_currentTask.DoneFrames < _currentTask.AllFrames)
+                    if (currentTask.DoneFrames < currentTask.AllFrames)
                     {
                         
                         if (!(WeatherDataCollector.Obs & WeatherDataCollector.Flat))
@@ -403,16 +409,16 @@ namespace RPCC.Tasks
                         }
                         else
                         {
-                            _isOnPause = true;
+                            isOnPause = true;
                         }
                     }
                     else
                     {
-                        DbCommunicate.AddMFrameToBd(_currentTask);
+                        DbCommunicate.AddMFrameToBd(currentTask);
                         EndTask(2);
                         if (Darks.Count > 0)
                         {
-                            _currentTask = Darks[0];
+                            currentTask = Darks[0];
                             Darks.RemoveAt(0);
                             StartDoDark();
                         }
@@ -426,7 +432,7 @@ namespace RPCC.Tasks
                 }
                 case Flat:
                 {
-                    if (_currentTask.DoneFrames < _currentTask.AllFrames)
+                    if (currentTask.DoneFrames < currentTask.AllFrames)
                     {
                         if (WeatherDataCollector.Obs)
                         {
@@ -434,12 +440,12 @@ namespace RPCC.Tasks
                         }
                         else
                         {
-                            _isOnPause = true;
+                            isOnPause = true;
                         }
                     }
                     else
                     {
-                        DbCommunicate.AddMFrameToBd(_currentTask);
+                        DbCommunicate.AddMFrameToBd(currentTask);
                         EndTask(2);
                         Settings.LastFlatsTime = DateTime.UtcNow;
                         Settings.SaveXmlConfig("SettingsDefault.xml");
@@ -496,7 +502,7 @@ namespace RPCC.Tasks
                                   $"{Utilities.DegreesToDMS(zenRaDec[1])}");
             DbCommunicate.AddTaskToDb(flatTask);
             // Tasker.AddTask(flatTask);
-            _currentTask = flatTask;
+            currentTask = flatTask;
             StartDoFlats();
         }
 
@@ -505,34 +511,34 @@ namespace RPCC.Tasks
             if(WeatherDataCollector.Flat)
             {
                 _isDoFlats = true;
-                Logger.AddLogEntry($"Start task# {_currentTask.TaskNumber}, type: {_currentTask.FrameType}");
-                if (SiTechExeSocket.GoTo(_currentTask.Ra, _currentTask.Dec, true))
+                Logger.AddLogEntry($"Start task# {currentTask.TaskNumber}, type: {currentTask.FrameType}");
+                if (SiTechExeSocket.GoTo(currentTask.Ra, currentTask.Dec, true))
                 {
-                    if (CameraControl.PrepareToObs(_currentTask))
+                    if (CameraControl.PrepareToObs(currentTask))
                     {
-                        _currentTask.Status = 1;
-                        _currentTask.Filters = CheckFil();
-                        _currentTask.TimeStart = DateTime.UtcNow;
-                        _currentTask.TimeEnd = DateTime.UtcNow.AddSeconds((short) (FlatDarkQuantity*_currentTask.Exp + 180));
-                        _currentTask.Duration = (float) Math.Round((_currentTask.TimeEnd - _currentTask.TimeStart).TotalHours, 2);
+                        currentTask.Status = 1;
+                        currentTask.Filters = CheckFil();
+                        currentTask.TimeStart = DateTime.UtcNow;
+                        currentTask.TimeEnd = DateTime.UtcNow.AddSeconds((short) (FlatDarkQuantity*currentTask.Exp + 180));
+                        currentTask.Duration = (float) Math.Round((currentTask.TimeEnd - currentTask.TimeStart).TotalHours, 2);
                         // Tasker.UpdateTaskInTable(_currentTask);
-                        DbCommunicate.UpdateTaskInDb(_currentTask);
+                        DbCommunicate.UpdateTaskInDb(currentTask);
                         CameraControl.StartExposure();
                         return; //не удалось подготовиться к наблюдению
                     }
                     else
                     {
-                        Logger.AddLogEntry($"WARNING: can't start task #{_currentTask.TaskNumber}, error while prepare to observe");
+                        Logger.AddLogEntry($"WARNING: can't start task #{currentTask.TaskNumber}, error while prepare to observe");
                     }
                 }
                 else
                 {
-                    Logger.AddLogEntry($"WARNING: can't start task #{_currentTask.TaskNumber}, error while GOTO");
+                    Logger.AddLogEntry($"WARNING: can't start task #{currentTask.TaskNumber}, error while GOTO");
                 }
             }
             else
             {
-                Logger.AddLogEntry($"Can't start task# {_currentTask.TaskNumber}, type: {_currentTask.FrameType}, no dusk");
+                Logger.AddLogEntry($"Can't start task# {currentTask.TaskNumber}, type: {currentTask.FrameType}, no dusk");
             }
             EndTask(4);
         }
@@ -559,7 +565,7 @@ namespace RPCC.Tasks
                 DbCommunicate.AddTaskToDb(darkTask);
                 Darks.Add(darkTask);
             }
-            _currentTask = Darks[0];
+            currentTask = Darks[0];
             Darks.RemoveAt(0);
             StartDoDark();
         }
@@ -567,31 +573,31 @@ namespace RPCC.Tasks
         private static void StartDoDark()
         {
             _isDoDarks = true;
-            Logger.AddLogEntry($"Start task# {_currentTask.TaskNumber}, type: {_currentTask.FrameType}");
-            if (CameraControl.PrepareToObs(_currentTask))
+            Logger.AddLogEntry($"Start task# {currentTask.TaskNumber}, type: {currentTask.FrameType}");
+            if (CameraControl.PrepareToObs(currentTask))
             {
-                 _currentTask.Status = 1;
-                 _currentTask.Filters = CheckFil();
-                 _currentTask.TimeStart = DateTime.UtcNow;
-                 _currentTask.TimeEnd = DateTime.UtcNow.AddSeconds((short) (FlatDarkQuantity*_currentTask.Exp + 180));
-                 _currentTask.Duration = (float) Math.Round((_currentTask.TimeEnd - _currentTask.TimeStart).TotalHours, 2);
+                 currentTask.Status = 1;
+                 currentTask.Filters = CheckFil();
+                 currentTask.TimeStart = DateTime.UtcNow;
+                 currentTask.TimeEnd = DateTime.UtcNow.AddSeconds((short) (FlatDarkQuantity*currentTask.Exp + 180));
+                 currentTask.Duration = (float) Math.Round((currentTask.TimeEnd - currentTask.TimeStart).TotalHours, 2);
                  // Tasker.UpdateTaskInTable(_currentTask);
-                 DbCommunicate.UpdateTaskInDb(_currentTask);
+                 DbCommunicate.UpdateTaskInDb(currentTask);
                  CameraControl.StartExposure();
                  return;
             }
             else
             {
-                Logger.AddLogEntry($"WARNING: can't start task #{_currentTask.TaskNumber}, error while prepare to observe");
+                Logger.AddLogEntry($"WARNING: can't start task #{currentTask.TaskNumber}, error while prepare to observe");
             }
 
 
             if (Darks.Count>0)
             {
-                _currentTask.Status = 4;
+                currentTask.Status = 4;
                 // Tasker.UpdateTaskInTable(_currentTask);
-                DbCommunicate.UpdateTaskInDb(_currentTask);
-                _currentTask = Darks[0];
+                DbCommunicate.UpdateTaskInDb(currentTask);
+                currentTask = Darks[0];
                 Darks.RemoveAt(0);
                 StartDoDark();
             }

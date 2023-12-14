@@ -556,5 +556,10 @@ namespace RPCC
         //     Tasker.PaintTable();
         // }
         #endregion
+
+        private void checkBoxGuiding_CheckedChanged(object sender, EventArgs e)
+        {
+            Head.isGuid = checkBoxGuiding.Checked;
+        }
     }
 }
