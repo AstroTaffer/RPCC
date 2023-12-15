@@ -463,24 +463,30 @@ namespace RPCC.Tasks
             }
             else
             {
-                if (DonutsSocket.IsConnected & CD1_1 < 100 & CD1_2 < 100)
+                if (!(DonutsSocket.IsConnected & CD1_1 < 100 & CD1_2 < 100))
                 {
-                    var req = $"{_firstFrame}_{CameraControl.cams.Last().latestImageFilename}";
-                    var correction = DonutsSocket.GetGuideCorrection(req);
-
-                    correction[0] = (float) (correction[0] * CD1_1 * 60 * 60);
-                    correction[1] = (float) (correction[1] * CD1_2 * 60 * 60);
-                    //arcsec
-                    //x = north
-                    //y = east
-                    if (!(_isLookingEastLastCd & MountDataCollector.IsLookingEast))
-                    {
-                        correction[0] *= -1;
-                        correction[1] *= -1;
-                    }
-                    SiTechExeSocket.PulseGuide(correction[0] > 0 ? "N" : "S", (int) (correction[0]*1e3/PulseGuideVelocity));
-                    SiTechExeSocket.PulseGuide(correction[1] > 0 ? "E" : "W", (int) (correction[1]*1e3/PulseGuideVelocity));
-                }
+                    Logger.AddLogEntry($"WARNING: can't guide, no connection to donuts");
+                    return;
+                } //Если нет конекта или нет матрицы, то выходим
+                var req = $"{_firstFrame}_{CameraControl.cams.Last().latestImageFilename}"; //Формируем запрос для донатов
+                var correction = DonutsSocket.GetGuideCorrection(req); //Получаем коррекцию
+                if (correction[0] > 2 | correction[1] > 2)
+                {
+                    Logger.AddLogEntry($"WARNING: guiding correction: dx = {correction[0]} px, dy = {correction[1]} px");
+                    return;
+                } //Если коррекция больше 2 пикселей, выходим
+                var corDec = (correction[0] * CD1_1 + correction[1] * CD1_2) * 60.0 * 60.0;
+                var corRa = (correction[1] * CD1_2 + correction[0] * CD1_1) * 60.0 * 60.0;
+                //arcsec
+                //x = north
+                //y = east
+                // if (!(_isLookingEastLastCd & MountDataCollector.IsLookingEast))  // TODO неправильно
+                // {
+                //     correction[0] *= -1;
+                //     correction[1] *= -1;
+                // }
+                SiTechExeSocket.PulseGuide(corDec > 0 ? "N" : "S", (int) (Math.Abs(corDec)*1e3/PulseGuideVelocity));
+                SiTechExeSocket.PulseGuide(corRa > 0 ? "E" : "W", (int) (Math.Abs(corRa)*1e3/PulseGuideVelocity));
             }
         }
 
