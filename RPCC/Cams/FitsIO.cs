@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using ASCOM.Tools;
 using nom.tam.fits;
 using nom.tam.util;
 using RPCC.Comms;

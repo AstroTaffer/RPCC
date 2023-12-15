@@ -582,6 +582,57 @@ namespace RPCC.Cams
         }
         #endregion
 
+        #region Matrix rotate and flip
+
+        private static void Rotate(short[][] matrix)
+        {
+            // (I2, I1) = (I1, I2); 
+            for(var x = 0; x <= matrix.GetUpperBound(0);)
+            {
+                var yUp = matrix.GetUpperBound(1) / 2;
+                for (var y = 0; x <= yUp;)
+                {
+                    var newX = matrix.GetUpperBound(0) - x;
+                    var newY = matrix.GetUpperBound(1) - y;
+                    if(newX == x & newY == y) continue;
+                    (matrix[x][y], matrix[newX][newY]) = 
+                        (matrix[newX][newY], matrix[x][y]);
+                }
+            }
+        }
+
+        private static void FlipH(short[][] matrix)
+        {
+            for(var y = 0; y <= matrix.GetUpperBound(1);)
+            {
+                var xUp = matrix.GetUpperBound(0) / 2;
+                for (var x = 0; x <= xUp;)
+                {
+                    var newX = matrix.GetUpperBound(0) - x;
+                    if(newX == x) continue;
+                    (matrix[x][y], matrix[newX][y]) =
+                        (matrix[newX][y], matrix[x][y]);
+                }
+            }
+        }
+
+        private static void FlipV(short[][] matrix)
+        {
+            for(var x = 0; x <= matrix.GetUpperBound(0);)
+            {
+                var yUp = matrix.GetUpperBound(1) / 2;
+                for (var y = 0; x <= yUp;)
+                {
+                    var newY = matrix.GetUpperBound(1) - y;
+                    if(newY == y) continue;
+                    (matrix[x][y], matrix[x][newY]) =
+                        (matrix[x][newY], matrix[x][y]);
+                }
+            }
+        }
+
+        #endregion
+
         // It just works
         #region eliotg's code
         static private DeviceName[] EnumerateCameras(int domain)
