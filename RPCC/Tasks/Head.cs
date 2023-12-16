@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading;
 using System.Timers;
 using ASCOM.Tools;
 using nom.tam.fits;
@@ -29,7 +30,7 @@ namespace RPCC.Tasks
         private static string _firstFrame;
         private static double CD1_1 = 100;
         private static double CD1_2 = 100;
-        private static bool _isLookingEastLastCd;
+        // private static bool _isLookingEastLastCd;
         private const double PulseGuideVelocity = 2; //sec in sec TODO add in .cfg
         public static bool IsThinking;
 
@@ -90,7 +91,7 @@ namespace RPCC.Tasks
 
                     CD1_1 = hdu.Header.GetDoubleValue("CD1_1");
                     CD1_2 = hdu.Header.GetDoubleValue("CD1_2");
-                    _isLookingEastLastCd = MountDataCollector.IsLookingEast;
+                    // _isLookingEastLastCd = MountDataCollector.IsLookingEast;
                     fits.Close();
                 }
                 catch
@@ -369,12 +370,12 @@ namespace RPCC.Tasks
                                 }
                                 else
                                 {
-                                    CameraControl.StartExposure();
+                                    CheckAndStartExp();
                                 }
                             }
                             else
                             {
-                                CameraControl.StartExposure();
+                                CheckAndStartExp();
                             }
                         }
                         
@@ -389,7 +390,7 @@ namespace RPCC.Tasks
                 {
                     if (currentTask.DoneFrames < currentTask.AllFrames)
                     {
-                        CameraControl.StartExposure();
+                        CheckAndStartExp();
                     }
                     else
                     {
@@ -453,6 +454,15 @@ namespace RPCC.Tasks
                     break;
                 }
             }
+        }
+
+        public static void CheckAndStartExp()
+        {
+            while (MountDataCollector.IsSlewing)
+            {
+                Thread.Sleep(1000);
+            }
+            CameraControl.StartExposure();
         }
 
         public static void Guiding()

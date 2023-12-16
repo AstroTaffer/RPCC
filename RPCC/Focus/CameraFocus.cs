@@ -414,7 +414,7 @@ namespace RPCC.Focus
             SerialFocus.FRun_To(z);
             if (!Head.isOnPause)
             {
-                CameraControl.StartExposure();
+                Head.CheckAndStartExp();
             }
         }
 
