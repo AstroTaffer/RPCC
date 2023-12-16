@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using ASCOM.Tools;
+using RPCC.Comms;
 using RPCC.Focus;
 using RPCC.Tasks;
 using RPCC.Utils;
@@ -552,6 +553,19 @@ namespace RPCC.Cams
             if (!isAllGood) Logger.AddLogEntry($"ERROR Unable to read frame from {cam.serialNumber} camera");
 
             // TODO: Mirror image
+            switch (cam.filter)
+            {
+                case "g":
+                    if (MountDataCollector.IsLookingEast) Rotate(imageFits.data);
+                    break;
+                case "r":
+                    if (!MountDataCollector.IsLookingEast) Rotate(imageFits.data);
+                    break;
+                case "i":
+                    if (MountDataCollector.IsLookingEast) FlipH(imageFits.data); 
+                    else FlipV(imageFits.data);
+                    break;
+            }
 
             return imageFits;
         }
@@ -584,7 +598,7 @@ namespace RPCC.Cams
 
         #region Matrix rotate and flip
 
-        private static void Rotate(short[][] matrix)
+        private static void Rotate(ushort[][] matrix)
         {
             // (I2, I1) = (I1, I2); 
             for(var x = 0; x <= matrix.GetUpperBound(0);)
@@ -597,11 +611,11 @@ namespace RPCC.Cams
                     if(newX == x & newY == y) continue;
                     (matrix[x][y], matrix[newX][newY]) = 
                         (matrix[newX][newY], matrix[x][y]);
-                }
+                }   
             }
         }
 
-        private static void FlipH(short[][] matrix)
+        private static void FlipV(ushort[][] matrix)
         {
             for(var y = 0; y <= matrix.GetUpperBound(1);)
             {
@@ -613,10 +627,10 @@ namespace RPCC.Cams
                     (matrix[x][y], matrix[newX][y]) =
                         (matrix[newX][y], matrix[x][y]);
                 }
-            }
+            }   
         }
 
-        private static void FlipV(short[][] matrix)
+        private static void FlipH(ushort[][] matrix)
         {
             for(var x = 0; x <= matrix.GetUpperBound(0);)
             {
