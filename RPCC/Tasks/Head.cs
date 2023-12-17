@@ -17,7 +17,7 @@ namespace RPCC.Tasks
     public static class Head
     {
         private const short TotalMinutes2StartTask = 5; //TODO add in .cfg
-        private const short TotalDays2ReMakeCalibrationFrames = 30; //TODO add in .cfg
+        private const short TotalDays2ReMakeCalibrationFrames = 1; //TODO add in .cfg
         private const short FlatExp = 2; // in s 
         private const short FlatDarkQuantity = 10; //TODO add in .cfg
         public static readonly Timer ThinkingTimer = new Timer();
