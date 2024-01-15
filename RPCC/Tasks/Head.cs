@@ -107,7 +107,7 @@ namespace RPCC.Tasks
                     ((DateTime.UtcNow - Settings.LastFlatsTime).TotalDays > TotalDays2ReMakeCalibrationFrames))
                     PrepareAndStartDoFlats();
 
-                if (!WeatherDataCollector.Obs &
+                if (!WeatherDataCollector.Obs & !WeatherDataCollector.Flat &
                     ((DateTime.UtcNow - Settings.LastDarksTime).TotalDays > TotalDays2ReMakeCalibrationFrames))
                     PrepareAndStartDoDarks();
             }

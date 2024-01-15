@@ -556,14 +556,13 @@ namespace RPCC.Cams
             switch (cam.filter)
             {
                 case "g":
-                    if (MountDataCollector.IsLookingEast) Rotate(imageFits.data);
+                    if (MountDataCollector.IsLookingEast) imageFits.data = Rotate(imageFits.data);
                     break;
                 case "r":
-                    if (!MountDataCollector.IsLookingEast) Rotate(imageFits.data);
+                    if (!MountDataCollector.IsLookingEast) imageFits.data = Rotate(imageFits.data);
                     break;
                 case "i":
-                    if (MountDataCollector.IsLookingEast) FlipH(imageFits.data); 
-                    else FlipV(imageFits.data);
+                    imageFits.data = MountDataCollector.IsLookingEast ? FlipV(imageFits.data) : FlipH(imageFits.data);
                     break;
             }
 
@@ -598,51 +597,58 @@ namespace RPCC.Cams
 
         #region Matrix rotate and flip
 
-        private static void Rotate(ushort[][] matrix)
+        private static ushort[][] Rotate(ushort[][] matrix)
         {
             // (I2, I1) = (I1, I2); 
-            for(var x = 0; x <= matrix.GetUpperBound(0);)
+            var xUp = matrix.GetUpperBound(0);
+            for(var x = 0; x <= xUp; x++)
             {
-                var yUp = matrix.GetUpperBound(1) / 2;
-                for (var y = 0; x <= yUp;)
+                var yUp = matrix[0].GetUpperBound(0);
+                for (var y = 0; y <= yUp/2; y++)
                 {
-                    var newX = matrix.GetUpperBound(0) - x;
-                    var newY = matrix.GetUpperBound(1) - y;
+                    var newX = xUp - x;
+                    var newY = yUp - y;
                     if(newX == x & newY == y) continue;
                     (matrix[x][y], matrix[newX][newY]) = 
                         (matrix[newX][newY], matrix[x][y]);
                 }   
             }
+            return matrix;
         }
 
-        private static void FlipV(ushort[][] matrix)
+        private static ushort[][] FlipV(ushort[][] matrix)
         {
-            for(var y = 0; y <= matrix.GetUpperBound(1);)
+            var yUp = matrix[0].GetUpperBound(0);
+            for(var y = 0; y <= yUp; y++)
             {
-                var xUp = matrix.GetUpperBound(0) / 2;
-                for (var x = 0; x <= xUp;)
+                var xUp = matrix.GetUpperBound(0);
+                for (var x = 0; x <= xUp / 2; x++)
                 {
-                    var newX = matrix.GetUpperBound(0) - x;
+                    var newX = xUp - x;
                     if(newX == x) continue;
                     (matrix[x][y], matrix[newX][y]) =
                         (matrix[newX][y], matrix[x][y]);
                 }
-            }   
+            }
+
+            return matrix;
         }
 
-        private static void FlipH(ushort[][] matrix)
+        private static ushort[][] FlipH(ushort[][] matrix)
         {
-            for(var x = 0; x <= matrix.GetUpperBound(0);)
+            var xUp = matrix.GetUpperBound(0);
+            for(var x = 0; x <= xUp; x++)
             {
-                var yUp = matrix.GetUpperBound(1) / 2;
-                for (var y = 0; x <= yUp;)
+                var yUp = matrix[0].GetUpperBound(0);
+                for (var y = 0; y <= yUp/2; y++)
                 {
-                    var newY = matrix.GetUpperBound(1) - y;
+                    var newY = yUp - y;
                     if(newY == y) continue;
                     (matrix[x][y], matrix[x][newY]) =
                         (matrix[x][newY], matrix[x][y]);
                 }
             }
+            return matrix;
         }
 
         #endregion

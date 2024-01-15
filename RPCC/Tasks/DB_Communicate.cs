@@ -280,6 +280,41 @@ namespace RPCC.Tasks
                 return true;
             }
         }
+
+        public static bool CheckDarkInDb(int exp)       
+        {
+            lock (Loc)
+            {
+                try
+                {
+                    var tsks = 0;
+                    var query = "SELECT count(m_task_id) FROM robophot_master_frames (m_task_id) " +
+                                $"WHERE ";
+                    using (var con = ConnectToDb())
+                    {
+                        using (var com = new NpgsqlCommand(query, con))
+                        {
+                            using (var reader = com.ExecuteReader())
+                            {
+                                while (reader.Read()) tsks = Convert.ToInt32(reader[0]);
+                            } 
+                        }
+                    }
+
+                    if (tsks > 0)
+                    {
+                        return false;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Logger.AddLogEntry("AddFrameToDb error");
+                    Logger.AddLogEntry(e.Message);
+                    return false;
+                }
+                return true;
+            }
+        }
         
     }
-}
+}   
