@@ -166,6 +166,7 @@ namespace RPCC.Cams
             switch (CameraControl.loadedTask.FrameType)
             {
                 case "Object":
+                case "Test":
                     cursor.Add(string.IsNullOrEmpty(CameraControl.loadedTask.Object)
                         ? new HeaderCard("OBJNAME", "UNKNOWN", "object name")
                         : new HeaderCard("OBJNAME", CameraControl.loadedTask.Object, "object name"));
