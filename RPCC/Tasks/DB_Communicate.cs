@@ -12,23 +12,25 @@ namespace RPCC.Tasks
     public static class DbCommunicate
     {
         // public static string RoboPhotServer = "localhost"; // TODO to cfg
-        public static string RoboPhotServer = "192.168.240.5";
-        public static string Port = "5432";
-        public static string UserId = "remote_user";
-        public static string Password = "remote_user";
-        public static string Database = "postgres";
-        const string QueryForLoadDbTable = "SELECT task_id, get_hms_dms(start_coord2000) as coord2000, " +
-                                           "time_add, time_start, time_end, " +
-                                           "duration, exp_time, done_frames, all_frames, time_last_exp, " +
-                                           "is_filter_g, is_filter_r, is_filter_i, object_name, object_type, " +
-                                           "status, observer, frame_type, x_bin, y_bin " +
-                                           "FROM robophot_tasks ORDER BY time_start DESC LIMIT 50";
-        const string QueryGetTableForThinking = "SELECT task_id, get_hms_dms(start_coord2000) as coord2000, " +
-                                                "time_add, time_start, time_end, " +
-                                                "duration, exp_time, done_frames, all_frames, time_last_exp, " +
-                                                "is_filter_g, is_filter_r, is_filter_i, object_name, object_type, " +
-                                                "status, observer, frame_type, x_bin, y_bin " +
-                                                "FROM robophot_tasks WHERE status < 2 order by time_start ASC";
+        private const string RoboPhotServer = "192.168.240.5";
+        private const string Port = "5432";
+        private const string UserId = "remote_user";
+        private const string Password = "remote_user";
+        private const string Database = "postgres";
+
+        private const string QueryForLoadDbTable = "SELECT task_id, get_hms_dms(start_coord2000) as coord2000, " +
+                                                   "time_add, time_start, time_end, " +
+                                                   "duration, exp_time, done_frames, all_frames, time_last_exp, " +
+                                                   "is_filter_g, is_filter_r, is_filter_i, object_name, object_type, " +
+                                                   "status, observer, frame_type, x_bin, y_bin " +
+                                                   "FROM robophot_tasks ORDER BY time_start DESC LIMIT 50";
+
+        private const string QueryGetTableForThinking = "SELECT task_id, get_hms_dms(start_coord2000) as coord2000, " +
+                                                        "time_add, time_start, time_end, " +
+                                                        "duration, exp_time, done_frames, all_frames, time_last_exp, " +
+                                                        "is_filter_g, is_filter_r, is_filter_i, object_name, object_type, " +
+                                                        "status, observer, frame_type, x_bin, y_bin " +
+                                                        "FROM robophot_tasks WHERE status < 2 order by time_start ASC";
         // public static NpgsqlConnection Con;
         private static readonly object Loc = new object();
         
@@ -281,40 +283,40 @@ namespace RPCC.Tasks
             }
         }
 
-        public static bool CheckDarkInDb(int exp)       
-        {
-            lock (Loc)
-            {
-                try
-                {
-                    var tsks = 0;
-                    var query = "SELECT count(m_task_id) FROM robophot_master_frames (m_task_id) " +
-                                $"WHERE ";
-                    using (var con = ConnectToDb())
-                    {
-                        using (var com = new NpgsqlCommand(query, con))
-                        {
-                            using (var reader = com.ExecuteReader())
-                            {
-                                while (reader.Read()) tsks = Convert.ToInt32(reader[0]);
-                            } 
-                        }
-                    }
-
-                    if (tsks > 0)
-                    {
-                        return false;
-                    }
-                }
-                catch (Exception e)
-                {
-                    Logger.AddLogEntry("AddFrameToDb error");
-                    Logger.AddLogEntry(e.Message);
-                    return false;
-                }
-                return true;
-            }
-        }
+        // public static bool CheckDarkInDb(int exp)       
+        // {
+        //     lock (Loc)
+        //     {
+        //         try
+        //         {
+        //             var tsks = 0;
+        //             var query = "SELECT count(m_task_id) FROM robophot_master_frames (m_task_id) " +
+        //                         $"WHERE ";
+        //             using (var con = ConnectToDb())
+        //             {
+        //                 using (var com = new NpgsqlCommand(query, con))
+        //                 {
+        //                     using (var reader = com.ExecuteReader())
+        //                     {
+        //                         while (reader.Read()) tsks = Convert.ToInt32(reader[0]);
+        //                     } 
+        //                 }
+        //             }
+        //
+        //             if (tsks > 0)
+        //             {
+        //                 return false;
+        //             }
+        //         }
+        //         catch (Exception e)
+        //         {
+        //             Logger.AddLogEntry("AddFrameToDb error");
+        //             Logger.AddLogEntry(e.Message);
+        //             return false;
+        //         }
+        //         return true;
+        //     }
+        // }
         
     }
 }   

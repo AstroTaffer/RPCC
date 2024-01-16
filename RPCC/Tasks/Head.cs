@@ -101,17 +101,6 @@ namespace RPCC.Tasks
 
             }
 
-            if (CameraControl.isConnected & !_isObserve & !_isDoDarks & !_isDoFlats)
-            {
-                if (WeatherDataCollector.Flat &
-                    ((DateTime.UtcNow - Settings.LastFlatsTime).TotalDays > TotalDays2ReMakeCalibrationFrames))
-                    PrepareAndStartDoFlats();
-
-                if (!WeatherDataCollector.Obs & !WeatherDataCollector.Flat &
-                    ((DateTime.UtcNow - Settings.LastDarksTime).TotalDays > TotalDays2ReMakeCalibrationFrames))
-                    PrepareAndStartDoDarks();
-            }
-
             foreach (DataRow row in DbCommunicate.GetTableForThinking().Rows)
             {
                 var bufTask = new ObservationTask();
@@ -153,7 +142,6 @@ namespace RPCC.Tasks
                                 // bufTask.Status = 0;
                                 currentTask = bufTask;
                                 // DbCommunicate.UpdateTaskInDb(_currentTask);
-                                
                             }
                             break;
                         }
@@ -167,59 +155,70 @@ namespace RPCC.Tasks
                     currentTask = bufTask;
                 }
             }
-
-        
+            
             //а если нашлась и время до начала менее 5 минут, то стартуем 
-        if (!(currentTask is null))
-        {
-            if (!_isObserve & !_isDoDarks & !_isDoFlats & (IsThinking | currentTask.FrameType == Test) &
-                  (currentTask.TimeStart - DateTime.UtcNow).TotalMinutes < TotalMinutes2StartTask &
-                  CameraControl.isConnected)
+            if (currentTask is null)
             {
-                if (MountDataCollector.IsParked)
+                if (CameraControl.isConnected & !_isObserve & !_isDoDarks & !_isDoFlats)
                 {
-                    SiTechExeSocket.Unpark();
-                    //Thread.Sleep(5000);
+                    if (WeatherDataCollector.Flat &
+                        ((DateTime.UtcNow - Settings.LastFlatsTime).TotalDays > TotalDays2ReMakeCalibrationFrames))
+                        PrepareAndStartDoFlats();
+
+                    if (!WeatherDataCollector.Obs & !WeatherDataCollector.Flat &
+                        ((DateTime.UtcNow - Settings.LastDarksTime).TotalDays > TotalDays2ReMakeCalibrationFrames))
+                        PrepareAndStartDoDarks();
                 }
-
-                switch (currentTask.FrameType)
-                {
-                    case Light:
+            } else 
+            {
+                if (!_isObserve & !_isDoDarks & !_isDoFlats & (IsThinking | currentTask.FrameType == Test) &
+                      (currentTask.TimeStart - DateTime.UtcNow).TotalMinutes < TotalMinutes2StartTask &
+                      CameraControl.isConnected)
                     {
-                        if (WeatherDataCollector.Obs)
+                        if (MountDataCollector.IsParked)
                         {
-                            StartDoLight();
+                            SiTechExeSocket.Unpark();
+                            //Thread.Sleep(5000);
                         }
 
-                        break;
-                    }
-                    case Test:
-                    {
-                        StartDoTest();
-                        break;
-                    }
-                    case Dark:
-                    {
-                        if (!WeatherDataCollector.Obs)
+                        switch (currentTask.FrameType)
                         {
-                            StartDoDark();
-                        }
+                            case Light:
+                            {
+                                if (WeatherDataCollector.Obs)
+                                {
+                                    StartDoLight();
+                                }
 
-                        break;
-                    }
-                    case Flat:
-                    {
-                        if (WeatherDataCollector.Flat)
-                        {
-                            StartDoFlats();
-                        }
+                                break;
+                            }
+                            case Test:
+                            {
+                                StartDoTest();
+                                break;
+                            }
+                            case Dark:
+                            {
+                                if (!WeatherDataCollector.Obs)
+                                {
+                                    StartDoDark();
+                                }
 
-                        break;
+                                break;
+                            }
+                            case Flat:
+                            {
+                                if (WeatherDataCollector.Flat)
+                                {
+                                    StartDoFlats();
+                                }
+
+                                break;
+                            }
+                        }
                     }
-                }
             }
-        }
-        ThinkingTimer.Start();
+            ThinkingTimer.Start();
     }
 
         private static void StartDoTest()
@@ -506,7 +505,7 @@ namespace RPCC.Tasks
             var flatTask = new ObservationTask
             {
                 Exp = FlatExp,
-                TaskNumber = Tasker.GetTasksLen(),
+                // TaskNumber = Tasker.GetTasksLen(),
                 TimeAdd = DateTime.UtcNow,
                 AllFrames = FlatDarkQuantity,
                 Status = 0,
@@ -569,7 +568,7 @@ namespace RPCC.Tasks
             {
                 var darkTask = new ObservationTask
                 {
-                    TaskNumber = Tasker.GetTasksLen(),
+                    // TaskNumber = Tasker.GetTasksLen(),
                     FrameType = Dark,
                     Exp = exp,
                     Status = 0,
