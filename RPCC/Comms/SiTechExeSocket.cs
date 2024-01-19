@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
+using Microsoft.Extensions.Logging;
 using RPCC.Utils;
 
 namespace RPCC.Comms
@@ -339,7 +340,17 @@ namespace RPCC.Comms
 
         // [RA] = h, [DEC] = deg
         internal static bool GoTo(double ra, double dec, bool isJ2K)
-        {  
+        {
+            if (MountDataCollector.IsParking)
+            {
+                Logger.AddLogEntry("Can't goto while parking");
+                return false;
+            }
+            if (MountDataCollector.IsSlewing)
+            {
+                Logger.AddLogEntry("Can't goto while slewing");
+                return false;
+            }
             var response = ExchangeMessages($"GoTo {ra} {dec}{(isJ2K ? " J2K" : "")}");
             //var response = await ExchangeMessagesAsync($"GoTo {ra} {dec}{(isJ2K ? " J2K" : "")}");
             if (CheckResponse(response, $"GoTo {ra} {dec}{(isJ2K ? " J2K" : "")}"))
@@ -352,6 +363,7 @@ namespace RPCC.Comms
                     {
                         System.Threading.Thread.Sleep(1000);
                     }
+                    System.Threading.Thread.Sleep(1000);
                     return true;
                 }
                 else
@@ -407,6 +419,21 @@ namespace RPCC.Comms
         // [time] == msec
         internal static void PulseGuide(string direction, int time)
         {
+            if (MountDataCollector.IsParked)
+            {
+                Logger.AddLogEntry("Can't PulseGuide when parked");
+                return;
+            }
+            if (MountDataCollector.IsParking)
+            {
+                Logger.AddLogEntry("Can't PulseGuide while parking");
+                return;
+            }
+            if (MountDataCollector.IsSlewing)
+            {
+                Logger.AddLogEntry("Can't PulseGuide while slewing");
+                return;
+            }
             if (direction == "N" || direction == "S" || direction == "E" || direction == "W")
             {
                 string[] response = null;

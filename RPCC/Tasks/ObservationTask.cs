@@ -83,6 +83,7 @@ namespace RPCC.Tasks
         {
             var t = new ObservationTask
             {
+                TaskNumber = TaskNumber,
                 Ra = Ra,
                 Dec = Dec,
                 RaDec = RaDec,

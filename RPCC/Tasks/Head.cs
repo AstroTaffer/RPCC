@@ -275,10 +275,15 @@ namespace RPCC.Tasks
         private static void StartDoLight()
         {   
             _isObserve = true;
+            currentTask.Status = 1;
+            Logger.AddLogEntry($"Start task# {currentTask.TaskNumber}, type: {currentTask.FrameType}");
+            if (MountDataCollector.IsParked)
+            {
+                SiTechExeSocket.Unpark();
+                //Thread.Sleep(5000);
+            }
             if (SiTechExeSocket.GoTo(currentTask.Ra, currentTask.Dec, true)) //проверять доехал ли
             {
-                currentTask.Status = 1;
-                Logger.AddLogEntry($"Start task# {currentTask.TaskNumber}, type: {currentTask.FrameType}");
                 if (CameraControl.PrepareToObs(currentTask))
                 {
                     currentTask.Filters = CheckFil();
@@ -527,6 +532,11 @@ namespace RPCC.Tasks
             {
                 _isDoFlats = true;
                 Logger.AddLogEntry($"Start task# {currentTask.TaskNumber}, type: {currentTask.FrameType}");
+                if (MountDataCollector.IsParked)
+                {
+                    SiTechExeSocket.Unpark();
+                    //Thread.Sleep(5000);
+                }
                 if (SiTechExeSocket.GoTo(currentTask.Ra, currentTask.Dec, true))
                 {
                     if (CameraControl.PrepareToObs(currentTask))

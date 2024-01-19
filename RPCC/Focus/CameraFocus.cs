@@ -25,7 +25,7 @@ namespace RPCC.Focus
         private static readonly List<GetDataFromFits> Frames = new List<GetDataFromFits>();
         private static int _startFocusPos;
         private const int N = 10; //количество точек для построения кривой фокусировки
-        private static short _shift = -300; //шаг по фокусу
+        private static short _shift = -100; //шаг по фокусу
         private static short _sumShift;
         private static ObservationTask _taskForFocus;
         private static short _phase;
@@ -66,7 +66,7 @@ namespace RPCC.Focus
         
         public static void CamFocusCallback()
         {
-            if (Head.isGuid)
+            if (Head.isGuid & !IsZenith)
             {
                 Head.Guiding(); 
             }
