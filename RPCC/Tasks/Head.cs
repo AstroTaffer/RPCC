@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Timers;
@@ -40,7 +41,7 @@ namespace RPCC.Tasks
         public const string Flat = "Flat";
         public const string Light = "Object";
         public const string Test = "Test";
-        public static bool isGuid = true;
+        public static bool IsGuid = true;
 
         public static void StartThinking()
         {
@@ -79,25 +80,28 @@ namespace RPCC.Tasks
                 }
             }
 
-            if (!string.IsNullOrEmpty(_firstFrame))
+            if (!string.IsNullOrEmpty(_firstFrame) & CD1_1 > 99)
             {
-                try
+                var cal = _firstFrame.Replace("RAW", "CALIBRATED");
+                if (File.Exists(cal))
                 {
-                    //Если матрицы еще нет, ориентируемся на первый кадр, если есть, ловим решенный кадр по свежее
-                    var fits = new Fits(CD1_1 > 99 | CD1_2 > 99
-                        ? _firstFrame
-                        : CameraControl.cams.Last().latestImageFilename);
-                    var hdu = (ImageHDU)fits.GetHDU(0);
-
-                    CD1_1 = hdu.Header.GetDoubleValue("CD1_1");
-                    CD1_2 = hdu.Header.GetDoubleValue("CD1_2");
-                    // _isLookingEastLastCd = MountDataCollector.IsLookingEast;
-                    fits.Close();
+                    try
+                    {
+                        //Если матрицы еще нет, ориентируемся на первый кадр, если есть, ловим решенный кадр по свежее
+                        var fits = new Fits(cal);
+                        var hdu = (ImageHDU)fits.GetHDU(0);
+    
+                        CD1_1 = hdu.Header.GetDoubleValue("CD1_1");
+                        CD1_2 = hdu.Header.GetDoubleValue("CD1_2");
+                        // _isLookingEastLastCd = MountDataCollector.IsLookingEast;
+                        fits.Close();
+                    }
+                    catch
+                    {
+    
+                    }
                 }
-                catch
-                {
-
-                }
+                
 
             }
 
@@ -266,6 +270,8 @@ namespace RPCC.Tasks
             isOnPause = false;
             currentTask = null;
             _firstFrame = null;
+            CD1_1 = 100;
+            CD1_2 = 100;
             if (!MountDataCollector.IsParked)
             {
                 SiTechExeSocket.Park();
@@ -337,7 +343,7 @@ namespace RPCC.Tasks
                     if (currentTask.TimeEnd > DateTime.UtcNow)
                     {
                         // 
-                        if (isGuid)
+                        if (IsGuid)
                         {
                             Guiding(); 
                         }
@@ -482,15 +488,18 @@ namespace RPCC.Tasks
                     Logger.AddLogEntry($"WARNING: can't guide, no connection to donuts");
                     return;
                 } //Если нет конекта или нет матрицы, то выходим
-                var req = $"{_firstFrame}_{CameraControl.cams.Last().latestImageFilename}"; //Формируем запрос для донатов
+                // var req = $"\"{_firstFrame}\"~\"{CameraControl.cams.Last().latestImageFilename}\""; //Формируем запрос для донатов
+                var req = $"{_firstFrame}~{CameraControl.cams.Last().latestImageFilename}"; //Формируем запрос для донатов
                 var correction = DonutsSocket.GetGuideCorrection(req); //Получаем коррекцию
                 if (correction[0] > 2 | correction[1] > 2)
                 {
                     Logger.AddLogEntry($"WARNING: guiding correction: dx = {correction[0]} px, dy = {correction[1]} px");
                     return;
                 } //Если коррекция больше 2 пикселей, выходим
-                var corDec = (correction[0] * CD1_1 + correction[1] * CD1_2) * 60.0 * 60.0;
-                var corRa = (correction[1] * CD1_2 + correction[0] * CD1_1) * 60.0 * 60.0;
+                double corDec = (correction[0] * CD1_1 + correction[1] * CD1_2) * 60.0 * 60.0;
+                double corRa = (correction[1] * CD1_2 + correction[0] * CD1_1) * 60.0 * 60.0;
+                Logger.AddLogEntry($"correction = {correction[0]}, {correction[1]}");
+                Logger.AddLogEntry($"corRa = {corRa}, corDec = {corDec}");
                 //arcsec
                 //x = north
                 //y = east
@@ -499,8 +508,13 @@ namespace RPCC.Tasks
                 //     correction[0] *= -1;
                 //     correction[1] *= -1;
                 // }
-                SiTechExeSocket.PulseGuide(corDec > 0 ? "N" : "S", (int) (Math.Abs(corDec)*1e3/PulseGuideVelocity));
-                SiTechExeSocket.PulseGuide(corRa > 0 ? "E" : "W", (int) (Math.Abs(corRa)*1e3/PulseGuideVelocity));
+                var pulseN = (Math.Abs(corDec)*1e3/PulseGuideVelocity);
+                var pulseE =  (Math.Abs(corRa)*1e3/PulseGuideVelocity);
+                Logger.AddLogEntry($"pulse time: {pulseN}N, {pulseE}E");
+                SiTechExeSocket.PulseGuide(corDec > 0 ? "N" : "S", (int) pulseN);
+                // SiTechExeSocket.PulseGuide(corDec > 0 ? "S" : "N", (int) (Math.Abs(corDec)*1e3/PulseGuideVelocity));
+                SiTechExeSocket.PulseGuide(corRa > 0 ? "E" : "W", (int) pulseE);
+                // SiTechExeSocket.PulseGuide(corRa > 0 ? "W" : "E", (int) (Math.Abs(corRa)*1e3/PulseGuideVelocity));
             }
         }
 

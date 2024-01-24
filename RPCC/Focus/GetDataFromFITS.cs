@@ -15,8 +15,8 @@ namespace RPCC.Focus
 {
     public class GetDataFromFits
     {
-        private const double MaxEll = 0.25;
-        private const int MinStars = 100;
+        private const double MaxEll = 0.7;
+        private const int MinStars = 20;
         private const double FwhmFocused = 3.0;
         private const double MinLimitFwhm = 1.0;
         private const double MaxLimitFwhm = 20.0;
@@ -189,18 +189,18 @@ namespace RPCC.Focus
             if (Ell > MaxEll)
             {
                 // игнорируем
-                // Logger.AddLogEntry("FOCUS: Images stretched");
+                Logger.AddLogEntry($"FOCUS: Images stretched, ell = {Ell}");
                 return false;
             }
 
             if (StarsNum < MinStars)
             {
                 //мало звезд на обоих кадрах, игнорируем, скорее всего облако. Но может обе в диком дефокусе!
-                // Logger.AddLogEntry("FOCUS: Few stars");
+                Logger.AddLogEntry($"FOCUS: Few stars, num = {StarsNum}");
                 return false;
             }
 
-            // Logger.AddLogEntry("FOCUS: Focus image is ok!");
+            Logger.AddLogEntry("FOCUS: Focus image is ok!");
             return true;
         }
         
@@ -210,6 +210,16 @@ namespace RPCC.Focus
             {
                 return Fwhm < FwhmFocused + 1;
             }
+
+            if (Fwhm < FwhmFocused)
+            {
+                Logger.AddLogEntry($"FOCUS: image is focused, fwhm = {Fwhm}");
+            }
+            else
+            {
+                Logger.AddLogEntry($"FOCUS: image is not focused, fwhm = {Fwhm}");
+            }
+            
             return Fwhm < FwhmFocused;
         }
 

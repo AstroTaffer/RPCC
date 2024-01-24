@@ -121,9 +121,13 @@ namespace RPCC.Comms
 
         public static float[] GetGuideCorrection(string req)
         {
+            Logger.AddLogEntry($"req: {req}");
             var response = ExchangeMessages(req);
+            Logger.AddLogEntry($"resp: {response}");
+            
             if (!(response is null) && response != "")
-                return response == "fail" ? new float[] {0, 0} : response.Split('_').Select(float.Parse).ToArray();
+                return response.Contains("fail") ? new float[] {0, 0} : 
+                    response.Split('~').Select(float.Parse).ToArray();
             Logger.AddLogEntry("WARNING Disconnecting from Donuts");
             Disconnect();
             return null;

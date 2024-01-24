@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using RPCC.Cams;
 using RPCC.Comms;
 using RPCC.Tasks;
@@ -25,7 +26,7 @@ namespace RPCC.Focus
         private static readonly List<GetDataFromFits> Frames = new List<GetDataFromFits>();
         private static int _startFocusPos;
         private const int N = 10; //количество точек для построения кривой фокусировки
-        private static short _shift = -100; //шаг по фокусу
+        private static short _shift = -150; //шаг по фокусу
         private static short _sumShift;
         private static ObservationTask _taskForFocus;
         private static short _phase;
@@ -35,7 +36,7 @@ namespace RPCC.Focus
         private const int CriticalShift = 2000 / N;
         private static short _frameCounter;
         private const string Focus = "Focus";
-        private const short FocusExp = 30;
+        private const short FocusExp = 10;
 
         public static void StartAutoFocus(ObservationTask observationTask)
         {
@@ -66,7 +67,7 @@ namespace RPCC.Focus
         
         public static void CamFocusCallback()
         {
-            if (Head.isGuid & !IsZenith)
+            if (Head.IsGuid & !IsZenith)
             {
                 Head.Guiding(); 
             }
@@ -98,6 +99,7 @@ namespace RPCC.Focus
             {
                 Logger.AddLogEntry("FOCUS: Autofocus disable, exit");
                 ReturnFocusAndExit();
+                _sumShift = 0;
                 FwhmBest = 0;
                 return;
             }
@@ -263,9 +265,9 @@ namespace RPCC.Focus
             Logger.AddLogEntry("FOCUS: check");
 
             if (fwhm < 2.2) Logger.AddLogEntry("FOCUS: FWHM < 2.2");
-            if (_oldFwhm < fwhm) Logger.AddLogEntry("FOCUS: Old_FWHM_W < West_FWHM.FWHM");
+            if (_oldFwhm < fwhm) Logger.AddLogEntry("FOCUS: Old_FWHM < FWHM");
             if (Math.Abs(_oldFwhm - fwhm) < 0.2)
-                Logger.AddLogEntry("FOCUS: Math.Abs(Old_FWHM_W - West_FWHM.FWHM)<0.2");
+                Logger.AddLogEntry("FOCUS: Math.Abs(Old_FWHM - FWHM)<0.2");
             
             if (fwhm < 2.2 || _oldFwhm < fwhm || Math.Abs(_oldFwhm - fwhm) < 0.2)
             {
@@ -411,7 +413,9 @@ namespace RPCC.Focus
 
         private static void GetImForFocus(int z)
         {
+            Logger.AddLogEntry($"Move focus {z}");
             SerialFocus.FRun_To(z);
+            Thread.Sleep(3000);
             if (!Head.isOnPause)
             {
                 Head.CheckAndStartExp();

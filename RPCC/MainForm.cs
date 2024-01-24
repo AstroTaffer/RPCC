@@ -559,7 +559,7 @@ namespace RPCC
 
         private void checkBoxGuiding_CheckedChanged(object sender, EventArgs e)
         {
-            Head.isGuid = checkBoxGuiding.Checked;
+            Head.IsGuid = checkBoxGuiding.Checked;
         }
     }
 }
