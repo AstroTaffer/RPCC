@@ -16,10 +16,10 @@ namespace RPCC.Focus
     public class GetDataFromFits
     {
         private const double MaxEll = 0.7;
-        private const int MinStars = 20;
+        private const int MinStars = 10;
         private const double FwhmFocused = 3.0;
         private const double MinLimitFwhm = 1.0;
-        private const double MaxLimitFwhm = 20.0;
+        // private const double MaxLimitFwhm = 50.0;
         private readonly string _path2Cat;
         private List<List<double>> _sortTable;
         public bool Status { get; }
@@ -116,7 +116,7 @@ namespace RPCC.Focus
                 var line = reader.ReadLine();
                 if (line?[0] == '#') continue;
                 var row = line?.Split(' ').Where(t => t.Length >= 1).Select(Convert.ToDouble).ToList();
-                if (row?[3] > MaxLimitFwhm | row?[3] < MinLimitFwhm)
+                if (row?[3] < MinLimitFwhm | row?[2] != 0 | row?[6]/row?[7] < 15 | row?[6]/row?[7] > 1000)
                 {
                     continue;
                 }
@@ -200,7 +200,7 @@ namespace RPCC.Focus
                 return false;
             }
 
-            Logger.AddLogEntry("FOCUS: Focus image is ok!");
+            // Logger.AddLogEntry("FOCUS: Focus image is ok!");
             return true;
         }
         

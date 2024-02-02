@@ -98,7 +98,7 @@ namespace RPCC.Tasks
                     }
                     catch
                     {
-    
+                        
                     }
                 }
                 
@@ -343,16 +343,16 @@ namespace RPCC.Tasks
                     if (currentTask.TimeEnd > DateTime.UtcNow)
                     {
                         // 
-                        if (IsGuid)
-                        {
-                            Guiding(); 
-                        }
+                       
 
                         foreach (var cam in CameraControl.cams)
                         {
                             if (!string.IsNullOrEmpty(cam.latestImageFilename))
                             {
                                 fitsAnalysis = new GetDataFromFits(cam.latestImageFilename); //TODO распараллелить
+                                Logger.AddLogEntry($"Camera {cam.filter}: Status = {fitsAnalysis.Status}, " +
+                                                   $"SEXFWHM = {fitsAnalysis.Fwhm}, SEXELL = {fitsAnalysis.Ell}, " +
+                                                   $"Focus pos = {fitsAnalysis.Focus}, SEX stars = {fitsAnalysis.GetStarsNum()}");
                             }
                         }
 
@@ -361,6 +361,11 @@ namespace RPCC.Tasks
                             Logger.AddLogEntry("CamCallback: no data available, stop obs");
                             EndTask(5);
                             return;
+                        }
+                        
+                        if (IsGuid & fitsAnalysis.CheckImageQuality())
+                        {
+                            Guiding(); 
                         }
 
                         if (!WeatherDataCollector.Obs)
@@ -400,7 +405,42 @@ namespace RPCC.Tasks
                 {
                     if (currentTask.DoneFrames < currentTask.AllFrames)
                     {
-                        CheckAndStartExp();
+                        if (IsGuid)
+                        {
+                            Guiding(); 
+                        }
+                        foreach (var cam in CameraControl.cams)
+                        {
+                            if (!string.IsNullOrEmpty(cam.latestImageFilename))
+                            {
+                                fitsAnalysis = new GetDataFromFits(cam.latestImageFilename); //TODO распараллелить
+                                Logger.AddLogEntry($"Camera {cam.filter}: Status = {fitsAnalysis.Status}, " +
+                                                   $"SEXFWHM = {fitsAnalysis.Fwhm}, SEXELL = {fitsAnalysis.Ell}, " +
+                                                   $"Focus pos = {fitsAnalysis.Focus}, SEX stars = {fitsAnalysis.GetStarsNum()}");
+                            }
+                        }
+
+                        if (fitsAnalysis is null)
+                        {
+                            Logger.AddLogEntry("CamCallback: no data available, stop obs");
+                            EndTask(5);
+                            return;
+                        }
+                        if (CameraFocus.IsAutoFocus)
+                        {
+                            if (!fitsAnalysis.CheckFocused())
+                            {
+                                CameraFocus.StartAutoFocus(currentTask);
+                            }
+                            else
+                            {
+                                CheckAndStartExp();
+                            }
+                        }
+                        else
+                        {
+                            CheckAndStartExp();
+                        }
                     }
                     else
                     {
@@ -472,6 +512,7 @@ namespace RPCC.Tasks
             {
                 Thread.Sleep(1000);
             }
+            Logger.AddLogEntry("Start exp");
             CameraControl.StartExposure();
         }
 
@@ -483,7 +524,11 @@ namespace RPCC.Tasks
             }
             else
             {
-                if (!(DonutsSocket.IsConnected & CD1_1 < 100 & CD1_2 < 100))
+                if (CD1_1 > 99 || CD1_2 > 99 || CD1_1 == 0 || CD1_2 == 0)
+                {
+                    return;
+                }
+                if (!DonutsSocket.IsConnected)
                 {
                     Logger.AddLogEntry($"WARNING: can't guide, no connection to donuts");
                     return;
@@ -493,24 +538,17 @@ namespace RPCC.Tasks
                 var correction = DonutsSocket.GetGuideCorrection(req); //Получаем коррекцию
                 if (correction[0] > 2 | correction[1] > 2)
                 {
-                    Logger.AddLogEntry($"WARNING: guiding correction: dx = {correction[0]} px, dy = {correction[1]} px");
+                    Logger.AddLogEntry($"WARNING: guiding correction: dx = {correction[0]} px, dy = {correction[1]} px, skip correction");
                     return;
                 } //Если коррекция больше 2 пикселей, выходим
                 double corDec = (correction[0] * CD1_1 + correction[1] * CD1_2) * 60.0 * 60.0;
                 double corRa = (correction[1] * CD1_2 + correction[0] * CD1_1) * 60.0 * 60.0;
-                Logger.AddLogEntry($"correction = {correction[0]}, {correction[1]}");
+                Logger.AddLogEntry($"Guiding correction: dx = {correction[0]} px, dy = {correction[1]} px");
                 Logger.AddLogEntry($"corRa = {corRa}, corDec = {corDec}");
                 //arcsec
-                //x = north
-                //y = east
-                // if (!(_isLookingEastLastCd & MountDataCollector.IsLookingEast))  // TODO неправильно
-                // {
-                //     correction[0] *= -1;
-                //     correction[1] *= -1;
-                // }
                 var pulseN = (Math.Abs(corDec)*1e3/PulseGuideVelocity);
                 var pulseE =  (Math.Abs(corRa)*1e3/PulseGuideVelocity);
-                Logger.AddLogEntry($"pulse time: {pulseN}N, {pulseE}E");
+                Logger.AddLogEntry($"Pulse time: {pulseN}N, {pulseE}E");
                 SiTechExeSocket.PulseGuide(corDec > 0 ? "N" : "S", (int) pulseN);
                 // SiTechExeSocket.PulseGuide(corDec > 0 ? "S" : "N", (int) (Math.Abs(corDec)*1e3/PulseGuideVelocity));
                 SiTechExeSocket.PulseGuide(corRa > 0 ? "E" : "W", (int) pulseE);
