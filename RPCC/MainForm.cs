@@ -525,12 +525,10 @@ namespace RPCC
             // Logger.AddLogEntry("Add Task click");
             if (!IsTaskFormOpen)
             {
-                IsTaskFormOpen = true;
+               IsTaskFormOpen = true;
                var taskForm = new TaskForm(true);
                taskForm.Show(); 
-               
             }
-            
         }
 
         private void DataGridViewTasker_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)

@@ -66,11 +66,12 @@ namespace RPCC.Tasks
             this.buttonAdd = new System.Windows.Forms.Button();
             this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonDelete = new System.Windows.Forms.Button();
+            this.buttonCopy = new System.Windows.Forms.Button();
             this.groupBoxCoords.SuspendLayout();
             this.groupBoxFrame.SuspendLayout();
             this.groupBox3.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_ybin)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_xbin)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.numericUpDown_ybin)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.numericUpDown_xbin)).BeginInit();
             this.groupBox2.SuspendLayout();
             this.groupBoxFilters.SuspendLayout();
             this.SuspendLayout();
@@ -88,7 +89,7 @@ namespace RPCC.Tasks
             this.groupBoxCoords.Controls.Add(this.labelTimeStart);
             this.groupBoxCoords.Controls.Add(this.textBoxCoords);
             this.groupBoxCoords.Controls.Add(this.labelCoords);
-            this.groupBoxCoords.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.groupBoxCoords.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (204)));
             this.groupBoxCoords.Location = new System.Drawing.Point(12, 12);
             this.groupBoxCoords.Name = "groupBoxCoords";
             this.groupBoxCoords.Size = new System.Drawing.Size(433, 219);
@@ -99,7 +100,7 @@ namespace RPCC.Tasks
             // comboBoxObjectType
             // 
             this.comboBoxObjectType.FormattingEnabled = true;
-            this.comboBoxObjectType.Items.AddRange(new object[] { "Exoplanet", "Brown dwarf", "White dwarf", "Nova", "Super nova", "Planet", "Asteroid", "Satellite", "Variable star", "Star cluster", "Nebula", "Galaxy", "Alert", "Other" });
+            this.comboBoxObjectType.Items.AddRange(new object[] {"Exoplanet", "Brown dwarf", "White dwarf", "Nova", "Super nova", "Planet", "Asteroid", "Satellite", "Variable star", "Star cluster", "Nebula", "Galaxy", "Alert", "Other"});
             this.comboBoxObjectType.Location = new System.Drawing.Point(6, 181);
             this.comboBoxObjectType.Name = "comboBoxObjectType";
             this.comboBoxObjectType.Size = new System.Drawing.Size(202, 28);
@@ -187,7 +188,7 @@ namespace RPCC.Tasks
             this.groupBoxFrame.Controls.Add(this.groupBox3);
             this.groupBoxFrame.Controls.Add(this.groupBox2);
             this.groupBoxFrame.Controls.Add(this.groupBoxFilters);
-            this.groupBoxFrame.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.groupBoxFrame.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (204)));
             this.groupBoxFrame.Location = new System.Drawing.Point(12, 237);
             this.groupBoxFrame.Name = "groupBoxFrame";
             this.groupBoxFrame.Size = new System.Drawing.Size(433, 200);
@@ -212,23 +213,23 @@ namespace RPCC.Tasks
             // 
             this.numericUpDown_ybin.InterceptArrowKeys = false;
             this.numericUpDown_ybin.Location = new System.Drawing.Point(11, 117);
-            this.numericUpDown_ybin.Maximum = new decimal(new int[] { 16, 0, 0, 0 });
-            this.numericUpDown_ybin.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            this.numericUpDown_ybin.Maximum = new decimal(new int[] {16, 0, 0, 0});
+            this.numericUpDown_ybin.Minimum = new decimal(new int[] {1, 0, 0, 0});
             this.numericUpDown_ybin.Name = "numericUpDown_ybin";
             this.numericUpDown_ybin.Size = new System.Drawing.Size(78, 26);
             this.numericUpDown_ybin.TabIndex = 36;
-            this.numericUpDown_ybin.Value = new decimal(new int[] { 2, 0, 0, 0 });
+            this.numericUpDown_ybin.Value = new decimal(new int[] {2, 0, 0, 0});
             // 
             // numericUpDown_xbin
             // 
             this.numericUpDown_xbin.InterceptArrowKeys = false;
             this.numericUpDown_xbin.Location = new System.Drawing.Point(11, 49);
-            this.numericUpDown_xbin.Maximum = new decimal(new int[] { 16, 0, 0, 0 });
-            this.numericUpDown_xbin.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            this.numericUpDown_xbin.Maximum = new decimal(new int[] {16, 0, 0, 0});
+            this.numericUpDown_xbin.Minimum = new decimal(new int[] {1, 0, 0, 0});
             this.numericUpDown_xbin.Name = "numericUpDown_xbin";
             this.numericUpDown_xbin.Size = new System.Drawing.Size(78, 26);
             this.numericUpDown_xbin.TabIndex = 35;
-            this.numericUpDown_xbin.Value = new decimal(new int[] { 2, 0, 0, 0 });
+            this.numericUpDown_xbin.Value = new decimal(new int[] {2, 0, 0, 0});
             // 
             // labelYbin
             // 
@@ -289,7 +290,7 @@ namespace RPCC.Tasks
             // comboBoxFrameType
             // 
             this.comboBoxFrameType.FormattingEnabled = true;
-            this.comboBoxFrameType.Items.AddRange(new object[] { "Object", "Dark", "Flat", "Test", "Bias" });
+            this.comboBoxFrameType.Items.AddRange(new object[] {"Object", "Dark", "Flat", "Test", "Bias"});
             this.comboBoxFrameType.Location = new System.Drawing.Point(113, 117);
             this.comboBoxFrameType.Name = "comboBoxFrameType";
             this.comboBoxFrameType.Size = new System.Drawing.Size(107, 28);
@@ -299,7 +300,7 @@ namespace RPCC.Tasks
             // comboBoxExp
             // 
             this.comboBoxExp.FormattingEnabled = true;
-            this.comboBoxExp.Items.AddRange(new object[] { "2", "5", "10", "15", "20", "30", "50", "80", "120", "180" });
+            this.comboBoxExp.Items.AddRange(new object[] {"2", "5", "10", "15", "20", "30", "50", "80", "120", "180"});
             this.comboBoxExp.Location = new System.Drawing.Point(113, 49);
             this.comboBoxExp.Name = "comboBoxExp";
             this.comboBoxExp.Size = new System.Drawing.Size(107, 28);
@@ -405,30 +406,43 @@ namespace RPCC.Tasks
             this.buttonDelete.UseVisualStyleBackColor = true;
             this.buttonDelete.Click += new System.EventHandler(this.buttonDelete_Click);
             // 
+            // buttonCopy
+            // 
+            this.buttonCopy.Location = new System.Drawing.Point(196, 443);
+            this.buttonCopy.Name = "buttonCopy";
+            this.buttonCopy.Size = new System.Drawing.Size(86, 31);
+            this.buttonCopy.TabIndex = 5;
+            this.buttonCopy.Text = "Copy";
+            this.buttonCopy.UseVisualStyleBackColor = true;
+            this.buttonCopy.Click += new System.EventHandler(this.buttonCopy_Click);
+            // 
             // TaskForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(455, 486);
+            this.Controls.Add(this.buttonCopy);
             this.Controls.Add(this.buttonDelete);
             this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.buttonAdd);
             this.Controls.Add(this.groupBoxFrame);
             this.Controls.Add(this.groupBoxCoords);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
             this.Name = "TaskForm";
             this.Text = "TaskForm";
             this.groupBoxCoords.ResumeLayout(false);
             this.groupBoxCoords.PerformLayout();
             this.groupBoxFrame.ResumeLayout(false);
             this.groupBox3.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_ybin)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_xbin)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.numericUpDown_ybin)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.numericUpDown_xbin)).EndInit();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             this.groupBoxFilters.ResumeLayout(false);
             this.ResumeLayout(false);
         }
+
+        private System.Windows.Forms.Button buttonCopy;
 
         private System.Windows.Forms.ComboBox comboBoxObjectType;
 

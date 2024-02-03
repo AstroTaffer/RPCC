@@ -13,8 +13,8 @@ namespace RPCC.Tasks
         private readonly int _rowIndex;
         private readonly ObservationTask _task = new ObservationTask();
 
-        public TaskForm(bool isNewTask, int rowIndex = 0)
-        {
+        public TaskForm(bool isNewTask, int rowIndex = 0, ObservationTask newTask = null)
+        {   
             InitializeComponent();
             _rowIndex = rowIndex;
             textBoxDateTime.Text = DateTime.UtcNow.ToString(CultureInfo.CurrentCulture);
@@ -22,7 +22,17 @@ namespace RPCC.Tasks
             if (_isNewTask)
             {
                 // _task.TaskNumber = Tasker.GetTasksLen();
-                textBoxCoords.Text = $@"{ASCOM.Tools.Utilities.HoursToHMS(MountDataCollector.RightAsc)} {ASCOM.Tools.Utilities.DegreesToDMS(MountDataCollector.Declination)}";
+                if (!(newTask is null))
+                {
+                    _task = newTask;
+                    SetLabels();
+                }
+                else
+                {
+                    textBoxCoords.Text = $@"{ASCOM.Tools.Utilities.HoursToHMS(MountDataCollector.RightAsc)} {ASCOM.Tools.Utilities.DegreesToDMS(MountDataCollector.Declination)}";
+
+                }
+
             }
             else
             {
@@ -38,25 +48,30 @@ namespace RPCC.Tasks
                     return;
                 }
                 
-                textBoxCoords.Text = _task.RaDec;
-                textBoxObject.Text = _task.Object;
-                textBoxObserver.Text = _task.Observer;
-                numericUpDown_xbin.Value = _task.Xbin;
-                numericUpDown_ybin.Value = _task.Ybin;
-                textBoxDateTime.Text = _task.TimeStart.ToString(CultureInfo.CurrentCulture);
-                textBoxExpN.Text = _task.AllFrames.ToString(CultureInfo.CurrentCulture);
-
-                comboBoxExp.Text = _task.Exp.ToString(CultureInfo.CurrentCulture);
-                textBoxDuration.Text = _task.Duration.ToString(CultureInfo.CurrentCulture);
-                comboBoxFrameType.Text = _task.FrameType;
-                comboBoxObjectType.Text = _task.ObjectType;
-                var s = _task.Filters.Split(' ');
-                if (s.Contains("g")) checkBoxFilg.Checked = true;
-                if (s.Contains("r")) checkBoxFilr.Checked = true;
-                if (s.Contains("i")) checkBoxFili.Checked = true;
+                SetLabels();
             }
 
             labelTaskN.Text = $@"Task №{_task.TaskNumber}";
+        }
+
+        private void SetLabels()
+        {
+            textBoxCoords.Text = _task.RaDec;
+            textBoxObject.Text = _task.Object;
+            textBoxObserver.Text = _task.Observer;
+            numericUpDown_xbin.Value = _task.Xbin;
+            numericUpDown_ybin.Value = _task.Ybin;
+            textBoxDateTime.Text = _task.TimeStart.ToString(CultureInfo.CurrentCulture);
+            textBoxExpN.Text = _task.AllFrames.ToString(CultureInfo.CurrentCulture);
+
+            comboBoxExp.Text = _task.Exp.ToString(CultureInfo.CurrentCulture);
+            textBoxDuration.Text = _task.Duration.ToString(CultureInfo.CurrentCulture);
+            comboBoxFrameType.Text = _task.FrameType;
+            comboBoxObjectType.Text = _task.ObjectType;
+            var s = _task.Filters.Split(' ');
+            if (s.Contains("g")) checkBoxFilg.Checked = true;
+            if (s.Contains("r")) checkBoxFilr.Checked = true;
+            if (s.Contains("i")) checkBoxFili.Checked = true;
         }
 
         private void buttonAdd_Click(object sender, EventArgs e)
@@ -184,6 +199,12 @@ namespace RPCC.Tasks
             // Tasker.UpdateTaskInTable(_task);
             Logger.AddLogEntry($"Task #{_task.TaskNumber} rejected");
             buttonCancel_Click(sender, e);
+        }
+
+        private void buttonCopy_Click(object sender, EventArgs e)
+        {
+            var taskForm = new TaskForm(true, _rowIndex);
+            taskForm.Show();
         }
     }
 }
