@@ -170,6 +170,9 @@ namespace RPCC.Cams
                     cursor.Add(string.IsNullOrEmpty(CameraControl.loadedTask.Object)
                         ? new HeaderCard("OBJNAME", "UNKNOWN", "object name")
                         : new HeaderCard("OBJNAME", CameraControl.loadedTask.Object, "object name"));
+                    var radec = CameraControl.loadedTask.RaDec.Split(' ');
+                    cursor.Add(new HeaderCard("OBJRA", radec[0], "object RA [h:m:s]"));
+                    cursor.Add(new HeaderCard("OBJDEC", radec[1], "object DEC [d:m:s]"));
                     goto case "Flat";
                 case "Flat":
                     cursor.Add(new HeaderCard("ALPHA", MountDataCollector.RightAsc, "scope RA [h]"));
