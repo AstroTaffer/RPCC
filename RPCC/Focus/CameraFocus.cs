@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading;
 using RPCC.Cams;
 using RPCC.Comms;
@@ -135,7 +134,7 @@ namespace RPCC.Focus
             }
             
             Frames.Add(new GetDataFromFits(focusImPath));
-            LogShit(Frames.Last());
+            Logger.LogFrameInfo(Frames.Last());
             
             if (!Frames.Last().Status)
             {
@@ -146,7 +145,7 @@ namespace RPCC.Focus
             }
             
             //проверяем валидность измерений (кол-во звезд, вытянутость), счетчик плохих кадров + или 0.
-            if (!Frames.Last().CheckImageQuality())
+            if (!Frames.Last().Focused)
             {
                 _focBadFrames++;
                 //если плохих >=Max_Foc_Bad_Frames => репойнт в зенит и рестарт процедуры, но без первого сдвига.
@@ -177,7 +176,7 @@ namespace RPCC.Focus
             //проверяем FWHM, если меньше 6, то рассчитываем сдвиг в ту же сторону еще на 90*(6-FWHM)
             if (_phase == 0)
             {
-                _shift = (short) (Math.Sign(_shift) * 90 * (6.0 - Frames.Last().Fwhm));
+                _shift = BigShift(Frames.Last().Fwhm, _shift);
                 GetImForFocus(_shift);
                 return;
             }
@@ -206,12 +205,8 @@ namespace RPCC.Focus
             _focCycles = 0;
             _focBadFrames = 0;
             _oldFwhm = Frames.Last().Fwhm;
-            //сдвиг считаем как 45*(FWHM-1.5), тогда должны дойти до фокуса за 4-5 шагов.
-            if (_sumShift < 600)
-            {
-                _shift = (short) (Math.Sign(_shift) * 45 * (_oldFwhm - 1.5));
-            }
-            
+            //сдвиг считаем как 22*(FWHM-1.5), тогда должны дойти до фокуса за 4-5 шагов.
+            _shift = SmallShift(_oldFwhm, _shift);
             GetImForFocus(_shift);
         }
 
@@ -219,7 +214,7 @@ namespace RPCC.Focus
         {
             Logger.AddLogEntry("Focus cycle #" + _focCycles);
             Frames.Add(new GetDataFromFits(focusImPath));
-            LogShit(Frames.Last());
+            Logger.LogFrameInfo(Frames.Last());
             var fwhm = Frames.Last().Fwhm;
             
             if (!Frames.Last().Status)
@@ -231,7 +226,7 @@ namespace RPCC.Focus
             }
 
             //проверяем валидность измерений (кол-во звезд, вытянутость в двух трубах), счетчик плохих кадров+ или 0.
-            if (!Frames.Last().CheckImageQuality())
+            if (!Frames.Last().Quality)
             {
                 _focBadFrames++;
                 //если плохих >=Max_Foc_Bad_Frames => репойнт в зенит.
@@ -284,10 +279,7 @@ namespace RPCC.Focus
             {
                 _oldFwhm = fwhm;
                 //сдвиг считаем как 45*(FWHM-1.5), тогда должны дойти до фокуса за 4-5 шагов.
-                if (_sumShift < 600)
-                {
-                    _shift = (short)(Math.Sign(_shift) * 45 * (fwhm - 1.5));
-                }
+                _shift = SmallShift(fwhm, _shift);
 
                 _focCycles++;
                 GetImForFocus(_shift);
@@ -338,8 +330,8 @@ namespace RPCC.Focus
         private static void PhaseThree(string focusImPath)
         {
             var testShot = new GetDataFromFits(focusImPath);
-            LogShit(testShot);
-            if (testShot.CheckFocused())
+            Logger.LogFrameInfo(testShot);
+            if (testShot.Focused)
             {
                 // FwhmBest = testShot.Fwhm;
                 Logger.AddLogEntry("FOCUS: image is focused");
@@ -347,7 +339,6 @@ namespace RPCC.Focus
                 return;
             }
             
-            Frames.Select(frame => frame.DelOutputs());
             Frames.Clear();
             _zs.Clear();
             
@@ -364,7 +355,7 @@ namespace RPCC.Focus
         {
             _frameCounter += 1;
             Frames.Add(new GetDataFromFits(focusImPath));
-            LogShit(Frames.Last());
+            Logger.LogFrameInfo(Frames.Last());
             // Сделать N-1 снимков с малой экспозицией для
             // разных положений фокуса z, распределенных по
             // всему диапазону значений
@@ -375,8 +366,6 @@ namespace RPCC.Focus
             }
             _fwhms = Frames.Select(frame => frame.Fwhm).ToList();
             _zs = Frames.Select(frame => frame.Focus).ToList();
-
-            Frames.Select(frame => frame.DelOutputs()); // удаляем все лишние файлы
 
             var newFocus = Curve_fitting(_zs, _fwhms,
                 _zs[_fwhms.IndexOf(_fwhms.Min())]); // строим кривую фокусировки и фитируем ее гиперболой
@@ -396,8 +385,8 @@ namespace RPCC.Focus
         private static void PhaseFive(string focusImPath)
         {
             var testShot = new GetDataFromFits(focusImPath);
-            LogShit(testShot);
-            if (testShot.CheckFocused())
+            Logger.LogFrameInfo(testShot);
+            if (testShot.Focused)
             {
                 // FwhmBest = testShot.Fwhm;
                 Logger.AddLogEntry("FOCUS: image is focused");
@@ -413,12 +402,15 @@ namespace RPCC.Focus
         #endregion
 
         #region Utils
-    
-        private static void LogShit(GetDataFromFits fitsAnalysis)
+
+        private static short BigShift(double fwhm, float shift)
+        {   
+            return (short) (Math.Sign(shift) * 44.5 * (6.0 - fwhm));
+        }   
+        
+        private static short SmallShift(double fwhm, float shift)
         {
-            Logger.AddLogEntry($"Status = {fitsAnalysis.Status}, " +
-                               $"SEXFWHM = {fitsAnalysis.Fwhm}, SEXELL = {fitsAnalysis.Ell}, " +
-                               $"Focus pos = {fitsAnalysis.Focus}, SEX stars = {fitsAnalysis.GetStarsNum()}");
+            return (short) (Math.Sign(shift) * 22 * (fwhm - 1.5));
         }
         
         private static void Repoint4Focus()

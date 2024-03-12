@@ -119,15 +119,40 @@ namespace RPCC.Comms
             }
         }
 
-        public static float[] GetGuideCorrection(string req)
+        public static float[] GetGuideCorrection(string im1, string im2)
         {
+            var req = $"don~{im1}~{im2}"; //Формируем запрос для донатов
             Logger.AddLogEntry($"req: {req}");
             var response = ExchangeMessages(req);
             Logger.AddLogEntry($"resp: {response}");
             
             if (!(response is null) && response != "")
-                return response.Contains("fail") ? new float[] {0, 0} : 
-                    response.Split('~').Select(float.Parse).ToArray();
+            {
+                return response.Contains("fail")
+                    ? new float[] {0, 0}
+                    : response.Split('~').Select(float.Parse).ToArray();
+            }
+            Logger.AddLogEntry("WARNING Disconnecting from Donuts");
+            Disconnect();
+            return null;
+        }
+        
+        public static float[] GetImageFwhm(string im)
+        {
+            var req = $"fwhm~{im}"; //Формируем запрос для донатов
+            Logger.AddLogEntry($"req: {req}");
+            var response = ExchangeMessages(req);
+            Logger.AddLogEntry($"resp: {response}");
+            
+            if (!(response is null) && response != "")
+            {
+                if (response.Contains("fwhm"))
+                {
+                    return response.Contains("fail")
+                        ? new float[] {0, 0, 0, 0, 0}
+                        : response.Split('~').Select(float.Parse).ToArray();
+                }
+            }
             Logger.AddLogEntry("WARNING Disconnecting from Donuts");
             Disconnect();
             return null;

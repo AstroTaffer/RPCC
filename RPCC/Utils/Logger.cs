@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Windows.Forms;
+using RPCC.Focus;
 
 namespace RPCC.Utils
 {
@@ -25,6 +26,16 @@ namespace RPCC.Utils
             {
                 LogBox.Invoke((MethodInvoker) delegate { LogBox.Items.Insert(0, $"{DateTime.UtcNow:G} {entry}"); });
             }
+        }
+
+        public static void LogFrameInfo(GetDataFromFits fitsAnalysis)
+        {
+            AddLogEntry($"Status = {fitsAnalysis.Status}, " +
+                           $"FWHM = {fitsAnalysis.Fwhm}, " +
+                           $"ELL = {fitsAnalysis.Ell}, " +
+                           $"Focus pos = {fitsAnalysis.Focus}, " +
+                           $"Num stars = {fitsAnalysis.StarsNum}," +
+                           $"Background = {fitsAnalysis.Bkg}");
         }
 
         internal static void SaveLogs()

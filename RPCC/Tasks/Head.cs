@@ -29,8 +29,8 @@ namespace RPCC.Tasks
         private static bool _isDoDarks;
         public static bool isOnPause;
         private static string _firstFrame;
-        private static double CD1_1 = 100;
-        private static double CD1_2 = 100;
+        private static double _cd11 = 100;
+        private static double _cd12 = 100;
         // private static bool _isLookingEastLastCd;
         private const double PulseGuideVelocity = 2; //sec in sec TODO add in .cfg
         public static bool IsThinking;
@@ -80,7 +80,7 @@ namespace RPCC.Tasks
                 }
             }
 
-            if (!string.IsNullOrEmpty(_firstFrame) & CD1_1 > 99)
+            if (!string.IsNullOrEmpty(_firstFrame) & _cd11 > 99)
             {
                 var cal = _firstFrame.Replace("RAW", "CALIBRATED");
                 if (File.Exists(cal))
@@ -91,8 +91,8 @@ namespace RPCC.Tasks
                         var fits = new Fits(cal);
                         var hdu = (ImageHDU)fits.GetHDU(0);
     
-                        CD1_1 = hdu.Header.GetDoubleValue("CD1_1");
-                        CD1_2 = hdu.Header.GetDoubleValue("CD1_2");
+                        _cd11 = hdu.Header.GetDoubleValue("CD1_1");
+                        _cd12 = hdu.Header.GetDoubleValue("CD1_2");
                         // _isLookingEastLastCd = MountDataCollector.IsLookingEast;
                         fits.Close();
                     }
@@ -101,8 +101,6 @@ namespace RPCC.Tasks
                         
                     }
                 }
-                
-
             }
 
             foreach (DataRow row in DbCommunicate.GetTableForThinking().Rows)
@@ -270,8 +268,8 @@ namespace RPCC.Tasks
             isOnPause = false;
             currentTask = null;
             _firstFrame = null;
-            CD1_1 = 100;
-            CD1_2 = 100;
+            _cd11 = 100;
+            _cd12 = 100;
             if (!MountDataCollector.IsParked)
             {
                 SiTechExeSocket.Park();
@@ -350,9 +348,7 @@ namespace RPCC.Tasks
                             if (!string.IsNullOrEmpty(cam.latestImageFilename))
                             {
                                 fitsAnalysis = new GetDataFromFits(cam.latestImageFilename); //TODO распараллелить
-                                Logger.AddLogEntry($"Camera {cam.filter}: Status = {fitsAnalysis.Status}, " +
-                                                   $"SEXFWHM = {fitsAnalysis.Fwhm}, SEXELL = {fitsAnalysis.Ell}, " +
-                                                   $"Focus pos = {fitsAnalysis.Focus}, SEX stars = {fitsAnalysis.GetStarsNum()}");
+                                Logger.LogFrameInfo(fitsAnalysis);
                             }
                         }
 
@@ -363,7 +359,7 @@ namespace RPCC.Tasks
                             return;
                         }
                         
-                        if (IsGuid & fitsAnalysis.CheckImageQuality())
+                        if (IsGuid & fitsAnalysis.Focused)
                         {
                             Guiding(); 
                         }
@@ -379,7 +375,7 @@ namespace RPCC.Tasks
                         {
                             if (CameraFocus.IsAutoFocus)
                             {
-                                if (!fitsAnalysis.CheckFocused())
+                                if (!fitsAnalysis.Focused)
                                 {
                                     CameraFocus.StartAutoFocus(currentTask);
                                 }
@@ -414,9 +410,7 @@ namespace RPCC.Tasks
                             if (!string.IsNullOrEmpty(cam.latestImageFilename))
                             {
                                 fitsAnalysis = new GetDataFromFits(cam.latestImageFilename); //TODO распараллелить
-                                Logger.AddLogEntry($"Camera {cam.filter}: Status = {fitsAnalysis.Status}, " +
-                                                   $"SEXFWHM = {fitsAnalysis.Fwhm}, SEXELL = {fitsAnalysis.Ell}, " +
-                                                   $"Focus pos = {fitsAnalysis.Focus}, SEX stars = {fitsAnalysis.GetStarsNum()}");
+                                Logger.LogFrameInfo(fitsAnalysis);
                             }
                         }
 
@@ -428,7 +422,7 @@ namespace RPCC.Tasks
                         }
                         if (CameraFocus.IsAutoFocus)
                         {
-                            if (!fitsAnalysis.CheckFocused())
+                            if (!fitsAnalysis.Focused)
                             {
                                 CameraFocus.StartAutoFocus(currentTask);
                             }
@@ -524,7 +518,7 @@ namespace RPCC.Tasks
             }
             else
             {
-                if (CD1_1 > 99 || CD1_2 > 99 || CD1_1 == 0 || CD1_2 == 0)
+                if (_cd11 > 99 || _cd12 > 99 || _cd11 == 0 || _cd12 == 0)
                 {
                     return;
                 }
@@ -534,15 +528,16 @@ namespace RPCC.Tasks
                     return;
                 } //Если нет конекта или нет матрицы, то выходим
                 // var req = $"\"{_firstFrame}\"~\"{CameraControl.cams.Last().latestImageFilename}\""; //Формируем запрос для донатов
-                var req = $"{_firstFrame}~{CameraControl.cams.Last().latestImageFilename}"; //Формируем запрос для донатов
-                var correction = DonutsSocket.GetGuideCorrection(req); //Получаем коррекцию
+                // var req = $"don~{_firstFrame}~{CameraControl.cams.Last().latestImageFilename}"; //Формируем запрос для донатов
+                var correction = DonutsSocket.GetGuideCorrection(_firstFrame, 
+                    CameraControl.cams.Last().latestImageFilename); //Получаем коррекцию
                 if (correction[0] > 2 | correction[1] > 2)
                 {
                     Logger.AddLogEntry($"WARNING: guiding correction: dx = {correction[0]} px, dy = {correction[1]} px, skip correction");
                     return;
                 } //Если коррекция больше 2 пикселей, выходим
-                double corDec = (correction[0] * CD1_1 + correction[1] * CD1_2) * 60.0 * 60.0;
-                double corRa = (correction[1] * CD1_2 + correction[0] * CD1_1) * 60.0 * 60.0;
+                double corDec = (correction[0] * _cd11 + correction[1] * _cd12) * 60.0 * 60.0;
+                double corRa = (correction[1] * _cd12 + correction[0] * _cd11) * 60.0 * 60.0;
                 Logger.AddLogEntry($"Guiding correction: dx = {correction[0]} px, dy = {correction[1]} px");
                 Logger.AddLogEntry($"corRa = {corRa}, corDec = {corDec}");
                 //arcsec

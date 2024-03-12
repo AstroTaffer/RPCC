@@ -285,6 +285,7 @@
     <Content Include="Guid\2023-04-07T18-00-24.167_EAST_V.fits">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Guid\testfwhm.py" />
     <Content Include="Sex\default.nnw">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
