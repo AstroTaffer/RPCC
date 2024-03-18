@@ -86,7 +86,9 @@ def calc_fwhm(path):
         hdulist[0].header.append(ell_card)
         hdulist[0].header.append(stars_card)
         hdulist[0].header.append(bkg_card)
-    return header['FOCUS'], fwhm, ell, stars_num, b
+    if np.isnan(fwhm):
+        return 'fail'
+    return '~'.join([str(header['FOCUS']), str(fwhm), str(ell), str(stars_num), str(b)])
 
 
 def timer_loop():
@@ -98,8 +100,8 @@ def timer_loop():
 
 
 def pars_req(req: str) -> str:
-    if 'ping' in req:
-        return 'pong'
+    # if 'ping' in req:
+    #     return 'pong'
     data = req.split('~')
     if len(data) < 2:
         return 'fail while split'
@@ -121,10 +123,14 @@ def pars_req(req: str) -> str:
     if 'fwhm' in data[0]:
         # fwhm = 0.0225 * focus - 35
         # focus = 44.5*(fwhm + 35)
-        out = calc_fwhm(data[1])
-        if np.isnan(out[1]):
-            return 'fail'
-        return '~'.join(out)
+        try:
+            print(data)
+            out = calc_fwhm(data[1])
+        except Exception as e:
+            print(e)
+            print('fail')
+            return f'fail: {e}'
+        return out
 
 
 def handle_client(reader, writer):
@@ -137,6 +143,8 @@ def handle_client(reader, writer):
             break
         if (request is not None) and (request != '') and ('\ufeff' not in request):
             response = pars_req(request) + '\n'
+            # if 'pong' in response:
+            #     continue
             writer.writelines(response)
             writer.flush()
     writer.close()

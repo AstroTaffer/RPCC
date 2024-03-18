@@ -40,6 +40,7 @@ namespace RPCC.Focus
 
         public static void StartAutoFocus(ObservationTask observationTask)
         {
+            Logger.AddLogEntry("Start focusing");
             Head.isFocusing = true;
             _taskForFocus = observationTask.Copy();
             _taskForFocus.FrameType = Focus;
@@ -145,7 +146,7 @@ namespace RPCC.Focus
             }
             
             //проверяем валидность измерений (кол-во звезд, вытянутость), счетчик плохих кадров + или 0.
-            if (!Frames.Last().Focused)
+            if (!Frames.Last().Quality)
             {
                 _focBadFrames++;
                 //если плохих >=Max_Foc_Bad_Frames => репойнт в зенит и рестарт процедуры, но без первого сдвига.

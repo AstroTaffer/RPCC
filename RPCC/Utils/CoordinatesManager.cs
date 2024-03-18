@@ -1,6 +1,7 @@
 ﻿using System;
 using ASCOM.Tools;
 using ASCOM.Tools.Novas31;
+using RPCC.Comms;
 using RPCC.Tasks;
 
 namespace RPCC.Utils
@@ -38,6 +39,7 @@ namespace RPCC.Utils
 
         public static void CalculateObjectDistance2Moon(ObservationTask task)
         {
+            // Возвращает угловое расстояние в градусах между целью и луной на данный момент
             var jd = Utilities.JulianDateUtc;
             double moonRa = 0, moonDec = 0, moonDist = 0;   
             var stat = Novas.LocalPlanet(jd, Moon, 0.0, Observatory, Accuracy.Reduced,
@@ -61,6 +63,20 @@ namespace RPCC.Utils
             Trans.JulianDateUTC = Utilities.JulianDateFromDateTime(time);
             var el = Trans.ElevationTopocentric;
             return el >= 30;
+        }
+            
+        public static double CalculateObjectDistance2Mount(ObservationTask task)
+        {   
+            /*
+              Возвращает угловое расстояние в минутах между направлением трубы и целью
+             */
+            var mountRa = MountDataCollector.RightAsc * 15 * Math.PI / 18;
+            var mountDec= MountDataCollector.Declination * Math.PI / 180;
+
+            var tarRa = task.Ra * 15 * Math.PI / 180;
+            var tarDec = task.Dec * Math.PI / 180;
+            return (Math.Acos(Math.Sin(tarDec) * Math.Sin(mountDec) +
+                              Math.Cos(tarDec) * Math.Cos(mountDec) * Math.Cos(mountRa - tarRa)) * 180 / Math.PI) * 60;
         }
     }
 }

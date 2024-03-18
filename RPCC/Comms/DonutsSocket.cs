@@ -51,7 +51,7 @@ namespace RPCC.Comms
                     _streamWriter = new StreamWriter(_stream, Encoding.UTF8);
                     _streamWriter.AutoFlush = true;
                     IsConnected = true;
-                    PingPongTimer.Start();
+                    // PingPongTimer.Start();
                     Logger.AddLogEntry($"Connected to Donuts {_endPoint}");
                 }
                 else
@@ -146,12 +146,9 @@ namespace RPCC.Comms
             
             if (!(response is null) && response != "")
             {
-                if (response.Contains("fwhm"))
-                {
-                    return response.Contains("fail")
-                        ? new float[] {0, 0, 0, 0, 0}
-                        : response.Split('~').Select(float.Parse).ToArray();
-                }
+                return response.Contains("fail")
+                    ? new float[] {0, 0, 0, 0, 0}
+                    : response.Split('~').Select(float.Parse).ToArray();
             }
             Logger.AddLogEntry("WARNING Disconnecting from Donuts");
             Disconnect();

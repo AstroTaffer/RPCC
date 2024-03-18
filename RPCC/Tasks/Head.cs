@@ -74,10 +74,19 @@ namespace RPCC.Tasks
                     _isDoDarks & !WeatherDataCollector.Obs |
                     _isDoFlats & WeatherDataCollector.Flat)
                 {
-                    isOnPause = false;
-                    Logger.AddLogEntry($"Unpause task #{currentTask.TaskNumber}");
-                    CameraControl.StartExposure();
+                    Logger.AddLogEntry($"Head: Unpause task #{currentTask.TaskNumber}");
+                    if (UnparkAndGoTo())
+                    {
+                        isOnPause = false;
+                        CameraControl.StartExposure();
+                    }
                 }
+            }
+
+            if ((MountDataCollector.IsParked | MountDataCollector.IsParking) & !(currentTask is null))
+            {
+                isOnPause = true;
+                Logger.AddLogEntry($"Head: Pause task #{currentTask.TaskNumber}, mount is parked or parking");
             }
 
             if (!string.IsNullOrEmpty(_firstFrame) & _cd11 > 99)
@@ -87,12 +96,13 @@ namespace RPCC.Tasks
                 {
                     try
                     {
-                        //Если матрицы еще нет, ориентируемся на первый кадр, если есть, ловим решенный кадр по свежее
+                        //Если матрицы еще нет, ориентируемся на первый кадр, если есть, ловим решенный кадр посвежее
                         var fits = new Fits(cal);
                         var hdu = (ImageHDU)fits.GetHDU(0);
     
                         _cd11 = hdu.Header.GetDoubleValue("CD1_1");
                         _cd12 = hdu.Header.GetDoubleValue("CD1_2");
+                        Logger.AddLogEntry($"Head: new CD11, CD12 = [{_cd11}, {_cd12}]");
                         // _isLookingEastLastCd = MountDataCollector.IsLookingEast;
                         fits.Close();
                     }
@@ -177,8 +187,15 @@ namespace RPCC.Tasks
                       (currentTask.TimeStart - DateTime.UtcNow).TotalMinutes < TotalMinutes2StartTask &
                       CameraControl.isConnected)
                     {
+                        while (MountDataCollector.IsParking)
+                        {
+                            Logger.AddLogEntry("Head: task is preparing while mount is parking, sleep 1 sec");
+                            Thread.Sleep(1000);
+                        }
+
                         if (MountDataCollector.IsParked)
                         {
+                            Logger.AddLogEntry("Head: task is preparing while mount is parked, unparking");
                             SiTechExeSocket.Unpark();
                             //Thread.Sleep(5000);
                         }
@@ -228,19 +245,9 @@ namespace RPCC.Tasks
             _isObserve = true;
             currentTask.Status = 1;
             // DbCommunicate.UpdateTaskInDb(_currentTask);
-            if (!(Math.Abs(currentTask.Ra - MountDataCollector.RightAsc) < 1e-3 &
-                  Math.Abs(currentTask.Dec - MountDataCollector.Declination) < 1e-3))
+            if (!UnparkAndGoTo())
             {
-                if (MountDataCollector.IsParked)
-                {
-                    SiTechExeSocket.Unpark();
-                }
-                if (!SiTechExeSocket.GoTo(currentTask.Ra, currentTask.Dec, true))
-                {
-                    Logger.AddLogEntry($"WARNING: can't start task #{currentTask.TaskNumber}, error while GOTO");
-                    EndTask(4);
-                    return;
-                }
+                return;
             }
             
             if (CameraControl.PrepareToObs(currentTask))
@@ -257,6 +264,26 @@ namespace RPCC.Tasks
             }
             EndTask(4);
         }
+    
+        private static bool UnparkAndGoTo()
+        {
+            if (CoordinatesManager.CalculateObjectDistance2Mount(currentTask) < 10) return true;
+            while (MountDataCollector.IsParking)
+            {
+                Logger.AddLogEntry("UnparkAndGoTo: mount is parking, sleep 1 sec");
+                Thread.Sleep(1000);
+            }
+            if (MountDataCollector.IsParked)
+            {
+                Logger.AddLogEntry("UnparkAndGoTo: mount is parked, unparking");
+                SiTechExeSocket.Unpark();
+            }
+            if (SiTechExeSocket.GoTo(currentTask.Ra, currentTask.Dec, true)) return true;
+            Logger.AddLogEntry($"WARNING: can't start task #{currentTask.TaskNumber}, error while GOTO");
+            EndTask(4);
+            return false;
+
+        }
 
         public static void EndTask(short endStatus)
         {
@@ -272,6 +299,7 @@ namespace RPCC.Tasks
             _cd12 = 100;
             if (!MountDataCollector.IsParked)
             {
+                Logger.AddLogEntry("EndTask: mount is parking");
                 SiTechExeSocket.Park();
             }
         }
@@ -281,12 +309,7 @@ namespace RPCC.Tasks
             _isObserve = true;
             currentTask.Status = 1;
             Logger.AddLogEntry($"Start task# {currentTask.TaskNumber}, type: {currentTask.FrameType}");
-            if (MountDataCollector.IsParked)
-            {
-                SiTechExeSocket.Unpark();
-                //Thread.Sleep(5000);
-            }
-            if (SiTechExeSocket.GoTo(currentTask.Ra, currentTask.Dec, true)) //проверять доехал ли
+            if (UnparkAndGoTo()) //проверять доехал ли
             {
                 if (CameraControl.PrepareToObs(currentTask))
                 {
@@ -327,7 +350,7 @@ namespace RPCC.Tasks
                 _isDoFlats = false;
                 isOnPause = false;
                 currentTask = null;
-                if (!MountDataCollector.IsParked)
+                if (!MountDataCollector.IsParked & !MountDataCollector.IsParking)
                 {
                     SiTechExeSocket.Park();
                 }
@@ -341,8 +364,6 @@ namespace RPCC.Tasks
                     if (currentTask.TimeEnd > DateTime.UtcNow)
                     {
                         // 
-                       
-
                         foreach (var cam in CameraControl.cams)
                         {
                             if (!string.IsNullOrEmpty(cam.latestImageFilename))
@@ -479,7 +500,7 @@ namespace RPCC.Tasks
                 {
                     if (currentTask.DoneFrames < currentTask.AllFrames)
                     {
-                        if (WeatherDataCollector.Obs)
+                        if (WeatherDataCollector.Flat)
                         {
                             CameraControl.StartExposure();
                         }

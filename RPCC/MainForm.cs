@@ -87,6 +87,10 @@ namespace RPCC
                 Head.IsThinking = true;
                 Head.ThinkingTimer.Start();
             }
+            if (checkBoxAutoFocus.Checked)
+            {
+                CameraFocus.IsAutoFocus = true;
+            }
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
