@@ -41,7 +41,7 @@ namespace RPCC.Comms
             // Settings = settings;
             // _collector = collector;
 
-            _meteoTimer = new Timer(60000);
+            _meteoTimer = new Timer(1000);
             _meteoTimer.Elapsed += OnMeteoTimedEventAsync;
 
             _isConnected = false;

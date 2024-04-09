@@ -42,7 +42,7 @@ namespace RPCC.Tasks
         public const string Light = "Object";
         public const string Test = "Test";
         public static bool IsGuid = true;
-
+        private static int troubles = 0;
         public static void StartThinking()
         {
             ThinkingTimer.Elapsed += Thinking;
@@ -68,6 +68,24 @@ namespace RPCC.Tasks
                 CameraControl.ReconnectCameras();
             }
 
+            if (MountDataCollector.IsInBlinky)
+            {
+                troubles += 1;
+                SiTechExeSocket.MotorsToAuto();
+            }
+            else
+            {
+                troubles = 0;
+            }
+
+            if (troubles > 2)
+            {
+                if (!(currentTask is null))
+                {
+                    EndTask(5);
+                }
+            }
+
             if (isOnPause & !(currentTask is null))
             {
                 if (_isObserve & WeatherDataCollector.Obs |
@@ -83,7 +101,8 @@ namespace RPCC.Tasks
                 }
             }
 
-            if ((MountDataCollector.IsParked | MountDataCollector.IsParking) & !(currentTask is null))
+            if ((WeatherDataCollector.Obs | WeatherDataCollector.Flat) & 
+                (MountDataCollector.IsParked | MountDataCollector.IsParking) & (currentTask != null))
             {
                 isOnPause = true;
                 Logger.AddLogEntry($"Head: Pause task #{currentTask.TaskNumber}, mount is parked or parking");
@@ -197,7 +216,7 @@ namespace RPCC.Tasks
                         {
                             Logger.AddLogEntry("Head: task is preparing while mount is parked, unparking");
                             SiTechExeSocket.Unpark();
-                            //Thread.Sleep(5000);
+                            Thread.Sleep(5000);
                         }
 
                         switch (currentTask.FrameType)
@@ -297,11 +316,11 @@ namespace RPCC.Tasks
             _firstFrame = null;
             _cd11 = 100;
             _cd12 = 100;
-            if (!MountDataCollector.IsParked)
-            {
-                Logger.AddLogEntry("EndTask: mount is parking");
-                SiTechExeSocket.Park();
-            }
+            // if (!MountDataCollector.IsParked | !MountDataCollector.IsParking)
+            // {
+            //     Logger.AddLogEntry("EndTask: mount is parking");
+            //     SiTechExeSocket.Park();
+            // }
         }
 
         private static void StartDoLight()
@@ -353,6 +372,7 @@ namespace RPCC.Tasks
                 if (!MountDataCollector.IsParked & !MountDataCollector.IsParking)
                 {
                     SiTechExeSocket.Park();
+                    Logger.AddLogEntry("CamCallback: mount is parking");
                 }
                 return;
             }
