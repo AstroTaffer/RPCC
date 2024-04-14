@@ -431,7 +431,7 @@ namespace RPCC.Utils
                     new XElement("snCamR", "ML0892515"),
                     new XElement("snCamI", "ML0742515"),
                     new XElement("numFlushes", 5),
-                    new XElement("camTemp", -30.0)),
+                    new XElement("camTemp", -20.0)),
                 
                 new XElement("survey",
                   new XElement("mainOutFolder", Directory.Exists("D:") ? 
