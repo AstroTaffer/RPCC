@@ -207,6 +207,7 @@ namespace RPCC.Comms
             {
                 // _collector.ParseFullData(response);
                 WeatherDataCollector.ParseFullData(response);
+                // Logger.AddLogEntry(response);
             }
         }
 

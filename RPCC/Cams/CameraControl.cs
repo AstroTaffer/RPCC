@@ -347,6 +347,7 @@ namespace RPCC.Cams
         #region Expose Frames
         internal static bool PrepareToObs(ObservationTask task)
         {
+            
             string[] validFrameTypes = { "Object", "Bias", "Dark", "Flat", "Focus", "Test" };
 
             if (!Array.Exists(validFrameTypes, element => element == task.FrameType))
@@ -552,7 +553,7 @@ namespace RPCC.Cams
             }
             if (!isAllGood) Logger.AddLogEntry($"ERROR Unable to read frame from {cam.serialNumber} camera");
 
-            // TODO: Mirror image
+            // Mirror image
             switch (cam.filter)
             {
                 case "g":

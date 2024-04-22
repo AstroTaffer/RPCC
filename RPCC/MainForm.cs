@@ -79,6 +79,10 @@ namespace RPCC
             // DbCommunicate.LoadDbTable();
             // DbCommunicate.DisconnectFromDb();
             
+            progressBarG.Style = ProgressBarStyle.Continuous;
+            progressBarR.Style = ProgressBarStyle.Continuous;
+            progressBarI.Style = ProgressBarStyle.Continuous;
+            
             FocusTimer.Start();
             timerUi.Start();
             Head.StartThinking();
@@ -128,6 +132,7 @@ namespace RPCC
                         labelCam3CoolerPwr.Text = $"Cooler Power: {CameraControl.cams[2].coolerPwr} %";
                         labelCam3Status.Text = $"Status: {CameraControl.cams[2].status}";
                         labelCam3RemTime.Text = $"Remaining: {CameraControl.cams[2].remTime / 1000}";
+                        SetProgress(2);
                         goto case 2;
                     case 2:
                         labelCam2CcdTemp.Text = $"CCD Temp: {CameraControl.cams[1].ccdTemp:F3}";
@@ -135,6 +140,7 @@ namespace RPCC
                         labelCam2CoolerPwr.Text = $"Cooler Power: {CameraControl.cams[1].coolerPwr} %";
                         labelCam2Status.Text = $"Status: {CameraControl.cams[1].status}";
                         labelCam2RemTime.Text = $"Remaining: {CameraControl.cams[1].remTime / 1000}";
+                        SetProgress(1);
                         goto case 1;
                     case 1:
                         labelCam1CcdTemp.Text = $"CCD Temp: {CameraControl.cams[0].ccdTemp:F3}";
@@ -142,6 +148,7 @@ namespace RPCC
                         labelCam1CoolerPwr.Text = $"Cooler Power: {CameraControl.cams[0].coolerPwr} %";
                         labelCam1Status.Text = $"Status: {CameraControl.cams[0].status}";
                         labelCam1RemTime.Text = $"Remaining: {CameraControl.cams[0].remTime / 1000}";
+                        SetProgress(0);
                         break;
                 }
             }
@@ -562,6 +569,32 @@ namespace RPCC
         private void checkBoxGuiding_CheckedChanged(object sender, EventArgs e)
         {
             Head.IsGuid = checkBoxGuiding.Checked;
+        }
+
+        private void SetProgress(int indx)
+        {
+            var value = 0;
+            if (CameraControl.cams[indx].isExposing)
+            {
+                if (Head.currentTask is null) return;
+                value = 100 - CameraControl.cams[indx].remTime / 10 / Head.currentTask.Exp;
+                if (value < 0)
+                {
+                    value = 0;
+                }
+            }
+            switch (CameraControl.cams[indx].filter)
+            {
+                case "g":
+                    progressBarG.Value = value;
+                    break;
+                case "r":
+                    progressBarR.Value = value;
+                    break;
+                case "i":
+                    progressBarI.Value = value;
+                    break;
+            }
         }
     }
 }
