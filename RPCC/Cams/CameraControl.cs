@@ -356,6 +356,27 @@ namespace RPCC.Cams
                 return false;
             }
 
+            // Safety checks
+            switch (task.FrameType)
+            {
+                case "Bias":
+                    if (task.Exp != 0)
+                    {
+                        Logger.AddLogEntry($"WARNING Incorrect exposure time {task.Exp} in bias-type observation task (expected 0)");
+                    }
+                    break;
+                case "Focus":
+                    if (task.Xbin != 1)
+                    {
+                        Logger.AddLogEntry($"WARNING Incorrect Xbin factor {task.Xbin} in focus-type observation task (expected 1)");
+                    }
+                    if (task.Ybin != 1)
+                    {
+                        Logger.AddLogEntry($"WARNING Incorrect Ybin factor {task.Ybin} in focus-type observation task (expected 1)");
+                    }
+                    break;
+            }
+
             bool isAllGood = true;
             int errorLastFliCmd;
 
@@ -403,25 +424,11 @@ namespace RPCC.Cams
                     }
 
                     // Exposure
-                    switch (task.FrameType)
+                    errorLastFliCmd = NativeMethods.FLISetExposureTime(cams[i].handle, task.Exp * 1000);
+                    if (errorLastFliCmd != 0)
                     {
-                        case "Bias":
-                            // Safety measure: exposure is explicitly set to 0 ms
-                            errorLastFliCmd = NativeMethods.FLISetExposureTime(cams[i].handle, 0);
-                            if (errorLastFliCmd != 0)
-                            {
-                                Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} exposure time");
-                                isAllGood = false;
-                            }
-                            break;
-                        default:
-                            errorLastFliCmd = NativeMethods.FLISetExposureTime(cams[i].handle, task.Exp * 1000);
-                            if (errorLastFliCmd != 0)
-                            {
-                                Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} exposure time");
-                                isAllGood = false;
-                            }
-                            break;
+                        Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} exposure time");
+                        isAllGood = false;
                     }
 
                     // VBin, HBin and corresponding VisibleArea

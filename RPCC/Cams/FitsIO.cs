@@ -147,6 +147,8 @@ namespace RPCC.Cams
                 cam.expStartDt.ToString("yyyy-MM-ddTHH:mm:ss.fff"),
                 "date-time at the beginning of exposure"));
             cursor.Add(new HeaderCard("JD-OBS", cam.expStartJd, "JD at the beginning of exposure"));
+            // I'm sorry in advance if this MJD calculation is wrong
+            cursor.Add(new HeaderCard("MJD-OBS", cam.expStartJd - 2400000.5, "MJD at the beginning of exposure"));
             cursor.Add(new HeaderCard("COUNT",
                 CameraControl.loadedTask.DoneFrames + 1, "frame number in sequence"));
             cursor.Add(new HeaderCard("MAXCNT",

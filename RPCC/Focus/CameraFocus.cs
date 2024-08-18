@@ -44,6 +44,8 @@ namespace RPCC.Focus
             Head.isFocusing = true;
             _taskForFocus = observationTask.Copy();
             _taskForFocus.FrameType = Focus;
+            _taskForFocus.Xbin = 1;
+            _taskForFocus.Ybin = 1;
             if (Head.currentTask.Exp > FocusExp)
             {
                 _taskForFocus.Exp = FocusExp;
