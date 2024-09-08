@@ -121,7 +121,8 @@ namespace RPCC
         private void TimerUiUpdate(object sender, EventArgs e)
         {
             tSStatusClock.Text = @"UTC: " + DateTime.UtcNow.ToString("yyyy-MM-ddTHH-mm-ss");
-
+            checkBoxHead.Checked = Head.IsThinking;
+            checkBoxGuiding.Checked = Head.IsGuid;
             try
             {
                 switch (CameraControl.cams.Length)
@@ -549,7 +550,7 @@ namespace RPCC
             var taskForm = new TaskForm(false, e.RowIndex);
             taskForm?.Show();
         }
-        
+
         private void CheckBoxHead_CheckedChanged(object sender, EventArgs e)
         {
             if (checkBoxHead.Checked) Head.ThinkingTimer.Start();
@@ -558,14 +559,8 @@ namespace RPCC
             Head.IsThinking = checkBoxHead.Checked;
         }
 
-        // private void DataGridViewTasker_VisibleChanged(object sender, EventArgs e)
-        // {
-        //     if (!_isFirstLoad || !dataGridViewTasker.Visible) return;
-        //     _isFirstLoad = false;
-        //     Tasker.PaintTable();
-        // }
         #endregion
-
+        
         private void checkBoxGuiding_CheckedChanged(object sender, EventArgs e)
         {
             Head.IsGuid = checkBoxGuiding.Checked;
