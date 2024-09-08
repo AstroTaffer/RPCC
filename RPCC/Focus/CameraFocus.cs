@@ -26,7 +26,7 @@ namespace RPCC.Focus
         private static readonly List<GetDataFromFits> Frames = new List<GetDataFromFits>();
         private static int _startFocusPos;
         private const int N = 10; //количество точек для построения кривой фокусировки
-        private static short _shift = -100; //шаг по фокусу
+        private static short _shift; //шаг по фокусу = -50
         private static short _sumShift;
         private static ObservationTask _taskForFocus;
         private static short _phase;
@@ -37,6 +37,7 @@ namespace RPCC.Focus
         private static short _frameCounter;
         private const string Focus = "Focus";
         private const short FocusExp = 10;
+        public static double seeing = 1;
 
         public static void StartAutoFocus(ObservationTask observationTask)
         {
@@ -269,14 +270,14 @@ namespace RPCC.Focus
             {
                 Logger.AddLogEntry("FOCUS: image is focused");
                 // FwhmBest = Frames.Last().Fwhm;
-                FocusingDone();
+                FocusingDone(fwhm);
                 return;
             }
 
             if ( _oldFwhm < fwhm)
             {
                 _shift *= -1;
-                Logger.AddLogEntry($"FOCUS: Old_FWHM < FWHM, but fwhm < 3, reverse");
+                Logger.AddLogEntry($"FOCUS: Old_FWHM < FWHM, but fwhm > 3, reverse");
             }
             if(_focCycles < MaxFocCycles && _focBadFrames < MaxFocBadFrames)
             {
@@ -310,24 +311,29 @@ namespace RPCC.Focus
             }
             
             //после много попыток дефокуса
-            Logger.AddLogEntry("FOCUS: Max cycles reached, start curve algorithm on previous frames, phase 3");
-            _phase = 2;
-
-            _fwhms = Frames.Select(frame => frame.Fwhm).ToList();
-            _zs = Frames.Select(frame => frame.Focus).ToList();
-
-            var newFocus = Curve_fitting(_zs, _fwhms, _zs[_fwhms.IndexOf(_fwhms.Min())]);
-
-            if (Math.Abs(newFocus) < 3000)
-            {
-                Logger.AddLogEntry(@"FOCUS: minimum position " + newFocus);
-
-                var newShift = newFocus - SerialFocus.CurrentPosition;
-                GetImForFocus(newShift);
-            } else
-            {
-                Logger.AddLogEntry("Math.Abs(newFocus) > 3000");
-            }
+            // Logger.AddLogEntry("FOCUS: Max cycles reached, start curve algorithm on previous frames, phase 3");
+            Logger.AddLogEntry("FOCUS: Max cycles reached, return focus and exit");
+            // FwhmBest = 0;
+            ReturnFocusAndExit();
+            // return;
+            //
+            // _phase = 2;
+            //
+            // _fwhms = Frames.Select(frame => frame.Fwhm).ToList();
+            // _zs = Frames.Select(frame => frame.Focus).ToList();
+            //
+            // var newFocus = Curve_fitting(_zs, _fwhms, _zs[_fwhms.IndexOf(_fwhms.Min())]);
+            //
+            // if (Math.Abs(newFocus) < 3000)
+            // {
+            //     Logger.AddLogEntry(@"FOCUS: minimum position " + newFocus);
+            //
+            //     var newShift = newFocus - SerialFocus.CurrentPosition;
+            //     GetImForFocus(newShift);
+            // } else
+            // {
+            //     Logger.AddLogEntry("Math.Abs(newFocus) > 3000");
+            // }
         }
     
         private static void PhaseThree(string focusImPath)
@@ -338,7 +344,7 @@ namespace RPCC.Focus
             {
                 // FwhmBest = testShot.Fwhm;
                 Logger.AddLogEntry("FOCUS: image is focused");
-                FocusingDone();
+                FocusingDone(testShot.Fwhm);
                 return;
             }
             
@@ -393,7 +399,7 @@ namespace RPCC.Focus
             {
                 // FwhmBest = testShot.Fwhm;
                 Logger.AddLogEntry("FOCUS: image is focused");
-                FocusingDone();
+                FocusingDone(testShot.Fwhm);
                 return;
             }
 
@@ -440,11 +446,12 @@ namespace RPCC.Focus
         {
             SerialFocus.FRun_To(-1 * _sumShift);
             _sumShift = 0;
-            FocusingDone();
+            FocusingDone(1);
         }
 
-        private static void FocusingDone()
+        private static void FocusingDone(double seeing)
         {
+            CameraFocus.seeing = seeing;
             if (DeFocus != 0)
             {
                 Logger.AddLogEntry("FOCUS: defocus to " + DeFocus);
@@ -452,6 +459,7 @@ namespace RPCC.Focus
             }
             // _taskForFocus.FrameType = Head.Light;
             Head.isFocusing = false;
+            
             CameraControl.PrepareToObs(Head.currentTask);
             if (!Head.isOnPause)
             {
