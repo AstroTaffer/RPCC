@@ -122,9 +122,9 @@ namespace RPCC.Comms
         public static float[] GetGuideCorrection(string im1, string im2)
         {
             var req = $"don~{im1}~{im2}"; //Формируем запрос для донатов
-            Logger.AddLogEntry($"req: {req}");
+            // Logger.AddLogEntry($"DONUTS req: {req}");
             var response = ExchangeMessages(req);
-            Logger.AddLogEntry($"resp: {response}");
+            // Logger.AddLogEntry($"DONUTS resp: {response}");
             
             if (!(response is null) && response != "")
             {
@@ -140,9 +140,9 @@ namespace RPCC.Comms
         public static float[] GetImageFwhm(string im)
         {
             var req = $"fwhm~{im}"; //Формируем запрос для донатов
-            Logger.AddLogEntry($"req: {req}");
+            // Logger.AddLogEntry($"req: {req}");
             var response = ExchangeMessages(req);
-            Logger.AddLogEntry($"resp: {response}");
+            // Logger.AddLogEntry($"resp: {response}");
             
             if (!(response is null) && response != "")
             {
