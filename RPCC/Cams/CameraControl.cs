@@ -345,8 +345,8 @@ namespace RPCC.Cams
         #endregion
 
         #region Expose Frames
-        internal static bool PrepareToObs(ObservationTask task)
-        {
+        internal static bool PrepareToObs(ObservationTask task, bool isCheck = false)
+        {   
             
             string[] validFrameTypes = { "Object", "Bias", "Dark", "Flat", "Focus", "Test" };
 
@@ -494,7 +494,27 @@ namespace RPCC.Cams
                 }
             }
 
-            if (isAllGood) loadedTask = task;
+            if (isAllGood)
+            {
+                loadedTask = task;
+            }
+            else if (isCheck)
+            {
+                Head.IsThinking = false;
+                Head.ThinkingTimer.Stop();
+            }
+            else
+            {
+                if (ReconnectCameras() & PrepareToObs(task, true))
+                {
+                    loadedTask = task;
+                }
+                else
+                {
+                    Head.IsThinking = false;
+                    Head.ThinkingTimer.Stop();
+                }
+            }
             return isAllGood;
         }
         
