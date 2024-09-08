@@ -204,6 +204,16 @@ namespace RPCC.Tasks
         private void buttonCopy_Click(object sender, EventArgs e)
         {
             var taskForm = new TaskForm(true, _rowIndex);
+            taskForm.textBoxCoords.Text = textBoxCoords.Text;
+            taskForm.textBoxObserver.Text = textBoxObserver.Text;
+            taskForm.comboBoxObjectType.Text = comboBoxObjectType.Text;
+            taskForm.textBoxObject.Text = textBoxObject.Text;
+            taskForm.comboBoxExp.Text = comboBoxExp.Text;
+            taskForm.comboBoxFrameType.Text = comboBoxFrameType.Text;
+
+            taskForm.numericUpDown_xbin.Value = (int)numericUpDown_xbin.Value;
+            taskForm.numericUpDown_ybin.Value = (int)numericUpDown_ybin.Value;
+            
             taskForm.Show();
         }
     }
