@@ -102,7 +102,7 @@ namespace RPCC.Tasks
             }
 
             if ((WeatherDataCollector.Obs | WeatherDataCollector.Flat) & 
-                (MountDataCollector.IsParked | MountDataCollector.IsParking) & (currentTask != null))
+                (MountDataCollector.IsParked | MountDataCollector.IsParking) & (currentTask != null) & !isOnPause)
             {
                 isOnPause = true;
                 Logger.AddLogEntry($"Head: Pause task #{currentTask.TaskNumber}, mount is parked or parking");
@@ -121,8 +121,15 @@ namespace RPCC.Tasks
     
                         _cd11 = hdu.Header.GetDoubleValue("CD1_1");
                         _cd12 = hdu.Header.GetDoubleValue("CD1_2");
-                        Logger.AddLogEntry($"Head: new CD11, CD12 = [{_cd11}, {_cd12}]");
-                        // _isLookingEastLastCd = MountDataCollector.IsLookingEast;
+                        if (_cd11 + _cd12 == 0)
+                        {
+                            _cd11 = 100;
+                            _cd12 = 100;
+                        }
+                        else
+                        {
+                            Logger.AddLogEntry($"Head: new CD11, CD12 = [{_cd11}, {_cd12}]");
+                        }
                         fits.Close();
                     }
                     catch
@@ -171,8 +178,30 @@ namespace RPCC.Tasks
                             if (currentTask is null)
                             {
                                 // bufTask.Status = 0;
-                                currentTask = bufTask;
+                                // currentTask = bufTask;
                                 // DbCommunicate.UpdateTaskInDb(_currentTask);
+
+                                switch (bufTask.FrameType)
+                                {
+                                    case Flat:
+                                        if (WeatherDataCollector.Flat)
+                                        {
+                                            currentTask = bufTask;
+                                        }
+                                        break;
+                                    case Light:
+                                        if (WeatherDataCollector.Obs)
+                                        {
+                                            currentTask = bufTask;
+                                        }
+                                        break;
+                                    case Dark:
+                                        if (!WeatherDataCollector.Flat & !WeatherDataCollector.Obs)
+                                        {
+                                            currentTask = bufTask;
+                                        }
+                                        break;
+                                }
                             }
                             break;
                         }
@@ -183,7 +212,27 @@ namespace RPCC.Tasks
                 if (_isObserve || _isDoDarks || _isDoFlats) continue; // если уже идет задание, то ждем минуту
                 if (currentTask is null)
                 {
-                    currentTask = bufTask;
+                    switch (bufTask.FrameType)
+                    {
+                        case Flat:
+                            if (WeatherDataCollector.Flat)
+                            {
+                                currentTask = bufTask;
+                            }
+                            break;
+                        case Light:
+                            if (WeatherDataCollector.Obs)
+                            {
+                                currentTask = bufTask;
+                            }
+                            break;
+                        case Dark:
+                            if (!WeatherDataCollector.Flat & !WeatherDataCollector.Obs)
+                            {
+                                currentTask = bufTask;
+                            }
+                            break;
+                    }
                 }
             }
             
@@ -206,18 +255,6 @@ namespace RPCC.Tasks
                       (currentTask.TimeStart - DateTime.UtcNow).TotalMinutes < TotalMinutes2StartTask &
                       CameraControl.isConnected)
                     {
-                        while (MountDataCollector.IsParking)
-                        {
-                            Logger.AddLogEntry("Head: task is preparing while mount is parking, sleep 1 sec");
-                            Thread.Sleep(1000);
-                        }
-
-                        if (MountDataCollector.IsParked)
-                        {
-                            Logger.AddLogEntry("Head: task is preparing while mount is parked, unparking");
-                            SiTechExeSocket.Unpark();
-                            Thread.Sleep(5000);
-                        }
 
                         switch (currentTask.FrameType)
                         {
@@ -257,7 +294,7 @@ namespace RPCC.Tasks
                     }
             }
             ThinkingTimer.Start();
-    }
+        }
 
         private static void StartDoTest()
         {
@@ -289,8 +326,8 @@ namespace RPCC.Tasks
             if (CoordinatesManager.CalculateObjectDistance2Mount(currentTask) < 10) return true;
             while (MountDataCollector.IsParking)
             {
-                Logger.AddLogEntry("UnparkAndGoTo: mount is parking, sleep 1 sec");
-                Thread.Sleep(1000);
+                Logger.AddLogEntry("UnparkAndGoTo: mount is parking, sleep 5 sec");
+                Thread.Sleep(5000);
             }
             if (MountDataCollector.IsParked)
             {
@@ -316,11 +353,11 @@ namespace RPCC.Tasks
             _firstFrame = null;
             _cd11 = 100;
             _cd12 = 100;
-            // if (!MountDataCollector.IsParked | !MountDataCollector.IsParking)
-            // {
-            //     Logger.AddLogEntry("EndTask: mount is parking");
-            //     SiTechExeSocket.Park();
-            // }
+            if (!MountDataCollector.IsParked & !MountDataCollector.IsParking)
+            {
+                Logger.AddLogEntry("EndTask: mount is parking");
+                SiTechExeSocket.Park();
+            }
         }
 
         private static void StartDoLight()
@@ -572,23 +609,20 @@ namespace RPCC.Tasks
                 // var req = $"don~{_firstFrame}~{CameraControl.cams.Last().latestImageFilename}"; //Формируем запрос для донатов
                 var correction = DonutsSocket.GetGuideCorrection(_firstFrame, 
                     CameraControl.cams.Last().latestImageFilename); //Получаем коррекцию
-                if (correction[0] > 2 | correction[1] > 2)
+                if (Math.Abs(correction[0]) > 2 | Math.Abs(correction[1]) > 2)
                 {
                     Logger.AddLogEntry($"WARNING: guiding correction: dx = {correction[0]} px, dy = {correction[1]} px, skip correction");
                     return;
                 } //Если коррекция больше 2 пикселей, выходим
-                double corDec = (correction[0] * _cd11 + correction[1] * _cd12) * 60.0 * 60.0;
-                double corRa = (correction[1] * _cd12 + correction[0] * _cd11) * 60.0 * 60.0;
-                Logger.AddLogEntry($"Guiding correction: dx = {correction[0]} px, dy = {correction[1]} px");
-                Logger.AddLogEntry($"corRa = {corRa}, corDec = {corDec}");
+                double corDec = Math.Round((correction[0] * _cd11 + correction[1] * _cd12) * 60.0 * 60.0, 2);
+                double corRa = Math.Round((correction[0] * _cd12 + correction[1] * _cd11) * 60.0 * 60.0, 2);
                 //arcsec
-                var pulseN = (Math.Abs(corDec)*1e3/PulseGuideVelocity);
-                var pulseE =  (Math.Abs(corRa)*1e3/PulseGuideVelocity);
-                Logger.AddLogEntry($"Pulse time: {pulseN}N, {pulseE}E");
-                SiTechExeSocket.PulseGuide(corDec > 0 ? "N" : "S", (int) pulseN);
-                // SiTechExeSocket.PulseGuide(corDec > 0 ? "S" : "N", (int) (Math.Abs(corDec)*1e3/PulseGuideVelocity));
-                SiTechExeSocket.PulseGuide(corRa > 0 ? "E" : "W", (int) pulseE);
-                // SiTechExeSocket.PulseGuide(corRa > 0 ? "W" : "E", (int) (Math.Abs(corRa)*1e3/PulseGuideVelocity));
+                int pulseN = (int)(Math.Abs(corDec)*1e3/PulseGuideVelocity);
+                int pulseE =  (int)(Math.Abs(corRa)*1e3/PulseGuideVelocity);
+                Logger.AddLogEntry($"Guiding correction: dx = {correction[0]} px, dy = {correction[1]} px; " +
+                                   $"corRa = {corRa} arcsec, corDec = {corDec} arcsec");
+                SiTechExeSocket.PulseGuide(corDec > 0 ? "N" : "S", pulseN);
+                SiTechExeSocket.PulseGuide(corRa > 0 ? "E" : "W", pulseE);
             }
         }
 
