@@ -429,11 +429,11 @@ namespace RPCC.Comms
                 Logger.AddLogEntry("Can't PulseGuide while parking");
                 return;
             }
-            if (MountDataCollector.IsSlewing)
-            {
-                Logger.AddLogEntry("Can't PulseGuide while slewing");
-                return;
-            }
+            // if (MountDataCollector.IsSlewing)
+            // {
+            //     Logger.AddLogEntry("Can't PulseGuide while slewing");
+            //     return;
+            // }
             if (direction == "N" || direction == "S" || direction == "E" || direction == "W")
             {
                 string[] response = null;
@@ -463,10 +463,11 @@ namespace RPCC.Comms
                     if (message == "_PulseGuide Accepted")
                     {
                         // TODO: Do stuff if good
+                        Logger.AddLogEntry($"PulseGuide {direction} {time} ms is ok");
                     }
                     else
                     {
-                        Logger.AddLogEntry($"WARNING Unable to pulse guide {direction} {time}: {message}");
+                        Logger.AddLogEntry($"WARNING Unable to pulse guide {direction} {time} ms: {message}");
                         // TODO: Do stuff if bad
                     }
                 }
