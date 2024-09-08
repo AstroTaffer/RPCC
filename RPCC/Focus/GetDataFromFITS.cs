@@ -1,4 +1,5 @@
-﻿using RPCC.Comms;
+﻿using System;
+using RPCC.Comms;
 using RPCC.Utils;
 
 
@@ -9,13 +10,11 @@ namespace RPCC.Focus
 {
     public class GetDataFromFits
     {
-        private const double MaxEll = 0.7;
+        private const double MaxEll = 0.3;
         private const int MinStars = 1;
-        private const double FwhmFocused = 3.0;
-        // private const double MinLimitFwhm = 1.0;
-        // private const double MaxLimitFwhm = 50.0;
-        // private readonly string _path2Cat;
-        // private List<List<double>> _sortTable;
+        private const double FwhmFocused = 3.3;
+
+        
         public bool Status { get; }
         public int Focus { get; }
         public bool Focused { get; }
@@ -30,8 +29,8 @@ namespace RPCC.Focus
             if (string.IsNullOrEmpty(path2Fits)) return;
             var resp = DonutsSocket.GetImageFwhm(path2Fits);
             Focus = (int) resp[0];
-            Fwhm = resp[1];
-            Ell = resp[2];
+            Fwhm = Math.Round(resp[1], 2);
+            Ell = Math.Round(resp[2], 2);
             StarsNum = (int) resp[3];
             Bkg = resp[4];
             if (StarsNum == 0)
@@ -72,7 +71,7 @@ namespace RPCC.Focus
                 return Fwhm < FwhmFocused + 1;
             }
 
-            if (Fwhm < FwhmFocused)
+            if (Fwhm < FwhmFocused || Fwhm < CameraFocus.seeing)
             {
                 Logger.AddLogEntry($"FOCUS: image is focused, fwhm = {Fwhm}");
             }
