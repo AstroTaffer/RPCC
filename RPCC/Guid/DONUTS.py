@@ -8,6 +8,7 @@ from astropy.stats import sigma_clipped_stats, SigmaClip
 from donuts import Donuts
 from photutils.background import MedianBackground, Background2D
 from scipy import ndimage
+from astropy.stats import gaussian_sigma_to_fwhm
 
 time_last_message = None
 time_wait_sec = 3
@@ -20,7 +21,7 @@ def calc_fwhm(path):
         image = hdulist[0].data.copy()
         sigma_clip = SigmaClip(sigma=3.0)
         bkg_estimator = MedianBackground()
-        bkg = Background2D(image, (50, 50), filter_size=(3, 3),
+        bkg = Background2D(image, (32, 32), filter_size=(3, 3),
                            sigma_clip=sigma_clip, bkg_estimator=bkg_estimator)
         # apply filters
         f_image = ndimage.median_filter(image, 9, mode='reflect')
@@ -65,20 +66,20 @@ def calc_fwhm(path):
             Mxx = np.sum(Slice * X_index[None, :] * X_index[None, :]) / np.sum(Slice)
             # calc FWHM
             M = Mxx + Myy
-            _fwhm = 2 * np.sqrt(0.69 * M)
+            _fwhm = np.sqrt(M) * gaussian_sigma_to_fwhm
 
             # sigmax = np.sqrt(Mxx)
             # sigmay = np.sqrt(Myy)
-            ell = 1 - min([Mxx, Myy]) / M
+            ell = 1 - np.sqrt(min([Mxx, Myy]) / max([Mxx, Myy]))
 
             #     print('Centriod: ', Mx, My, '\t FWHM: ', _fwhm)
             FWHM.append(_fwhm)
             ELL.append(ell)
-        fwhm = np.round(np.nanmedian(np.asarray(FWHM)), 1)
+        fwhm = np.round((np.nanmedian(np.asarray(FWHM)) - 3.5) * 0.65 * header['XBINNING'], 2)
         ell = np.round(np.nanmedian(np.asarray(ELL)), 2)
         stars_num = len(FWHM)
         b = np.round(bkg.background_median, 2)
-        fwhm_card = fits.Card('FWHM', 'nan' if np.isnan(fwhm) else fwhm, 'Median FWHM')
+        fwhm_card = fits.Card('FWHM', 'nan' if np.isnan(fwhm) else fwhm, 'Median FWHM [arcsec]')
         ell_card = fits.Card('ELL', 'nan' if np.isnan(ell) else ell, 'Median ellipticity')
         stars_card = fits.Card('NSTARS', 'nan' if np.isnan(stars_num) else stars_num, "Stars on frame")
         bkg_card = fits.Card('BKG', 'nan' if np.isnan(b) else b, "Median background")
