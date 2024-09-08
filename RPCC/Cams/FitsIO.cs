@@ -168,6 +168,7 @@ namespace RPCC.Cams
             switch (CameraControl.loadedTask.FrameType)
             {
                 case "Object":
+                case "Focus":
                 case "Test":
                     cursor.Add(string.IsNullOrEmpty(CameraControl.loadedTask.Object)
                         ? new HeaderCard("OBJNAME", "UNKNOWN", "object name")
@@ -190,7 +191,7 @@ namespace RPCC.Cams
             #region Instrument keywords
             cursor.Add(new HeaderCard("ORIGIN", "URFU", "organization responsible for the data"));
             cursor.Add(new HeaderCard("TELESCOP", "APM-RoboPhot", "telescope"));
-            cursor.Add(new HeaderCard("INSTRUME", "3CHP", "instrument"));
+            cursor.Add(new HeaderCard("INSTRUME", "TRIP", "instrument"));
             cursor.Add(new HeaderCard("CAMERA", "FLI ML4240 MB", "camera name"));
             cursor.Add(new HeaderCard("DETECTOR", "E2V CCD42-40-1-368 MB", "CCD Detector"));
             cursor.Add(new HeaderCard("SERNUM", cam.serialNumber,
