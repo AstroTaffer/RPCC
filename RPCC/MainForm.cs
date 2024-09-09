@@ -99,7 +99,7 @@ namespace RPCC
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            
+            Logger.SaveLogs();
             timerUi.Stop();
             
             // Tasker.SaveTasksToXml();
