@@ -43,6 +43,15 @@ namespace RPCC.Tasks
         public const string Test = "Test";
         public static bool IsGuid = true;
         private static int troubles = 0;
+        private static double Ix = 0;
+        private static double Iy = 0;
+        private static double oldErrX = 0;
+        private static double oldErrY = 0;
+        private static double kP = 4;
+        private static double kI = 0;
+        private static double kD = 0;
+        
+        
         public static void StartThinking()
         {
             ThinkingTimer.Elapsed += Thinking;
@@ -593,6 +602,10 @@ namespace RPCC.Tasks
             if (_firstFrame is null)
             {
                 _firstFrame = CameraControl.cams.Last().latestImageFilename;
+                Ix = 0;
+                Iy = 0;
+                oldErrX = 0;
+                oldErrY = 0;
             }
             else
             {
@@ -605,21 +618,32 @@ namespace RPCC.Tasks
                     Logger.AddLogEntry($"WARNING: can't guide, no connection to donuts");
                     return;
                 } //Если нет конекта или нет матрицы, то выходим
-                // var req = $"\"{_firstFrame}\"~\"{CameraControl.cams.Last().latestImageFilename}\""; //Формируем запрос для донатов
-                // var req = $"don~{_firstFrame}~{CameraControl.cams.Last().latestImageFilename}"; //Формируем запрос для донатов
                 var correction = DonutsSocket.GetGuideCorrection(_firstFrame, 
                     CameraControl.cams.Last().latestImageFilename); //Получаем коррекцию
-                if (Math.Abs(correction[0]) > 2 | Math.Abs(correction[1]) > 2)
+                if (Math.Abs(correction[0]) > 20 | Math.Abs(correction[1]) > 20)
                 {
                     Logger.AddLogEntry($"WARNING: guiding correction: dx = {correction[0]} px, dy = {correction[1]} px, skip correction");
                     return;
                 } //Если коррекция больше 2 пикселей, выходим
-                double corDec = Math.Round((correction[0] * _cd11 + correction[1] * _cd12) * 60.0 * 60.0, 2);
-                double corRa = Math.Round((correction[0] * _cd12 + correction[1] * _cd11) * 60.0 * 60.0, 2);
+
+                Ix += correction[0]*currentTask.Exp;
+                Iy += correction[1]*currentTask.Exp;
+
+                var dx = (correction[0] - oldErrX) / currentTask.Exp;
+                var dy = (correction[1] - oldErrY) / currentTask.Exp;
+                
+                oldErrX = correction[0];
+                oldErrY = correction[1];
+                
+                var corrX = kP*oldErrX + kI*Ix + kD*dx;
+                var corrY = kP*oldErrY + kI*Iy + kD*dy;
+
+                var corDec = Math.Round((corrX * _cd11 + corrY * _cd12) * 60.0 * 60.0, 2);
+                var corRa = Math.Round((corrX * _cd12 + corrY * _cd11) * 60.0 * 60.0, 2);
                 //arcsec
                 int pulseN = (int)(Math.Abs(corDec)*1e3/PulseGuideVelocity);
                 int pulseE =  (int)(Math.Abs(corRa)*1e3/PulseGuideVelocity);
-                Logger.AddLogEntry($"Guiding correction: dx = {correction[0]} px, dy = {correction[1]} px; " +
+                Logger.AddLogEntry($"Guiding correction: dx = {corrX} px, dy = {corrY} px; " +
                                    $"corRa = {corRa} arcsec, corDec = {corDec} arcsec");
                 SiTechExeSocket.PulseGuide(corDec > 0 ? "N" : "S", pulseN);
                 SiTechExeSocket.PulseGuide(corRa > 0 ? "E" : "W", pulseE);
