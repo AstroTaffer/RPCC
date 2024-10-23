@@ -4,10 +4,17 @@ using System.Windows.Forms;
 using RPCC.Focus;
 
 namespace RPCC.Utils
-{
+{   
     public static class Logger
     {
         internal static ListBox LogBox;
+        public static bool DebugMode = false;
+
+        internal static void AddDebugLogEntry(string entry)
+        {
+            if (DebugMode) 
+                AddLogEntry(entry);
+        }
         
         internal static void AddLogEntry(string entry)
         {
@@ -28,19 +35,19 @@ namespace RPCC.Utils
             }
         }
 
-        public static void LogFrameInfo(GetDataFromFits fitsAnalysis)
+        public static void LogFrameInfo(GetDataFromFits fitsAnalysis, string fil)
         {
-            AddLogEntry($"Status = {fitsAnalysis.Status}, " +
-                           $"FWHM = {fitsAnalysis.Fwhm}, " +
-                           $"ELL = {fitsAnalysis.Ell}, " +
-                           $"Focus pos = {fitsAnalysis.Focus}, " +
-                           $"Num stars = {fitsAnalysis.StarsNum}," +
-                           $"Background = {fitsAnalysis.Bkg}");
+            AddLogEntry($"{fil}: Status = {fitsAnalysis.Status}, " +
+                                 $"FWHM = {fitsAnalysis.Fwhm}, " +
+                                 $"ELL = {fitsAnalysis.Ell}, " +
+                                 $"Focus pos = {fitsAnalysis.Focus}, " +
+                                 $"Num stars = {fitsAnalysis.StarsNum}, " +
+                                 $"Background = {fitsAnalysis.Bkg}");
         }
 
         internal static void SaveLogs()
         {
-            var logsDir = $"{Settings.MainOutFolder}\\LOGS";
+            var logsDir = $"{Settings.MainOutFolder}\\LOGS\\RPCC_LOGS";
             if (!Directory.Exists(logsDir)) Directory.CreateDirectory(logsDir);
             var logsFileName = $"Logs {DateTime.UtcNow:yyyy-MM-ddTHH-mm-ss}.txt";
             var sw = new StreamWriter($"{logsDir}\\{logsFileName}");
