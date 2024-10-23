@@ -220,6 +220,18 @@ namespace RPCC.Cams
                 "offset data range to that of unsigned short"));
             cursor.Add(new HeaderCard("BSCALE", 1.0, "default scaling factor"));
             cursor.Add(new HeaderCard("FOCUS", SerialFocus.CurrentPosition, "focus position"));
+            cursor.Add(new HeaderCard("LOOKEAST", MountDataCollector.IsLookingEast, "is mount looking east (GEM)"));
+            cursor.Add(new HeaderCard("BLINKY", MountDataCollector.IsInBlinky, "is motor(s) in blinky mode"));
+            cursor.Add(new HeaderCard("SLEWING", MountDataCollector.IsSlewing, "is mount slewing"));
+            cursor.Add(new HeaderCard("INIT", MountDataCollector.IsInit, "is mount initialized"));
+            cursor.Add(new HeaderCard("COMFAULT", MountDataCollector.IsCommFault, "com fault between sitech and brush"));
+            cursor.Add(new HeaderCard("TRACKING", MountDataCollector.IsTracking, "is mount tracking"));
+            cursor.Add(new HeaderCard("PPLS", MountDataCollector.IsPplsOn, "prim plus lim switch activated"));
+            cursor.Add(new HeaderCard("PMLS", MountDataCollector.IsPmlsOn, "prim minus lim switch activated"));
+            cursor.Add(new HeaderCard("SPLS", MountDataCollector.IsSplsOn, "second plus lim switch activated"));
+            cursor.Add(new HeaderCard("SMLS", MountDataCollector.IsSmlsOn, "second minus lim switch activated"));
+            cursor.Add(new HeaderCard("PHS", MountDataCollector.IsPhsOn, "primary homing switch activated"));
+            cursor.Add(new HeaderCard("SHS", MountDataCollector.IsShsOn, "second homing switch activated"));
             #endregion
 
             #region Observatory keywords
