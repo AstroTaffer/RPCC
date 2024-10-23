@@ -16,13 +16,8 @@ namespace RPCC
         ///     Логика работы основной формы программы
         ///     Обработка команд пользователя с помощью вызова готовых функций
         /// </summary>
-        //private bool _isCurrentImageLoaded;
-        //private bool _isZoomModeActivated;
 
-        private readonly WeatherSocket _domeSocket;
-        private readonly DonutsSocket _donutsSocket;
-
-        private static readonly System.Timers.Timer FocusTimer = new System.Timers.Timer();
+        private static readonly System.Timers.Timer FocusTimer = new();
 
         public static bool IsTaskFormOpen;
 
@@ -41,14 +36,9 @@ namespace RPCC
             // Camera controls
             CameraControl.resetUi = ResetCamsUi;
             CameraControl.resetPics = RefreshImages;
-
+            
             // MeteoDome connect
-            _domeSocket = new WeatherSocket();
-            _domeSocket.Connect();
-
-            // Donuts connect
-            _donutsSocket = new DonutsSocket();
-            _donutsSocket.Connect();
+            WeatherSocket.Connect();
 
             // SiTechExe connect
             SiTechExeSocket.Connect();
@@ -66,18 +56,13 @@ namespace RPCC
                 Logger.AddLogEntry(@"Can't open Focus serial port");
             }
             groupBoxFocusSettings.Text = $@"Focus Settings (COMPORT {Settings.FocusComId})";
-
-            // if (!DbCommunicate.ConnectToDb())
-            // {
-            //     MessageBox.Show(@"Can't connect to data base", @"OK", MessageBoxButtons.OK);
-            //     Logger.AddLogEntry(@"Can't connect to data base");
-            // }
+            
             Tasker.dataGridViewTasker = dataGridViewTasker;
             Tasker.contextMenuStripTasker = contextMenuStripTasker;
             Tasker.SetHeader();
-            // Tasker.LoadTasksFromXml();
-            // DbCommunicate.LoadDbTable();
-            // DbCommunicate.DisconnectFromDb();
+            
+            // Donuts connect
+            DonutsSocket.Connect();
             
             progressBarG.Style = ProgressBarStyle.Continuous;
             progressBarR.Style = ProgressBarStyle.Continuous;
@@ -95,6 +80,11 @@ namespace RPCC
             {
                 CameraFocus.IsAutoFocus = true;
             }
+
+            if (checkBoxDebugMode.Checked)
+            {
+                Logger.DebugMode = true;
+            }
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -105,7 +95,7 @@ namespace RPCC
             // Tasker.SaveTasksToXml();
             // DbCommunicate.DisconnectFromDb();
             
-            _domeSocket.Disconnect();
+            WeatherSocket.Disconnect();
             DonutsSocket.Disconnect();
             SiTechExeSocket.Disconnect();
 
@@ -280,19 +270,19 @@ namespace RPCC
 
         private void ReconnectMeteoDomeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (_domeSocket._isConnected) _domeSocket.Disconnect();
-            _domeSocket.Connect();
+            if (WeatherSocket.IsConnected) WeatherSocket.Disconnect();
+            WeatherSocket.Connect();
         }
 
         private void ReconnectDonutsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // if(_donutsSocket.isConnected) _donutsSocket.Disconnect();
-            _donutsSocket.Connect();
+            DonutsSocket.Connect();
         }
 
         private void ReconnectSiTechExeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (SiTechExeSocket._isConnected) SiTechExeSocket.Disconnect();
+            if (SiTechExeSocket.IsConnected) SiTechExeSocket.Disconnect();
             SiTechExeSocket.Connect();
         }
 
@@ -571,8 +561,8 @@ namespace RPCC
             var value = 0;
             if (CameraControl.cams[indx].isExposing)
             {
-                if (Head.currentTask is null) return;
-                value = 100 - CameraControl.cams[indx].remTime / 10 / Head.currentTask.Exp;
+                if (Head.CurrentTask is null) return;
+                value = 100 - CameraControl.cams[indx].remTime / 10 / Head.CurrentTask.Exp;
                 if (value < 0)
                 {
                     value = 0;
@@ -590,6 +580,11 @@ namespace RPCC
                     progressBarI.Value = value;
                     break;
             }
+        }
+
+        private void checkBoxDebugMode_CheckedChanged(object sender, EventArgs e)
+        {
+            Logger.DebugMode = checkBoxDebugMode.Checked;
         }
     }
 }

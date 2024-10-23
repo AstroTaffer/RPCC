@@ -89,6 +89,7 @@
             this.labelCam3Sn = new System.Windows.Forms.Label();
             this.labelCam3Model = new System.Windows.Forms.Label();
             this.groupBoxSurvey = new System.Windows.Forms.GroupBox();
+            this.checkBoxDebugMode = new System.Windows.Forms.CheckBox();
             this.checkBoxGuiding = new System.Windows.Forms.CheckBox();
             this.checkBoxHead = new System.Windows.Forms.CheckBox();
             this.buttonSurveyStop = new System.Windows.Forms.Button();
@@ -674,6 +675,7 @@
             // 
             // groupBoxSurvey
             // 
+            this.groupBoxSurvey.Controls.Add(this.checkBoxDebugMode);
             this.groupBoxSurvey.Controls.Add(this.checkBoxGuiding);
             this.groupBoxSurvey.Controls.Add(this.checkBoxHead);
             this.groupBoxSurvey.Controls.Add(this.buttonSurveyStop);
@@ -683,6 +685,18 @@
             this.groupBoxSurvey.TabIndex = 10;
             this.groupBoxSurvey.TabStop = false;
             this.groupBoxSurvey.Text = "Survey";
+            // 
+            // checkBoxDebugMode
+            // 
+            this.checkBoxDebugMode.Checked = true;
+            this.checkBoxDebugMode.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxDebugMode.Location = new System.Drawing.Point(9, 62);
+            this.checkBoxDebugMode.Name = "checkBoxDebugMode";
+            this.checkBoxDebugMode.Size = new System.Drawing.Size(93, 25);
+            this.checkBoxDebugMode.TabIndex = 30;
+            this.checkBoxDebugMode.Text = "DebugMode";
+            this.checkBoxDebugMode.UseVisualStyleBackColor = true;
+            this.checkBoxDebugMode.CheckedChanged += new System.EventHandler(this.checkBoxDebugMode_CheckedChanged);
             // 
             // checkBoxGuiding
             // 
@@ -1193,6 +1207,8 @@
             this.ResumeLayout(false);
             this.PerformLayout();
         }
+
+        private System.Windows.Forms.CheckBox checkBoxDebugMode;
 
         private System.Windows.Forms.ProgressBar progressBarI;
         private System.Windows.Forms.ProgressBar progressBarR;
