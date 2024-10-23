@@ -5,6 +5,7 @@ using System.Drawing.Imaging;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using ASCOM.Tools;
@@ -12,6 +13,7 @@ using RPCC.Comms;
 using RPCC.Focus;
 using RPCC.Tasks;
 using RPCC.Utils;
+using Timer = System.Timers.Timer;
 
 namespace RPCC.Cams
 {
@@ -20,9 +22,9 @@ namespace RPCC.Cams
         // _camsDomain = bitwise OR of 0x02 (USB interface) and 0x100 (Camera device)
         private const int _camsDomain = 0x02 | 0x100;
         private static readonly int[] _imageArea = new int[4];
-        public static readonly object _camsLocker = new object();   
+        public static readonly object _camsLocker = new();   
 
-        private static readonly Timer _camsTimer = new Timer(1000);
+        private static readonly Timer _camsTimer = new(1000);
         private static readonly List<Task> _readyImagesProcessList = new List<Task>();
         internal delegate void ResetUi();
         internal static ResetUi resetUi;
@@ -32,7 +34,7 @@ namespace RPCC.Cams
         internal static CameraDevice[] cams = Array.Empty<CameraDevice>();
         internal static ObservationTask loadedTask = new ObservationTask();
 
-        internal static bool isConnected = false;
+        internal static bool IsConnected = false;
         private static bool _isCallbackRequired = false;
         private static int _readyCamNum;
         internal static int displayCamIndex = -1;
@@ -42,7 +44,7 @@ namespace RPCC.Cams
         {
             bool isAllGood = true;
 
-            if (isConnected) isAllGood = DisconnectCameras();
+            if (IsConnected) isAllGood = DisconnectCameras();
 
             lock (_camsLocker)
             {
@@ -68,7 +70,7 @@ namespace RPCC.Cams
                     _camsTimer.Elapsed += CamsTimerTickAlt;
                     _camsTimer.Start();
                     resetUi();
-                    isConnected = true;
+                    IsConnected = true;
                     return isAllGood;
                 }
             }
@@ -182,7 +184,7 @@ namespace RPCC.Cams
             {
                 _camsTimer.Stop();
                 _camsTimer.Elapsed -= CamsTimerTickAlt;
-                isConnected = false;
+                IsConnected = false;
 
                 int errorLastFliCmd;
                 for (int i = 0; i < cams.Length; i++)
@@ -292,7 +294,7 @@ namespace RPCC.Cams
                     _readyImagesProcessList.Clear();
                 }
             }
-            if (isConnected) _camsTimer.Start();
+            if (IsConnected) _camsTimer.Start();
         }
 
         static private void GetCamsStatusAlt()
@@ -339,7 +341,16 @@ namespace RPCC.Cams
                         break;
                 }
 
-                if (errorStatus != 0) cams[i].status = "ERROR";
+                if (errorStatus != 0)
+                {
+                    cams[i].status = "ERROR";
+                    Logger.AddLogEntry($"ERROR cam {cams[i].filter}");
+                    Thread.Sleep(5000);
+                    if (ReconnectCameras()) continue;
+                    Logger.AddLogEntry($"ERROR cam can't reconect, stop cam timer");
+                    _camsTimer.Stop();
+                    Logger.SaveLogs();
+                }
             }
         }
         #endregion
@@ -365,16 +376,16 @@ namespace RPCC.Cams
                         Logger.AddLogEntry($"WARNING Incorrect exposure time {task.Exp} in bias-type observation task (expected 0)");
                     }
                     break;
-                case "Focus":
-                    if (task.Xbin != 1)
-                    {
-                        Logger.AddLogEntry($"WARNING Incorrect Xbin factor {task.Xbin} in focus-type observation task (expected 1)");
-                    }
-                    if (task.Ybin != 1)
-                    {
-                        Logger.AddLogEntry($"WARNING Incorrect Ybin factor {task.Ybin} in focus-type observation task (expected 1)");
-                    }
-                    break;
+                // case "Focus":
+                    // if (task.Xbin != 1)
+                    // {
+                    //     Logger.AddLogEntry($"WARNING Incorrect Xbin factor {task.Xbin} in focus-type observation task (expected 1)");
+                    // }
+                    // if (task.Ybin != 1)
+                    // {
+                    //     Logger.AddLogEntry($"WARNING Incorrect Ybin factor {task.Ybin} in focus-type observation task (expected 1)");
+                    // }
+                    // break;
             }
 
             bool isAllGood = true;
@@ -526,15 +537,15 @@ namespace RPCC.Cams
             lock (_camsLocker)
             {
                 var dt = DateTime.UtcNow;
-                var jd = Utilities.JulianDateFromDateTime(dt);
+                var jd = AstroUtilities.JulianDateFromDateTime(dt);
                 CoordinatesManager.CalculateObjectDistance2Moon(loadedTask);
-                CoordinatesManager.MoonIllumination = Utilities.MoonIllumination(jd);
+                CoordinatesManager.MoonIllumination = AstroUtilities.MoonIllumination(jd);
                 for (int i = 0; i < cams.Length; i++)
                 {
                     if (!cams[i].isSelected) continue;
 
                     errorLastFliCmd = NativeMethods.FLIExposeFrame(cams[i].handle);
-                    // Logger.AddLogEntry("Exposing");
+                    Logger.AddLogEntry($"Exposing {cams[i].filter}");
                     cams[i].expStartDt = dt;
                     cams[i].expStartJd = jd;
                     if (errorLastFliCmd != 0)
@@ -563,6 +574,7 @@ namespace RPCC.Cams
 
         private static RpccFits ReadImage(CameraDevice cam)
         {
+            Logger.AddDebugLogEntry($"Start read image from {cam.filter}");
             bool isAllGood = true;
             int imageWidth = _imageArea[2] - _imageArea[0];
             int imageHeight = _imageArea[3] - _imageArea[1];
