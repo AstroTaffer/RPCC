@@ -68,18 +68,18 @@ namespace RPCC.Focus
         {
             if (CameraFocus.DeFocus != 0)
             {
-                return Fwhm < FwhmFocused + 1;
+                return Fwhm < FwhmFocused + 1 || Fwhm < CameraFocus.Seeing + 1;
             }
 
-            if (Fwhm < FwhmFocused || Fwhm < CameraFocus.seeing)
-            {
-                Logger.AddLogEntry($"FOCUS: image is focused, fwhm = {Fwhm}");
-            }
-            else
-            {
-                Logger.AddLogEntry($"FOCUS: image is not focused, fwhm = {Fwhm}");
-            }
-            return Fwhm < FwhmFocused;
+            // if (Fwhm < FwhmFocused || Fwhm < CameraFocus.Seeing)
+            // {
+            //     Logger.AddLogEntry($"FOCUS: image is focused, fwhm = {Fwhm}");
+            // }
+            // else
+            // {
+            //     Logger.AddLogEntry($"FOCUS: image is not focused, fwhm = {Fwhm}");
+            // }
+            return Fwhm < FwhmFocused || Fwhm < CameraFocus.Seeing;
         }
     }
 }
