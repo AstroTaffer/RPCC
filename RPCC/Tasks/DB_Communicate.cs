@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows.Forms;
 using Npgsql;
 using RPCC.Cams;
+using RPCC.Comms;
 using RPCC.Utils;
 
 
@@ -11,7 +12,6 @@ namespace RPCC.Tasks
 {
     public static class DbCommunicate
     {
-        // public static string RoboPhotServer = "localhost"; // TODO to cfg
         private const string RoboPhotServer = "192.168.240.5";
         private const string Port = "5432";
         private const string UserId = "remote_user";
@@ -56,14 +56,6 @@ namespace RPCC.Tasks
                 return null;
             }
         }
-
-        // public static void DisconnectFromDb()
-        // {
-        //     lock (Loc)
-        //     {
-        //         Con.Close();
-        //     }
-        // }
 
         public static void LoadDbTable()
         {
@@ -229,9 +221,10 @@ namespace RPCC.Tasks
                 {
                     var query = "INSERT INTO robophot_frames (fk_task_id, " +
                                 "frame_path, coord2000, frame_filter, " +
-                                "date_utc, extinction, ccd_temp, camera_sn) VALUES " + 
+                                "date_utc, extinction, ccd_temp, camera_sn, is_focus, is_looking_east) VALUES " + 
                                 $"({observationTask.TaskNumber}, '{path}', ({ra*360/24}, {dec})::spoint_domen, '{fil}', " +
-                                $"'{date}'::timestamp, {ext}, {temp}, '{sn}')";
+                                $"'{date}'::timestamp, {ext}, {temp}, '{sn}', {observationTask.FrameType == Head.Focus}, " +
+                                $"{MountDataCollector.IsLookingEast})";
                     using (var con = ConnectToDb())
                     {
                         using (var com = new NpgsqlCommand(query, con))
@@ -283,40 +276,47 @@ namespace RPCC.Tasks
             }
         }
 
-        // public static bool CheckDarkInDb(int exp)       
-        // {
-        //     lock (Loc)
-        //     {
-        //         try
-        //         {
-        //             var tsks = 0;
-        //             var query = "SELECT count(m_task_id) FROM robophot_master_frames (m_task_id) " +
-        //                         $"WHERE ";
-        //             using (var con = ConnectToDb())
-        //             {
-        //                 using (var com = new NpgsqlCommand(query, con))
-        //                 {
-        //                     using (var reader = com.ExecuteReader())
-        //                     {
-        //                         while (reader.Read()) tsks = Convert.ToInt32(reader[0]);
-        //                     } 
-        //                 }
-        //             }
-        //
-        //             if (tsks > 0)
-        //             {
-        //                 return false;
-        //             }
-        //         }
-        //         catch (Exception e)
-        //         {
-        //             Logger.AddLogEntry("AddFrameToDb error");
-        //             Logger.AddLogEntry(e.Message);
-        //             return false;
-        //         }
-        //         return true;
-        //     }
-        // }
+        public static bool CanDoDarkFlat(bool isDark, int exp)
+        {
+            lock (Loc)
+            {
+                double time = 0;
+                var query = "SELECT EXTRACT(EPOCH FROM (NOW() - time_start)::INTERVAL)/3600 " +
+                            $"FROM robophot_tasks WHERE exp_time = {exp} AND " +
+                            $"frame_type = '{(isDark ? Head.Dark : Head.Flat)}' ORDER BY task_id DESC LIMIT 1";
+                using (var con = ConnectToDb())
+                {
+                    var com = new NpgsqlCommand(query, con);
+                    using (var reader = com.ExecuteReader())
+                    {
+                        while (reader.Read()) time = Convert.ToDouble(reader[0]);
+                    }
+                }
+                return isDark ? time > 24 : time > 8;
+            }
+        }
+
+        public static string GetPath2FirstAssFrame(int task)
+        {
+            string path = null;
+            lock (Loc)
+            {
+                var query = "SELECT robophot_frames.calibration_frame_path " +
+                            $"FROM robophot_frames WHERE fk_task_id = {task} AND is_do_astrometry " +
+                            $"AND robophot_frames.is_looking_east = {MountDataCollector.IsLookingEast} " +
+                            $"ORDER BY frame_id ASC LIMIT 1";
+                using (var con = ConnectToDb())
+                {
+                    var com = new NpgsqlCommand(query, con);
+                    using (var reader = com.ExecuteReader())
+                    {
+                        while (reader.Read()) path = Convert.ToString(reader[0]);
+                    }
+                }
+            }
+            
+            return !string.IsNullOrEmpty(path) ? path : null;
+        }
         
     }
 }   
