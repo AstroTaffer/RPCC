@@ -146,8 +146,8 @@ namespace RPCC.Utils
         /// </summary>
 
         private static string _mainOutFolder;
-        private static DateTime _lastDarksTime;
-        private static DateTime _lastFlatsTime;
+        // private static DateTime _lastDarksTime;
+        // private static DateTime _lastFlatsTime;
 
         public static string MainOutFolder
         {
@@ -160,23 +160,23 @@ namespace RPCC.Utils
             }
         }
 
-        public static DateTime LastDarksTime
-        {
-            get => _lastDarksTime;
-            set
-            {
-                _lastDarksTime = value;
-            }
-        }
-
-        public static DateTime LastFlatsTime
-        {
-            get => _lastFlatsTime;
-            set
-            {
-                _lastFlatsTime = value;
-            }
-        }
+        // public static DateTime LastDarksTime
+        // {
+        //     get => _lastDarksTime;
+        //     set
+        //     {
+        //         _lastDarksTime = value;
+        //     }
+        // }
+        //
+        // public static DateTime LastFlatsTime
+        // {
+        //     get => _lastFlatsTime;
+        //     set
+        //     {
+        //         _lastFlatsTime = value;
+        //     }
+        // }
         #endregion
 
         #region Comms
@@ -278,8 +278,8 @@ namespace RPCC.Utils
                 CamTemp = (double)config.Root.Element("cameras").Element("camTemp");
 
                 MainOutFolder = (string)config.Root.Element("survey").Element("mainOutFolder");
-                LastDarksTime = (DateTime)config.Root.Element("survey").Element("lastDarksTime");
-                LastFlatsTime = (DateTime)config.Root.Element("survey").Element("lastFlatsTime");
+                // LastDarksTime = (DateTime)config.Root.Element("survey").Element("lastDarksTime");
+                // LastFlatsTime = (DateTime)config.Root.Element("survey").Element("lastFlatsTime");
 
                 FocusComId = (int)config.Root.Element("comms").Element("focusComId");
                 MeteoDomeTcpIpPort = (int)config.Root.Element("comms").Element("meteoDomeTcpIpPort");
@@ -401,9 +401,10 @@ namespace RPCC.Utils
                     new XElement("camTemp", CamTemp)),
                 
                 new XElement("survey",
-                    new XElement("mainOutFolder", MainOutFolder),
-                    new XElement("lastDarksTime", LastDarksTime), 
-                    new XElement("lastFlatsTime", LastFlatsTime)),
+                    new XElement("mainOutFolder", MainOutFolder)
+                    // new XElement("lastDarksTime", LastDarksTime), 
+                    // new XElement("lastFlatsTime", LastFlatsTime)
+                    ),
 
                 new XElement("comms",
                     new XElement("focusComId", FocusComId),
@@ -435,16 +436,21 @@ namespace RPCC.Utils
                 
                 new XElement("survey",
                   new XElement("mainOutFolder", Directory.Exists("D:") ? 
-                  "D:" : Directory.GetCurrentDirectory()),
-                  new XElement("lastDarksTime", LastDarksTime), 
-                  new XElement("lastFlatsTime", LastFlatsTime)),
+                  "D:" : Directory.GetCurrentDirectory())),
 
                 new XElement("comms",
-                    //new XElement("focusComId", 10),  // for monoblock
                     new XElement("focusComId", 4),  // for server
                     new XElement("meteoDomeTcpIpPort", 8085),
                     new XElement("donutsTcpIpPort", 3030),
-                    new XElement("siTechExeTcpIpPort", 8079))
+                    new XElement("siTechExeTcpIpPort", 8079)),
+                
+                new XElement("database",
+                    new XElement("dbIP", "192.168.240.5"),
+                    new XElement("dbPort", "5432"),
+                    new XElement("dbUserId", "remote_user"),
+                    new XElement("dbPassword", "remote_user"),
+                    new XElement("database", "postgres")
+                    )
             ));
 
             config.Save("SettingsDefault.xml");
