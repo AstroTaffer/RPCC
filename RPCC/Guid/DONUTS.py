@@ -4,15 +4,31 @@ import threading
 
 import numpy as np
 from astropy.io import fits
-from astropy.stats import sigma_clipped_stats, SigmaClip
+from astropy.stats import sigma_clipped_stats
 from donuts import Donuts
 from photutils.background import MedianBackground, Background2D
 from scipy import ndimage
-from astropy.stats import gaussian_sigma_to_fwhm
+from astropy.stats import gaussian_fwhm_to_sigma, gaussian_sigma_to_fwhm
+from astropy.convolution import Gaussian2DKernel, convolve
+from photutils.segmentation import detect_sources, SourceCatalog
+from astropy import wcs
+from astropy.stats import SigmaClip, mad_std, sigma_clip
 
 time_last_message = None
 time_wait_sec = 3
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+
+def write_to_fits(path, fwhm, ell, stars_num, b):
+    with fits.open(path, memmap=False, mode='update') as hdulist:
+        fwhm_card = fits.Card('FWHM', 'nan' if np.isnan(fwhm) else fwhm, 'Median FWHM [arcsec]')
+        ell_card = fits.Card('ELL', 'nan' if np.isnan(ell) else ell, 'Median ellipticity')
+        stars_card = fits.Card('NSTARS', 'nan' if np.isnan(stars_num) else stars_num, "Stars on frame")
+        bkg_card = fits.Card('BKG', 'nan' if np.isnan(b) else b, "Median background")
+        hdulist[0].header.append(fwhm_card)
+        hdulist[0].header.append(ell_card)
+        hdulist[0].header.append(stars_card)
+        hdulist[0].header.append(bkg_card)
 
 
 def calc_fwhm(path):
@@ -30,7 +46,7 @@ def calc_fwhm(path):
         mean, median, stddev = sigma_clipped_stats(f_image, sigma=3, maxiters=3,
                                                    cenfunc='median', stdfunc='mad_std')
         # detect peaks
-        Peaks = f_image - (median + 10 * stddev)
+        Peaks = f_image - (median + 5 * stddev)
         detected_peaks = Peaks > 0
         labeled_im, nb_labels = ndimage.label(detected_peaks)
         # check labels size
@@ -75,21 +91,45 @@ def calc_fwhm(path):
             #     print('Centriod: ', Mx, My, '\t FWHM: ', _fwhm)
             FWHM.append(_fwhm)
             ELL.append(ell)
-        fwhm = np.round((np.nanmedian(np.asarray(FWHM)) - 3.5) * 0.65 * header['XBINNING'], 2)
+        fwhm = np.round((np.nanmedian(np.asarray(FWHM))-2.2) * 0.65 * header['XBINNING'], 2)
         ell = np.round(np.nanmedian(np.asarray(ELL)), 2)
         stars_num = len(FWHM)
         b = np.round(bkg.background_median, 2)
-        fwhm_card = fits.Card('FWHM', 'nan' if np.isnan(fwhm) else fwhm, 'Median FWHM [arcsec]')
-        ell_card = fits.Card('ELL', 'nan' if np.isnan(ell) else ell, 'Median ellipticity')
-        stars_card = fits.Card('NSTARS', 'nan' if np.isnan(stars_num) else stars_num, "Stars on frame")
-        bkg_card = fits.Card('BKG', 'nan' if np.isnan(b) else b, "Median background")
-        hdulist[0].header.append(fwhm_card)
-        hdulist[0].header.append(ell_card)
-        hdulist[0].header.append(stars_card)
-        hdulist[0].header.append(bkg_card)
     if np.isnan(fwhm):
         return 'fail'
-    return '~'.join([str(header['FOCUS']), str(fwhm), str(ell), str(stars_num), str(b)])
+    # return '~'.join([str(header['FOCUS']), str(fwhm), str(ell), str(stars_num), str(b)])
+    return header['FOCUS'], fwhm, ell, stars_num, b
+
+
+def calc_source_catalog(path):
+    with fits.open(path, memmap=False, mode='update') as hdulist:
+        header = hdulist[0].header
+        image = hdulist[0].data.copy()
+        sigmaclip = SigmaClip(sigma=3.)
+        bkg_estimator = MedianBackground()
+        # delete background
+        bkg = Background2D(image, (32, 32), filter_size=(9, 9),
+                           sigma_clip=sigmaclip, bkg_estimator=bkg_estimator)
+        Data_without_background = image - bkg.background
+        # Sky = bkg.background_median
+        # print('Sky={0:.1f}'.format(Sky))
+        s_sky = sigma_clip(Data_without_background, stdfunc=mad_std).filled(np.nan)
+        s_sky = np.nanstd(s_sky)
+        # print('S_Sky = ', s_sky)
+        sigma = 9.0 * gaussian_fwhm_to_sigma  # FWHM = 3.
+        kernel = Gaussian2DKernel(sigma, x_size=3, y_size=3)
+        kernel.normalize()
+        segm = detect_sources(convolve(Data_without_background, kernel), 50 * s_sky, npixels=5)
+        cat = SourceCatalog(Data_without_background, segm)
+        # cat.moments
+        fwhm = np.round(np.median(cat.fwhm.value) * 0.65 * header['XBINNING'], 2)
+        ell = np.round(np.median(cat.ellipticity.value), 2)
+        b = np.round(bkg.background_median, 2)
+        stars_num = len(cat.fwhm.value)
+        if np.isnan(fwhm):
+            return 'fail'
+    # return '~'.join([str(header['FOCUS']), str(fwhm), str(ell), str(stars_num), str(b)])
+    return header['FOCUS'], fwhm, ell, stars_num, b
 
 
 def timer_loop():
@@ -98,6 +138,29 @@ def timer_loop():
         if (now - time_last_message).total_seconds() > time_wait_sec:
             print('Donuts timeout, closing server')
             server.close()
+
+
+def calc_don_shifts(data):
+    donuts = Donuts(refimage=data[1], image_ext=0, overscan_width=24, prescan_width=24,
+                    border=50, normalise=True, exposure='EXPTIME', subtract_bkg=True, ntiles=32)
+    hlist = fits.open(data[1])
+    h = hlist[0].header
+    shift_result = donuts.measure_shift(data[2])
+    dx = - shift_result.x.value
+    dy = - shift_result.y.value
+
+    x_m = h['CRPIX1'] - shift_result.x.value
+    y_m = h['CRPIX2'] - shift_result.y.value
+    hlist.close()
+    w = wcs.WCS(h)
+    bRa, bDec = w.all_pix2world(x_m, y_m, 0)
+    cRa, cDec = w.all_pix2world(h['CRPIX1'], h['CRPIX2'], 0)
+    dalpha = (cRa - bRa)*60*60
+    ddelta = (cDec - bDec)*60*60
+
+    ans = f'{np.round(dx, 2)}~{np.round(dy, 2)}~{np.round(dalpha, 2)}~{np.round(ddelta, 2)}'
+    print('ans = ' + ans)
+    return ans
 
 
 def pars_req(req: str) -> str:
@@ -111,27 +174,23 @@ def pars_req(req: str) -> str:
 
     if 'don' in data[0]:
         try:
-            donuts = Donuts(refimage=data[1], image_ext=0, overscan_width=24, prescan_width=24,
-                            border=50, normalise=True, exposure='EXPTIME', subtract_bkg=True, ntiles=32)
-            shift_result = donuts.measure_shift(data[2])
-            ans = f'{np.round(shift_result.x.value, 2)}~{np.round(shift_result.y.value, 2)}'
-            print('ans = ' + ans)
-            return ans
+            return calc_don_shifts(data)
         except Exception as e:
             print(e)
-            print('fail')
+            print('fail don')
             return f'fail: {e}'
     if 'fwhm' in data[0]:
-        # fwhm = 0.0225 * focus - 35
-        # focus = 44.5*(fwhm + 35)
         try:
             print(data)
-            out = calc_fwhm(data[1])
+            focus, fwhm, ell, stars_num, b = calc_source_catalog(data[1])
+            if fwhm > 4.5:
+                focus, fwhm, ell, stars_num, b = calc_fwhm(data[1])
+            write_to_fits(data[1], fwhm, ell, stars_num, b)
         except Exception as e:
             print(e)
-            print('fail')
+            print('fail fwhm')
             return f'fail: {e}'
-        return out
+        return '~'.join([str(focus), str(fwhm), str(ell), str(stars_num), str(b)])
 
 
 def handle_client(reader, writer):
