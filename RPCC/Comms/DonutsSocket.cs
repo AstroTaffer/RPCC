@@ -10,7 +10,7 @@ using RPCC.Utils;
 
 namespace RPCC.Comms
 {
-    public class DonutsSocket
+    public static class DonutsSocket
     {
         private static TcpClient _client;
         private static IPEndPoint _endPoint;
@@ -18,28 +18,26 @@ namespace RPCC.Comms
         private static StreamReader _streamReader;
         private static StreamWriter _streamWriter;
         public static bool IsConnected;
-        private static readonly Timer PingPongTimer = new Timer();
+        private static readonly Timer PingPongTimer = new();
 
-        internal DonutsSocket()
+        static DonutsSocket()
         {
             StartDonutsPy();
             IsConnected = false;
             PingPongTimer.Elapsed += Ping;
             PingPongTimer.Interval = 1000;
-        }
+        }   
 
-        internal void Connect()
-        {
+        public static bool Connect()
+        {   
             if (IsConnected)
             {
                 Logger.AddLogEntry("WARNING Already connected to Donuts");
-                return;
+                return true;
             }
 
             _client = new TcpClient();
             var ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
-            // var ipAddress = ipHostInfo.AddressList[1];
-            // _endPoint = new IPEndPoint(ipAddress, Settings.DonutsTcpIpPort);
             _endPoint = new IPEndPoint(IPAddress.Loopback, Settings.DonutsTcpIpPort);
             try
             {
@@ -65,6 +63,8 @@ namespace RPCC.Comms
                 // In case of bugs check "catch" block in Disconnect() function
                 Logger.AddLogEntry($"WARNING Unable to connect to Donuts: {ex.Message}");
             }
+
+            return IsConnected;
         }
 
         internal static void Disconnect()
@@ -97,12 +97,12 @@ namespace RPCC.Comms
             }
         }
 
-        internal static string ExchangeMessages(string request)
+        private static string ExchangeMessages(string request)
         {
             if (!IsConnected)
             {
                 Logger.AddLogEntry("WARNING Unable to exchange messages with Donuts: not connected to Donuts");
-                return null;
+                // if (!Connect()) return null;
             }
 
             try
@@ -122,15 +122,18 @@ namespace RPCC.Comms
         public static float[] GetGuideCorrection(string im1, string im2)
         {
             var req = $"don~{im1}~{im2}"; //Формируем запрос для донатов
-            // Logger.AddLogEntry($"DONUTS req: {req}");
+            Logger.AddDebugLogEntry($"DONUTS req: {req}");
             var response = ExchangeMessages(req);
-            // Logger.AddLogEntry($"DONUTS resp: {response}");
             
             if (!(response is null) && response != "")
             {
-                return response.Contains("fail")
-                    ? new float[] {0, 0}
-                    : response.Split('~').Select(float.Parse).ToArray();
+                if (response.Contains("fail"))
+                {
+                    Logger.AddLogEntry($"WARNING: DONUTS resp: {response}");
+                    return new float[] { 0, 0, 0, 0 };
+                }
+                // Logger.AddDebugLogEntry($"WARNING: DONUTS resp: {response}");
+                return response.Split('~').Select(float.Parse).ToArray();
             }
             Logger.AddLogEntry("WARNING Disconnecting from Donuts");
             Disconnect();
@@ -140,15 +143,13 @@ namespace RPCC.Comms
         public static float[] GetImageFwhm(string im)
         {
             var req = $"fwhm~{im}"; //Формируем запрос для донатов
-            // Logger.AddLogEntry($"req: {req}");
+            Logger.AddDebugLogEntry($"FWHM req: {req}");
             var response = ExchangeMessages(req);
-            // Logger.AddLogEntry($"resp: {response}");
-            
             if (!(response is null) && response != "")
             {
-                return response.Contains("fail")
-                    ? new float[] {0, 0, 0, 0, 0}
-                    : response.Split('~').Select(float.Parse).ToArray();
+                if (!response.Contains("fail")) return response.Split('~').Select(float.Parse).ToArray();
+                Logger.AddLogEntry($"WARNING: FWHM {response}");
+                return new float[] { 0, 0, 0, 0, 0 };
             }
             Logger.AddLogEntry("WARNING Disconnecting from Donuts");
             Disconnect();
@@ -160,7 +161,7 @@ namespace RPCC.Comms
             _streamWriter.WriteLine("quit");
         }
 
-        private void StartDonutsPy()
+        private static void StartDonutsPy()
         {
             var cwd = Directory.GetCurrentDirectory();
             var start = new ProcessStartInfo
@@ -174,12 +175,12 @@ namespace RPCC.Comms
             Process.Start(start);
         }
 
-        public string PingServer()
+        public static string PingServer()
         {
             return ExchangeMessages("ping");
         }
         
-        private void Ping(object sender, ElapsedEventArgs e)
+        private static void Ping(object sender, ElapsedEventArgs e)
         {
             PingServer();
         }
