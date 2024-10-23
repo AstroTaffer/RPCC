@@ -5,7 +5,6 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
-using Microsoft.Extensions.Logging;
 using RPCC.Utils;
 
 namespace RPCC.Comms
@@ -16,9 +15,9 @@ namespace RPCC.Comms
         // private readonly Settings Settings;
         // private  readonly MountDataCollector MountDataCollector;
 
-        private static readonly Timer _mountTimer;
+        private static readonly Timer MountTimer;
 
-        internal static bool _isConnected;
+        internal static bool IsConnected;
         private static IPEndPoint _endPoint;
         private static TcpClient _client;
         private static NetworkStream _stream;
@@ -48,20 +47,20 @@ namespace RPCC.Comms
             // Settings = settings;
             // MountDataCollector = collector;
 
-            _mountTimer = new Timer(1000);
-            _mountTimer.Elapsed += OnMountTimedEvent;
+            MountTimer = new Timer(1000);
+            MountTimer.Elapsed += OnMountTimedEvent;
 
-            _isConnected = false;
+            IsConnected = false;
         }
 
         #region General
 
-        internal static async void Connect()
+        internal static async Task<bool> Connect()
         {
-            if (_isConnected)
+            if (IsConnected)
             {
                 Logger.AddLogEntry("WARNING Already connected to SiTechExe");
-                return;
+                return true;
             }
 
             _client = new TcpClient();
@@ -75,31 +74,33 @@ namespace RPCC.Comms
                     _streamReader = new StreamReader(_stream, Encoding.ASCII);
                     _streamWriter = new StreamWriter(_stream, Encoding.ASCII);
                     _streamWriter.AutoFlush = true;
-                    _isConnected = true;
+                    IsConnected = true;
 
                     // The very first sent command will never be recognized, so we send some nonsense, literally
                     ExchangeMessages("Nonsense");
                     //await ExchangeMessagesAsync("Nonsense");
                     ReadScopeStatus();
-                    _mountTimer.Start();
+                    MountTimer.Start();
 
                     Logger.AddLogEntry($"Connected to SiTechExe {_endPoint}");
                 }
                 else
                 {
-                    _mountTimer.Stop();
+                    MountTimer.Stop();
                 }
             }
             catch (Exception ex) when (ex is SocketException || ex is IOException)
             {
-                _mountTimer.Stop();
+                MountTimer.Stop();
                 Logger.AddLogEntry($"WARNING Unable to connect to SiTechExe: {ex.Message}");
             }
+
+            return IsConnected;
         }
 
         internal static void Disconnect()
         {
-            if (!_isConnected)
+            if (!IsConnected)
             {
                 Logger.AddLogEntry("WARNING Already disconnected from SiTechExe");
                 return;
@@ -107,8 +108,8 @@ namespace RPCC.Comms
 
             try
             {
-                _mountTimer.Stop();
-                _mountTimer.Close();
+                MountTimer.Stop();
+                MountTimer.Close();
 
                 _streamWriter.Close();
                 _streamReader.Close();
@@ -116,7 +117,7 @@ namespace RPCC.Comms
                 _client.Close();
 
                 Logger.AddLogEntry("Disconnected from SiTechExe");
-                _isConnected = false;
+                IsConnected = false;
             }
             catch (Exception ex) when (ex is SocketException || ex is IOException)
             {
@@ -126,7 +127,7 @@ namespace RPCC.Comms
 
         internal static async Task<string[]> ExchangeMessagesAsync(string request)
         {
-            if (!_isConnected)
+            if (!IsConnected)
             {
                 Logger.AddLogEntry("WARNING Unable to exchange messages with SiTechExe: not connected");
                 return null;
@@ -146,9 +147,9 @@ namespace RPCC.Comms
             }
         }
 
-        internal static string[] ExchangeMessages(string request)
+        private static string[] ExchangeMessages(string request)
         {
-            if (!_isConnected)
+            if (!IsConnected)
             {
                 Logger.AddLogEntry("WARNING Unable to exchange messages with SiTechExe: not connected");
                 return null;
@@ -157,7 +158,7 @@ namespace RPCC.Comms
             try
             {
                 _streamWriter.WriteLine(request);
-                var response = _streamReader.ReadLine().Split(';');
+                var response = _streamReader.ReadLine()?.Split(';');
                 MountDataCollector.ParseScopeStatus(response);
                 return response;
             }
@@ -188,8 +189,8 @@ namespace RPCC.Comms
 
         private static void OnMountTimedEvent(object sender, EventArgs e)
         {
-            if (!_isConnected)
-                _mountTimer.Stop();
+            if (!IsConnected)
+                MountTimer.Stop();
             else
                 ReadScopeStatus();
         }
@@ -363,7 +364,7 @@ namespace RPCC.Comms
                     {
                         System.Threading.Thread.Sleep(1000);
                     }
-                    System.Threading.Thread.Sleep(1000);
+                    System.Threading.Thread.Sleep(3000);
                     return true;
                 }
                 else
@@ -376,15 +377,6 @@ namespace RPCC.Comms
             }
 
             return false;
-        }
-
-        internal static double[] GoToAltAz(double az, double el)
-        {
-            CoordinatesManager.Trans.SetAzimuthElevation(az, el);
-            var ra = CoordinatesManager.Trans.RAJ2000;
-            var dec = CoordinatesManager.Trans.DecJ2000;
-            GoTo(ra, dec, true);
-            return new[] {ra, dec};
         }
 
         // Valid directions: N (to North Celestial Pole), S (to South Celestial Pole), W (clockwise), E (counterclockwise)
