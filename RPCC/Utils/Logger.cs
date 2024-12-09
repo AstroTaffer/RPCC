@@ -50,9 +50,16 @@ namespace RPCC.Utils
             var logsDir = $"{Settings.MainOutFolder}\\LOGS\\RPCC_LOGS";
             if (!Directory.Exists(logsDir)) Directory.CreateDirectory(logsDir);
             var logsFileName = $"Logs {DateTime.UtcNow:yyyy-MM-ddTHH-mm-ss}.txt";
-            var sw = new StreamWriter($"{logsDir}\\{logsFileName}");
-            foreach (string item in LogBox.Items) sw.WriteLine(item);
-            sw.Close();
+            try
+            {
+                using var sw = new StreamWriter($"{logsDir}\\{logsFileName}");
+                foreach (string item in LogBox.Items) sw.WriteLine(item);
+            }
+            catch (NullReferenceException e)
+            {
+                AddLogEntry($"Logger warning: {e}");
+            }
+            
         }
 
         internal static void ClearLogs()
