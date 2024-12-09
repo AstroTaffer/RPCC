@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using ASCOM.Tools;
 
 namespace RPCC.Tasks
@@ -59,6 +60,9 @@ namespace RPCC.Tasks
         public int Xbin { get; set; } = 2;
 
         public int Ybin { get; set; } = 2;
+    
+        public List<string> RepointCoords { get; set; } = new();
+        public List<DateTime> RepointTimes { get; set; } = new();
 
         // public short XSubframeStart { get; set; } = 0;
         //

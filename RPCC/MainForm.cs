@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Windows.Forms;
 using System.Timers;
+using Npgsql;
 using RPCC.Cams;
 using RPCC.Focus;
 using RPCC.Utils;
@@ -22,10 +23,11 @@ namespace RPCC
         public static bool IsTaskFormOpen;
 
         #region General
+        [Obsolete("Obsolete")]
         public MainForm()
         {
             InitializeComponent();
-
+    
             // _isFirstLoad = true;
 
             Logger.LogBox = listBoxLogs;
@@ -57,8 +59,8 @@ namespace RPCC
             }
             groupBoxFocusSettings.Text = $@"Focus Settings (COMPORT {Settings.FocusComId})";
             
-            Tasker.dataGridViewTasker = dataGridViewTasker;
-            Tasker.contextMenuStripTasker = contextMenuStripTasker;
+            Tasker.DataGridViewTasker = dataGridViewTasker;
+            Tasker.ContextMenuStripTasker = contextMenuStripTasker;
             Tasker.SetHeader();
             
             // Donuts connect
@@ -85,6 +87,8 @@ namespace RPCC
             {
                 Logger.DebugMode = true;
             }
+
+            NpgsqlConnection.GlobalTypeMapper.MapComposite<Spoint>("public.spoint");
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)

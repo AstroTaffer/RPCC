@@ -11,7 +11,7 @@ namespace RPCC.Tasks
     {
         private readonly bool _isNewTask;
         private readonly int _rowIndex;
-        private readonly ObservationTask _task = new ObservationTask();
+        private readonly ObservationTask _task = new();
 
         public TaskForm(bool isNewTask, int rowIndex = 0, ObservationTask newTask = null)
         {   
@@ -21,8 +21,7 @@ namespace RPCC.Tasks
             _isNewTask = isNewTask;
             if (_isNewTask)
             {
-                // _task.TaskNumber = Tasker.GetTasksLen();
-                if (!(newTask is null))
+                if (newTask is not null)
                 {
                     _task = newTask;
                     SetLabels();
@@ -116,6 +115,24 @@ namespace RPCC.Tasks
                         MessageBox.Show(@"Target under elevation limit", @"OK", MessageBoxButtons.OK);
                         return;
                     }
+
+                    var times = textBoxDateTimeSSObjects.Text.Split('\n');
+                    var coors = textBoxCoordsSSObjects.Text.Split('\n').ToList();
+                    if (times.Length > 0 & !string.IsNullOrEmpty(times[0]))
+                    {
+                        if (times.Length == coors.Count)
+                        {
+                           _task.RepointCoords = coors;
+                           _task.RepointTimes = (from t in times select DateTime.Parse(t)).ToList(); 
+                        }
+                        else
+                        {
+                            MessageBox.Show(@"Length of repoint coords not equal length of repoint times", 
+                                @"OK", MessageBoxButtons.OK);
+                            return;
+                        }
+                        
+                    }
                 }
                 
                 _task.Exp = short.Parse(comboBoxExp.Text);
@@ -137,7 +154,6 @@ namespace RPCC.Tasks
                         MessageBox.Show(@"Can't calc duration", @"OK", MessageBoxButtons.OK);
                         return;
                     }
-
                 }
 
                 _task.TimeEnd = _task.TimeStart + TimeSpan.FromHours(_task.Duration);
