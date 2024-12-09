@@ -167,7 +167,9 @@ namespace RPCC.Tasks
                 }
             }
 
-            foreach (DataRow row in DbCommunicate.GetTableForThinking().Rows)
+            var tab = DbCommunicate.GetTableForThinking().Rows;
+
+            foreach (DataRow row in tab)
             {
                 var bufTask = new ObservationTask();
                 Tasker.GetTaskFromRow(row, ref bufTask);
