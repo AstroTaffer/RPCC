@@ -3,6 +3,7 @@ using System.Data;
 using System.Linq;
 using System.Windows.Forms;
 using Npgsql;
+using NpgsqlTypes;
 using RPCC.Cams;
 using RPCC.Comms;
 using RPCC.Utils;
@@ -29,21 +30,28 @@ namespace RPCC.Tasks
                                                         "time_add, time_start, time_end, " +
                                                         "duration, exp_time, done_frames, all_frames, time_last_exp, " +
                                                         "is_filter_g, is_filter_r, is_filter_i, object_name, object_type, " +
-                                                        "status, observer, frame_type, x_bin, y_bin " +
+                                                        "status, observer, frame_type, x_bin, y_bin, " +
+                                                        "repoint_coords, repoint_times " +
                                                         "FROM robophot_tasks WHERE status < 2 order by time_start ASC";
         // public static NpgsqlConnection Con;
-        private static readonly object Loc = new object();
+        private static readonly object Loc = new();
+
+
         
-        public static NpgsqlConnection ConnectToDb()
+        private static NpgsqlConnection ConnectToDb()
         {
             try
             {
-                lock (Loc)
+                lock (Loc)  
                 {
                     var connString =
                         $"Server={RoboPhotServer};Port={Port};User Id={UserId};Password={Password}; Database={Database};";
                      var con = new NpgsqlConnection(connString);
                     con.Open();
+                    
+                    // var dataSourceBuilder = new NpgsqlDataSourceBuilder(connString);
+                    // dataSourceBuilder.MapComposite<Spoint>("spoint");
+                    // using var dataSource = dataSourceBuilder.Build();
                     return con;
                 }   
 
@@ -52,7 +60,6 @@ namespace RPCC.Tasks
             {
                 Logger.AddLogEntry(@"Can't connect to data base");
                 Logger.AddLogEntry(e.Message);
-                // MessageBox.Show(@"Can't connect to data base", @"OK", MessageBoxButtons.OK);
                 return null;
             }
         }
@@ -61,23 +68,17 @@ namespace RPCC.Tasks
         {
             lock (Loc)
             {
-                using (var con = ConnectToDb())
+                using var con = ConnectToDb();
+                var com = new NpgsqlCommand(QueryForLoadDbTable, con);
+                using var reader = com.ExecuteReader();
+                if (!reader.HasRows) return;
+                var dt = new DataTable();
+                dt.Load(reader);
+                Tasker.DataGridViewTasker.Invoke((MethodInvoker)delegate
                 {
-                    var com = new NpgsqlCommand(QueryForLoadDbTable, con);
-                    using (var reader = com.ExecuteReader())
-                    {
-                        if (reader.HasRows)
-                        {
-                            var dt = new DataTable();
-                            dt.Load(reader);
-                            Tasker.dataGridViewTasker.Invoke((MethodInvoker)delegate
-                            {
-                                Tasker.dataGridViewTasker.DataSource = dt;
-                                Tasker.PaintTable();
-                            });
-                        }
-                    }
-                }
+                    Tasker.DataGridViewTasker.DataSource = dt;
+                    Tasker.PaintTable();
+                });
             }
         }
 
@@ -85,19 +86,15 @@ namespace RPCC.Tasks
         {
             lock (Loc)
             {
-                using (var con = ConnectToDb())
+                using var con = ConnectToDb();
+                var com = new NpgsqlCommand(QueryGetTableForThinking, con);
+                using var reader = com.ExecuteReader();
+                var dt = new DataTable();
+                if (reader.HasRows)
                 {
-                    var com = new NpgsqlCommand(QueryGetTableForThinking, con);
-                    using (var reader = com.ExecuteReader())
-                    {
-                        var dt = new DataTable();
-                        if (reader.HasRows)
-                        {
-                            dt.Load(reader);
-                        }
-                        return dt;
-                    }
+                    dt.Load(reader);
                 }
+                return dt;
             }
         }
                 
@@ -109,21 +106,17 @@ namespace RPCC.Tasks
                             "time_add, time_start, time_end, " +
                             "duration, exp_time, done_frames, all_frames, time_last_exp, " +
                             "is_filter_g, is_filter_r, is_filter_i, object_name, object_type, " +
-                            "status, observer, frame_type, x_bin, y_bin " +
+                            "status, observer, frame_type, x_bin, y_bin, repoint_coords, repoint_times " +
                             $"FROM robophot_tasks WHERE task_id = {observationTask.TaskNumber}";
-                using (var con = ConnectToDb())
+                using var con = ConnectToDb();
+                var com = new NpgsqlCommand(query, con);
+                using var reader = com.ExecuteReader();
+                var dt = new DataTable();
+                if (reader.HasRows)
                 {
-                    var com = new NpgsqlCommand(query, con);
-                    using (var reader = com.ExecuteReader())
-                    {
-                        var dt = new DataTable();
-                        if (reader.HasRows)
-                        {
-                            dt.Load(reader);
-                        }
-                        Tasker.GetTaskFromRow(dt.Rows[0], ref observationTask);
-                    }
+                    dt.Load(reader);
                 }
+                Tasker.GetTaskFromRow(dt.Rows[0], ref observationTask);
             }
         }
 
@@ -142,7 +135,9 @@ namespace RPCC.Tasks
                    $"{observationTask.Filters.Contains("i")}, " +
                    $"'{observationTask.Object}', '{observationTask.ObjectType}', " +
                    $"{observationTask.Status}, '{observationTask.Observer}', " +
-                   $"'{observationTask.FrameType}', {observationTask.Xbin}, {observationTask.Ybin})";
+                   $"'{observationTask.FrameType}', {observationTask.Xbin}, {observationTask.Ybin}, " +
+                   $"{(observationTask.RepointCoords?.Count > 0 ? "'ARRAY" + observationTask.RepointCoords + "'" : "NULL")}, " +
+                   $"{(observationTask.RepointTimes?.Count > 0 ? "'ARRAY" + observationTask.RepointTimes + "'::timestamp[]" : "NULL")})";
         }
 
         public static bool AddTaskToDb(ObservationTask observationTask)
@@ -156,16 +151,51 @@ namespace RPCC.Tasks
                                     "time_add, time_start, time_end, time_last_exp, " +
                                     "duration, exp_time, done_frames, all_frames, " +
                                     "is_filter_g, is_filter_r, is_filter_i, " +
-                                    "object_name, object_type, status, observer, frame_type, x_bin, y_bin) VALUES " +
-                                    $"{TaskQueryBuilder(observationTask)} RETURNING task_id";
-                    using (var con = ConnectToDb())
+                                    "object_name, object_type, status, observer, frame_type, x_bin, y_bin, " +
+                                    "repoint_coords, repoint_times) VALUES " +
+                                    "($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, " +
+                                    "$14, $15, $16, $17, $18, $19, $20, $21)  " +
+                                    "RETURNING task_id";
+                    using var con = ConnectToDb();
+                    var com = new NpgsqlCommand(query, con)
                     {
-                       var com = new NpgsqlCommand(query, con);
-                       using (var reader = com.ExecuteReader())
-                       {
-                           while (reader.Read()) observationTask.TaskNumber = Convert.ToInt32(reader[0]);
-                       } 
-                    }
+                        Parameters = { 
+                            new NpgsqlParameter { Value = new Spoint
+                            {
+                                TargetRa = observationTask.Ra*360/24,
+                                TargetDec = observationTask.Dec
+                            }, DataTypeName = "spoint_domen"},
+                            new NpgsqlParameter { Value = observationTask.TimeAdd },
+                            new NpgsqlParameter { Value = observationTask.TimeStart },
+                            new NpgsqlParameter { Value = observationTask.TimeEnd },
+                            new NpgsqlParameter { Value = observationTask.TimeLastExp },
+                            new NpgsqlParameter { Value = observationTask.Duration },
+                            new NpgsqlParameter { Value = observationTask.Exp },
+                            new NpgsqlParameter { Value = observationTask.DoneFrames },
+                            new NpgsqlParameter { Value = observationTask.AllFrames },
+                            new NpgsqlParameter { Value = observationTask.Filters.Contains("g") },
+                            new NpgsqlParameter { Value = observationTask.Filters.Contains("r") },
+                            new NpgsqlParameter { Value = observationTask.Filters.Contains("i") },
+                            new NpgsqlParameter { Value = observationTask.Object is null ? 
+                                DBNull.Value : observationTask.Object, NpgsqlDbType = NpgsqlDbType.Text},
+                            new NpgsqlParameter { Value = observationTask.ObjectType  is null ? 
+                                DBNull.Value : observationTask.ObjectType, NpgsqlDbType = NpgsqlDbType.Text },
+                            new NpgsqlParameter { Value = observationTask.Status, NpgsqlDbType = NpgsqlDbType.Smallint },
+                            new NpgsqlParameter { Value = observationTask.Observer, NpgsqlDbType = NpgsqlDbType.Text },
+                            new NpgsqlParameter { Value = observationTask.FrameType, NpgsqlDbType = NpgsqlDbType.Text },
+                            new NpgsqlParameter { Value = observationTask.Xbin, NpgsqlDbType = NpgsqlDbType.Smallint },
+                            new NpgsqlParameter { Value = observationTask.Ybin, NpgsqlDbType = NpgsqlDbType.Smallint },
+                            new NpgsqlParameter { Value = observationTask.RepointCoords?.Count > 0 ? 
+                                observationTask.RepointCoords : DBNull.Value, 
+                                NpgsqlDbType = NpgsqlDbType.Array | NpgsqlDbType.Text },
+                            new NpgsqlParameter { Value = observationTask.RepointTimes?.Count > 0 ? 
+                                observationTask.RepointTimes : DBNull.Value,
+                                NpgsqlDbType = NpgsqlDbType.Array | NpgsqlDbType.Timestamp
+                            }
+                        }
+                    };
+                    using var reader = com.ExecuteReader();
+                    while (reader.Read()) observationTask.TaskNumber = Convert.ToInt32(reader[0]);
                 }
             }
             catch (Exception e)
@@ -184,21 +214,18 @@ namespace RPCC.Tasks
             {
                 lock (Loc)
                 {
+                    var sus = TaskQueryBuilder(observationTask);
                     var query = "UPDATE robophot_tasks " +
                                      "SET (start_coord2000, " +
                                      "time_add, time_start, time_end, time_last_exp, " +
                                      "duration, exp_time, done_frames, all_frames, " +
                                      "is_filter_g, is_filter_r, is_filter_i, " +
-                                     "object_name, object_type, status, observer, frame_type, x_bin, y_bin) = " +
-                                     $"{TaskQueryBuilder(observationTask)} WHERE task_id = {observationTask.TaskNumber}";
-                    using (var con = ConnectToDb())
-                    {
-                        using (var com = new NpgsqlCommand(query, con))
-                        {
-                            com.ExecuteReader();
-                        }
-                    }
-
+                                     "object_name, object_type, status, observer, frame_type, x_bin, y_bin, " +
+                                     "repoint_coords, repoint_times) = " +
+                                     $"{sus} WHERE task_id = {observationTask.TaskNumber}";
+                    using var con = ConnectToDb();
+                    using var com = new NpgsqlCommand(query, con);
+                    com.ExecuteReader();
                 }
 
             }
@@ -225,13 +252,9 @@ namespace RPCC.Tasks
                                 $"({observationTask.TaskNumber}, '{path}', ({ra*360/24}, {dec})::spoint_domen, '{fil}', " +
                                 $"'{date}'::timestamp, {ext}, {temp}, '{sn}', {observationTask.FrameType == Head.Focus}, " +
                                 $"{MountDataCollector.IsLookingEast})";
-                    using (var con = ConnectToDb())
-                    {
-                        using (var com = new NpgsqlCommand(query, con))
-                        {
-                            com.ExecuteReader();
-                        }
-                    }
+                    using var con = ConnectToDb();
+                    using var com = new NpgsqlCommand(query, con);
+                    com.ExecuteReader();
                 }
             }
             catch (Exception e)
@@ -257,13 +280,9 @@ namespace RPCC.Tasks
                                     $"m_camera_sn, m_x_bin, m_y_bin, m_exp_time) VALUES " +
                                     $"('m_{observationTask.FrameType}', '{fil}', {observationTask.TaskNumber}, '{cam.serialNumber}'," +
                                     $"{observationTask.Xbin}, {observationTask.Ybin}, {observationTask.Exp})";
-                        using (var con = ConnectToDb())
-                        {
-                            using (var com = new NpgsqlCommand(query, con))
-                            {
-                                com.ExecuteReader();
-                            }
-                        }
+                        using var con = ConnectToDb();
+                        using var com = new NpgsqlCommand(query, con);
+                        com.ExecuteReader();
                     }
                 }
                 catch (Exception e)
@@ -305,18 +324,19 @@ namespace RPCC.Tasks
                             $"FROM robophot_frames WHERE fk_task_id = {task} AND is_do_astrometry " +
                             $"AND robophot_frames.is_looking_east = {MountDataCollector.IsLookingEast} " +
                             $"ORDER BY frame_id ASC LIMIT 1";
-                using (var con = ConnectToDb())
-                {
-                    var com = new NpgsqlCommand(query, con);
-                    using (var reader = com.ExecuteReader())
-                    {
-                        while (reader.Read()) path = Convert.ToString(reader[0]);
-                    }
-                }
+                using var con = ConnectToDb();
+                var com = new NpgsqlCommand(query, con);
+                using var reader = com.ExecuteReader();
+                while (reader.Read()) path = Convert.ToString(reader[0]);
             }
             
             return !string.IsNullOrEmpty(path) ? path : null;
         }
         
+    }
+    public class Spoint
+    {
+        public double TargetRa { get; set; }
+        public double TargetDec { get; set; }
     }
 }   
