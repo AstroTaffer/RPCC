@@ -299,9 +299,13 @@
     <Reference Include="System.Xml.ReaderWriter" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Cams\ApogeeCameraDevice.cs" />
     <Compile Include="Cams\CameraControl.cs" />
     <Compile Include="Cams\FitsAnalysis.cs" />
     <Compile Include="Cams\FitsIO.cs" />
+    <Compile Include="Cams\FLICameraDevice.cs" />
+    <Compile Include="Cams\FliSharp.cs" />
+    <Compile Include="Cams\ICameraDevice.cs" />
     <Compile Include="Cams\LibFliNative.cs" />
     <Compile Include="Comms\SiTechExeSocket.cs" />
     <Compile Include="Comms\DonutsSocket.cs" />
@@ -374,9 +378,8 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Cams\libfli.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Content Include="Cams\dll\Apogee.dll" />
+    <Content Include="Cams\dll\libfli.dll" />
     <Content Include="FliLogoMod.ico" />
     <Content Include="Guid\2023-04-07T17-56-16.918_EAST_V.fits">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -384,6 +387,7 @@
     <Content Include="Guid\2023-04-07T18-00-24.167_EAST_V.fits">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Guid\ringOstar.py" />
     <Content Include="Guid\testfwhm.py" />
     <Content Include="JPLEPH" />
     <Content Include="Sex\default.nnw">
@@ -419,6 +423,17 @@
     <Content Include="Utils\libsofa.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="APOGEELib">
+      <Guid>{A2882C73-7CFB-11D4-9155-0060676644C1}</Guid>
+      <VersionMajor>1</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

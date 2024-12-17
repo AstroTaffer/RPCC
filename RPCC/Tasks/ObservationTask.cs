@@ -53,13 +53,13 @@ namespace RPCC.Tasks
 //Object, Dark, Flat, Focus, Test, bias
         public string FrameType { get; set; }
 
-        public string Filters { get; set; } = "g r i";
+        public string Filters { get; set; } = $"{StringHolder.FilG} {StringHolder.FilV} {StringHolder.FilR} {StringHolder.FilI}";
 
 //in pix
 // Бин камер должен быть от 1 до 16
-        public int Xbin { get; set; } = 2;
+        public int Xbin { get; set; } = 1;
 
-        public int Ybin { get; set; } = 2;
+        public int Ybin { get; set; } = 1;
     
         public List<string> RepointCoords { get; set; } = new();
         public List<DateTime> RepointTimes { get; set; } = new();

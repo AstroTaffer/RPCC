@@ -1,68 +1,67 @@
-﻿using RPCC.Utils;
-using System;
+﻿using System;
+using RPCC.Utils;
 
-namespace RPCC.Cams
+namespace RPCC.Cams;
+
+internal class GeneralImageStat
 {
-    internal class GeneralImageStat
+    internal double DnrColorScale;
+    private double _dnrEnd;
+
+    internal double DnrStart;
+
+    /// <summary>
+    ///     General FITS image statistics
+    /// </summary>
+    private int _max;
+
+    private double _mean;
+    private int _min;
+    private double _stddev;
+
+    internal GeneralImageStat()
     {
-        /// <summary>
-        ///     General FITS image statistics
-        /// </summary>
+        Reset();
+    }
 
-        internal int max;
-        internal int min;
-        internal double mean;
-        internal double stddev;
+    internal void Reset()
+    {
+        _max = int.MinValue;
+        _min = int.MaxValue;
+        _mean = 0.0;
+        _stddev = 0.0;
 
-        internal double dnrStart;
-        internal double dnrEnd;
-        internal double dnrColorScale;
+        DnrStart = 0.0;
+        _dnrEnd = 0.0;
+        DnrColorScale = 0.0;
+    }
 
-        internal GeneralImageStat()
+    internal void Calculate(ushort[,] image)
+    {
+        var sum = 0.0;
+        var height = image.GetLength(0);
+        var width = image.GetLength(1);
+
+        for (var i = 0; i < height; i++)
+        for (var j = 0; j < width; j++)
         {
-            Reset();
+            sum += image[i, j];
+            if (image[i, j] > _max) _max = image[i, j];
+            if (image[i, j] < _min) _min = image[i, j];
         }
 
-        internal void Reset()
-        {
-            max = int.MinValue;
-            min = int.MaxValue;
-            mean = 0.0;
-            stddev = 0.0;
+        _mean = sum / (height * width);
 
-            dnrStart = 0.0;
-            dnrEnd = 0.0;
-            dnrColorScale = 0.0;
-        }
+        sum = 0.0;
+        for (var i = 0; i < height; i++)
+        for (var j = 0; j < width; j++)
+            sum += Math.Pow(image[i, j] - _mean, 2);
+        _stddev = Math.Sqrt(sum / (height * width));
 
-        internal void Calculate(ushort[][] image)
-        {
-            var sum = 0.0;
-            var height = image.Length;
-            var width = image[0].Length;
-
-            for (int i = 0; i < height; i++)
-                for (int j = 0; j < width; j++)
-                {
-                    sum += image[i][j];
-                    if (image[i][j] > max) max = image[i][j];
-                    if (image[i][j] < min) min = image[i][j];
-                }
-
-            mean = sum / (height * width);
-
-            sum = 0.0;
-            for (int i = 0; i < height; i++)
-                for (int j = 0; j < width; j++)
-                    sum += Math.Pow(image[i][j] - mean, 2);
-            stddev = Math.Sqrt(sum / (height * width));
-
-            dnrStart = mean - Settings.LowerBrightnessSd * stddev;
-            if (dnrStart < min) dnrStart = min;
-            dnrEnd = mean + Settings.UpperBrightnessSd * stddev;
-            if (dnrStart > max) dnrEnd = min;
-            dnrColorScale = 255 / (dnrEnd - dnrStart);
-
-        }
+        DnrStart = _mean - Settings.LowerBrightnessSd * _stddev;
+        if (DnrStart < _min) DnrStart = _min;
+        _dnrEnd = _mean + Settings.UpperBrightnessSd * _stddev;
+        if (DnrStart > _max) _dnrEnd = _min;
+        DnrColorScale = 255 / (_dnrEnd - DnrStart);
     }
 }

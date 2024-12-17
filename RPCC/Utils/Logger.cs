@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Windows.Forms;
+using RPCC.Cams;
 using RPCC.Focus;
 
 namespace RPCC.Utils
@@ -9,6 +10,7 @@ namespace RPCC.Utils
     {
         internal static ListBox LogBox;
         public static bool DebugMode = false;
+        public static string LogPath = $"{Settings.MainOutFolder}\\LOGS\\RPCC_LOGS";
 
         internal static void AddDebugLogEntry(string entry)
         {
@@ -47,7 +49,7 @@ namespace RPCC.Utils
 
         internal static void SaveLogs()
         {
-            var logsDir = $"{Settings.MainOutFolder}\\LOGS\\RPCC_LOGS";
+            var logsDir = LogPath;
             if (!Directory.Exists(logsDir)) Directory.CreateDirectory(logsDir);
             var logsFileName = $"Logs {DateTime.UtcNow:yyyy-MM-ddTHH-mm-ss}.txt";
             try
@@ -60,6 +62,12 @@ namespace RPCC.Utils
                 AddLogEntry($"Logger warning: {e}");
             }
             
+        }
+
+        internal static void AddError(string proc, Exception e, ICameraDevice cam)
+        { 
+            AddLogEntry($"ERROR WHILE {proc}: {e.Message}");
+            AddLogEntry($"ERROR WHILE {proc}: filter {cam.Filter}, SN {cam.SerialNumber}, model {cam.ModelName}, file {cam.FileName}");
         }
 
         internal static void ClearLogs()

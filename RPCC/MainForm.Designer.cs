@@ -115,25 +115,22 @@
             this.checkBoxAutoFocus = new System.Windows.Forms.CheckBox();
             this.tabPageImages = new System.Windows.Forms.TabPage();
             this.groupBoxImage3 = new System.Windows.Forms.GroupBox();
-            this.pictureBoxProfile3 = new System.Windows.Forms.PictureBox();
             this.panelImage3 = new System.Windows.Forms.Panel();
             this.pictureBoxImage3 = new System.Windows.Forms.PictureBox();
+            this.progressBarG = new System.Windows.Forms.ProgressBar();
             this.groupBoxImage2 = new System.Windows.Forms.GroupBox();
-            this.pictureBoxProfile2 = new System.Windows.Forms.PictureBox();
             this.panelImage2 = new System.Windows.Forms.Panel();
             this.pictureBoxImage2 = new System.Windows.Forms.PictureBox();
+            this.progressBarR = new System.Windows.Forms.ProgressBar();
             this.groupBoxImage1 = new System.Windows.Forms.GroupBox();
-            this.pictureBoxProfile1 = new System.Windows.Forms.PictureBox();
             this.panelImage1 = new System.Windows.Forms.Panel();
             this.pictureBoxImage1 = new System.Windows.Forms.PictureBox();
+            this.progressBarI = new System.Windows.Forms.ProgressBar();
             this.contextMenuStripTasker = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.addToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dataGridTextBoxColumn1 = new System.Windows.Forms.DataGridTextBoxColumn();
             this.dataGridTextBoxColumn2 = new System.Windows.Forms.DataGridTextBoxColumn();
-            this.progressBarI = new System.Windows.Forms.ProgressBar();
-            this.progressBarR = new System.Windows.Forms.ProgressBar();
-            this.progressBarG = new System.Windows.Forms.ProgressBar();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewTasker)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.dataGridViewTasker)).BeginInit();
             this.statusStrip.SuspendLayout();
             this.menuStrip.SuspendLayout();
             this.groupBoxLogs.SuspendLayout();
@@ -145,26 +142,23 @@
             this.tabControlMain.SuspendLayout();
             this.tabPageInfo.SuspendLayout();
             this.tabPageTasks.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridTasks)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.dataGridTasks)).BeginInit();
             this.tabPageCams.SuspendLayout();
             this.groupBoxInfo.SuspendLayout();
             this.groupBoxFocusSettings.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownRun)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownRun)).BeginInit();
             this.groupBoxAutoFocus.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownSetDefoc)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownSetDefoc)).BeginInit();
             this.tabPageImages.SuspendLayout();
             this.groupBoxImage3.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxProfile3)).BeginInit();
             this.panelImage3.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage3)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBoxImage3)).BeginInit();
             this.groupBoxImage2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxProfile2)).BeginInit();
             this.panelImage2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage2)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBoxImage2)).BeginInit();
             this.groupBoxImage1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxProfile1)).BeginInit();
             this.panelImage1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBoxImage1)).BeginInit();
             this.contextMenuStripTasker.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -175,7 +169,7 @@
             this.dataGridViewTasker.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (204)));
             dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
             dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
@@ -184,7 +178,7 @@
             this.dataGridViewTasker.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (204)));
             dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
             dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
@@ -196,21 +190,21 @@
             this.dataGridViewTasker.Name = "dataGridViewTasker";
             dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (204)));
             dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
             dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
             dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             this.dataGridViewTasker.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
             this.dataGridViewTasker.RowHeadersVisible = false;
-            this.dataGridViewTasker.Size = new System.Drawing.Size(1126, 493);
+            this.dataGridViewTasker.Size = new System.Drawing.Size(1126, 530);
             this.dataGridViewTasker.TabIndex = 1;
             this.dataGridViewTasker.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.DataGridViewTasker_CellMouseDoubleClick);
             // 
             // statusStrip
             // 
-            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.tSStatusClock });
-            this.statusStrip.Location = new System.Drawing.Point(0, 549);
+            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {this.tSStatusClock});
+            this.statusStrip.Location = new System.Drawing.Point(0, 586);
             this.statusStrip.Name = "statusStrip";
             this.statusStrip.Size = new System.Drawing.Size(1140, 22);
             this.statusStrip.SizingGrip = false;
@@ -225,7 +219,7 @@
             // 
             // menuStrip
             // 
-            this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.launchToolStripMenuItem, this.optionsToolStripMenuItem, this.debugToolStripMenuItem });
+            this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {this.launchToolStripMenuItem, this.optionsToolStripMenuItem, this.debugToolStripMenuItem});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
             this.menuStrip.Size = new System.Drawing.Size(1140, 24);
@@ -234,7 +228,7 @@
             // 
             // launchToolStripMenuItem
             // 
-            this.launchToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { this.findCamerasToolStripMenuItem, this.findFocusToolStripMenuItem, this.reconnectSocketToolStripMenuItem });
+            this.launchToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.findCamerasToolStripMenuItem, this.findFocusToolStripMenuItem, this.reconnectSocketToolStripMenuItem});
             this.launchToolStripMenuItem.Name = "launchToolStripMenuItem";
             this.launchToolStripMenuItem.Size = new System.Drawing.Size(58, 20);
             this.launchToolStripMenuItem.Text = "Launch";
@@ -255,7 +249,7 @@
             // 
             // reconnectSocketToolStripMenuItem
             // 
-            this.reconnectSocketToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { this.reconnectMeteoDomeToolStripMenuItem, this.reconnectDonutsToolStripMenuItem, this.reconnectSiTechExeToolStripMenuItem, this.toolStripSeparator1, this.reconnectAllToolStripMenuItem });
+            this.reconnectSocketToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.reconnectMeteoDomeToolStripMenuItem, this.reconnectDonutsToolStripMenuItem, this.reconnectSiTechExeToolStripMenuItem, this.toolStripSeparator1, this.reconnectAllToolStripMenuItem});
             this.reconnectSocketToolStripMenuItem.Name = "reconnectSocketToolStripMenuItem";
             this.reconnectSocketToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
             this.reconnectSocketToolStripMenuItem.Text = "Reconnect socket";
@@ -295,7 +289,7 @@
             // 
             // optionsToolStripMenuItem
             // 
-            this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { this.settingsToolStripMenuItem, this.updateCamerasSettingsToolStripMenuItem, this.loadConfigToolStripMenuItem, this.saveConfigToolStripMenuItem });
+            this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.settingsToolStripMenuItem, this.updateCamerasSettingsToolStripMenuItem, this.loadConfigToolStripMenuItem, this.saveConfigToolStripMenuItem});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             this.optionsToolStripMenuItem.Text = "Options";
@@ -330,7 +324,7 @@
             // 
             // debugToolStripMenuItem
             // 
-            this.debugToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { this.restoreDefaultConfigFileToolStripMenuItem });
+            this.debugToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.restoreDefaultConfigFileToolStripMenuItem});
             this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
             this.debugToolStripMenuItem.Size = new System.Drawing.Size(54, 20);
             this.debugToolStripMenuItem.Text = "Debug";
@@ -348,7 +342,7 @@
             this.groupBoxLogs.Dock = System.Windows.Forms.DockStyle.Left;
             this.groupBoxLogs.Location = new System.Drawing.Point(3, 3);
             this.groupBoxLogs.Name = "groupBoxLogs";
-            this.groupBoxLogs.Size = new System.Drawing.Size(1121, 493);
+            this.groupBoxLogs.Size = new System.Drawing.Size(1121, 530);
             this.groupBoxLogs.TabIndex = 2;
             this.groupBoxLogs.TabStop = false;
             this.groupBoxLogs.Text = "Logs";
@@ -361,13 +355,13 @@
             this.listBoxLogs.HorizontalScrollbar = true;
             this.listBoxLogs.Location = new System.Drawing.Point(3, 16);
             this.listBoxLogs.Name = "listBoxLogs";
-            this.listBoxLogs.Size = new System.Drawing.Size(1115, 474);
+            this.listBoxLogs.Size = new System.Drawing.Size(1115, 511);
             this.listBoxLogs.TabIndex = 0;
             this.listBoxLogs.DoubleClick += new System.EventHandler(this.ListBoxLogs_DoubleClick);
             // 
             // contextMenuStripLogs
             // 
-            this.contextMenuStripLogs.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.clearToolStripMenuItem, this.saveToolStripMenuItem });
+            this.contextMenuStripLogs.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {this.clearToolStripMenuItem, this.saveToolStripMenuItem});
             this.contextMenuStripLogs.Name = "contextMenuStrip1";
             this.contextMenuStripLogs.Size = new System.Drawing.Size(102, 48);
             // 
@@ -742,7 +736,7 @@
             this.tabControlMain.Location = new System.Drawing.Point(0, 24);
             this.tabControlMain.Name = "tabControlMain";
             this.tabControlMain.SelectedIndex = 0;
-            this.tabControlMain.Size = new System.Drawing.Size(1140, 525);
+            this.tabControlMain.Size = new System.Drawing.Size(1140, 562);
             this.tabControlMain.TabIndex = 3;
             // 
             // tabPageInfo
@@ -751,7 +745,7 @@
             this.tabPageInfo.Location = new System.Drawing.Point(4, 22);
             this.tabPageInfo.Name = "tabPageInfo";
             this.tabPageInfo.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageInfo.Size = new System.Drawing.Size(1132, 499);
+            this.tabPageInfo.Size = new System.Drawing.Size(1132, 536);
             this.tabPageInfo.TabIndex = 0;
             this.tabPageInfo.Text = "Info";
             this.tabPageInfo.UseVisualStyleBackColor = true;
@@ -764,7 +758,7 @@
             this.tabPageTasks.Location = new System.Drawing.Point(4, 22);
             this.tabPageTasks.Name = "tabPageTasks";
             this.tabPageTasks.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageTasks.Size = new System.Drawing.Size(1132, 499);
+            this.tabPageTasks.Size = new System.Drawing.Size(1132, 536);
             this.tabPageTasks.TabIndex = 1;
             this.tabPageTasks.Text = "Tasks";
             this.tabPageTasks.UseVisualStyleBackColor = true;
@@ -776,7 +770,7 @@
             this.dataGridTasks.HeaderForeColor = System.Drawing.SystemColors.ControlText;
             this.dataGridTasks.Location = new System.Drawing.Point(3, 3);
             this.dataGridTasks.Name = "dataGridTasks";
-            this.dataGridTasks.Size = new System.Drawing.Size(1126, 493);
+            this.dataGridTasks.Size = new System.Drawing.Size(1126, 530);
             this.dataGridTasks.TabIndex = 0;
             // 
             // tabPageCams
@@ -791,7 +785,7 @@
             this.tabPageCams.Location = new System.Drawing.Point(4, 22);
             this.tabPageCams.Name = "tabPageCams";
             this.tabPageCams.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageCams.Size = new System.Drawing.Size(1132, 499);
+            this.tabPageCams.Size = new System.Drawing.Size(1132, 536);
             this.tabPageCams.TabIndex = 2;
             this.tabPageCams.Text = "Cams&Focus";
             this.tabPageCams.UseVisualStyleBackColor = true;
@@ -875,7 +869,7 @@
             // 
             // buttonRun
             // 
-            this.buttonRun.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonRun.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonRun.Enabled = false;
             this.buttonRun.Location = new System.Drawing.Point(244, 25);
             this.buttonRun.Name = "buttonRun";
@@ -887,7 +881,7 @@
             // 
             // buttonRunStop
             // 
-            this.buttonRunStop.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonRunStop.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonRunStop.Location = new System.Drawing.Point(244, 60);
             this.buttonRunStop.Name = "buttonRunStop";
             this.buttonRunStop.Size = new System.Drawing.Size(74, 29);
@@ -899,10 +893,10 @@
             // numericUpDownRun
             // 
             this.numericUpDownRun.Enabled = false;
-            this.numericUpDownRun.Increment = new decimal(new int[] { 100, 0, 0, 0 });
+            this.numericUpDownRun.Increment = new decimal(new int[] {100, 0, 0, 0});
             this.numericUpDownRun.Location = new System.Drawing.Point(138, 25);
-            this.numericUpDownRun.Maximum = new decimal(new int[] { 5000, 0, 0, 0 });
-            this.numericUpDownRun.Minimum = new decimal(new int[] { 5000, 0, 0, -2147483648 });
+            this.numericUpDownRun.Maximum = new decimal(new int[] {5000, 0, 0, 0});
+            this.numericUpDownRun.Minimum = new decimal(new int[] {5000, 0, 0, -2147483648});
             this.numericUpDownRun.Name = "numericUpDownRun";
             this.numericUpDownRun.Size = new System.Drawing.Size(75, 20);
             this.numericUpDownRun.TabIndex = 1;
@@ -934,7 +928,7 @@
             // numericUpDownSetDefoc
             // 
             this.numericUpDownSetDefoc.Location = new System.Drawing.Point(242, 25);
-            this.numericUpDownSetDefoc.Minimum = new decimal(new int[] { 100, 0, 0, -2147483648 });
+            this.numericUpDownSetDefoc.Minimum = new decimal(new int[] {100, 0, 0, -2147483648});
             this.numericUpDownSetDefoc.Name = "numericUpDownSetDefoc";
             this.numericUpDownSetDefoc.Size = new System.Drawing.Size(76, 20);
             this.numericUpDownSetDefoc.TabIndex = 15;
@@ -970,31 +964,22 @@
             this.tabPageImages.Location = new System.Drawing.Point(4, 22);
             this.tabPageImages.Name = "tabPageImages";
             this.tabPageImages.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageImages.Size = new System.Drawing.Size(1132, 499);
+            this.tabPageImages.Size = new System.Drawing.Size(1132, 536);
             this.tabPageImages.TabIndex = 3;
             this.tabPageImages.Text = "Images";
             this.tabPageImages.UseVisualStyleBackColor = true;
             // 
             // groupBoxImage3
             // 
-            this.groupBoxImage3.Controls.Add(this.pictureBoxProfile3);
             this.groupBoxImage3.Controls.Add(this.panelImage3);
+            this.groupBoxImage3.Controls.Add(this.progressBarG);
             this.groupBoxImage3.Dock = System.Windows.Forms.DockStyle.Left;
             this.groupBoxImage3.Location = new System.Drawing.Point(627, 3);
             this.groupBoxImage3.Name = "groupBoxImage3";
-            this.groupBoxImage3.Size = new System.Drawing.Size(312, 493);
+            this.groupBoxImage3.Size = new System.Drawing.Size(312, 530);
             this.groupBoxImage3.TabIndex = 25;
             this.groupBoxImage3.TabStop = false;
             this.groupBoxImage3.Text = "Camera 3 Image";
-            // 
-            // pictureBoxProfile3
-            // 
-            this.pictureBoxProfile3.BackColor = System.Drawing.SystemColors.Desktop;
-            this.pictureBoxProfile3.Location = new System.Drawing.Point(6, 326);
-            this.pictureBoxProfile3.Name = "pictureBoxProfile3";
-            this.pictureBoxProfile3.Size = new System.Drawing.Size(300, 161);
-            this.pictureBoxProfile3.TabIndex = 5;
-            this.pictureBoxProfile3.TabStop = false;
             // 
             // panelImage3
             // 
@@ -1014,26 +999,26 @@
             this.pictureBoxImage3.TabIndex = 0;
             this.pictureBoxImage3.TabStop = false;
             // 
+            // progressBarG
+            // 
+            this.progressBarG.ForeColor = System.Drawing.Color.Lime;
+            this.progressBarG.Location = new System.Drawing.Point(6, 325);
+            this.progressBarG.Name = "progressBarG";
+            this.progressBarG.Size = new System.Drawing.Size(300, 23);
+            this.progressBarG.Step = 1;
+            this.progressBarG.TabIndex = 6;
+            // 
             // groupBoxImage2
             // 
-            this.groupBoxImage2.Controls.Add(this.pictureBoxProfile2);
             this.groupBoxImage2.Controls.Add(this.panelImage2);
+            this.groupBoxImage2.Controls.Add(this.progressBarR);
             this.groupBoxImage2.Dock = System.Windows.Forms.DockStyle.Left;
             this.groupBoxImage2.Location = new System.Drawing.Point(315, 3);
             this.groupBoxImage2.Name = "groupBoxImage2";
-            this.groupBoxImage2.Size = new System.Drawing.Size(312, 493);
+            this.groupBoxImage2.Size = new System.Drawing.Size(312, 530);
             this.groupBoxImage2.TabIndex = 24;
             this.groupBoxImage2.TabStop = false;
             this.groupBoxImage2.Text = "Camera 2 Image";
-            // 
-            // pictureBoxProfile2
-            // 
-            this.pictureBoxProfile2.BackColor = System.Drawing.SystemColors.Desktop;
-            this.pictureBoxProfile2.Location = new System.Drawing.Point(6, 326);
-            this.pictureBoxProfile2.Name = "pictureBoxProfile2";
-            this.pictureBoxProfile2.Size = new System.Drawing.Size(300, 161);
-            this.pictureBoxProfile2.TabIndex = 5;
-            this.pictureBoxProfile2.TabStop = false;
             // 
             // panelImage2
             // 
@@ -1053,26 +1038,26 @@
             this.pictureBoxImage2.TabIndex = 0;
             this.pictureBoxImage2.TabStop = false;
             // 
+            // progressBarR
+            // 
+            this.progressBarR.ForeColor = System.Drawing.Color.Red;
+            this.progressBarR.Location = new System.Drawing.Point(6, 325);
+            this.progressBarR.Name = "progressBarR";
+            this.progressBarR.Size = new System.Drawing.Size(300, 23);
+            this.progressBarR.Step = 1;
+            this.progressBarR.TabIndex = 5;
+            // 
             // groupBoxImage1
             // 
-            this.groupBoxImage1.Controls.Add(this.pictureBoxProfile1);
             this.groupBoxImage1.Controls.Add(this.panelImage1);
+            this.groupBoxImage1.Controls.Add(this.progressBarI);
             this.groupBoxImage1.Dock = System.Windows.Forms.DockStyle.Left;
             this.groupBoxImage1.Location = new System.Drawing.Point(3, 3);
             this.groupBoxImage1.Name = "groupBoxImage1";
-            this.groupBoxImage1.Size = new System.Drawing.Size(312, 493);
+            this.groupBoxImage1.Size = new System.Drawing.Size(312, 530);
             this.groupBoxImage1.TabIndex = 23;
             this.groupBoxImage1.TabStop = false;
             this.groupBoxImage1.Text = "Camera 1 Image";
-            // 
-            // pictureBoxProfile1
-            // 
-            this.pictureBoxProfile1.BackColor = System.Drawing.SystemColors.Desktop;
-            this.pictureBoxProfile1.Location = new System.Drawing.Point(6, 326);
-            this.pictureBoxProfile1.Name = "pictureBoxProfile1";
-            this.pictureBoxProfile1.Size = new System.Drawing.Size(300, 161);
-            this.pictureBoxProfile1.TabIndex = 5;
-            this.pictureBoxProfile1.TabStop = false;
             // 
             // panelImage1
             // 
@@ -1092,9 +1077,19 @@
             this.pictureBoxImage1.TabIndex = 0;
             this.pictureBoxImage1.TabStop = false;
             // 
+            // progressBarI
+            // 
+            this.progressBarI.BackColor = System.Drawing.SystemColors.Control;
+            this.progressBarI.ForeColor = System.Drawing.Color.Fuchsia;
+            this.progressBarI.Location = new System.Drawing.Point(6, 325);
+            this.progressBarI.Name = "progressBarI";
+            this.progressBarI.Size = new System.Drawing.Size(300, 23);
+            this.progressBarI.Step = 1;
+            this.progressBarI.TabIndex = 4;
+            // 
             // contextMenuStripTasker
             // 
-            this.contextMenuStripTasker.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.addToolStripMenuItem });
+            this.contextMenuStripTasker.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {this.addToolStripMenuItem});
             this.contextMenuStripTasker.Name = "contextMenuStripTasker";
             this.contextMenuStripTasker.Size = new System.Drawing.Size(97, 26);
             // 
@@ -1117,53 +1112,22 @@
             this.dataGridTextBoxColumn2.FormatInfo = null;
             this.dataGridTextBoxColumn2.Width = -1;
             // 
-            // progressBarI
-            // 
-            this.progressBarI.BackColor = System.Drawing.SystemColors.Control;
-            this.progressBarI.ForeColor = System.Drawing.Color.Fuchsia;
-            this.progressBarI.Location = new System.Drawing.Point(155, 549);
-            this.progressBarI.Name = "progressBarI";
-            this.progressBarI.Size = new System.Drawing.Size(136, 23);
-            this.progressBarI.Step = 1;
-            this.progressBarI.TabIndex = 4;
-            // 
-            // progressBarR
-            // 
-            this.progressBarR.ForeColor = System.Drawing.Color.Red;
-            this.progressBarR.Location = new System.Drawing.Point(297, 549);
-            this.progressBarR.Name = "progressBarR";
-            this.progressBarR.Size = new System.Drawing.Size(136, 23);
-            this.progressBarR.Step = 1;
-            this.progressBarR.TabIndex = 5;
-            // 
-            // progressBarG
-            // 
-            this.progressBarG.ForeColor = System.Drawing.Color.Lime;
-            this.progressBarG.Location = new System.Drawing.Point(439, 549);
-            this.progressBarG.Name = "progressBarG";
-            this.progressBarG.Size = new System.Drawing.Size(136, 23);
-            this.progressBarG.Step = 1;
-            this.progressBarG.TabIndex = 6;
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1140, 571);
-            this.Controls.Add(this.progressBarG);
-            this.Controls.Add(this.progressBarR);
-            this.Controls.Add(this.progressBarI);
+            this.ClientSize = new System.Drawing.Size(1140, 608);
             this.Controls.Add(this.tabControlMain);
             this.Controls.Add(this.statusStrip);
             this.Controls.Add(this.menuStrip);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip;
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.Text = "RoboPhot Cameras Controls";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewTasker)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.dataGridViewTasker)).EndInit();
             this.statusStrip.ResumeLayout(false);
             this.statusStrip.PerformLayout();
             this.menuStrip.ResumeLayout(false);
@@ -1180,29 +1144,26 @@
             this.tabControlMain.ResumeLayout(false);
             this.tabPageInfo.ResumeLayout(false);
             this.tabPageTasks.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridTasks)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.dataGridTasks)).EndInit();
             this.tabPageCams.ResumeLayout(false);
             this.groupBoxInfo.ResumeLayout(false);
             this.groupBoxInfo.PerformLayout();
             this.groupBoxFocusSettings.ResumeLayout(false);
             this.groupBoxFocusSettings.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownRun)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownRun)).EndInit();
             this.groupBoxAutoFocus.ResumeLayout(false);
             this.groupBoxAutoFocus.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownSetDefoc)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownSetDefoc)).EndInit();
             this.tabPageImages.ResumeLayout(false);
             this.groupBoxImage3.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxProfile3)).EndInit();
             this.panelImage3.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage3)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBoxImage3)).EndInit();
             this.groupBoxImage2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxProfile2)).EndInit();
             this.panelImage2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage2)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBoxImage2)).EndInit();
             this.groupBoxImage1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxProfile1)).EndInit();
             this.panelImage1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.pictureBoxImage1)).EndInit();
             this.contextMenuStripTasker.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -1311,15 +1272,12 @@
         private System.Windows.Forms.ToolStripMenuItem reconnectAllToolStripMenuItem;
         private System.Windows.Forms.TabPage tabPageImages;
         private System.Windows.Forms.GroupBox groupBoxImage3;
-        private System.Windows.Forms.PictureBox pictureBoxProfile3;
         private System.Windows.Forms.Panel panelImage3;
         private System.Windows.Forms.PictureBox pictureBoxImage3;
         private System.Windows.Forms.GroupBox groupBoxImage2;
-        private System.Windows.Forms.PictureBox pictureBoxProfile2;
         private System.Windows.Forms.Panel panelImage2;
         private System.Windows.Forms.PictureBox pictureBoxImage2;
         private System.Windows.Forms.GroupBox groupBoxImage1;
-        private System.Windows.Forms.PictureBox pictureBoxProfile1;
         private System.Windows.Forms.Panel panelImage1;
         private System.Windows.Forms.PictureBox pictureBoxImage1;
     }

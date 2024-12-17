@@ -45,11 +45,6 @@ namespace RPCC.Tasks
             this.textBoxCoords = new System.Windows.Forms.TextBox();
             this.labelCoords = new System.Windows.Forms.Label();
             this.groupBoxFrame = new System.Windows.Forms.GroupBox();
-            this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.numericUpDown_ybin = new System.Windows.Forms.NumericUpDown();
-            this.numericUpDown_xbin = new System.Windows.Forms.NumericUpDown();
-            this.labelYbin = new System.Windows.Forms.Label();
-            this.labelXbin = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.textBoxDuration = new System.Windows.Forms.TextBox();
             this.labelDuration = new System.Windows.Forms.Label();
@@ -60,6 +55,7 @@ namespace RPCC.Tasks
             this.textBoxExpN = new System.Windows.Forms.TextBox();
             this.labelExpN = new System.Windows.Forms.Label();
             this.groupBoxFilters = new System.Windows.Forms.GroupBox();
+            this.checkBoxFilV = new System.Windows.Forms.CheckBox();
             this.checkBoxFili = new System.Windows.Forms.CheckBox();
             this.checkBoxFilr = new System.Windows.Forms.CheckBox();
             this.checkBoxFilg = new System.Windows.Forms.CheckBox();
@@ -74,9 +70,6 @@ namespace RPCC.Tasks
             this.label7 = new System.Windows.Forms.Label();
             this.groupBoxCoords.SuspendLayout();
             this.groupBoxFrame.SuspendLayout();
-            this.groupBox3.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_ybin)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_xbin)).BeginInit();
             this.groupBox2.SuspendLayout();
             this.groupBoxFilters.SuspendLayout();
             this.groupBoxSSObjects.SuspendLayout();
@@ -95,7 +88,7 @@ namespace RPCC.Tasks
             this.groupBoxCoords.Controls.Add(this.labelTimeStart);
             this.groupBoxCoords.Controls.Add(this.textBoxCoords);
             this.groupBoxCoords.Controls.Add(this.labelCoords);
-            this.groupBoxCoords.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.groupBoxCoords.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (204)));
             this.groupBoxCoords.Location = new System.Drawing.Point(12, 12);
             this.groupBoxCoords.Name = "groupBoxCoords";
             this.groupBoxCoords.Size = new System.Drawing.Size(433, 219);
@@ -106,7 +99,7 @@ namespace RPCC.Tasks
             // comboBoxObjectType
             // 
             this.comboBoxObjectType.FormattingEnabled = true;
-            this.comboBoxObjectType.Items.AddRange(new object[] { "Exoplanet", "Brown dwarf", "White dwarf", "Nova", "Super nova", "Planet", "Asteroid", "Satellite", "Variable star", "Star cluster", "Nebula", "Galaxy", "Alert", "Other" });
+            this.comboBoxObjectType.Items.AddRange(new object[] {"Exoplanet", "Brown dwarf", "White dwarf", "Nova", "Super nova", "Planet", "Asteroid", "Satellite", "Variable star", "Star cluster", "Nebula", "Galaxy", "Alert", "Other"});
             this.comboBoxObjectType.Location = new System.Drawing.Point(6, 181);
             this.comboBoxObjectType.Name = "comboBoxObjectType";
             this.comboBoxObjectType.Size = new System.Drawing.Size(202, 28);
@@ -191,67 +184,15 @@ namespace RPCC.Tasks
             // 
             // groupBoxFrame
             // 
-            this.groupBoxFrame.Controls.Add(this.groupBox3);
             this.groupBoxFrame.Controls.Add(this.groupBox2);
             this.groupBoxFrame.Controls.Add(this.groupBoxFilters);
-            this.groupBoxFrame.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.groupBoxFrame.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (204)));
             this.groupBoxFrame.Location = new System.Drawing.Point(12, 237);
             this.groupBoxFrame.Name = "groupBoxFrame";
             this.groupBoxFrame.Size = new System.Drawing.Size(433, 200);
             this.groupBoxFrame.TabIndex = 1;
             this.groupBoxFrame.TabStop = false;
             this.groupBoxFrame.Text = "Frames";
-            // 
-            // groupBox3
-            // 
-            this.groupBox3.Controls.Add(this.numericUpDown_ybin);
-            this.groupBox3.Controls.Add(this.numericUpDown_xbin);
-            this.groupBox3.Controls.Add(this.labelYbin);
-            this.groupBox3.Controls.Add(this.labelXbin);
-            this.groupBox3.Location = new System.Drawing.Point(247, 25);
-            this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(102, 160);
-            this.groupBox3.TabIndex = 27;
-            this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "Binning";
-            // 
-            // numericUpDown_ybin
-            // 
-            this.numericUpDown_ybin.InterceptArrowKeys = false;
-            this.numericUpDown_ybin.Location = new System.Drawing.Point(11, 117);
-            this.numericUpDown_ybin.Maximum = new decimal(new int[] { 16, 0, 0, 0 });
-            this.numericUpDown_ybin.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
-            this.numericUpDown_ybin.Name = "numericUpDown_ybin";
-            this.numericUpDown_ybin.Size = new System.Drawing.Size(78, 26);
-            this.numericUpDown_ybin.TabIndex = 36;
-            this.numericUpDown_ybin.Value = new decimal(new int[] { 2, 0, 0, 0 });
-            // 
-            // numericUpDown_xbin
-            // 
-            this.numericUpDown_xbin.InterceptArrowKeys = false;
-            this.numericUpDown_xbin.Location = new System.Drawing.Point(11, 49);
-            this.numericUpDown_xbin.Maximum = new decimal(new int[] { 16, 0, 0, 0 });
-            this.numericUpDown_xbin.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
-            this.numericUpDown_xbin.Name = "numericUpDown_xbin";
-            this.numericUpDown_xbin.Size = new System.Drawing.Size(78, 26);
-            this.numericUpDown_xbin.TabIndex = 35;
-            this.numericUpDown_xbin.Value = new decimal(new int[] { 2, 0, 0, 0 });
-            // 
-            // labelYbin
-            // 
-            this.labelYbin.Location = new System.Drawing.Point(13, 92);
-            this.labelYbin.Name = "labelYbin";
-            this.labelYbin.Size = new System.Drawing.Size(65, 23);
-            this.labelYbin.TabIndex = 34;
-            this.labelYbin.Text = "Ybin";
-            // 
-            // labelXbin
-            // 
-            this.labelXbin.Location = new System.Drawing.Point(13, 25);
-            this.labelXbin.Name = "labelXbin";
-            this.labelXbin.Size = new System.Drawing.Size(65, 23);
-            this.labelXbin.TabIndex = 32;
-            this.labelXbin.Text = "Xbin";
             // 
             // groupBox2
             // 
@@ -296,7 +237,7 @@ namespace RPCC.Tasks
             // comboBoxFrameType
             // 
             this.comboBoxFrameType.FormattingEnabled = true;
-            this.comboBoxFrameType.Items.AddRange(new object[] { "Object", "Dark", "Flat", "Test", "Bias" });
+            this.comboBoxFrameType.Items.AddRange(new object[] {"Object", "Dark", "Flat", "Test"});
             this.comboBoxFrameType.Location = new System.Drawing.Point(113, 117);
             this.comboBoxFrameType.Name = "comboBoxFrameType";
             this.comboBoxFrameType.Size = new System.Drawing.Size(107, 28);
@@ -306,7 +247,7 @@ namespace RPCC.Tasks
             // comboBoxExp
             // 
             this.comboBoxExp.FormattingEnabled = true;
-            this.comboBoxExp.Items.AddRange(new object[] { "2", "5", "10", "15", "20", "30", "50", "80", "120", "180" });
+            this.comboBoxExp.Items.AddRange(new object[] {"2", "5", "10", "15", "20", "30", "50", "80", "120", "180"});
             this.comboBoxExp.Location = new System.Drawing.Point(113, 49);
             this.comboBoxExp.Name = "comboBoxExp";
             this.comboBoxExp.Size = new System.Drawing.Size(107, 28);
@@ -339,21 +280,35 @@ namespace RPCC.Tasks
             // 
             // groupBoxFilters
             // 
+            this.groupBoxFilters.Controls.Add(this.checkBoxFilV);
             this.groupBoxFilters.Controls.Add(this.checkBoxFili);
             this.groupBoxFilters.Controls.Add(this.checkBoxFilr);
             this.groupBoxFilters.Controls.Add(this.checkBoxFilg);
-            this.groupBoxFilters.Location = new System.Drawing.Point(355, 25);
+            this.groupBoxFilters.Location = new System.Drawing.Point(247, 25);
             this.groupBoxFilters.Name = "groupBoxFilters";
-            this.groupBoxFilters.Size = new System.Drawing.Size(67, 160);
+            this.groupBoxFilters.Size = new System.Drawing.Size(175, 160);
             this.groupBoxFilters.TabIndex = 24;
             this.groupBoxFilters.TabStop = false;
             this.groupBoxFilters.Text = "Filters";
+            // 
+            // checkBoxFilV
+            // 
+            this.checkBoxFilV.Checked = true;
+            this.checkBoxFilV.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxFilV.Enabled = false;
+            this.checkBoxFilV.Location = new System.Drawing.Point(126, 30);
+            this.checkBoxFilV.Name = "checkBoxFilV";
+            this.checkBoxFilV.Size = new System.Drawing.Size(43, 23);
+            this.checkBoxFilV.TabIndex = 30;
+            this.checkBoxFilV.Text = "V";
+            this.checkBoxFilV.UseVisualStyleBackColor = true;
             // 
             // checkBoxFili
             // 
             this.checkBoxFili.Checked = true;
             this.checkBoxFili.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxFili.Location = new System.Drawing.Point(15, 123);
+            this.checkBoxFili.Enabled = false;
+            this.checkBoxFili.Location = new System.Drawing.Point(15, 93);
             this.checkBoxFili.Name = "checkBoxFili";
             this.checkBoxFili.Size = new System.Drawing.Size(43, 23);
             this.checkBoxFili.TabIndex = 29;
@@ -364,7 +319,8 @@ namespace RPCC.Tasks
             // 
             this.checkBoxFilr.Checked = true;
             this.checkBoxFilr.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxFilr.Location = new System.Drawing.Point(15, 75);
+            this.checkBoxFilr.Enabled = false;
+            this.checkBoxFilr.Location = new System.Drawing.Point(15, 63);
             this.checkBoxFilr.Name = "checkBoxFilr";
             this.checkBoxFilr.Size = new System.Drawing.Size(43, 23);
             this.checkBoxFilr.TabIndex = 28;
@@ -375,6 +331,7 @@ namespace RPCC.Tasks
             // 
             this.checkBoxFilg.Checked = true;
             this.checkBoxFilg.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxFilg.Enabled = false;
             this.checkBoxFilg.Location = new System.Drawing.Point(15, 25);
             this.checkBoxFilg.Name = "checkBoxFilg";
             this.checkBoxFilg.Size = new System.Drawing.Size(43, 32);
@@ -428,7 +385,7 @@ namespace RPCC.Tasks
             this.groupBoxSSObjects.Controls.Add(this.label6);
             this.groupBoxSSObjects.Controls.Add(this.textBoxCoordsSSObjects);
             this.groupBoxSSObjects.Controls.Add(this.label7);
-            this.groupBoxSSObjects.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.groupBoxSSObjects.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (204)));
             this.groupBoxSSObjects.Location = new System.Drawing.Point(451, 12);
             this.groupBoxSSObjects.Name = "groupBoxSSObjects";
             this.groupBoxSSObjects.Size = new System.Drawing.Size(433, 462);
@@ -480,15 +437,13 @@ namespace RPCC.Tasks
             this.Controls.Add(this.buttonAdd);
             this.Controls.Add(this.groupBoxFrame);
             this.Controls.Add(this.groupBoxCoords);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Enabled = false;
+            this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
             this.Name = "TaskForm";
             this.Text = "TaskForm";
             this.groupBoxCoords.ResumeLayout(false);
             this.groupBoxCoords.PerformLayout();
             this.groupBoxFrame.ResumeLayout(false);
-            this.groupBox3.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_ybin)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_xbin)).EndInit();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             this.groupBoxFilters.ResumeLayout(false);
@@ -496,6 +451,8 @@ namespace RPCC.Tasks
             this.groupBoxSSObjects.PerformLayout();
             this.ResumeLayout(false);
         }
+
+        private System.Windows.Forms.CheckBox checkBoxFilV;
 
         private System.Windows.Forms.GroupBox groupBoxSSObjects;
         private System.Windows.Forms.TextBox textBoxDateTimeSSObjects;
@@ -509,13 +466,8 @@ namespace RPCC.Tasks
 
         private System.Windows.Forms.Label label1;
 
-        private System.Windows.Forms.NumericUpDown numericUpDown_xbin;
-        private System.Windows.Forms.NumericUpDown numericUpDown_ybin;
-
         private System.Windows.Forms.TextBox textBoxDuration;
         private System.Windows.Forms.Label labelDuration;
-
-        private System.Windows.Forms.GroupBox groupBox3;
 
         private System.Windows.Forms.Button buttonDelete;
 
@@ -532,11 +484,7 @@ namespace RPCC.Tasks
         private System.Windows.Forms.CheckBox checkBoxFilr;
         private System.Windows.Forms.CheckBox checkBoxFili;
 
-        private System.Windows.Forms.Label labelYbin;
-
         private System.Windows.Forms.Label labelFrameType;
-
-        private System.Windows.Forms.Label labelXbin;
 
         private System.Windows.Forms.ComboBox comboBoxExp;
 

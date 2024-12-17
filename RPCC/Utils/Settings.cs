@@ -86,6 +86,7 @@ namespace RPCC.Utils
         private static string _snCamG;
         private static string _snCamR;
         private static string _snCamI;
+        private static string _snCamV;
         private static int _numFlushes;
         private static double _camTemp;
 
@@ -115,6 +116,16 @@ namespace RPCC.Utils
             set
             {
                 if (value.Length > 0) _snCamI = value;
+                else throw new ArgumentException("Camera serial number can't be an empty string");
+            }
+        }
+        
+        public static string SnCamV
+        {
+            get => _snCamV;
+            set
+            {
+                if (value.Length > 0) _snCamV = value;
                 else throw new ArgumentException("Camera serial number can't be an empty string");
             }
         }
@@ -250,6 +261,7 @@ namespace RPCC.Utils
                       config.Root.Elements("cameras").Elements("snCamG").Any() &&
                       config.Root.Elements("cameras").Elements("snCamR").Any() &&
                       config.Root.Elements("cameras").Elements("snCamI").Any() &&
+                      config.Root.Elements("cameras").Elements("snCamV").Any() &&
                       config.Root.Elements("cameras").Elements("numFlushes").Any() &&
                       config.Root.Elements("cameras").Elements("camTemp").Any() &&
 
@@ -397,6 +409,7 @@ namespace RPCC.Utils
                     new XElement("snCamG", SnCamG),
                     new XElement("snCamR", SnCamR),
                     new XElement("snCamI", SnCamI),
+                    new XElement("snCamV", SnCamV),
                     new XElement("numFlushes", NumFlushes),
                     new XElement("camTemp", CamTemp)),
                 
@@ -431,6 +444,7 @@ namespace RPCC.Utils
                     new XElement("snCamG", "ML0882515"),
                     new XElement("snCamR", "ML0892515"),
                     new XElement("snCamI", "ML0742515"),
+                    new XElement("snCamV", "Alta-U6"), // TODO find sn
                     new XElement("numFlushes", 5),
                     new XElement("camTemp", -20.0)),
                 
