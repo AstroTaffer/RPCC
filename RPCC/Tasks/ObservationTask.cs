@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using ASCOM.Tools;
 
 namespace RPCC.Tasks
@@ -40,6 +41,8 @@ namespace RPCC.Tasks
 //0 = Wait, 1 = In progress, 5 = Ended not complete,
 //2 = Ended complete, 3 = Rejected by observer, 4 = Not observed
         public short Status { get; set; } = 0;
+        
+        public string ObjectType { get; set; }
 
         public string Object { get; set; }
 
@@ -47,23 +50,27 @@ namespace RPCC.Tasks
 
         public int TaskNumber { get; set; }
 
-//light, dark, flat
+//Object, Dark, Flat, Focus, Test, bias
         public string FrameType { get; set; }
 
         public string Filters { get; set; } = "g r i";
 
 //in pix
-        public short Xbin { get; set; } = 1;
+// Бин камер должен быть от 1 до 16
+        public int Xbin { get; set; } = 2;
 
-        public short Ybin { get; set; } = 1;
+        public int Ybin { get; set; } = 2;
+    
+        public List<string> RepointCoords { get; set; } = new();
+        public List<DateTime> RepointTimes { get; set; } = new();
 
-        public short XSubframeStart { get; set; } = 0;
-
-        public short YSubframeStart { get; set; } = 0;
-
-        public short XSubframeEnd { get; set; } = 2047;
-
-        public short YSubframeEnd { get; set; } = 2047;
+        // public short XSubframeStart { get; set; } = 0;
+        //
+        // public short YSubframeStart { get; set; } = 0;
+        //
+        // public short XSubframeEnd { get; set; } = 2047;
+        //
+        // public short YSubframeEnd { get; set; } = 2047;
 
 //in hours
         public float Duration { get; set; }
@@ -74,6 +81,34 @@ namespace RPCC.Tasks
             var radec = RaDec.Split(' ');
             Ra = Utilities.HMSToHours(radec[0]);
             Dec = Utilities.DMSToDegrees(radec[1]);
+        }
+
+        public ObservationTask Copy()
+        {
+            var t = new ObservationTask
+            {
+                TaskNumber = TaskNumber,
+                Ra = Ra,
+                Dec = Dec,
+                RaDec = RaDec,
+                TimeAdd = TimeAdd,
+                TimeStart = TimeStart,
+                TimeEnd = TimeEnd,
+                TimeLastExp = TimeLastExp,
+                Duration = Duration,
+                Filters = Filters,
+                Exp = Exp,
+                Object = Object,
+                Observer = Observer,
+                Status = Status,
+                Xbin = Xbin,
+                Ybin = Ybin,
+                AllFrames = AllFrames,
+                FrameType = FrameType,
+                DoneFrames = DoneFrames,
+                ObjectType = ObjectType
+            };
+            return t;
         }
     }
 }

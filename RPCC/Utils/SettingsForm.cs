@@ -27,8 +27,6 @@ namespace RPCC.Utils
             textBoxiCamSn.Text = Settings.SnCamI;
             numericUpDownNumFlushes.Value = Settings.NumFlushes;
             comboBoxTemp.Text = Settings.CamTemp.ToString();
-            numericUpDownBin.Value = Settings.CamBin;
-            comboBoxReadout.SelectedItem = Settings.CamRoMode;
             #endregion
 
             #region Survey
@@ -93,8 +91,6 @@ namespace RPCC.Utils
             {
                 Settings.CamTemp = double.Parse(comboBoxTemp.Text, usCulture);
             }
-            Settings.CamBin = (int)numericUpDownBin.Value;
-            Settings.CamRoMode = (string)comboBoxReadout.SelectedItem;
             #endregion
 
             #region Survey

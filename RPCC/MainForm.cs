@@ -1,143 +1,109 @@
 ﻿using System;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Timers;
 using System.Windows.Forms;
+using System.Timers;
+using Npgsql;
 using RPCC.Cams;
-using RPCC.Comms;
 using RPCC.Focus;
-using RPCC.Tasks;
 using RPCC.Utils;
-using Timer = System.Timers.Timer;
+using RPCC.Comms;
+using RPCC.Tasks;
 
 namespace RPCC
 {
     public partial class MainForm : Form
     {
-        // private readonly SiTechExeSocket SiTechExeSocket;
-        // private readonly MountDataCollector _mountDc;
-
-        private static readonly Timer FocusTimer = new Timer();
-
-        private readonly CameraControl _cameraControl;
-
-        // private readonly CameraFocus CameraFocus;
-
-        private readonly WeatherSocket _domeSocket;
-        // private readonly WeatherDataCollector _weatherDc;
-
-        private readonly DonutsSocket _donutsSocket;
-
         /// <summary>
         ///     Логика работы основной формы программы
         ///     Обработка команд пользователя с помощью вызова готовых функций
         /// </summary>
-        // private readonly Logger Logger;
-        // private Settings Settings;
-        private ushort[][] _currentImage;
 
-        private GeneralImageStat _currentImageGStat;
-        private int _idleCamNum;
-        private bool _isCurrentImageLoaded;
+        private static readonly System.Timers.Timer FocusTimer = new();
 
-        private bool _isFirstLoad;
-        private bool _isZoomModeActivated;
-
-        private void AddToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            // Logger.AddLogEntry("Add Task click");
-            var taskForm = new TaskForm(true);
-            taskForm.Show();
-        }
-
-        private void DataGridViewTasker_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
-        {
-            // MessageBox.Show(e.RowIndex.ToString());
-            if (e.RowIndex == -1) return;
-            var taskForm = new TaskForm(false, e.RowIndex);
-            taskForm.Show();
-        }
-
-        private void DataGridViewTasker_VisibleChanged(object sender, EventArgs e)
-        {
-            if (!_isFirstLoad || !dataGridViewTasker.Visible) return;
-            _isFirstLoad = false;
-            Tasker.PaintTable();
-        }
+        public static bool IsTaskFormOpen;
 
         #region General
-
+        [Obsolete("Obsolete")]
         public MainForm()
         {
             InitializeComponent();
+    
+            // _isFirstLoad = true;
 
-            _isFirstLoad = true;
-
-            // Logger = new Logger(listBoxLogs);
-            Logger.logBox = listBoxLogs;
+            Logger.LogBox = listBoxLogs;
             Logger.AddLogEntry("Application launched");
 
-            // Settings = new Settings();
             Settings.LoadXmlConfig("SettingsDefault.xml");
 
-            // Hardware controls
-            _cameraControl = new CameraControl();
-
+            // Camera controls
+            CameraControl.resetUi = ResetCamsUi;
+            CameraControl.resetPics = RefreshImages;
+            
             // MeteoDome connect
-            // _weatherDc = new WeatherDataCollector();
-            _domeSocket = new WeatherSocket();
-            _domeSocket.Connect();
-
-            // Donuts connect
-            _donutsSocket = new DonutsSocket();
-            _donutsSocket.Connect();
+            WeatherSocket.Connect();
 
             // SiTechExe connect
-            // _mountDc = new MountDataCollector();
-            // SiTechExeSocket = new SiTechExeSocket();
             SiTechExeSocket.Connect();
 
             // Create timer for focus loop
             FocusTimer.Elapsed += OnTimedEvent_Clock;
             FocusTimer.Interval = 1000;
-            FocusTimer.Start();
-
+            
+            // Focus connect
             // HACK: For the love of god stop exiting the program when something is not connected!
             // Call FindFocusToolStripMenuItem_Click
-
             if (!SerialFocus.Init())
             {
                 MessageBox.Show(@"Can't open Focus serial port", @"OK", MessageBoxButtons.OK);
                 Logger.AddLogEntry(@"Can't open Focus serial port");
             }
-
             groupBoxFocusSettings.Text = $@"Focus Settings (COMPORT {Settings.FocusComId})";
-
-            // Tasker.logger = Logger;
-            Tasker.dataGridViewTasker = dataGridViewTasker;
-            Tasker.contextMenuStripTasker = contextMenuStripTasker;
+            
+            Tasker.DataGridViewTasker = dataGridViewTasker;
+            Tasker.ContextMenuStripTasker = contextMenuStripTasker;
             Tasker.SetHeader();
-            Tasker.LoadTasksFromXml();
+            
+            // Donuts connect
+            DonutsSocket.Connect();
+            
+            progressBarG.Style = ProgressBarStyle.Continuous;
+            progressBarR.Style = ProgressBarStyle.Continuous;
+            progressBarI.Style = ProgressBarStyle.Continuous;
+            
+            FocusTimer.Start();
+            timerUi.Start();
+            Head.StartThinking();
+            if (checkBoxHead.Checked)
+            {
+                Head.IsThinking = true;
+                Head.ThinkingTimer.Start();
+            }
+            if (checkBoxAutoFocus.Checked)
+            {
+                CameraFocus.IsAutoFocus = true;
+            }
 
-            timerClock.Start();
-            comboBoxImgType.SelectedIndex = 0;
+            if (checkBoxDebugMode.Checked)
+            {
+                Logger.DebugMode = true;
+            }
+
+            NpgsqlConnection.GlobalTypeMapper.MapComposite<Spoint>("public.spoint");
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            timerClock.Stop();
-
-            Tasker.SaveTasksToXml();
-
-            _domeSocket.Disconnect();
-            _donutsSocket.Disconnect();
+            Logger.SaveLogs();
+            timerUi.Stop();
+            
+            // Tasker.SaveTasksToXml();
+            // DbCommunicate.DisconnectFromDb();
+            
+            WeatherSocket.Disconnect();
+            DonutsSocket.Disconnect();
             SiTechExeSocket.Disconnect();
 
-            _cameraControl.DisconnectCameras();
+            CameraControl.DisconnectCameras();
 
             SerialFocus.Close_Port();
             CameraFocus.DeFocus = 0;
@@ -146,120 +112,153 @@ namespace RPCC
             FocusTimer.Dispose();
         }
 
-        private void TimerClock_Tick(object sender, EventArgs e)
+        private void TimerUiUpdate(object sender, EventArgs e)
         {
-            tSStatusClock.Text = @"UTC: " + DateTime.UtcNow.ToString("yyyy-MM-ddTHH-mm-ss.fff");
+            tSStatusClock.Text = @"UTC: " + DateTime.UtcNow.ToString("yyyy-MM-ddTHH-mm-ss");
+            checkBoxHead.Checked = Head.IsThinking;
+            checkBoxGuiding.Checked = Head.IsGuid;
+            try
+            {
+                switch (CameraControl.cams.Length)
+                {
+                    case 3:
+                        labelCam3CcdTemp.Text = $"CCD Temp: {CameraControl.cams[2].ccdTemp:F3}";
+                        labelCam3BaseTemp.Text = $"Base Temp: {CameraControl.cams[2].baseTemp:F3}";
+                        labelCam3CoolerPwr.Text = $"Cooler Power: {CameraControl.cams[2].coolerPwr} %";
+                        labelCam3Status.Text = $"Status: {CameraControl.cams[2].status}";
+                        labelCam3RemTime.Text = $"Remaining: {CameraControl.cams[2].remTime / 1000}";
+                        SetProgress(2);
+                        goto case 2;
+                    case 2:
+                        labelCam2CcdTemp.Text = $"CCD Temp: {CameraControl.cams[1].ccdTemp:F3}";
+                        labelCam2BaseTemp.Text = $"Base Temp: {CameraControl.cams[1].baseTemp:F3}";
+                        labelCam2CoolerPwr.Text = $"Cooler Power: {CameraControl.cams[1].coolerPwr} %";
+                        labelCam2Status.Text = $"Status: {CameraControl.cams[1].status}";
+                        labelCam2RemTime.Text = $"Remaining: {CameraControl.cams[1].remTime / 1000}";
+                        SetProgress(1);
+                        goto case 1;
+                    case 1:
+                        labelCam1CcdTemp.Text = $"CCD Temp: {CameraControl.cams[0].ccdTemp:F3}";
+                        labelCam1BaseTemp.Text = $"Base Temp: {CameraControl.cams[0].baseTemp:F3}";
+                        labelCam1CoolerPwr.Text = $"Cooler Power: {CameraControl.cams[0].coolerPwr} %";
+                        labelCam1Status.Text = $"Status: {CameraControl.cams[0].status}";
+                        labelCam1RemTime.Text = $"Remaining: {CameraControl.cams[0].remTime / 1000}";
+                        SetProgress(0);
+                        break;
+                }
+            }
+            catch (IndexOutOfRangeException)
+            {
+                Logger.AddLogEntry("WARNING Cameras list has been reset while updating GUI");
+                // If the cameras have been disconnected when we were updating the labels,
+                // IndexOutOfRangeException will be raised and silenced. It's not the best solution,
+                // but Monitor.Enter will stop the GUI thread and Monitor.TryEnter may cause some
+                // loops to be skipped if GUI timer and Cams timer would elapse at the same time.
+                // Though I think it's really unlikely. Use Monitor.TryEnter in case of bugs.
+            }
+        }
+        
+        internal void ResetCamsUi()
+        {
+            // Camera 1
+            groupBoxImage1.Invoke((MethodInvoker)delegate
+            {
+                groupBoxCam1.Enabled = false;
+                groupBoxImage1.Enabled = false;
+                pictureBoxImage1.Image = null;
+                pictureBoxProfile1.Image = null;
+                labelCam1Model.Text = "Model:";
+                labelCam1Sn.Text = "Serial Num:";
+                labelCam1Filter.Text = "Filter:";
+                labelCam1CcdTemp.Text = "CCD Temp:";
+                labelCam1BaseTemp.Text = "Base Temp:";
+                labelCam1CoolerPwr.Text = "Cooler Power:";
+                labelCam1Status.Text = "Status:";
+                labelCam1RemTime.Text = "Remaining:";
 
-            _cameraControl.GetStatus();
-            switch (_cameraControl.cameras.Length)
+                // Camera 2
+                groupBoxCam2.Enabled = false;
+                groupBoxImage2.Enabled = false;
+                pictureBoxImage2.Image = null;
+                pictureBoxProfile2.Image = null;
+                labelCam2Model.Text = "Model:";
+                labelCam2Sn.Text = "Serial Num:";
+                labelCam2Filter.Text = "Filter:";
+                labelCam2CcdTemp.Text = "CCD Temp:";
+                labelCam2BaseTemp.Text = "Base Temp:";
+                labelCam2CoolerPwr.Text = "Cooler Power:";
+                labelCam2Status.Text = "Status:";
+                labelCam2RemTime.Text = "Remaining:";
+
+                // Camera 3
+                groupBoxCam3.Enabled = false;
+                groupBoxImage3.Enabled = false;
+                pictureBoxImage3.Image = null;
+                pictureBoxProfile3.Image = null;
+                labelCam3Model.Text = "Model:";
+                labelCam3Sn.Text = "Serial Num:";
+                labelCam3Filter.Text = "Filter:";
+                labelCam3CcdTemp.Text = "CCD Temp:";
+                labelCam3BaseTemp.Text = "Base Temp:";
+                labelCam3CoolerPwr.Text = "Cooler Power:";
+                labelCam3Status.Text = "Status:";
+                labelCam3RemTime.Text = "Remaining:";
+            });
+            
+            switch (CameraControl.cams.Length)
             {
                 case 3:
-                    labelCam3CcdTemp.Text = $@"CCD Temp: {_cameraControl.cameras[2].ccdTemp}";
-                    labelCam3BaseTemp.Text = $@"Base Temp: {_cameraControl.cameras[2].baseTemp}";
-                    labelCam3CoolerPwr.Text = $@"Cooler Power: {_cameraControl.cameras[2].coolerPwr} %";
-                    labelCam3Status.Text = $@"Status: {_cameraControl.cameras[2].status}";
-                    labelCam3RemTime.Text = $@"Remaining: {_cameraControl.cameras[2].remTime / 1000}";
+                    groupBoxCam3.Invoke((MethodInvoker) delegate
+                    {
+                        groupBoxCam3.Enabled = true;
+                        groupBoxImage3.Enabled = true;
+                        labelCam3Model.Text = $"Model: {CameraControl.cams[2].modelName}";
+                       labelCam3Sn.Text = $"Serial Num: {CameraControl.cams[2].serialNumber}";
+                       labelCam3Filter.Text = $"Filter: {CameraControl.cams[2].filter}"; 
+                    });
                     goto case 2;
                 case 2:
-                    labelCam2CcdTemp.Text = $@"CCD Temp: {_cameraControl.cameras[1].ccdTemp}";
-                    labelCam2BaseTemp.Text = $@"Base Temp: {_cameraControl.cameras[1].baseTemp}";
-                    labelCam2CoolerPwr.Text = $@"Cooler Power: {_cameraControl.cameras[1].coolerPwr} %";
-                    labelCam2Status.Text = $@"Status: {_cameraControl.cameras[1].status}";
-                    labelCam2RemTime.Text = $@"Remaining: {_cameraControl.cameras[1].remTime / 1000}";
+                    groupBoxCam2.Invoke((MethodInvoker) delegate
+                    {
+                        groupBoxCam2.Enabled = true;
+                        groupBoxImage2.Enabled = true;
+                        labelCam2Model.Text = $"Model: {CameraControl.cams[1].modelName}";
+                        labelCam2Sn.Text = $"Serial Num: {CameraControl.cams[1].serialNumber}";
+                        labelCam2Filter.Text = $"Filter: {CameraControl.cams[1].filter}";
+                    });
                     goto case 1;
                 case 1:
-                    labelCam1CcdTemp.Text = $@"CCD Temp: {_cameraControl.cameras[0].ccdTemp}";
-                    labelCam1BaseTemp.Text = $@"Base Temp: {_cameraControl.cameras[0].baseTemp}";
-                    labelCam1CoolerPwr.Text = $@"Cooler Power: {_cameraControl.cameras[0].coolerPwr}  %";
-                    labelCam1Status.Text = $@"Status: {_cameraControl.cameras[0].status}";
-                    labelCam1RemTime.Text = $@"Remaining: {_cameraControl.cameras[0].remTime / 1000}";
-                    break;
-            }
-
-            _idleCamNum = 0;
-            for (var i = 0; i < _cameraControl.cameras.Length; i++)
-                if (_cameraControl.cameras[i].status == "IDLE")
-                {
-                    _idleCamNum++;
-                    if (_cameraControl.cameras[i].isExposing)
+                    groupBoxCam1.Invoke((MethodInvoker) delegate
                     {
-                        // Image ready
-                        // TODO: Move to separate thread
-                        var imageFits = _cameraControl.ReadImage(_cameraControl.cameras[i]);
-
-                        imageFits.SaveFitsFile(_cameraControl, SerialFocus.CurrentPosition, i);
-
-                        if (i == _cameraControl.task.viewCamIndex)
-                        {
-                            _isCurrentImageLoaded = false;
-                            _currentImage = imageFits.data;
-                            _currentImageGStat = new GeneralImageStat(_currentImage);
-                            Logger.AddLogEntry($"Min: {_currentImageGStat.min}; " +
-                                               $"Max: {_currentImageGStat.max}; " +
-                                               $"Mean: {_currentImageGStat.mean:0.##}; " +
-                                               $"SD: {_currentImageGStat.sd:0.##}");
-                            PlotFitsImage();
-                            _isCurrentImageLoaded = true;
-                        }
-
-                        // TODO: AUTOFOCUS, check quality
-                        // CameraFocus.AutoFocus();
-                        _cameraControl.cameras[i].isExposing = false;
-                    }
-                }
-
-            if (_idleCamNum == _cameraControl.cameras.Length)
-            {
-                if (_cameraControl.task.framesNum > 1)
-                {
-                    _cameraControl.task.framesNum--;
-                    numericUpDownSequence.Value = _cameraControl.task.framesNum;
-                    _cameraControl.StartExposure();
-                }
-                else if (!buttonSurveyStart.Enabled)
-                {
-                    buttonSurveyStart.Enabled = true;
-                    comboBoxImgType.Enabled = true;
-                    numericUpDownSequence.Enabled = true;
-                    numericUpDownExpTime.Enabled = true;
-                    updateCamerasSettingsToolStripMenuItem.Enabled = true;
-                    Logger.AddLogEntry("Survey finished");
-                }
+                        groupBoxCam1.Enabled = true;
+                        groupBoxImage1.Enabled = true;
+                        labelCam1Model.Text = $"Model: {CameraControl.cams[0].modelName}";
+                        labelCam1Sn.Text = $"Serial Num: {CameraControl.cams[0].serialNumber}";
+                        labelCam1Filter.Text = $"Filter: {CameraControl.cams[0].filter}";
+                    });
+                    break;
             }
         }
 
+        private void ButtonSurveyStop_Click(object sender, EventArgs e)
+        {
+            //_cameraControl.CancelSurvey();
+            //Logger.AddLogEntry($"Survey cancelled, {_cameraControl.task.framesNum} {(_cameraControl.task.framesNum == 1 ? "frame" : "frames")} skipped");
+            //_cameraControl.task.framesNum = 1;
+            //numericUpDownSequence.Value = 1;
+
+            //buttonSurveyStart.Enabled = true;
+            //comboBoxImgType.Enabled = true;
+            //numericUpDownSequence.Enabled = true;
+            //numericUpDownExpTime.Enabled = true;
+            //updateCamerasSettingsToolStripMenuItem.Enabled = true;
+        }
         #endregion
 
         #region Launch Menu
-
         private void FindCamerasToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            _cameraControl.LaunchCameras();
-
-            switch (_cameraControl.cameras.Length)
-            {
-                case 3:
-                    groupBoxCam3.Enabled = true;
-                    radioButtonViewCam3.Enabled = true;
-                    labelCam3Model.Text = $@"Model: {_cameraControl.cameras[2].modelName}";
-                    labelCam3Sn.Text = $@"Serial Num: {_cameraControl.cameras[2].serialNumber}";
-                    labelCam3Filter.Text = $@"Filter: {_cameraControl.cameras[2].filter}";
-                    goto case 2;
-                case 2:
-                    groupBoxCam2.Enabled = true;
-                    radioButtonViewCam2.Enabled = true;
-                    labelCam2Model.Text = $@"Model: {_cameraControl.cameras[1].modelName}";
-                    labelCam2Sn.Text = $@"Serial Num: {_cameraControl.cameras[1].serialNumber}";
-                    labelCam2Filter.Text = $@"Filter: {_cameraControl.cameras[1].filter}";
-                    goto case 1;
-                case 1:
-                    groupBoxCam1.Enabled = true;
-                    radioButtonViewCam1.Enabled = true;
-                    labelCam1Model.Text = $@"Model: {_cameraControl.cameras[0].modelName}";
-                    labelCam1Sn.Text = $@"Serial Num: {_cameraControl.cameras[0].serialNumber}";
-                    labelCam1Filter.Text = $@"Filter: {_cameraControl.cameras[0].filter}";
-                    break;
-            }
+            CameraControl.ReconnectCameras();
         }
 
         private void FindFocusToolStripMenuItem_Click(object sender, EventArgs e)
@@ -269,24 +268,25 @@ namespace RPCC
             //       Watch out! SerialFocus.Init() keeps adding functions on ComTimer.Elapsed every time it is called!
 
             //SerialFocus.Close_Port();
-            //CameraFocus.Init();
+            //FocusTimer.Elapsed -= OnTimedEvent_Clock;
+            //SerialFocus.Init();
         }
 
         private void ReconnectMeteoDomeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (_domeSocket._isConnected) _domeSocket.Disconnect();
-            _domeSocket.Connect();
+            if (WeatherSocket.IsConnected) WeatherSocket.Disconnect();
+            WeatherSocket.Connect();
         }
 
         private void ReconnectDonutsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // if(_donutsSocket.isConnected) _donutsSocket.Disconnect();
-            _donutsSocket.Connect();
+            DonutsSocket.Connect();
         }
 
         private void ReconnectSiTechExeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (SiTechExeSocket._isConnected) SiTechExeSocket.Disconnect();
+            if (SiTechExeSocket.IsConnected) SiTechExeSocket.Disconnect();
             SiTechExeSocket.Connect();
         }
 
@@ -296,11 +296,9 @@ namespace RPCC
             ReconnectDonutsToolStripMenuItem_Click(sender, e);
             ReconnectSiTechExeToolStripMenuItem_Click(sender, e);
         }
-
         #endregion
 
         #region Logs
-
         private void ListBoxLogs_DoubleClick(object sender, EventArgs e)
         {
             // TODO: Nice idea, but nothing points to this feature. Implement in a less obscure way.
@@ -320,202 +318,111 @@ namespace RPCC
             Logger.SaveLogs();
             Logger.AddLogEntry("Logs have been saved");
         }
-
         #endregion
 
-        #region Images Plotting
-
-        private void PlotFitsImage()
+        #region Camera Images
+        private void RefreshImages()
         {
-            pictureBoxFits.Image = null;
-            pictureBoxProfile.Image = null;
+            pictureBoxImage1.Image = null;
+            pictureBoxProfile1.Image = null;
+            pictureBoxImage2.Image = null;
+            pictureBoxProfile2.Image = null;
+            pictureBoxImage3.Image = null;
+            pictureBoxProfile3.Image = null;
 
-            var lowerBrightnessBorder = _currentImageGStat.mean - Settings.LowerBrightnessSd * _currentImageGStat.sd;
-            if (lowerBrightnessBorder < _currentImageGStat.min) lowerBrightnessBorder = _currentImageGStat.min;
-
-            var upperBrightnessBorder = _currentImageGStat.mean + Settings.UpperBrightnessSd * _currentImageGStat.sd;
-            if (upperBrightnessBorder > _currentImageGStat.max) upperBrightnessBorder = _currentImageGStat.max;
-
-            upperBrightnessBorder -= lowerBrightnessBorder;
-            var colorScale = 255 / upperBrightnessBorder;
-
-            var bitmapFits = new Bitmap(_currentImage.Length, _currentImage[0].Length, PixelFormat.Format24bppRgb);
-
-            int pixelColor;
-            for (ushort i = 0; i < _currentImage.Length; i++)
-            for (ushort j = 0; j < _currentImage[i].Length; j++)
+            switch (CameraControl.cams.Length)
             {
-                pixelColor = (int) ((_currentImage[i][j] - lowerBrightnessBorder) * colorScale);
-                if (pixelColor < 0) pixelColor = 0;
-                if (pixelColor > 255) pixelColor = 255;
-                bitmapFits.SetPixel(j, i, Color.FromArgb(pixelColor, pixelColor, pixelColor));
+                case 3:
+                    if (CameraControl.cams[2].latestImageBitmap != null)
+                        groupBoxImage3.Invoke((MethodInvoker)delegate
+                        {
+                            pictureBoxImage3.Image = CameraControl.cams[2].latestImageBitmap;
+                        });
+                    goto case 2;
+                case 2:
+                    if (CameraControl.cams[1].latestImageBitmap != null)
+                        groupBoxImage2.Invoke((MethodInvoker)delegate
+                        {
+                            pictureBoxImage2.Image = CameraControl.cams[1].latestImageBitmap;
+                        });
+                    goto case 1;
+                case 1:
+                    if (CameraControl.cams[0].latestImageBitmap != null)
+                        groupBoxImage1.Invoke((MethodInvoker)delegate
+                        {
+                            pictureBoxImage1.Image = CameraControl.cams[0].latestImageBitmap;
+                        });
+                    break;
             }
-
-            pictureBoxFits.Image = bitmapFits;
         }
-
-        private void PlotProfileImage(ProfileImageStat pStat, ushort[][] image)
-        {
-            // It calculates scaling and placing parameters in a rather non-obvious way
-            // But it seems harmless. If you don't have anything better to do,
-            // You can tidy it up and create appropriate Settings variables
-
-            var bitmapProfile =
-                new Bitmap(pictureBoxProfile.Width, pictureBoxProfile.Height, PixelFormat.Format24bppRgb);
-
-            double pixelFlux;
-            double pixelRadius;
-            int pixelBitmapXCoordinate;
-            int pixelBitmapYCoordinate;
-            var bitmapScaleX = pictureBoxProfile.Width / (Settings.AnnulusOuterRadius * Math.Sqrt(2));
-            var bitmapScaleY = pictureBoxProfile.Height * 0.9 / (pStat.maxValue - pStat.background);
-            for (var i = 0; i < image.Length; i++)
-            for (var j = 0; j < image[i].Length; j++)
-            {
-                pixelFlux = image[i][j] - pStat.background;
-                pixelBitmapYCoordinate = pictureBoxProfile.Height -
-                                         (int) Math.Round(pictureBoxProfile.Height * 0.05 + pixelFlux * bitmapScaleY);
-
-                pixelRadius = Math.Sqrt(Math.Pow(i - pStat.centroidYCoordinate, 2) +
-                                        Math.Pow(j - pStat.centroidXCoordinate, 2));
-                pixelBitmapXCoordinate = (int) Math.Round(pixelRadius * bitmapScaleX);
-
-                if (pixelBitmapXCoordinate >= 0 &&
-                    pixelBitmapXCoordinate < pictureBoxProfile.Width &&
-                    pixelBitmapYCoordinate >= 0 &&
-                    pixelBitmapYCoordinate < pictureBoxProfile.Height)
-                    bitmapProfile.SetPixel(pixelBitmapXCoordinate, pixelBitmapYCoordinate,
-                        Color.FromArgb(255, 255, 255));
-            }
-
-            var apertureBitmapXCoordinate = (int) Math.Round(Settings.ApertureRadius * bitmapScaleX);
-            var annulusInnerRadiusBitmapXCoordinate = (int) Math.Round(Settings.AnnulusInnerRadius * bitmapScaleX);
-            for (var i = 0; i < pictureBoxProfile.Height; i++)
-            {
-                bitmapProfile.SetPixel(apertureBitmapXCoordinate, i, Color.FromArgb(255, 0, 0));
-                bitmapProfile.SetPixel(annulusInnerRadiusBitmapXCoordinate, i, Color.FromArgb(0, 0, 255));
-            }
-
-            pictureBoxProfile.Image = bitmapProfile;
-        }
-
+        
         private void PictureBoxFits_MouseClick(object sender, MouseEventArgs e)
         {
-            if (_isCurrentImageLoaded)
-            {
-                if (e.Button == MouseButtons.Right)
-                {
-                    _isZoomModeActivated = !_isZoomModeActivated;
-                    if (_isZoomModeActivated)
-                    {
-                        panelFitsImage.AutoScroll = true;
-                        pictureBoxFits.SizeMode = PictureBoxSizeMode.AutoSize;
-                    }
-                    else
-                    {
-                        panelFitsImage.AutoScroll = false;
-                        pictureBoxFits.SizeMode = PictureBoxSizeMode.StretchImage;
-                    }
-                }
-                else if (e.Button == MouseButtons.Left)
-                {
-                    pictureBoxProfile.Image = null;
+            //if (_isCurrentImageLoaded)
+            //{
+            //    if (e.Button == MouseButtons.Right)
+            //    {
+            //        _isZoomModeActivated = !_isZoomModeActivated;
+            //        if (_isZoomModeActivated)
+            //        {
+            //            panelFitsImage.AutoScroll = true;
+            //            pictureBoxFits.SizeMode = PictureBoxSizeMode.AutoSize;
+            //        }
+            //        else
+            //        {
+            //            panelFitsImage.AutoScroll = false;
+            //            pictureBoxFits.SizeMode = PictureBoxSizeMode.StretchImage;
+            //        }
+            //    }
+            //    else if (e.Button == MouseButtons.Left)
+            //    {
+            //        pictureBoxProfile.Image = null;
 
-                    var xCoordinate = (int) ((double) e.X / pictureBoxFits.Width * _currentImage[0].Length);
-                    var yCoordinate = (int) ((double) e.Y / pictureBoxFits.Height * _currentImage.Length);
-                    Logger.AddLogEntry($"Pixel ({xCoordinate}, {yCoordinate}) selected");
+            //        var xCoordinate = (int) ((double) e.X / pictureBoxFits.Width * _currentImage[0].Length);
+            //        var yCoordinate = (int) ((double) e.Y / pictureBoxFits.Height * _currentImage.Length);
+            //        Logger.AddLogEntry($"Pixel ({xCoordinate}, {yCoordinate}) selected");
 
-                    if (xCoordinate - Settings.AnnulusOuterRadius < 0 ||
-                        xCoordinate + Settings.AnnulusOuterRadius > _currentImage[0].Length - 1 ||
-                        yCoordinate - Settings.AnnulusOuterRadius < 0 ||
-                        yCoordinate + Settings.AnnulusOuterRadius > _currentImage.Length - 1)
-                    {
-                        Logger.AddLogEntry("WARNING Pixel is too close to the frame borders");
-                    }
-                    else
-                    {
-                        var subProfileImage = new ushort[2 * Settings.AnnulusOuterRadius + 1][];
-                        for (var i = 0; i < subProfileImage.Length; i++)
-                        {
-                            subProfileImage[i] = new ushort[2 * Settings.AnnulusOuterRadius + 1];
-                            for (var j = 0; j < subProfileImage[i].Length; j++)
-                                subProfileImage[i][j] =
-                                    _currentImage[yCoordinate - Settings.AnnulusOuterRadius + i]
-                                        [xCoordinate - Settings.AnnulusOuterRadius + j];
-                        }
+            //        if (xCoordinate - Settings.AnnulusOuterRadius < 0 ||
+            //            xCoordinate + Settings.AnnulusOuterRadius > _currentImage[0].Length - 1 ||
+            //            yCoordinate - Settings.AnnulusOuterRadius < 0 ||
+            //            yCoordinate + Settings.AnnulusOuterRadius > _currentImage.Length - 1)
+            //        {
+            //            Logger.AddLogEntry("WARNING Pixel is too close to the frame borders");
+            //        }
+            //        else
+            //        {
+            //            var subProfileImage = new ushort[2 * Settings.AnnulusOuterRadius + 1][];
+            //            for (var i = 0; i < subProfileImage.Length; i++)
+            //            {
+            //                subProfileImage[i] = new ushort[2 * Settings.AnnulusOuterRadius + 1];
+            //                for (var j = 0; j < subProfileImage[i].Length; j++)
+            //                    subProfileImage[i][j] =
+            //                        _currentImage[yCoordinate - Settings.AnnulusOuterRadius + i]
+            //                            [xCoordinate - Settings.AnnulusOuterRadius + j];
+            //            }
 
-                        var localStat = new ProfileImageStat(subProfileImage);
-                        Logger.AddLogEntry($"Max: {localStat.maxValue} " +
-                                           $"({localStat.maxXCoordinate + xCoordinate - Settings.AnnulusOuterRadius}; " +
-                                           $"{localStat.maxYCoordinate + yCoordinate - Settings.AnnulusOuterRadius}); " +
-                                           $"Background: {localStat.background:0.#}; " +
-                                           $"Centroid: ({localStat.centroidXCoordinate + xCoordinate - Settings.AnnulusOuterRadius:0.#}; " +
-                                           $"{localStat.centroidYCoordinate + yCoordinate - Settings.AnnulusOuterRadius:0.#}); " +
-                                           $"SNR: {localStat.snr:0.#}; " +
-                                           $"FWHM: {localStat.fwhm:0.##}");
-                        PlotProfileImage(localStat, subProfileImage);
-                        Logger.AddLogEntry("Profile image plotted");
-                    }
-                }
-            }
-            else
-            {
-                Logger.AddLogEntry("WARNING Image not loaded");
-            }
+            //            var localStat = new ProfileImageStat(subProfileImage);
+            //            Logger.AddLogEntry($"Max: {localStat.maxValue} " +
+            //                               $"({localStat.maxXCoordinate + xCoordinate - Settings.AnnulusOuterRadius}; " +
+            //                               $"{localStat.maxYCoordinate + yCoordinate - Settings.AnnulusOuterRadius}); " +
+            //                               $"Background: {localStat.background:0.#}; " +
+            //                               $"Centroid: ({localStat.centroidXCoordinate + xCoordinate - Settings.AnnulusOuterRadius:0.#}; " +
+            //                               $"{localStat.centroidYCoordinate + yCoordinate - Settings.AnnulusOuterRadius:0.#}); " +
+            //                               $"SNR: {localStat.snr:0.#}; " +
+            //                               $"FWHM: {localStat.fwhm:0.##}");
+            //            PlotProfileImage(localStat, subProfileImage);
+            //            Logger.AddLogEntry("Profile image plotted");
+            //        }
+            //    }
+            //}
+            //else
+            //{
+            //    Logger.AddLogEntry("WARNING Image not loaded");
+            //}
         }
-
-        #endregion
-
-        #region Survey
-
-        private void ButtonSurveyStart_Click(object sender, EventArgs e)
-        {
-            buttonSurveyStart.Enabled = false;
-            comboBoxImgType.Enabled = false;
-            numericUpDownSequence.Enabled = false;
-            numericUpDownExpTime.Enabled = false;
-            updateCamerasSettingsToolStripMenuItem.Enabled = false;
-
-            _cameraControl.task.framesNum = (int) numericUpDownSequence.Value;
-            _cameraControl.task.framesType = comboBoxImgType.Text;
-            if (_cameraControl.task.framesType == "Bias") _cameraControl.task.framesExpTime = 0;
-            else _cameraControl.task.framesExpTime = (int) numericUpDownExpTime.Value * 1000;
-
-            if (radioButtonViewCam1.Checked) _cameraControl.task.viewCamIndex = 0;
-            else if (radioButtonViewCam2.Checked) _cameraControl.task.viewCamIndex = 1;
-            else if (radioButtonViewCam3.Checked) _cameraControl.task.viewCamIndex = 2;
-
-            if (_cameraControl.task.framesType == "Test") _cameraControl.task.framesNum = 1;
-
-            _cameraControl.task.objectName = textBoxObjectName.Text;
-            _cameraControl.task.objectRa = textBoxObjectRa.Text;
-            _cameraControl.task.objectDec = textBoxObjectDec.Text;
-
-            _cameraControl.SetSurveySettings();
-            _cameraControl.StartExposure();
-            Logger.AddLogEntry($"Survey started - {_cameraControl.task.framesNum} {_cameraControl.task.framesType}" +
-                               $" frames with exposure of {_cameraControl.task.framesExpTime * 1e-3} s");
-        }
-
-        private void ButtonSurveyStop_Click(object sender, EventArgs e)
-        {
-            _cameraControl.CancelSurvey();
-            Logger.AddLogEntry(
-                $"Survey cancelled, {_cameraControl.task.framesNum} {(_cameraControl.task.framesNum == 1 ? "frame" : "frames")} skipped");
-            _cameraControl.task.framesNum = 1;
-            numericUpDownSequence.Value = 1;
-
-            buttonSurveyStart.Enabled = true;
-            comboBoxImgType.Enabled = true;
-            numericUpDownSequence.Enabled = true;
-            numericUpDownExpTime.Enabled = true;
-            updateCamerasSettingsToolStripMenuItem.Enabled = true;
-        }
-
         #endregion
 
         #region Options
-
         private void SettingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var settingsForm = new SettingsForm();
@@ -525,7 +432,7 @@ namespace RPCC
 
         private void UpdateCameraSettingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            _cameraControl.UpdateSettings();
+            //_cameraControl.UpdateSettings();
         }
 
         private void LoadConfigToolStripMenuItem_Click(object sender, EventArgs e)
@@ -539,74 +446,23 @@ namespace RPCC
             if (saveFileDialogConfig.ShowDialog() == DialogResult.OK)
                 Settings.SaveXmlConfig(saveFileDialogConfig.FileName);
         }
-
         #endregion
 
         #region Debug Menu
-
-        private void TestDLLlibrariesToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            var testFits = new RpccFits(".\\Cams\\TestImage.fits");
-            var testHeader = testFits.header;
-            Logger.AddLogEntry($"Template DATE-OBS: {testHeader.GetStringValue("DATE-OBS")}");
-
-            var libVer = new StringBuilder(128);
-            var len = new IntPtr(128);
-            var errorLastFliCmd = NativeMethods.FLIGetLibVersion(libVer, len);
-            if (errorLastFliCmd == 0)
-                Logger.AddLogEntry(libVer.ToString());
-            else
-                Logger.AddLogEntry("WARNING Unable to retrieve FLI library version");
-        }
-
-        private async void LoadTestImageToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            _isCurrentImageLoaded = false;
-            var testFits = new RpccFits(".\\Cams\\TestImage.fits");
-            _currentImage = testFits.data;
-
-            _currentImageGStat = new GeneralImageStat(_currentImage);
-            Logger.AddLogEntry($"Min: {_currentImageGStat.min}; " +
-                               $"Max: {_currentImageGStat.max}; " +
-                               $"Mean: {_currentImageGStat.mean:0.##}; " +
-                               $"SD: {_currentImageGStat.sd:0.##}");
-
-            await Task.Run(() => PlotFitsImage());
-            _isCurrentImageLoaded = true;
-            Logger.AddLogEntry("Test image plotted");
-        }
-
         private void RestoreDefaultConfigFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Settings.RestoreDefaultXmlConfig();
         }
-
-        private void SocketToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Logger.AddLogEntry("Test donuts");
-            Logger.AddLogEntry(_donutsSocket.PingServer());
-
-            var cwd = Directory.GetCurrentDirectory();
-            var refFile = cwd + "\\Guid\\2023-04-07T17-56-16.918_EAST_V.fits";
-            var testFile = cwd + "\\Guid\\2023-04-07T18-00-24.167_EAST_V.fits";
-            var req = refFile + ";" + testFile;
-            // Logger.AddLogEntry(req);
-            var outPut = _donutsSocket.GetGuideCorrection(req);
-            if (outPut == null) return;
-            Logger.AddLogEntry("shifts = " + outPut[0] + "x " + outPut[1] + "y ");
-        }
-
         #endregion
 
         #region Focus
-
         private void OnTimedEvent_Clock(object sender, ElapsedEventArgs e)
         {
             GetData();
             // var getFocus = new Thread(GetData);
             // getFocus.Start();
         }
-
+        
         private void GetData()
         {
             const int waitTime = 50;
@@ -626,7 +482,7 @@ namespace RPCC
                 Console.WriteLine(e);
             }
         }
-
+        
         private void CheckBoxAutoFocus_CheckedChanged(object sender, EventArgs e)
         {
             var isAutoFocusEnabled = checkBoxAutoFocus.Checked;
@@ -644,7 +500,7 @@ namespace RPCC
 
         private void NumericUpDownSetDefoc_ValueChanged(object sender, EventArgs e)
         {
-            CameraFocus.DeFocus = (int) numericUpDownSetDefoc.Value;
+            CameraFocus.DeFocus = (int)numericUpDownSetDefoc.Value;
         }
 
         private void ButtonSetZeroPos_Click(object sender, EventArgs e)
@@ -659,15 +515,80 @@ namespace RPCC
 
         private void ButtonRun_Click(object sender, EventArgs e)
         {
-            if (radioButtonRunFast.Checked) SerialFocus.FRun_To((int) numericUpDownRun.Value);
-            else if (radioButtonRunSlow.Checked) SerialFocus.SRun_To((int) numericUpDownRun.Value);
+            if (radioButtonRunFast.Checked) SerialFocus.FRun_To((int)numericUpDownRun.Value);
+            else if (radioButtonRunSlow.Checked) SerialFocus.SRun_To((int)numericUpDownRun.Value);
         }
 
         private void CheckBoxGoZenith_CheckedChanged(object sender, EventArgs e)
         {
             CameraFocus.IsZenith = checkBoxGoZenith.Checked;
         }
+        #endregion
+
+        #region Tasker
+        private void AddToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Logger.AddLogEntry("Add Task click");
+            if (!IsTaskFormOpen)
+            {
+               IsTaskFormOpen = true;
+               var taskForm = new TaskForm(true);
+               taskForm.Show(); 
+            }
+        }
+
+        private void DataGridViewTasker_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            // MessageBox.Show(e.RowIndex.ToString());
+            if (e.RowIndex == -1) return;
+            var taskForm = new TaskForm(false, e.RowIndex);
+            taskForm?.Show();
+        }
+
+        private void CheckBoxHead_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBoxHead.Checked) Head.ThinkingTimer.Start();
+            else Head.ThinkingTimer.Stop();
+
+            Head.IsThinking = checkBoxHead.Checked;
+        }
 
         #endregion
+        
+        private void checkBoxGuiding_CheckedChanged(object sender, EventArgs e)
+        {
+            Head.IsGuid = checkBoxGuiding.Checked;
+        }
+
+        private void SetProgress(int indx)
+        {
+            var value = 0;
+            if (CameraControl.cams[indx].isExposing)
+            {
+                if (Head.CurrentTask is null) return;
+                value = 100 - CameraControl.cams[indx].remTime / 10 / Head.CurrentTask.Exp;
+                if (value < 0)
+                {
+                    value = 0;
+                }
+            }
+            switch (CameraControl.cams[indx].filter)
+            {
+                case "g":
+                    progressBarG.Value = value;
+                    break;
+                case "r":
+                    progressBarR.Value = value;
+                    break;
+                case "i":
+                    progressBarI.Value = value;
+                    break;
+            }
+        }
+
+        private void checkBoxDebugMode_CheckedChanged(object sender, EventArgs e)
+        {
+            Logger.DebugMode = checkBoxDebugMode.Checked;
+        }
     }
 }

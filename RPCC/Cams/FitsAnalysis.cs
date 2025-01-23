@@ -1,163 +1,68 @@
-﻿using System;
-using RPCC.Utils;
+﻿using RPCC.Utils;
+using System;
 
 namespace RPCC.Cams
 {
     internal class GeneralImageStat
     {
         /// <summary>
-        ///     Функции расчета общей статистики изображения.
+        ///     General FITS image statistics
         /// </summary>
+
         internal int max;
-
-        internal double mean;
         internal int min;
-        internal double sd;
+        internal double mean;
+        internal double stddev;
 
-        internal GeneralImageStat(ushort[][] image)
+        internal double dnrStart;
+        internal double dnrEnd;
+        internal double dnrColorScale;
+
+        internal GeneralImageStat()
+        {
+            Reset();
+        }
+
+        internal void Reset()
         {
             max = int.MinValue;
             min = int.MaxValue;
             mean = 0.0;
-            sd = 0.0;
+            stddev = 0.0;
 
+            dnrStart = 0.0;
+            dnrEnd = 0.0;
+            dnrColorScale = 0.0;
+        }
+
+        internal void Calculate(ushort[][] image)
+        {
             var sum = 0.0;
-            var imageHeight = image.Length;
-            var imageWidth = image[0].Length;
+            var height = image.Length;
+            var width = image[0].Length;
 
-            for (var i = 0; i < imageHeight; i++)
-            for (var j = 0; j < imageWidth; j++)
-            {
-                sum += image[i][j];
-                if (image[i][j] > max)
-                    max = image[i][j];
-                if (image[i][j] < min)
-                    min = image[i][j];
-            }
+            for (int i = 0; i < height; i++)
+                for (int j = 0; j < width; j++)
+                {
+                    sum += image[i][j];
+                    if (image[i][j] > max) max = image[i][j];
+                    if (image[i][j] < min) min = image[i][j];
+                }
 
-            mean = sum / (imageHeight * imageWidth);
+            mean = sum / (height * width);
 
             sum = 0.0;
-            for (var i = 0; i < imageHeight; i++)
-            for (var j = 0; j < imageWidth; j++)
-                sum += Math.Pow(image[i][j] - mean, 2);
-            sd = Math.Sqrt(sum / (imageHeight * imageWidth));
-        }
-    }
+            for (int i = 0; i < height; i++)
+                for (int j = 0; j < width; j++)
+                    sum += Math.Pow(image[i][j] - mean, 2);
+            stddev = Math.Sqrt(sum / (height * width));
 
-    internal class ProfileImageStat
-    {
-        internal double background;
-        internal double centroidXCoordinate;
-        internal double centroidYCoordinate;
-        internal double fwhm;
-        internal int maxValue;
+            dnrStart = mean - Settings.LowerBrightnessSd * stddev;
+            if (dnrStart < min) dnrStart = min;
+            dnrEnd = mean + Settings.UpperBrightnessSd * stddev;
+            if (dnrStart > max) dnrEnd = min;
+            dnrColorScale = 255 / (dnrEnd - dnrStart);
 
-        /// <summary>
-        ///     Функции расчета статистики профиля
-        /// </summary>
-        internal int maxXCoordinate;
-
-        internal int maxYCoordinate;
-        internal double snr;
-
-        internal ProfileImageStat(ushort[][] image)
-        {
-            maxValue = int.MinValue;
-            for (var i = 0; i < image.Length; i++)
-            for (var j = 0; j < image[i].Length; j++)
-                if (image[i][j] > maxValue)
-                {
-                    maxValue = image[i][j];
-                    maxYCoordinate = i;
-                    maxXCoordinate = j;
-                }
-
-            background = 0.0;
-            var backgroundCounter = 0;
-            double pixelRadius;
-            for (var i = 0; i < image.Length; i++)
-            for (var j = 0; j < image[i].Length; j++)
-            {
-                pixelRadius = Math.Sqrt(Math.Pow(i - maxYCoordinate, 2) + Math.Pow(j - maxXCoordinate, 2));
-                if (pixelRadius >= Settings.AnnulusInnerRadius && pixelRadius <= Settings.AnnulusOuterRadius)
-                {
-                    background += image[i][j];
-                    backgroundCounter++;
-                }
-            }
-
-            background /= backgroundCounter;
-
-            centroidXCoordinate = 0.0;
-            centroidYCoordinate = 0.0;
-            var centroidTotalValue = 0.0;
-            for (var i = 0; i < image.Length; i++)
-            for (var j = 0; j < image[i].Length; j++)
-            {
-                centroidXCoordinate += (image[i][j] - background) * j;
-                centroidYCoordinate += (image[i][j] - background) * i;
-                centroidTotalValue += image[i][j] - background;
-            }
-
-            centroidXCoordinate /= centroidTotalValue;
-            centroidYCoordinate /= centroidTotalValue;
-
-            var starFlux = 0.0;
-            var skyFlux = 0.0;
-            var starPixelCount = 0;
-            var skyPixelCount = 0;
-            double pixelFlux;
-            for (var i = 0; i < image.Length; i++)
-            for (var j = 0; j < image[i].Length; j++)
-            {
-                pixelFlux = image[i][j] - background;
-                pixelRadius = Math.Sqrt(Math.Pow(i - centroidYCoordinate, 2) + Math.Pow(j - centroidXCoordinate, 2));
-
-                if (pixelRadius <= Settings.ApertureRadius)
-                {
-                    starFlux += pixelFlux;
-                    starPixelCount++;
-                }
-                else if (pixelRadius >= Settings.AnnulusInnerRadius && pixelRadius <= Settings.AnnulusOuterRadius)
-                {
-                    skyFlux += pixelFlux;
-                    skyPixelCount++;
-                }
-            }
-
-            try
-            {
-                snr = starFlux / Math.Sqrt(starFlux + starPixelCount / skyPixelCount * skyFlux);
-            }
-            catch (DivideByZeroException)
-            {
-                snr = double.NaN;
-            }
-
-            starFlux = 0.0;
-            var weightFlux = 0.0;
-            for (var i = 0; i < image.Length; i++)
-            for (var j = 0; j < image[i].Length; j++)
-            {
-                pixelFlux = image[i][j] - background;
-                pixelRadius = Math.Sqrt(Math.Pow(i - centroidYCoordinate, 2) + Math.Pow(j - centroidXCoordinate, 2));
-
-                if (pixelRadius <= Settings.AnnulusInnerRadius)
-                {
-                    starFlux += pixelFlux;
-                    weightFlux += Math.Pow(pixelRadius, 2) * pixelFlux;
-                }
-            }
-
-            try
-            {
-                fwhm = 2.35 * Math.Sqrt(weightFlux / (2 * starFlux));
-            }
-            catch (DivideByZeroException)
-            {
-                fwhm = double.NaN;
-            }
         }
     }
 }

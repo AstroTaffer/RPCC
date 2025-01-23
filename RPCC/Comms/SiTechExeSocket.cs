@@ -15,9 +15,9 @@ namespace RPCC.Comms
         // private readonly Settings Settings;
         // private  readonly MountDataCollector MountDataCollector;
 
-        private static readonly Timer _mountTimer;
+        private static readonly Timer MountTimer;
 
-        internal static bool _isConnected;
+        internal static bool IsConnected;
         private static IPEndPoint _endPoint;
         private static TcpClient _client;
         private static NetworkStream _stream;
@@ -47,20 +47,20 @@ namespace RPCC.Comms
             // Settings = settings;
             // MountDataCollector = collector;
 
-            _mountTimer = new Timer(1000);
-            _mountTimer.Elapsed += OnMountTimedEvent;
+            MountTimer = new Timer(1000);
+            MountTimer.Elapsed += OnMountTimedEvent;
 
-            _isConnected = false;
+            IsConnected = false;
         }
 
         #region General
 
-        internal static async void Connect()
+        internal static async Task<bool> Connect()
         {
-            if (_isConnected)
+            if (IsConnected)
             {
                 Logger.AddLogEntry("WARNING Already connected to SiTechExe");
-                return;
+                return true;
             }
 
             _client = new TcpClient();
@@ -74,30 +74,33 @@ namespace RPCC.Comms
                     _streamReader = new StreamReader(_stream, Encoding.ASCII);
                     _streamWriter = new StreamWriter(_stream, Encoding.ASCII);
                     _streamWriter.AutoFlush = true;
-                    _isConnected = true;
+                    IsConnected = true;
 
                     // The very first sent command will never be recognized, so we send some nonsense, literally
-                    await ExchangeMessagesAsync("Nonsense");
+                    ExchangeMessages("Nonsense");
+                    //await ExchangeMessagesAsync("Nonsense");
                     ReadScopeStatus();
-                    _mountTimer.Start();
+                    MountTimer.Start();
 
                     Logger.AddLogEntry($"Connected to SiTechExe {_endPoint}");
                 }
                 else
                 {
-                    _mountTimer.Stop();
+                    MountTimer.Stop();
                 }
             }
             catch (Exception ex) when (ex is SocketException || ex is IOException)
             {
-                _mountTimer.Stop();
+                MountTimer.Stop();
                 Logger.AddLogEntry($"WARNING Unable to connect to SiTechExe: {ex.Message}");
             }
+
+            return IsConnected;
         }
 
         internal static void Disconnect()
         {
-            if (!_isConnected)
+            if (!IsConnected)
             {
                 Logger.AddLogEntry("WARNING Already disconnected from SiTechExe");
                 return;
@@ -105,8 +108,8 @@ namespace RPCC.Comms
 
             try
             {
-                _mountTimer.Stop();
-                _mountTimer.Close();
+                MountTimer.Stop();
+                MountTimer.Close();
 
                 _streamWriter.Close();
                 _streamReader.Close();
@@ -114,7 +117,7 @@ namespace RPCC.Comms
                 _client.Close();
 
                 Logger.AddLogEntry("Disconnected from SiTechExe");
-                _isConnected = false;
+                IsConnected = false;
             }
             catch (Exception ex) when (ex is SocketException || ex is IOException)
             {
@@ -124,7 +127,7 @@ namespace RPCC.Comms
 
         internal static async Task<string[]> ExchangeMessagesAsync(string request)
         {
-            if (!_isConnected)
+            if (!IsConnected)
             {
                 Logger.AddLogEntry("WARNING Unable to exchange messages with SiTechExe: not connected");
                 return null;
@@ -134,6 +137,28 @@ namespace RPCC.Comms
             {
                 await _streamWriter.WriteLineAsync(request);
                 var response = (await _streamReader.ReadLineAsync()).Split(';');
+                MountDataCollector.ParseScopeStatus(response);
+                return response;
+            }
+            catch (Exception ex) when (ex is SocketException || ex is IOException)
+            {
+                Logger.AddLogEntry($"WARNING Unable to exchange messages with SiTechExe: {ex.Message}");
+                return null;
+            }
+        }
+
+        private static string[] ExchangeMessages(string request)
+        {
+            if (!IsConnected)
+            {
+                Logger.AddLogEntry("WARNING Unable to exchange messages with SiTechExe: not connected");
+                return null;
+            }
+
+            try
+            {
+                _streamWriter.WriteLine(request);
+                var response = _streamReader.ReadLine()?.Split(';');
                 MountDataCollector.ParseScopeStatus(response);
                 return response;
             }
@@ -164,8 +189,8 @@ namespace RPCC.Comms
 
         private static void OnMountTimedEvent(object sender, EventArgs e)
         {
-            if (!_isConnected)
-                _mountTimer.Stop();
+            if (!IsConnected)
+                MountTimer.Stop();
             else
                 ReadScopeStatus();
         }
@@ -174,9 +199,10 @@ namespace RPCC.Comms
 
         #region SiTechExe Commands
 
-        internal static async void ReadScopeStatus()
+        internal static void ReadScopeStatus()
         {
-            var response = await ExchangeMessagesAsync("ReadScopeStatus");
+            var response = ExchangeMessages("ReadScopeStatus");
+            //var response = await ExchangeMessagesAsync("ReadScopeStatus");
             if (CheckResponse(response, "ReadScopeStatus"))
             {
                 var message = response[response.Length - 1];
@@ -192,9 +218,10 @@ namespace RPCC.Comms
             }
         }
 
-        internal static async void Abort()
+        internal static void Abort()
         {
-            var response = await ExchangeMessagesAsync("Abort");
+            var response = ExchangeMessages("Abort");
+            //var response = await ExchangeMessagesAsync("Abort");
             if (CheckResponse(response, "Abort"))
             {
                 var message = response[response.Length - 1];
@@ -210,9 +237,10 @@ namespace RPCC.Comms
             }
         }
 
-        internal static async void MotorsToBlinky()
+        internal static void MotorsToBlinky()
         {
-            var response = await ExchangeMessagesAsync("MotorsToBlinky");
+            var response = ExchangeMessages("MotorsToBlinky");
+            //var response = await ExchangeMessagesAsync("MotorsToBlinky");
             if (CheckResponse(response, "MotorsToBlinky"))
             {
                 var message = response[response.Length - 1];
@@ -228,9 +256,10 @@ namespace RPCC.Comms
             }
         }
 
-        internal static async void MotorsToAuto()
+        internal static void MotorsToAuto()
         {
-            var response = await ExchangeMessagesAsync("MotorsToAuto");
+            var response = ExchangeMessages("MotorsToAuto");
+            //var response = await ExchangeMessagesAsync("MotorsToAuto");
             if (CheckResponse(response, "MotorsToAuto"))
             {
                 var message = response[response.Length - 1];
@@ -246,9 +275,10 @@ namespace RPCC.Comms
             }
         }
 
-        internal static async void Park()
+        internal static void Park()
         {
-            var response = await ExchangeMessagesAsync("Park");
+            var response = ExchangeMessages("Park");
+            //var response = await ExchangeMessagesAsync("Park");
             if (CheckResponse(response, "Park"))
             {
                 var message = response[response.Length - 1];
@@ -265,14 +295,20 @@ namespace RPCC.Comms
         }
 
         // HACK: Apparently, it takes ~5 seconds to Unpark the scope
-        internal static async void Unpark()
+        internal static void Unpark()
         {
-            var response = await ExchangeMessagesAsync("UnPark");
+            var response = ExchangeMessages("UnPark");
+            System.Threading.Thread.Sleep(1000);
+            //var response = await ExchangeMessagesAsync("UnPark");
             if (CheckResponse(response, "UnPark"))
             {
                 var message = response[response.Length - 1];
                 if (message == "_UnPark Command Successful")
                 {
+                    while (MountDataCollector.IsParking)
+                    {
+                        System.Threading.Thread.Sleep(1000);
+                    }
                     // TODO: Do stuff if good
                 }
                 else
@@ -284,9 +320,10 @@ namespace RPCC.Comms
         }
 
         // HACK: After completing GoToPark command the scope won't be "parked", but won't be tracking either
-        internal static async void GoToPark(int parkLocNum)
+        internal static void GoToPark(int parkLocNum)
         {
-            var response = await ExchangeMessagesAsync($"GoToPark {parkLocNum}");
+            var response = ExchangeMessages($"GoToPark {parkLocNum}");
+            //var response = await ExchangeMessagesAsync($"GoToPark {parkLocNum}");
             if (CheckResponse(response, $"GoToPark {parkLocNum}"))
             {
                 var message = response[response.Length - 1];
@@ -303,40 +340,53 @@ namespace RPCC.Comms
         }
 
         // [RA] = h, [DEC] = deg
-        internal static async void GoTo(double ra, double dec, bool isJ2K)
+        internal static bool GoTo(double ra, double dec, bool isJ2K)
         {
-            var response = await ExchangeMessagesAsync($"GoTo {ra} {dec}{(isJ2K ? " J2K" : "")}");
+            if (MountDataCollector.IsParking)
+            {
+                Logger.AddLogEntry("Can't goto while parking");
+                return false;
+            }
+            if (MountDataCollector.IsSlewing)
+            {
+                Logger.AddLogEntry("Can't goto while slewing");
+                return false;
+            }
+            var response = ExchangeMessages($"GoTo {ra} {dec}{(isJ2K ? " J2K" : "")}");
+            //var response = await ExchangeMessagesAsync($"GoTo {ra} {dec}{(isJ2K ? " J2K" : "")}");
             if (CheckResponse(response, $"GoTo {ra} {dec}{(isJ2K ? " J2K" : "")}"))
             {
                 var message = response[response.Length - 1];
                 if (message == "_GoTo Accepted")
                 {
                     // TODO: Do stuff if good
+                    while (MountDataCollector.IsSlewing)
+                    {
+                        System.Threading.Thread.Sleep(1000);
+                    }
+                    System.Threading.Thread.Sleep(3000);
+                    return true;
                 }
                 else
                 {
                     Logger.AddLogEntry($"WARNING Unable to go to {ra} {dec}{(isJ2K ? " J2K" : "")}: {message}");
                     // TODO: Do stuff if bad
+                    
+                    // return false;
                 }
             }
-        }
 
-        internal static double[] GoToAltAz(double az, double el)
-        {
-            CoordinatesManager.Trans.SetAzimuthElevation(az, el);
-            var ra = CoordinatesManager.Trans.RAJ2000;
-            var dec = CoordinatesManager.Trans.DecJ2000;
-            GoTo(ra, dec, true);
-            return new[] {ra, dec};
+            return false;
         }
 
         // Valid directions: N (to North Celestial Pole), S (to South Celestial Pole), W (clockwise), E (counterclockwise)
         // [distance] == arcseconds
-        internal static async void Jog(string direction, int distance)
+        internal static void Jog(string direction, int distance)
         {
             if (direction == "N" || direction == "S" || direction == "E" || direction == "W")
             {
-                var response = await ExchangeMessagesAsync($"JogArcSeconds {direction} {distance}");
+                var response = ExchangeMessages($"JogArcSeconds {direction} {distance}");
+                //var response = await ExchangeMessagesAsync($"JogArcSeconds {direction} {distance}");
                 if (CheckResponse(response, $"JogArcSeconds {direction} {distance}"))
                 {
                     var message = response[response.Length - 1];
@@ -359,24 +409,43 @@ namespace RPCC.Comms
 
         // Valid directions: N (to North Celestial Pole), S (to South Celestial Pole), W (clockwise), E (counterclockwise)
         // [time] == msec
-        internal static async void PulseGuide(string direction, int time)
+        internal static void PulseGuide(string direction, int time)
         {
+            if (MountDataCollector.IsParked)
+            {
+                Logger.AddLogEntry("Can't PulseGuide when parked");
+                return;
+            }
+            if (MountDataCollector.IsParking)
+            {
+                Logger.AddLogEntry("Can't PulseGuide while parking");
+                return;
+            }
+            // if (MountDataCollector.IsSlewing)
+            // {
+            //     Logger.AddLogEntry("Can't PulseGuide while slewing");
+            //     return;
+            // }
             if (direction == "N" || direction == "S" || direction == "E" || direction == "W")
             {
                 string[] response = null;
                 switch (direction)
                 {
                     case "N":
-                        response = await ExchangeMessagesAsync($"PulseGuide 0 {time}");
+                        response = ExchangeMessages($"PulseGuide 0 {time}");
+                        //response = await ExchangeMessagesAsync($"PulseGuide 0 {time}");
                         break;
                     case "S":
-                        response = await ExchangeMessagesAsync($"PulseGuide 1 {time}");
+                        response = ExchangeMessages($"PulseGuide 1 {time}");
+                        //response = await ExchangeMessagesAsync($"PulseGuide 1 {time}");
                         break;
                     case "E":
-                        response = await ExchangeMessagesAsync($"PulseGuide 2 {time}");
+                        response = ExchangeMessages($"PulseGuide 2 {time}");
+                        //response = await ExchangeMessagesAsync($"PulseGuide 2 {time}");
                         break;
                     case "W":
-                        response = await ExchangeMessagesAsync($"PulseGuide 3 {time}");
+                        response = ExchangeMessages($"PulseGuide 3 {time}");
+                        //response = await ExchangeMessagesAsync($"PulseGuide 3 {time}");
                         break;
                 }
 
@@ -386,10 +455,11 @@ namespace RPCC.Comms
                     if (message == "_PulseGuide Accepted")
                     {
                         // TODO: Do stuff if good
+                        Logger.AddLogEntry($"PulseGuide {direction} {time} ms is ok");
                     }
                     else
                     {
-                        Logger.AddLogEntry($"WARNING Unable to pulse guide {direction} {time}: {message}");
+                        Logger.AddLogEntry($"WARNING Unable to pulse guide {direction} {time} ms: {message}");
                         // TODO: Do stuff if bad
                     }
                 }
@@ -401,10 +471,12 @@ namespace RPCC.Comms
         }
 
         // [raRate] = [decRate] = [arcsec/sec]
-        internal static async void SetTrackMode(bool shouldTrack, double raRate = 0.0, double decRate = 0.0)
+        internal static void SetTrackMode(bool shouldTrack, double raRate = 0.0, double decRate = 0.0)
         {
-            var response = await ExchangeMessagesAsync(
+            var response = ExchangeMessages(
                 $"SetTrackMode {(shouldTrack ? 1 : 0)} {(raRate == 0.0 && decRate == 0.0 ? 0 : 1)} {raRate} {decRate}");
+            //var response = await ExchangeMessagesAsync(
+            //    $"SetTrackMode {(shouldTrack ? 1 : 0)} {(raRate == 0.0 && decRate == 0.0 ? 0 : 1)} {raRate} {decRate}");
             if (CheckResponse(response,
                     $"SetTrackMode {(shouldTrack ? 1 : 0)} {(raRate == 0.0 && decRate == 0.0 ? 0 : 1)} {raRate} {decRate}"))
             {

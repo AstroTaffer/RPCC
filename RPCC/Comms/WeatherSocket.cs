@@ -9,20 +9,16 @@ using RPCC.Utils;
 
 namespace RPCC.Comms
 {
-    internal class WeatherSocket
+    static class WeatherSocket
     {
-        // private readonly Logger Logger;
-        // private readonly Settings Settings;
-        // private readonly WeatherDataCollector _collector;
+        private static readonly Timer MeteoTimer;
+        private static TcpClient _client;
+        private static IPEndPoint _endPoint;
 
-        private readonly Timer _meteoTimer;
-        private TcpClient _client;
-        private IPEndPoint _endPoint;
-
-        internal bool _isConnected;
-        private NetworkStream _stream;
-        private StreamReader _streamReader;
-        private StreamWriter _streamWriter;
+        internal static bool IsConnected;
+        private static NetworkStream _stream;
+        private static StreamReader _streamReader;
+        private static StreamWriter _streamWriter;
 
         /**
          * Valid messages:
@@ -39,21 +35,16 @@ namespace RPCC.Comms
          * full    ---
          * ping    ---
          */
-        internal WeatherSocket()
+        static WeatherSocket()
         {
-            // Logger = logger;
-            // Settings = settings;
-            // _collector = collector;
-
-            _meteoTimer = new Timer(60000);
-            _meteoTimer.Elapsed += OnMeteoTimedEventAsync;
-
-            _isConnected = false;
+            MeteoTimer = new Timer(1000);
+            MeteoTimer.Elapsed += OnMeteoTimedEventAsync;
+            IsConnected = false;
         }
 
-        internal async void Connect()
+        internal static async void Connect()
         {
-            if (_isConnected)
+            if (IsConnected)
             {
                 Logger.AddLogEntry("WARNING Already connected to MeteoDome");
                 return;
@@ -70,29 +61,30 @@ namespace RPCC.Comms
                     _streamReader = new StreamReader(_stream, Encoding.UTF8);
                     _streamWriter = new StreamWriter(_stream, Encoding.UTF8);
                     _streamWriter.AutoFlush = true;
-                    _isConnected = true;
+                    IsConnected = true;
 
-                    GetFullDataAsync();
-                    _meteoTimer.Start();
+                    GetFullData();
+                    // GetFullDataAsync();
+                    MeteoTimer.Start();
 
                     Logger.AddLogEntry($"Connected to MeteoDome {_endPoint}");
                 }
                 else
                 {
-                    _meteoTimer.Stop();
+                    MeteoTimer.Stop();
                 }
             }
             catch (Exception ex) when (ex is SocketException || ex is IOException)
             {
                 // In case of bugs check "catch" block in Disconnect() function
-                _meteoTimer.Stop();
+                MeteoTimer.Stop();
                 Logger.AddLogEntry($"WARNING Unable to connect to MeteoDome: {ex.Message}");
             }
         }
 
-        internal void Disconnect()
+        internal static void Disconnect()
         {
-            if (!_isConnected)
+            if (!IsConnected)
             {
                 Logger.AddLogEntry("WARNING Already disconnected from MeteoDome");
                 return;
@@ -100,8 +92,8 @@ namespace RPCC.Comms
 
             try
             {
-                _meteoTimer.Stop();
-                _meteoTimer.Close();
+                MeteoTimer.Stop();
+                MeteoTimer.Close();
 
                 _streamWriter.Close();
                 _streamReader.Close();
@@ -109,7 +101,7 @@ namespace RPCC.Comms
                 _client.Close();
 
                 Logger.AddLogEntry("Disconnected from MeteoDome");
-                _isConnected = false;
+                IsConnected = false;
             }
             catch (Exception ex) when (ex is SocketException || ex is IOException)
             {
@@ -121,9 +113,9 @@ namespace RPCC.Comms
             }
         }
 
-        internal async Task<string> ExchangeMessagesAsync(string request)
+        internal static async Task<string> ExchangeMessagesAsync(string request)
         {
-            if (!_isConnected)
+            if (!IsConnected)
             {
                 Logger.AddLogEntry("WARNING Unable to exchange messages with MeteoDome: not connected");
                 return null;
@@ -141,15 +133,33 @@ namespace RPCC.Comms
                 Logger.AddLogEntry($"WARNING Unable to exchange messages with MeteoDome: {ex.Message}");
                 return null;
             }
+            catch (InvalidOperationException exception)
+            {
+                Logger.AddLogEntry(exception.Message);
+                return null;
+            }
         }
 
-        internal async void GetFullDataAsync()
+        internal static async void GetFullDataAsync()
         {
-            var response = await ExchangeMessagesAsync("full");
+            var response = "";
+            try
+            {
+                response = await ExchangeMessagesAsync("full");
+            }
+            catch (InvalidOperationException exception)
+            {
+                Logger.AddLogEntry(exception.Message);
+                // Disconnect();
+                // Connect();
+                return;
+            }
+            
             if (response is null)
             {
                 Logger.AddLogEntry("WARNING Disconnecting from MeteoDome");
                 Disconnect();
+                // Connect();
             }
             else
             {
@@ -158,9 +168,9 @@ namespace RPCC.Comms
             }
         }
 
-        internal string ExchangeMessages(string request)
+        internal static string ExchangeMessages(string request)
         {
-            if (!_isConnected)
+            if (!IsConnected)
             {
                 Logger.AddLogEntry("WARNING Unable to exchange messages with MeteoDome: not connected to MeteoDome");
                 return null;
@@ -180,7 +190,7 @@ namespace RPCC.Comms
             }
         }
 
-        internal void GetFullData()
+        internal static void GetFullData()
         {
             var response = ExchangeMessages("full");
             if (response is null)
@@ -192,15 +202,17 @@ namespace RPCC.Comms
             {
                 // _collector.ParseFullData(response);
                 WeatherDataCollector.ParseFullData(response);
+                // Logger.AddLogEntry(response);
             }
         }
 
-        private void OnMeteoTimedEventAsync(object sender, ElapsedEventArgs e)
+        private static void OnMeteoTimedEventAsync(object sender, ElapsedEventArgs e)
         {
-            if (!_isConnected)
-                _meteoTimer.Stop();
+            if (!IsConnected)
+                MeteoTimer.Stop();
             else
-                GetFullDataAsync();
+                GetFullData();
+                // GetFullDataAsync();
         }
     }
 

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
-using ASCOM.Tools;
 using nom.tam.fits;
 using nom.tam.util;
 using RPCC.Comms;
+using RPCC.Focus;
 using RPCC.Tasks;
 using RPCC.Utils;
 
@@ -12,19 +12,23 @@ namespace RPCC.Cams
     internal class RpccFits
     {
         internal ushort[][] data;
-
         internal Header header;
-        // TODO: When reading and saving image from camera RpccFits.header will always be empty
-        // Because right now there is no use in creating one
-        // TODO: To completely remove the stutter, think of a way to async reading a fits file
+
+        // Create new empty RpccFits
+        internal RpccFits()
+        {
+            // When reading and saving captured images RpccFits.header will always be empty
+            // Because in all implementations that I can think of we'll end up generating
+            // false or useless information. All thanks to ushort[][] and short[][] difference.
+        }
 
         // Create RpccFits by reading an existing FITS file
         internal RpccFits(string fitsFileName)
         {
             var fitsFile = new Fits(fitsFileName);
-            var fitsHdu = (ImageHDU) fitsFile.ReadHDU();
+            var fitsHdu = (ImageHDU)fitsFile.ReadHDU();
             header = fitsHdu.Header;
-            var fitsDataRaw = (Array[]) fitsHdu.Kernel;
+            var fitsDataRaw = (Array[])fitsHdu.Kernel;
             fitsFile.Close();
 
             var dataHeight = fitsDataRaw.Length;
@@ -36,230 +40,64 @@ namespace RPCC.Cams
                 for (var j = 0; j < dataWidth; j++)
                 {
                     // Convert short (used in nom.tam.fits) to ushort (used in LibFli and RpccFits)
-                    var buff = short.MaxValue + (short) fitsDataRaw[i].GetValue(j) + 1;
-                    data[i][j] = (ushort) buff;
+                    var buff = short.MaxValue + (short)fitsDataRaw[i].GetValue(j) + 1;
+                    data[i][j] = (ushort)buff;
                 }
             }
         }
 
-        // Create new empty RpccFits
-        internal RpccFits()
+        internal string SaveFitsFile(CameraDevice cam)
         {
-        }
-
-        internal void SaveFitsFile(CameraControl camCtrl, int focusPos, int camNum)
-        {
-            var convertedData = new short[data.Length][];
+            short[][] convertedData = new short[data.Length][];
             for (var i = 0; i < convertedData.Length; i++)
             {
                 convertedData[i] = new short[data[i].Length];
                 for (var j = 0; j < convertedData[i].Length; j++)
                     // Convert ushort (used in LibFli and RpccFits) to short (used in nom.tam.fits)
-                    convertedData[i][j] = (short) (data[i][j] - short.MaxValue - 1);
+                    convertedData[i][j] = (short)(data[i][j] - short.MaxValue - 1);
             }
 
             var newFits = new Fits();
             newFits.AddHDU(FitsFactory.HDUFactory(convertedData));
-            var newHeader = ((ImageHDU) newFits.GetHDU(0)).Header;
+            var newHeader = ((ImageHDU)newFits.GetHDU(0)).Header;
+            
+            FillInHeader(cam, newHeader);
 
-            // When filling in header keys with Add function, CSharpFITS tends to shuffle keys.
-            // Though it can be fixed, I can't think of a simple and clean way to do so.
-            // Therefore, it's a feature now.
-            var newCursor = newHeader.GetCursor();
-            newCursor.Key = "END";
-
-            newCursor.Add(new HeaderCard("COMMENT",
-                "Conforms to FITS Version 4.0: updated 2016 July 22", false));
-
-            // Survey keywords
-            newCursor.Add(new HeaderCard("DATE-OBS",
-                camCtrl.cameras[camNum].expStartDt.ToString("yyyy-MM-ddTHH:mm:ss.fff"),
-                "date at the begining of exposure"));
-            // newCursor.Add(new HeaderCard("JD",
-            //     Utilities.JulianDateFromDateTime(camCtrl.cameras[camNum].expStartDt),
-            //     "Julian date at the begining of exposure"));
-            // newCursor.Add(new HeaderCard("JD",
-            //     Utilities.JulianDateUtc,
-            //     "Julian date at the begining of exposure"));
-            newCursor.Add(new HeaderCard("EXPTIME", camCtrl.task.framesExpTime / 1000.0,
-                "actual integration time [sec]"));
-            switch (camCtrl.task.framesType)
+            DateTime outDateTime = DateTime.Now.AddHours(-12);
+            string outDir = $"{Settings.MainOutFolder}\\{outDateTime.Year}\\{outDateTime:yyyy-MM-dd}\\" +
+                $"{(string.IsNullOrEmpty(CameraControl.loadedTask.Object) ? "UNKNOWN" : CameraControl.loadedTask.Object)}\\";
+            switch (CameraControl.loadedTask.FrameType)
             {
                 case "Object":
-                    newCursor.Add(string.IsNullOrEmpty(camCtrl.task.objectName)
-                        ? new HeaderCard("OBJNAME", "UNKNOWN", "object name")
-                        : new HeaderCard("OBJNAME", camCtrl.task.objectName, "object name"));
-                    break;
-                default:
-                    newCursor.Add(new HeaderCard("OBJNAME", camCtrl.task.framesType, "object name"));
-                    break;
-            }
-            newCursor.Add(string.IsNullOrEmpty(camCtrl.task.objectRa)
-                ? new HeaderCard("ALPHA", "UNKNOWN", "target RA [hh mm ss.s]")
-                : new HeaderCard("ALPHA", camCtrl.task.objectRa, "target RA [hh mm ss.s]"));
-            newCursor.Add(string.IsNullOrEmpty(camCtrl.task.objectDec)
-                ? new HeaderCard("DELTA", "UNKNOWN", "target DEC [dd mm ss.s]")
-                : new HeaderCard("DELTA", camCtrl.task.objectDec, "target DEC [dd mm ss.s]"));
-            newCursor.Add(new HeaderCard("IMAGETYP", camCtrl.task.framesType,
-                "Object, Flat, Dark, Bias, Test, Focus"));
-            // RA      = '21:51:12.055'       / target RA
-            // DEC     = '+28:51:38.72'       / target DEC
-
-            // Instrument keywords
-            newCursor.Add(new HeaderCard("ORIGIN", "URFU", "organization responsible for the data"));
-            newCursor.Add(new HeaderCard("TELESCOP", "APM-RoboPhot", "telescope"));
-            newCursor.Add(new HeaderCard("INSTRUME", "3CHP", "instrument"));
-            newCursor.Add(new HeaderCard("CAMERA", "FLI ML4240 MB", "camera name"));
-            newCursor.Add(new HeaderCard("DETECTOR", "E2V CCD42-40-1-368 MB", "CCD Detector"));
-            newCursor.Add(new HeaderCard("SERNUM", camCtrl.cameras[camNum].serialNumber,
-                "serial number"));
-            newCursor.Add(new HeaderCard("FILTER", camCtrl.cameras[camNum].filter, "SDSS filter"));
-            newCursor.Add(new HeaderCard("CCD-TEMP", camCtrl.cameras[camNum].ccdTemp,
-                "CCD temperature [C]"));
-            newCursor.Add(new HeaderCard("SET-TEMP", Settings.CamTemp, "CCD temperature setpoint [C]"));
-            newCursor.Add(new HeaderCard("HEATSINK", camCtrl.cameras[camNum].baseTemp,
-                "heatsink temperature [C]"));
-            newCursor.Add(new HeaderCard("COOLPOWR", camCtrl.cameras[camNum].coolerPwr,
-                "cooler power [%]"));
-            switch (Settings.CamRoMode)
-            {
-                case "2.0MHz":
-                    newCursor.Add(new HeaderCard("RATE", 2000.0, "horizontal readout rate [kPix/sec]"));
-                    newCursor.Add(new HeaderCard("RDNOISE", 14.0, "datasheet readnoise [e]"));
-                    break;
-                case "500KHz":
-                    newCursor.Add(new HeaderCard("RATE", 500.0, "horizontal readout rate [kPix/sec]"));
-                    newCursor.Add(new HeaderCard("RDNOISE", 9.0, "datasheet readnoise [e]"));
-                    break;
-            }
-
-            newCursor.Add(new HeaderCard("GAIN", 1.4, "typical gain [e/ADU]"));
-            newCursor.Add(new HeaderCard("BINNING", Settings.CamBin, "binning factor"));
-            newCursor.Add(new HeaderCard("PIXSZ", 13.5 * Settings.CamBin,
-                "pixel size in microns (after binning)"));
-            newCursor.Add(new HeaderCard("BZERO", short.MaxValue + 1.0,
-                "offset data range to that of unsigned short"));
-            newCursor.Add(new HeaderCard("BSCALE", 1.0, "default scaling factor"));
-            newCursor.Add(new HeaderCard("FOCUS", focusPos, "focus position"));
-
-            // Observatory keywords
-            newCursor.Add(new HeaderCard("OBSERVAT", "KAO", "observatory name"));
-            newCursor.Add(new HeaderCard("OBSERVID", 168, "observatory code"));
-            newCursor.Add(new HeaderCard("LONG", "03:58:11", "observatory longitude [hh:mm:ss]"));
-            newCursor.Add(new HeaderCard("LONGDEG", 59.545735, "observatory longitude [deg]"));
-            newCursor.Add(new HeaderCard("LAT", "57:02:11", "observatory latitude [dd:mm:ss]"));
-            newCursor.Add(new HeaderCard("LATDEG", 57.036537, "observatory latitude [deg]"));
-            newCursor.Add(new HeaderCard("ALTITUDE", 290.0, "observatory altitude [meters above SL]"));
-
-            // Weather keywords
-            // TODO: Implement or discard the rest of the keywords
-            // Grab Nabat by neck and review this section (and DataCollector) together
-            newCursor.Add(new HeaderCard("AIRMASS", MountDataCollector.Airmass, "Airmass"));
-            // newCursor.Add(new HeaderCard("MOONPHAS", Utilities.MoonPhase(Utilities.JulianDateUtc),
-            //     "Illuminated fraction of the Moon"));
-            // newCursor.Add(new HeaderCard("DMOON", 
-            //     CoordinatesManager.CalculateObjectDistance2Moon(new ObservationTask()), //TODO INSERT TASK
-            //     "Ang. distance to Moon [deg]"));  
-
-
-            switch (WeatherDataCollector.Sky)
-            {
-                case -1.0:
-                    // Disconnected
-                    goto case 0.0;
-                case 0.0:
-                    // Old data
-                    newCursor.Add(new HeaderCard("SKY-TEMP", "UNKNOWN", "sky temperature from MLX-90614 sensor [deg]"));
-                    break;
-                default:
-                    newCursor.Add(new HeaderCard("SKY-TEMP", WeatherDataCollector.Sky,
-                        "sky temperature from MLX-90614 sensor [deg]"));
-                    break;
-            }
-
-            //SkyStd  SKY-STD
-            switch (WeatherDataCollector.Extinction)
-            {
-                case -1.0:
-                    // Disconnected
-                    goto case 0.0;
-                case 0.0:
-                    // Old data
-                    newCursor.Add(new HeaderCard("EXTINCT", "UNKNOWN", "relative extinction [Vmag]"));
-                    break;
-                default:
-                    newCursor.Add(new HeaderCard("EXTINCT", WeatherDataCollector.Extinction,
-                        "relative extinction [Vmag]"));
-                    break;
-            }
-
-            //Seeing
-            switch (WeatherDataCollector.Seeing)
-            {
-                case -1.0:
-                    // Disconnected
-                    goto case 0.0;
-                case 0.0:
-                    // Old data
-                    newCursor.Add(new HeaderCard("SEEING", "UNKNOWN", "seeing [arcsec]"));
-                    break;
-                default:
-                    newCursor.Add(new HeaderCard("SEEING", WeatherDataCollector.Seeing, "seeing [arcsec]"));
-                    break;
-            }
-
-            //Wind
-            switch (WeatherDataCollector.Wind)
-            {
-                case -1.0:
-                    // Disconnected
-                    goto case 100;
-                case 100.0:
-                    // Old data
-                    newCursor.Add(new HeaderCard("WIND", "UNKNOWN", "wind speed [m/s]"));
-                    break;
-                default:
-                    newCursor.Add(new HeaderCard("WIND", WeatherDataCollector.Wind, "wind speed [m/s]"));
-                    break;
-            }
-
-            newCursor.Add(new HeaderCard("SUN-ZD", WeatherDataCollector.Sun, "Sun zenith distance"));
-
-            // FIXME: Use MJD or something like that instead
-            string outDirectory = $"{Settings.MainOutFolder}\\{DateTime.Now.AddHours(-12):yyyy-MM-dd} " +
-                $"{(string.IsNullOrEmpty(camCtrl.task.objectName) ? "UNKNOWN" : camCtrl.task.objectName)}\\";
-            switch (camCtrl.task.framesType)
-            {
-                case "Object":
-                    outDirectory += $"RAW\\{(camCtrl.cameras[camNum].filter == "UNKNOWN" ? "UNKNOWN_" + camCtrl.cameras[camNum].serialNumber : camCtrl.cameras[camNum].filter)}";
+                    outDir += $"RAW\\{(cam.filter == "UNKNOWN" ? "UNKNOWN_" + cam.serialNumber : cam.filter)}";
                     break;
                 case "Bias":
-                    outDirectory += $"BIAS\\{(camCtrl.cameras[camNum].filter == "UNKNOWN" ? "UNKNOWN_" + camCtrl.cameras[camNum].serialNumber : camCtrl.cameras[camNum].filter)}";
+                    outDir += $"BIAS\\{(cam.filter == "UNKNOWN" ? "UNKNOWN_" + cam.serialNumber : cam.filter)}";
                     break;
                 case "Dark":
-                    outDirectory += $"DARK\\{(camCtrl.cameras[camNum].filter == "UNKNOWN" ? "UNKNOWN_" + camCtrl.cameras[camNum].serialNumber : camCtrl.cameras[camNum].filter)}";
+                    outDir += $"DARK\\{(cam.filter == "UNKNOWN" ? "UNKNOWN_" + cam.serialNumber : cam.filter)}";
                     break;
                 case "Flat":
-                    outDirectory += $"FLAT\\{(camCtrl.cameras[camNum].filter == "UNKNOWN" ? "UNKNOWN_" + camCtrl.cameras[camNum].serialNumber : camCtrl.cameras[camNum].filter)}";
+                    outDir += $"FLAT\\{(cam.filter == "UNKNOWN" ? "UNKNOWN_" + cam.serialNumber : cam.filter)}";
                     break;
                 case "Test":
-                    outDirectory += "TEST";
+                    outDir += "TEST";
                     break;
                 case "Focus":
-                    outDirectory += "FOCUS";
+                    outDir += "FOCUS";
                     break;
                 default:
-                    outDirectory += "EXTRA";
+                    outDir += "EXTRA";
                     break;
             }
-            if (!Directory.Exists(outDirectory)) Directory.CreateDirectory(outDirectory);
-            
+            if (!Directory.Exists(outDir)) Directory.CreateDirectory(outDir);
+
             string outName;
-            switch (camCtrl.task.framesType)
+            switch (CameraControl.loadedTask.FrameType)
             {
                 case "Object":
-                    outName = $"{(string.IsNullOrEmpty(camCtrl.task.objectName) ? "UNKNOWN" : camCtrl.task.objectName)}_" +
-                        $"{camCtrl.cameras[camNum].filter}_{camCtrl.cameras[camNum].expStartDt:yyyy-MM-ddTHH-mm-ss}.fits";
+                    outName = $"{(string.IsNullOrEmpty(CameraControl.loadedTask.Object) ? "UNKNOWN" : CameraControl.loadedTask.Object)}_" +
+                        $"{cam.filter}_{cam.expStartDt:yyyy-MM-ddTHH-mm-ss}.fits";
                     break;
                 case "Bias":
                     goto case "Dark";
@@ -267,20 +105,220 @@ namespace RPCC.Cams
                     goto case "Dark";
                 case "Dark":
                     // If you'll need more precise output for CamTemp, make sure to set decimal separator (use Culture?)
-                    outName = $"{camCtrl.task.framesType}_{camCtrl.cameras[camNum].expStartDt:yyyy-MM-ddTHH-mm-ss}_" +
-                        $"B={Settings.CamBin}_F={camCtrl.cameras[camNum].filter}_E={camCtrl.task.framesExpTime / 1000}_T={Settings.CamTemp:F0}.fits";
+                    outName = $"{CameraControl.loadedTask.FrameType}_{cam.expStartDt:yyyy-MM-ddTHH-mm-ss}_" +
+                        $"XB={CameraControl.loadedTask.Xbin}_YB={CameraControl.loadedTask.Ybin}" +
+                        $"_F={cam.filter}_E={CameraControl.loadedTask.Exp}_T={Settings.CamTemp:F0}.fits";
                     break;
                 default:
-                    outName = $"{camCtrl.task.framesType}_{camCtrl.cameras[camNum].filter}_{camCtrl.cameras[camNum].expStartDt:yyyy-MM-ddTHH-mm-ss}.fits";
+                    outName = $"{CameraControl.loadedTask.FrameType}_{cam.filter}_" +
+                        $"{cam.expStartDt:yyyy-MM-ddTHH-mm-ss}.fits";
                     break;
             }
 
-            BufferedDataStream outStream = new BufferedDataStream(new FileStream($"{outDirectory}\\{outName}", FileMode.Create));
+            string outFilePath = $"{outDir}\\{outName}";
+            BufferedDataStream outStream = new BufferedDataStream(new FileStream(outFilePath,
+                FileMode.Create));
             newFits.Write(outStream);
-            // FIXME: Suddenly caught a bug in next line - said something like "can't access closed file".
-            // Check it and, if needed, remove the next two lines.
+            // I once caught a bug in next line - said something like "can't access closed file".
+            // If encountered again, remove the next two lines.
             outStream.Flush();
             outStream.Close();
+
+            DbCommunicate.AddFrameToDb(CameraControl.loadedTask, outFilePath, 
+                MountDataCollector.RightAsc, MountDataCollector.Declination,
+                cam.filter, cam.expStartDt, WeatherDataCollector.Extinction, cam.ccdTemp, cam.serialNumber);
+            return outFilePath;
+        }
+
+        internal void FillInHeader(CameraDevice cam, Header head)
+        {
+            // When filling in header keys with Add function, CSharpFITS tends to shuffle keys.
+            // Though it can be fixed, I can't think of a simple and clean way to do so.
+            // Therefore, it's a feature now.
+
+            var cursor = head.GetCursor();
+            cursor.Key = "END";
+
+            cursor.Add(new HeaderCard("COMMENT",
+                "Conforms to FITS Version 4.0: updated 2016 July 22", false));
+
+            #region Observation keywords
+            cursor.Add(new HeaderCard("DATE-OBS",
+                cam.expStartDt.ToString("yyyy-MM-ddTHH:mm:ss.fff"),
+                "date-time at the beginning of exposure"));
+            cursor.Add(new HeaderCard("JD-OBS", cam.expStartJd, "JD at the beginning of exposure"));
+            // I'm sorry in advance if this MJD calculation is wrong
+            cursor.Add(new HeaderCard("MJD-OBS", cam.expStartJd - 2400000.5, "MJD at the beginning of exposure"));
+            cursor.Add(new HeaderCard("COUNT",
+                CameraControl.loadedTask.DoneFrames + 1, "frame number in sequence"));
+            cursor.Add(new HeaderCard("MAXCNT",
+                CameraControl.loadedTask.AllFrames, "length of sequence"));
+            cursor.Add(new HeaderCard("EXPTIME",
+                CameraControl.loadedTask.Exp, "actual integration time [sec]"));
+            cursor.Add(new HeaderCard("IMAGETYP",
+                CameraControl.loadedTask.FrameType, "Object, Flat, Dark, Bias, Focus, Test"));
+            cursor.Add(new HeaderCard("XBINNING",
+                CameraControl.loadedTask.Xbin, "binning factor in width"));
+            cursor.Add(new HeaderCard("XPIXSZ",
+                13.5 * CameraControl.loadedTask.Xbin, "pixel width (after binning) [micron]"));
+            cursor.Add(new HeaderCard("YBINNING",
+                CameraControl.loadedTask.Ybin, "binning factor in height"));
+            cursor.Add(new HeaderCard("YPIXSZ",
+                13.5 * CameraControl.loadedTask.Ybin, "pixel height (after binning) [micron]"));
+            switch (CameraControl.loadedTask.FrameType)
+            {
+                case "Object":
+                case "Focus":
+                case "Test":
+                    cursor.Add(string.IsNullOrEmpty(CameraControl.loadedTask.Object)
+                        ? new HeaderCard("OBJNAME", "UNKNOWN", "object name")
+                        : new HeaderCard("OBJNAME", CameraControl.loadedTask.Object, "object name"));
+                    var radec = CameraControl.loadedTask.RaDec.Split(' ');
+                    cursor.Add(new HeaderCard("OBJRA", radec[0], "object RA [h:m:s]"));
+                    cursor.Add(new HeaderCard("OBJDEC", radec[1], "object DEC [d:m:s]"));
+                    goto case "Flat";
+                case "Flat":
+                    cursor.Add(new HeaderCard("ALPHA", MountDataCollector.RightAsc, "scope RA [h]"));
+                    cursor.Add(new HeaderCard("DELTA", MountDataCollector.Declination, "scope DEC [deg]"));
+                    cursor.Add(new HeaderCard("EQUINOX", 2000.0, "equinox of ALPHA and DELTA [yr]"));
+                    break;
+            }
+            cursor.Add(string.IsNullOrEmpty(CameraControl.loadedTask.Observer)
+                        ? new HeaderCard("OBSERVER", "UNKNOWN", "object name")
+                        : new HeaderCard("OBSERVER", CameraControl.loadedTask.Observer, "observer"));
+            #endregion
+
+            #region Instrument keywords
+            cursor.Add(new HeaderCard("ORIGIN", "URFU", "organization responsible for the data"));
+            cursor.Add(new HeaderCard("TELESCOP", "APM-RoboPhot", "telescope"));
+            cursor.Add(new HeaderCard("INSTRUME", "TRIP", "instrument"));
+            cursor.Add(new HeaderCard("CAMERA", "FLI ML4240 MB", "camera name"));
+            cursor.Add(new HeaderCard("DETECTOR", "E2V CCD42-40-1-368 MB", "CCD Detector"));
+            cursor.Add(new HeaderCard("SERNUM", cam.serialNumber,
+                "serial number"));
+            cursor.Add(new HeaderCard("FILTER", cam.filter, "SDSS filter"));
+            cursor.Add(new HeaderCard("CCD-TEMP", cam.ccdTemp,
+                "CCD temperature [C]"));
+            cursor.Add(new HeaderCard("SET-TEMP", Settings.CamTemp, "CCD temperature setpoint [C]"));
+            cursor.Add(new HeaderCard("HEATSINK", cam.baseTemp,
+                "heatsink temperature [C]"));
+            cursor.Add(new HeaderCard("COOLPOWR", cam.coolerPwr,
+                "cooler power [%]"));
+            switch (CameraControl.loadedTask.FrameType)
+            {
+                case "Focus":
+                    cursor.Add(new HeaderCard("RATE", 2000.0, "horizontal readout rate [kPix/sec]"));
+                    cursor.Add(new HeaderCard("RDNOISE", 14.0, "datasheet readnoise [e]"));
+                    break;
+                default:
+                    cursor.Add(new HeaderCard("RATE", 500.0, "horizontal readout rate [kPix/sec]"));
+                    cursor.Add(new HeaderCard("RDNOISE", 9.0, "datasheet readnoise [e]"));
+                    break;
+            }
+            cursor.Add(new HeaderCard("GAIN", 1.4, "typical gain [e/ADU]"));
+            cursor.Add(new HeaderCard("BZERO", short.MaxValue + 1.0,
+                "offset data range to that of unsigned short"));
+            cursor.Add(new HeaderCard("BSCALE", 1.0, "default scaling factor"));
+            cursor.Add(new HeaderCard("FOCUS", SerialFocus.CurrentPosition, "focus position"));
+            cursor.Add(new HeaderCard("LOOKEAST", MountDataCollector.IsLookingEast, "is mount looking east (GEM)"));
+            cursor.Add(new HeaderCard("BLINKY", MountDataCollector.IsInBlinky, "is motor(s) in blinky mode"));
+            cursor.Add(new HeaderCard("SLEWING", MountDataCollector.IsSlewing, "is mount slewing"));
+            cursor.Add(new HeaderCard("INIT", MountDataCollector.IsInit, "is mount initialized"));
+            cursor.Add(new HeaderCard("COMFAULT", MountDataCollector.IsCommFault, "com fault between sitech and brush"));
+            cursor.Add(new HeaderCard("TRACKING", MountDataCollector.IsTracking, "is mount tracking"));
+            cursor.Add(new HeaderCard("PPLS", MountDataCollector.IsPplsOn, "prim plus lim switch activated"));
+            cursor.Add(new HeaderCard("PMLS", MountDataCollector.IsPmlsOn, "prim minus lim switch activated"));
+            cursor.Add(new HeaderCard("SPLS", MountDataCollector.IsSplsOn, "second plus lim switch activated"));
+            cursor.Add(new HeaderCard("SMLS", MountDataCollector.IsSmlsOn, "second minus lim switch activated"));
+            cursor.Add(new HeaderCard("PHS", MountDataCollector.IsPhsOn, "primary homing switch activated"));
+            cursor.Add(new HeaderCard("SHS", MountDataCollector.IsShsOn, "second homing switch activated"));
+            #endregion
+
+            #region Observatory keywords
+            cursor.Add(new HeaderCard("OBSERVAT", "KAO", "observatory name"));
+            cursor.Add(new HeaderCard("OBSERVID", 168, "observatory code"));
+            cursor.Add(new HeaderCard("LONG", "03:58:11", "observatory longitude [hh:mm:ss]"));
+            cursor.Add(new HeaderCard("LONGDEG", 59.545735, "observatory longitude [deg]"));
+            cursor.Add(new HeaderCard("LAT", "57:02:11", "observatory latitude [dd:mm:ss]"));
+            cursor.Add(new HeaderCard("LATDEG", 57.036537, "observatory latitude [deg]"));
+            cursor.Add(new HeaderCard("ALTITUDE", 290.0, "observatory altitude [meters above SL]"));
+            #endregion
+
+            #region Weather keywords
+            cursor.Add(new HeaderCard("AIRMASS",
+                MountDataCollector.Airmass, "airmass at the end of exposure"));
+            switch (WeatherDataCollector.Sky)
+            {
+                case -1.0:
+                    // Disconnected
+                    goto case 0.0;
+                case 0.0:
+                    // Old data
+                    cursor.Add(new HeaderCard("SKY-TEMP", "UNKNOWN",
+                        "sky temperature from MLX-90614 sensor [C]"));
+                    break;
+                default:
+                    cursor.Add(new HeaderCard("SKY-TEMP", WeatherDataCollector.Sky,
+                        "sky temperature from MLX-90614 sensor [C]"));
+                    break;
+            }
+            switch (WeatherDataCollector.Extinction)
+            {
+                case -1.0:
+                    // Disconnected
+                    goto case 0.0;
+                case 0.0:
+                    // Old data
+                    cursor.Add(new HeaderCard("EXTINCT", "UNKNOWN", "relative extinction [Vmag]"));
+                    break;
+                default:
+                    cursor.Add(new HeaderCard("EXTINCT",
+                        WeatherDataCollector.Extinction, "relative extinction [Vmag]"));
+                    break;
+            }
+            switch (WeatherDataCollector.Seeing)
+            {
+                case -1.0:
+                    // Disconnected
+                    goto case 0.0;
+                case 0.0:
+                    // Old data
+                    cursor.Add(new HeaderCard("SEEING", "UNKNOWN", "seeing [arcsec]"));
+                    break;
+                default:
+                    cursor.Add(new HeaderCard("SEEING", WeatherDataCollector.Seeing, "seeing [arcsec]"));
+                    break;
+            }
+            switch (WeatherDataCollector.Wind)
+            {
+                case -1.0:
+                    // Disconnected
+                    goto case 100;
+                case 100.0:
+                    // Old data
+                    cursor.Add(new HeaderCard("WIND", "UNKNOWN", "wind speed [m/s]"));
+                    break;
+                default:
+                    cursor.Add(new HeaderCard("WIND", WeatherDataCollector.Wind, "wind speed [m/s]"));
+                    break;
+            }
+            cursor.Add(new HeaderCard("SUN-ZD", WeatherDataCollector.Sun, "Sun zenith distance [deg]"));
+            cursor.Add(new HeaderCard("MOONPHAS", 
+                CoordinatesManager.MoonIllumination, "illuminated fraction of the Moon"));
+            
+            switch (CameraControl.loadedTask.FrameType)
+            {
+                case "Object":
+                    
+                    goto case "Flat";
+                case "Flat":
+                    cursor.Add(new HeaderCard("MOONANGL",
+                        CoordinatesManager.ObjectDistance2Moon,
+                        "angle between target and Moon [deg]"));
+                    
+                    break;
+            }
+            #endregion
         }
     }
 }
