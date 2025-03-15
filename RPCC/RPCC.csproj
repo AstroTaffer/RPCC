@@ -335,12 +335,6 @@
     <Compile Include="Utils\CoordinatesManager.cs" />
     <Compile Include="Utils\Logger.cs" />
     <Compile Include="Utils\Settings.cs" />
-    <Compile Include="Utils\SettingsForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Utils\SettingsForm.Designer.cs">
-      <DependentUpon>SettingsForm.cs</DependentUpon>
-    </Compile>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -356,9 +350,6 @@
     </Compile>
     <EmbeddedResource Include="Tasks\TaskForm.resx">
       <DependentUpon>TaskForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Utils\SettingsForm.resx">
-      <DependentUpon>SettingsForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Guid\DONUTS.py">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

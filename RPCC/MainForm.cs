@@ -358,18 +358,6 @@ public partial class MainForm : Form
     #endregion
 
     #region Options
-    private void SettingsToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        var settingsForm = new SettingsForm();
-        settingsForm.ShowDialog();
-        if (settingsForm.DialogResult == DialogResult.OK) Logger.AddLogEntry("Settings changed");
-    }
-
-    private void UpdateCameraSettingsToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        //_cameraControl.UpdateSettings();
-    }
-
     private void LoadConfigToolStripMenuItem_Click(object sender, EventArgs e)
     {
         if (openFileDialogConfig.ShowDialog() == DialogResult.OK)

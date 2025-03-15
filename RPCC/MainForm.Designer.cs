@@ -47,8 +47,6 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.reconnectAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.updateCamerasSettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loadConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.debugToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -130,7 +128,7 @@
             this.addToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dataGridTextBoxColumn1 = new System.Windows.Forms.DataGridTextBoxColumn();
             this.dataGridTextBoxColumn2 = new System.Windows.Forms.DataGridTextBoxColumn();
-            ((System.ComponentModel.ISupportInitialize) (this.dataGridViewTasker)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewTasker)).BeginInit();
             this.statusStrip.SuspendLayout();
             this.menuStrip.SuspendLayout();
             this.groupBoxLogs.SuspendLayout();
@@ -142,23 +140,23 @@
             this.tabControlMain.SuspendLayout();
             this.tabPageInfo.SuspendLayout();
             this.tabPageTasks.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize) (this.dataGridTasks)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridTasks)).BeginInit();
             this.tabPageCams.SuspendLayout();
             this.groupBoxInfo.SuspendLayout();
             this.groupBoxFocusSettings.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownRun)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownRun)).BeginInit();
             this.groupBoxAutoFocus.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownSetDefoc)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownSetDefoc)).BeginInit();
             this.tabPageImages.SuspendLayout();
             this.groupBoxImage3.SuspendLayout();
             this.panelImage3.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize) (this.pictureBoxImage3)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage3)).BeginInit();
             this.groupBoxImage2.SuspendLayout();
             this.panelImage2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize) (this.pictureBoxImage2)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage2)).BeginInit();
             this.groupBoxImage1.SuspendLayout();
             this.panelImage1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize) (this.pictureBoxImage1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage1)).BeginInit();
             this.contextMenuStripTasker.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -169,7 +167,7 @@
             this.dataGridViewTasker.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (204)));
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
             dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
@@ -178,7 +176,7 @@
             this.dataGridViewTasker.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (204)));
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
             dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
@@ -190,7 +188,7 @@
             this.dataGridViewTasker.Name = "dataGridViewTasker";
             dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (204)));
+            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
             dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
@@ -203,7 +201,8 @@
             // 
             // statusStrip
             // 
-            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {this.tSStatusClock});
+            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tSStatusClock});
             this.statusStrip.Location = new System.Drawing.Point(0, 586);
             this.statusStrip.Name = "statusStrip";
             this.statusStrip.Size = new System.Drawing.Size(1140, 22);
@@ -219,7 +218,10 @@
             // 
             // menuStrip
             // 
-            this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {this.launchToolStripMenuItem, this.optionsToolStripMenuItem, this.debugToolStripMenuItem});
+            this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.launchToolStripMenuItem,
+            this.optionsToolStripMenuItem,
+            this.debugToolStripMenuItem});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
             this.menuStrip.Size = new System.Drawing.Size(1140, 24);
@@ -228,7 +230,10 @@
             // 
             // launchToolStripMenuItem
             // 
-            this.launchToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.findCamerasToolStripMenuItem, this.findFocusToolStripMenuItem, this.reconnectSocketToolStripMenuItem});
+            this.launchToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.findCamerasToolStripMenuItem,
+            this.findFocusToolStripMenuItem,
+            this.reconnectSocketToolStripMenuItem});
             this.launchToolStripMenuItem.Name = "launchToolStripMenuItem";
             this.launchToolStripMenuItem.Size = new System.Drawing.Size(58, 20);
             this.launchToolStripMenuItem.Text = "Launch";
@@ -249,7 +254,12 @@
             // 
             // reconnectSocketToolStripMenuItem
             // 
-            this.reconnectSocketToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.reconnectMeteoDomeToolStripMenuItem, this.reconnectDonutsToolStripMenuItem, this.reconnectSiTechExeToolStripMenuItem, this.toolStripSeparator1, this.reconnectAllToolStripMenuItem});
+            this.reconnectSocketToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.reconnectMeteoDomeToolStripMenuItem,
+            this.reconnectDonutsToolStripMenuItem,
+            this.reconnectSiTechExeToolStripMenuItem,
+            this.toolStripSeparator1,
+            this.reconnectAllToolStripMenuItem});
             this.reconnectSocketToolStripMenuItem.Name = "reconnectSocketToolStripMenuItem";
             this.reconnectSocketToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
             this.reconnectSocketToolStripMenuItem.Text = "Reconnect socket";
@@ -289,42 +299,31 @@
             // 
             // optionsToolStripMenuItem
             // 
-            this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.settingsToolStripMenuItem, this.updateCamerasSettingsToolStripMenuItem, this.loadConfigToolStripMenuItem, this.saveConfigToolStripMenuItem});
+            this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.loadConfigToolStripMenuItem,
+            this.saveConfigToolStripMenuItem});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             this.optionsToolStripMenuItem.Text = "Options";
             // 
-            // settingsToolStripMenuItem
-            // 
-            this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(203, 22);
-            this.settingsToolStripMenuItem.Text = "Settings";
-            this.settingsToolStripMenuItem.Click += new System.EventHandler(this.SettingsToolStripMenuItem_Click);
-            // 
-            // updateCamerasSettingsToolStripMenuItem
-            // 
-            this.updateCamerasSettingsToolStripMenuItem.Name = "updateCamerasSettingsToolStripMenuItem";
-            this.updateCamerasSettingsToolStripMenuItem.Size = new System.Drawing.Size(203, 22);
-            this.updateCamerasSettingsToolStripMenuItem.Text = "Update cameras settings";
-            this.updateCamerasSettingsToolStripMenuItem.Click += new System.EventHandler(this.UpdateCameraSettingsToolStripMenuItem_Click);
-            // 
             // loadConfigToolStripMenuItem
             // 
             this.loadConfigToolStripMenuItem.Name = "loadConfigToolStripMenuItem";
-            this.loadConfigToolStripMenuItem.Size = new System.Drawing.Size(203, 22);
+            this.loadConfigToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.loadConfigToolStripMenuItem.Text = "Load config";
             this.loadConfigToolStripMenuItem.Click += new System.EventHandler(this.LoadConfigToolStripMenuItem_Click);
             // 
             // saveConfigToolStripMenuItem
             // 
             this.saveConfigToolStripMenuItem.Name = "saveConfigToolStripMenuItem";
-            this.saveConfigToolStripMenuItem.Size = new System.Drawing.Size(203, 22);
+            this.saveConfigToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.saveConfigToolStripMenuItem.Text = "Save config";
             this.saveConfigToolStripMenuItem.Click += new System.EventHandler(this.SaveConfigToolStripMenuItem_Click);
             // 
             // debugToolStripMenuItem
             // 
-            this.debugToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.restoreDefaultConfigFileToolStripMenuItem});
+            this.debugToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.restoreDefaultConfigFileToolStripMenuItem});
             this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
             this.debugToolStripMenuItem.Size = new System.Drawing.Size(54, 20);
             this.debugToolStripMenuItem.Text = "Debug";
@@ -361,7 +360,9 @@
             // 
             // contextMenuStripLogs
             // 
-            this.contextMenuStripLogs.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {this.clearToolStripMenuItem, this.saveToolStripMenuItem});
+            this.contextMenuStripLogs.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.clearToolStripMenuItem,
+            this.saveToolStripMenuItem});
             this.contextMenuStripLogs.Name = "contextMenuStrip1";
             this.contextMenuStripLogs.Size = new System.Drawing.Size(102, 48);
             // 
@@ -869,7 +870,7 @@
             // 
             // buttonRun
             // 
-            this.buttonRun.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonRun.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonRun.Enabled = false;
             this.buttonRun.Location = new System.Drawing.Point(244, 25);
             this.buttonRun.Name = "buttonRun";
@@ -881,7 +882,7 @@
             // 
             // buttonRunStop
             // 
-            this.buttonRunStop.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonRunStop.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonRunStop.Location = new System.Drawing.Point(244, 60);
             this.buttonRunStop.Name = "buttonRunStop";
             this.buttonRunStop.Size = new System.Drawing.Size(74, 29);
@@ -893,10 +894,22 @@
             // numericUpDownRun
             // 
             this.numericUpDownRun.Enabled = false;
-            this.numericUpDownRun.Increment = new decimal(new int[] {100, 0, 0, 0});
+            this.numericUpDownRun.Increment = new decimal(new int[] {
+            100,
+            0,
+            0,
+            0});
             this.numericUpDownRun.Location = new System.Drawing.Point(138, 25);
-            this.numericUpDownRun.Maximum = new decimal(new int[] {5000, 0, 0, 0});
-            this.numericUpDownRun.Minimum = new decimal(new int[] {5000, 0, 0, -2147483648});
+            this.numericUpDownRun.Maximum = new decimal(new int[] {
+            5000,
+            0,
+            0,
+            0});
+            this.numericUpDownRun.Minimum = new decimal(new int[] {
+            5000,
+            0,
+            0,
+            -2147483648});
             this.numericUpDownRun.Name = "numericUpDownRun";
             this.numericUpDownRun.Size = new System.Drawing.Size(75, 20);
             this.numericUpDownRun.TabIndex = 1;
@@ -928,7 +941,11 @@
             // numericUpDownSetDefoc
             // 
             this.numericUpDownSetDefoc.Location = new System.Drawing.Point(242, 25);
-            this.numericUpDownSetDefoc.Minimum = new decimal(new int[] {100, 0, 0, -2147483648});
+            this.numericUpDownSetDefoc.Minimum = new decimal(new int[] {
+            100,
+            0,
+            0,
+            -2147483648});
             this.numericUpDownSetDefoc.Name = "numericUpDownSetDefoc";
             this.numericUpDownSetDefoc.Size = new System.Drawing.Size(76, 20);
             this.numericUpDownSetDefoc.TabIndex = 15;
@@ -1089,7 +1106,8 @@
             // 
             // contextMenuStripTasker
             // 
-            this.contextMenuStripTasker.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {this.addToolStripMenuItem});
+            this.contextMenuStripTasker.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.addToolStripMenuItem});
             this.contextMenuStripTasker.Name = "contextMenuStripTasker";
             this.contextMenuStripTasker.Size = new System.Drawing.Size(97, 26);
             // 
@@ -1121,13 +1139,13 @@
             this.Controls.Add(this.statusStrip);
             this.Controls.Add(this.menuStrip);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip;
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.Text = "RoboPhot Cameras Controls";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
-            ((System.ComponentModel.ISupportInitialize) (this.dataGridViewTasker)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewTasker)).EndInit();
             this.statusStrip.ResumeLayout(false);
             this.statusStrip.PerformLayout();
             this.menuStrip.ResumeLayout(false);
@@ -1144,29 +1162,30 @@
             this.tabControlMain.ResumeLayout(false);
             this.tabPageInfo.ResumeLayout(false);
             this.tabPageTasks.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize) (this.dataGridTasks)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridTasks)).EndInit();
             this.tabPageCams.ResumeLayout(false);
             this.groupBoxInfo.ResumeLayout(false);
             this.groupBoxInfo.PerformLayout();
             this.groupBoxFocusSettings.ResumeLayout(false);
             this.groupBoxFocusSettings.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownRun)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownRun)).EndInit();
             this.groupBoxAutoFocus.ResumeLayout(false);
             this.groupBoxAutoFocus.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize) (this.numericUpDownSetDefoc)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownSetDefoc)).EndInit();
             this.tabPageImages.ResumeLayout(false);
             this.groupBoxImage3.ResumeLayout(false);
             this.panelImage3.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize) (this.pictureBoxImage3)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage3)).EndInit();
             this.groupBoxImage2.ResumeLayout(false);
             this.panelImage2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize) (this.pictureBoxImage2)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage2)).EndInit();
             this.groupBoxImage1.ResumeLayout(false);
             this.panelImage1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize) (this.pictureBoxImage1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage1)).EndInit();
             this.contextMenuStripTasker.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
+
         }
 
         private System.Windows.Forms.CheckBox checkBoxDebugMode;
@@ -1227,7 +1246,6 @@
         private System.Windows.Forms.Timer timerUi;
         private System.Windows.Forms.ListBox listBoxLogs;
         private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem loadConfigToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveConfigToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem restoreDefaultConfigFileToolStripMenuItem;
@@ -1260,7 +1278,6 @@
         private System.Windows.Forms.Label labelCam3Filter;
         private System.Windows.Forms.Label labelCam3Sn;
         private System.Windows.Forms.Label labelCam3Model;
-        private System.Windows.Forms.ToolStripMenuItem updateCamerasSettingsToolStripMenuItem;
         private System.Windows.Forms.GroupBox groupBoxSurvey;
         private System.Windows.Forms.Button buttonSurveyStop;
         private System.Windows.Forms.ToolStripMenuItem findFocusToolStripMenuItem;

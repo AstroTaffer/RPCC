@@ -393,6 +393,9 @@ namespace RPCC.Utils
                     LoadXmlConfig("SettingsDefault.xml");
                 }
             }
+
+            // TODO: call camera controls method, where settings will be applied inside lock(_camsLocker)
+            //       then await results and add logger entry
         }
 
         internal static void SaveXmlConfig(string fileName)
