@@ -48,6 +48,7 @@
             this.reconnectAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.reloadConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.regenerateConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBoxLogs = new System.Windows.Forms.GroupBox();
             this.listBoxLogs = new System.Windows.Forms.ListBox();
             this.contextMenuStripLogs = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -80,7 +81,7 @@
             this.checkBoxAutoFocus = new System.Windows.Forms.CheckBox();
             this.groupBoxCam1 = new System.Windows.Forms.GroupBox();
             this.pictureBoxImage1 = new System.Windows.Forms.PictureBox();
-            this.panel1 = new System.Windows.Forms.Panel();
+            this.panelImage1 = new System.Windows.Forms.Panel();
             this.progressBarG = new System.Windows.Forms.ProgressBar();
             this.labelCam1RemTime = new System.Windows.Forms.Label();
             this.labelCam1Status = new System.Windows.Forms.Label();
@@ -91,7 +92,7 @@
             this.labelCam1Sn = new System.Windows.Forms.Label();
             this.labelCam1Model = new System.Windows.Forms.Label();
             this.groupBoxCam2 = new System.Windows.Forms.GroupBox();
-            this.panel2 = new System.Windows.Forms.Panel();
+            this.panelImage2 = new System.Windows.Forms.Panel();
             this.pictureBoxImage2 = new System.Windows.Forms.PictureBox();
             this.progressBarR = new System.Windows.Forms.ProgressBar();
             this.labelCam2RemTime = new System.Windows.Forms.Label();
@@ -103,7 +104,7 @@
             this.labelCam2Sn = new System.Windows.Forms.Label();
             this.labelCam2Model = new System.Windows.Forms.Label();
             this.groupBoxCam3 = new System.Windows.Forms.GroupBox();
-            this.panel3 = new System.Windows.Forms.Panel();
+            this.panelImage3 = new System.Windows.Forms.Panel();
             this.pictureBoxImage3 = new System.Windows.Forms.PictureBox();
             this.progressBarI = new System.Windows.Forms.ProgressBar();
             this.labelCam3RemTime = new System.Windows.Forms.Label();
@@ -120,7 +121,6 @@
             this.addToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dataGridTextBoxColumn1 = new System.Windows.Forms.DataGridTextBoxColumn();
             this.dataGridTextBoxColumn2 = new System.Windows.Forms.DataGridTextBoxColumn();
-            this.regenerateConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewTasker)).BeginInit();
             this.statusStrip.SuspendLayout();
             this.menuStrip.SuspendLayout();
@@ -137,10 +137,10 @@
             this.groupBoxCam1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage1)).BeginInit();
             this.groupBoxCam2.SuspendLayout();
-            this.panel2.SuspendLayout();
+            this.panelImage2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage2)).BeginInit();
             this.groupBoxCam3.SuspendLayout();
-            this.panel3.SuspendLayout();
+            this.panelImage3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage3)).BeginInit();
             this.tabPageTasks.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridTasks)).BeginInit();
@@ -188,9 +188,8 @@
             // 
             // statusStrip
             // 
-            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tSStatusClock});
-            this.statusStrip.Location = new System.Drawing.Point(0, 586);
+            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.tSStatusClock });
+            this.statusStrip.Location = new System.Drawing.Point(0, 663);
             this.statusStrip.Name = "statusStrip";
             this.statusStrip.Size = new System.Drawing.Size(1364, 22);
             this.statusStrip.SizingGrip = false;
@@ -205,9 +204,7 @@
             // 
             // menuStrip
             // 
-            this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.launchToolStripMenuItem,
-            this.optionsToolStripMenuItem});
+            this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.launchToolStripMenuItem, this.optionsToolStripMenuItem });
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
             this.menuStrip.Size = new System.Drawing.Size(1364, 24);
@@ -216,10 +213,7 @@
             // 
             // launchToolStripMenuItem
             // 
-            this.launchToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.findCamerasToolStripMenuItem,
-            this.findFocusToolStripMenuItem,
-            this.reconnectSocketToolStripMenuItem});
+            this.launchToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { this.findCamerasToolStripMenuItem, this.findFocusToolStripMenuItem, this.reconnectSocketToolStripMenuItem });
             this.launchToolStripMenuItem.Name = "launchToolStripMenuItem";
             this.launchToolStripMenuItem.Size = new System.Drawing.Size(58, 20);
             this.launchToolStripMenuItem.Text = "Launch";
@@ -227,67 +221,60 @@
             // findCamerasToolStripMenuItem
             // 
             this.findCamerasToolStripMenuItem.Name = "findCamerasToolStripMenuItem";
-            this.findCamerasToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.findCamerasToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
             this.findCamerasToolStripMenuItem.Text = "Find cameras";
             this.findCamerasToolStripMenuItem.Click += new System.EventHandler(this.FindCamerasToolStripMenuItem_Click);
             // 
             // findFocusToolStripMenuItem
             // 
             this.findFocusToolStripMenuItem.Name = "findFocusToolStripMenuItem";
-            this.findFocusToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.findFocusToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
             this.findFocusToolStripMenuItem.Text = "Find focus";
             this.findFocusToolStripMenuItem.Click += new System.EventHandler(this.FindFocusToolStripMenuItem_Click);
             // 
             // reconnectSocketToolStripMenuItem
             // 
-            this.reconnectSocketToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.reconnectMeteoDomeToolStripMenuItem,
-            this.reconnectDonutsToolStripMenuItem,
-            this.reconnectSiTechExeToolStripMenuItem,
-            this.toolStripSeparator1,
-            this.reconnectAllToolStripMenuItem});
+            this.reconnectSocketToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { this.reconnectMeteoDomeToolStripMenuItem, this.reconnectDonutsToolStripMenuItem, this.reconnectSiTechExeToolStripMenuItem, this.toolStripSeparator1, this.reconnectAllToolStripMenuItem });
             this.reconnectSocketToolStripMenuItem.Name = "reconnectSocketToolStripMenuItem";
-            this.reconnectSocketToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.reconnectSocketToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
             this.reconnectSocketToolStripMenuItem.Text = "Reconnect socket";
             // 
             // reconnectMeteoDomeToolStripMenuItem
             // 
             this.reconnectMeteoDomeToolStripMenuItem.Name = "reconnectMeteoDomeToolStripMenuItem";
-            this.reconnectMeteoDomeToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.reconnectMeteoDomeToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
             this.reconnectMeteoDomeToolStripMenuItem.Text = "MeteoDome";
             this.reconnectMeteoDomeToolStripMenuItem.Click += new System.EventHandler(this.ReconnectMeteoDomeToolStripMenuItem_Click);
             // 
             // reconnectDonutsToolStripMenuItem
             // 
             this.reconnectDonutsToolStripMenuItem.Name = "reconnectDonutsToolStripMenuItem";
-            this.reconnectDonutsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.reconnectDonutsToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
             this.reconnectDonutsToolStripMenuItem.Text = "DONUTS";
             this.reconnectDonutsToolStripMenuItem.Click += new System.EventHandler(this.ReconnectDonutsToolStripMenuItem_Click);
             // 
             // reconnectSiTechExeToolStripMenuItem
             // 
             this.reconnectSiTechExeToolStripMenuItem.Name = "reconnectSiTechExeToolStripMenuItem";
-            this.reconnectSiTechExeToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.reconnectSiTechExeToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
             this.reconnectSiTechExeToolStripMenuItem.Text = "SiTechExe";
             this.reconnectSiTechExeToolStripMenuItem.Click += new System.EventHandler(this.ReconnectSiTechExeToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(137, 6);
             // 
             // reconnectAllToolStripMenuItem
             // 
             this.reconnectAllToolStripMenuItem.Name = "reconnectAllToolStripMenuItem";
-            this.reconnectAllToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.reconnectAllToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
             this.reconnectAllToolStripMenuItem.Text = "All";
             this.reconnectAllToolStripMenuItem.Click += new System.EventHandler(this.ReconnectAllToolStripMenuItem_Click);
             // 
             // optionsToolStripMenuItem
             // 
-            this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.reloadConfigToolStripMenuItem,
-            this.regenerateConfigToolStripMenuItem});
+            this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { this.reloadConfigToolStripMenuItem, this.regenerateConfigToolStripMenuItem });
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             this.optionsToolStripMenuItem.Text = "Options";
@@ -295,9 +282,16 @@
             // reloadConfigToolStripMenuItem
             // 
             this.reloadConfigToolStripMenuItem.Name = "reloadConfigToolStripMenuItem";
-            this.reloadConfigToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.reloadConfigToolStripMenuItem.Size = new System.Drawing.Size(170, 22);
             this.reloadConfigToolStripMenuItem.Text = "Reload config";
             this.reloadConfigToolStripMenuItem.Click += new System.EventHandler(this.ReloadConfigToolStripMenuItem_Click);
+            // 
+            // regenerateConfigToolStripMenuItem
+            // 
+            this.regenerateConfigToolStripMenuItem.Name = "regenerateConfigToolStripMenuItem";
+            this.regenerateConfigToolStripMenuItem.Size = new System.Drawing.Size(170, 22);
+            this.regenerateConfigToolStripMenuItem.Text = "Regenerate config";
+            this.regenerateConfigToolStripMenuItem.Click += new System.EventHandler(this.RegenerateConfigToolStripMenuItem_Click);
             // 
             // groupBoxLogs
             // 
@@ -323,9 +317,7 @@
             // 
             // contextMenuStripLogs
             // 
-            this.contextMenuStripLogs.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.clearToolStripMenuItem,
-            this.saveToolStripMenuItem});
+            this.contextMenuStripLogs.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.clearToolStripMenuItem, this.saveToolStripMenuItem });
             this.contextMenuStripLogs.Name = "contextMenuStrip1";
             this.contextMenuStripLogs.Size = new System.Drawing.Size(102, 48);
             // 
@@ -621,7 +613,7 @@
             // groupBoxCam1
             // 
             this.groupBoxCam1.Controls.Add(this.pictureBoxImage1);
-            this.groupBoxCam1.Controls.Add(this.panel1);
+            this.groupBoxCam1.Controls.Add(this.panelImage1);
             this.groupBoxCam1.Controls.Add(this.progressBarG);
             this.groupBoxCam1.Controls.Add(this.labelCam1RemTime);
             this.groupBoxCam1.Controls.Add(this.labelCam1Status);
@@ -649,12 +641,12 @@
             this.pictureBoxImage1.TabIndex = 0;
             this.pictureBoxImage1.TabStop = false;
             // 
-            // panel1
+            // panelImage1
             // 
-            this.panel1.Location = new System.Drawing.Point(6, 16);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(200, 200);
-            this.panel1.TabIndex = 8;
+            this.panelImage1.Location = new System.Drawing.Point(6, 16);
+            this.panelImage1.Name = "panelImage1";
+            this.panelImage1.Size = new System.Drawing.Size(200, 200);
+            this.panelImage1.TabIndex = 8;
             // 
             // progressBarG
             // 
@@ -740,7 +732,7 @@
             // 
             // groupBoxCam2
             // 
-            this.groupBoxCam2.Controls.Add(this.panel2);
+            this.groupBoxCam2.Controls.Add(this.panelImage2);
             this.groupBoxCam2.Controls.Add(this.progressBarR);
             this.groupBoxCam2.Controls.Add(this.labelCam2RemTime);
             this.groupBoxCam2.Controls.Add(this.labelCam2Status);
@@ -758,13 +750,13 @@
             this.groupBoxCam2.TabStop = false;
             this.groupBoxCam2.Text = "Camera 2";
             // 
-            // panel2
+            // panelImage2
             // 
-            this.panel2.Controls.Add(this.pictureBoxImage2);
-            this.panel2.Location = new System.Drawing.Point(6, 16);
-            this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(200, 200);
-            this.panel2.TabIndex = 16;
+            this.panelImage2.Controls.Add(this.pictureBoxImage2);
+            this.panelImage2.Location = new System.Drawing.Point(6, 16);
+            this.panelImage2.Name = "panelImage2";
+            this.panelImage2.Size = new System.Drawing.Size(200, 200);
+            this.panelImage2.TabIndex = 16;
             // 
             // pictureBoxImage2
             // 
@@ -859,7 +851,7 @@
             // 
             // groupBoxCam3
             // 
-            this.groupBoxCam3.Controls.Add(this.panel3);
+            this.groupBoxCam3.Controls.Add(this.panelImage3);
             this.groupBoxCam3.Controls.Add(this.progressBarI);
             this.groupBoxCam3.Controls.Add(this.labelCam3RemTime);
             this.groupBoxCam3.Controls.Add(this.labelCam3Status);
@@ -877,13 +869,13 @@
             this.groupBoxCam3.TabStop = false;
             this.groupBoxCam3.Text = "Camera 3";
             // 
-            // panel3
+            // panelImage3
             // 
-            this.panel3.Controls.Add(this.pictureBoxImage3);
-            this.panel3.Location = new System.Drawing.Point(6, 16);
-            this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(200, 200);
-            this.panel3.TabIndex = 24;
+            this.panelImage3.Controls.Add(this.pictureBoxImage3);
+            this.panelImage3.Location = new System.Drawing.Point(6, 16);
+            this.panelImage3.Name = "panelImage3";
+            this.panelImage3.Size = new System.Drawing.Size(200, 200);
+            this.panelImage3.TabIndex = 24;
             // 
             // pictureBoxImage3
             // 
@@ -1001,8 +993,7 @@
             // 
             // contextMenuStripTasker
             // 
-            this.contextMenuStripTasker.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.addToolStripMenuItem});
+            this.contextMenuStripTasker.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.addToolStripMenuItem });
             this.contextMenuStripTasker.Name = "contextMenuStripTasker";
             this.contextMenuStripTasker.Size = new System.Drawing.Size(97, 26);
             // 
@@ -1024,13 +1015,6 @@
             this.dataGridTextBoxColumn2.Format = "";
             this.dataGridTextBoxColumn2.FormatInfo = null;
             this.dataGridTextBoxColumn2.Width = -1;
-            // 
-            // regenerateConfigToolStripMenuItem
-            // 
-            this.regenerateConfigToolStripMenuItem.Name = "regenerateConfigToolStripMenuItem";
-            this.regenerateConfigToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.regenerateConfigToolStripMenuItem.Text = "Regenerate config";
-            this.regenerateConfigToolStripMenuItem.Click += new System.EventHandler(this.RegenerateConfigToolStripMenuItem_Click);
             // 
             // MainForm
             // 
@@ -1070,25 +1054,24 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage1)).EndInit();
             this.groupBoxCam2.ResumeLayout(false);
             this.groupBoxCam2.PerformLayout();
-            this.panel2.ResumeLayout(false);
+            this.panelImage2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage2)).EndInit();
             this.groupBoxCam3.ResumeLayout(false);
             this.groupBoxCam3.PerformLayout();
-            this.panel3.ResumeLayout(false);
+            this.panelImage3.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage3)).EndInit();
             this.tabPageTasks.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridTasks)).EndInit();
             this.contextMenuStripTasker.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
         
         private System.Windows.Forms.PictureBox pictureBoxImage1;
-        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Panel panelImage1;
         private System.Windows.Forms.ProgressBar progressBarG;
         private System.Windows.Forms.GroupBox groupBoxCam2;
-        private System.Windows.Forms.Panel panel2;
+        private System.Windows.Forms.Panel panelImage2;
         private System.Windows.Forms.PictureBox pictureBoxImage2;
         private System.Windows.Forms.ProgressBar progressBarR;
         private System.Windows.Forms.Label labelCam2RemTime;
@@ -1099,7 +1082,7 @@
         private System.Windows.Forms.Label labelCam2Filter;
         private System.Windows.Forms.Label labelCam2Sn;
         private System.Windows.Forms.GroupBox groupBoxCam3;
-        private System.Windows.Forms.Panel panel3;
+        private System.Windows.Forms.Panel panelImage3;
         private System.Windows.Forms.PictureBox pictureBoxImage3;
         private System.Windows.Forms.ProgressBar progressBarI;
         private System.Windows.Forms.Label labelCam3RemTime;
