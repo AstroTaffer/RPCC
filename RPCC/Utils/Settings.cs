@@ -243,12 +243,15 @@ namespace RPCC.Utils
 
         #endregion
 
-        #region ConfigIO
-        internal static void LoadXmlConfig(string fileName)
+        #region XmlIO
+        internal static void LoadXmlConfig()
         {
+            bool isConfigBad = false;
+            DialogResult isRegenRequested = DialogResult.No;
+
             try
             {
-                var config = XDocument.Load(fileName);
+                var config = XDocument.Load("Settings.xml");
 
                 if (!(config.Root.Elements("image_analysis").Any() &&
                       config.Root.Elements("image_analysis").Elements("lowerBrightnessSd").Any() &&
@@ -298,142 +301,64 @@ namespace RPCC.Utils
                 DonutsTcpIpPort = (int)config.Root.Element("comms").Element("donutsTcpIpPort");
                 SiTechExeTcpIpPort = (int)config.Root.Element("comms").Element("siTechExeTcpIpPort");
 
-                Logger.AddLogEntry($"Config file {fileName} loaded");
+                Logger.AddLogEntry($"Config file loaded");
             }
             catch (FileNotFoundException)
             {
-                if (fileName == "SettingsDefault.xml")
-                {
-                    DialogResult result = MessageBox.Show("Default config file not found.\n" +
-                        "Do you want to restore it (\"YES\")\n" +
-                        "or just close the application (\"NO\")?",
-                        "Config not found",
-                        MessageBoxButtons.YesNo,
-                        MessageBoxIcon.Error,
-                        MessageBoxDefaultButton.Button1);
-                    Logger.AddLogEntry($"WARNING Default config file not found");
-                    if (result == DialogResult.Yes)
-                    {
-                        RestoreDefaultXmlConfig();
-                        LoadXmlConfig("SettingsDefault.xml");
-                    }
-                    else Environment.Exit(1);
-                }
-                else
-                {
-                    MessageBox.Show($"Config file {fileName} not found.",
-                        "Config not found",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Error,
-                        MessageBoxDefaultButton.Button1);
-                    Logger.AddLogEntry($"WARNING Config file {fileName} not found");
-                }
+                isConfigBad = true;
+                isRegenRequested = MessageBox.Show("Config file not found.\n"
+                    + "Would you like to regenerate it (\"YES\")\n"
+                    + "or just close the application (\"NO\")?",
+                    "Config not found",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Error,
+                    MessageBoxDefaultButton.Button1);
+                Logger.AddLogEntry($"WARNING Config file not found");
             }
             catch (NullReferenceException)
             {
-                if (fileName == "SettingsDefault.xml")
-                {
-                    DialogResult result = MessageBox.Show("Default config file has invalid structure.\n" +
-                        "Do you want to restore it (\"YES\")\n" +
-                        "or just close the application (\"NO\")?",
-                        "Invalid config structure",
-                        MessageBoxButtons.YesNo,
-                        MessageBoxIcon.Error,
-                        MessageBoxDefaultButton.Button1);
-                    Logger.AddLogEntry($"WARNING Default config file has invalid structure");
-                    if (result == DialogResult.Yes)
-                    {
-                        RestoreDefaultXmlConfig();
-                        LoadXmlConfig("SettingsDefault.xml");
-                    }
-                    else Environment.Exit(1);
-                }
-                else
-                {
-                    MessageBox.Show($"Config file {fileName} has invalid structure.\n" +
-                        $"Reverting to default config.",
-                        "Invalid config structure",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Error,
-                        MessageBoxDefaultButton.Button1);
-                    Logger.AddLogEntry($"WARNING Config file {fileName} has invalid structure");
-                    LoadXmlConfig("SettingsDefault.xml");
-                }
+                isConfigBad = true;
+                isRegenRequested = MessageBox.Show("Config file has invalid structure.\n"
+                    + "Would you like to regenerate it (\"YES\")\n"
+                    + "or just close the application (\"NO\")?",
+                    "Invalid config structure",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Error,
+                    MessageBoxDefaultButton.Button1);
+                Logger.AddLogEntry($"WARNING Config file has invalid structure");
             }
             catch (Exception ex) when (ex is ArgumentException || ex is FormatException)
             {
-                if (fileName == "SettingsDefault.xml")
+                isConfigBad = true;
+                isRegenRequested = MessageBox.Show("Config file has invalid parameters:\n"
+                    + $"{ex.Message}.\n"
+                    + "Would you like to regenerate it (\"YES\")\n"
+                    + "or just close the application (\"NO\")?",
+                    "Invalid config parameters",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Error,
+                    MessageBoxDefaultButton.Button1);
+                Logger.AddLogEntry($"WARNING Config file has invalid parameters");
+            }
+            finally
+            {
+                if (isConfigBad)
                 {
-                    DialogResult result = MessageBox.Show("Default config file has invalid parameters:\n" +
-                        $"{ex.Message}.\n" +
-                        "Do you want to restore it (\"YES\")\n" +
-                        "or just close the application (\"NO\")?",
-                        "Invalid config parameters",
-                        MessageBoxButtons.YesNo,
-                        MessageBoxIcon.Error,
-                        MessageBoxDefaultButton.Button1);
-                    Logger.AddLogEntry($"WARNING Default config file has invalid parameters");
-                    if (result == DialogResult.Yes)
+                    switch (isRegenRequested)
                     {
-                        RestoreDefaultXmlConfig();
-                        LoadXmlConfig("SettingsDefault.xml");
+                        case DialogResult.Yes:
+                            RegeneratetXmlConfig();
+                            LoadXmlConfig();
+                            break;
+                        case DialogResult.No:
+                            Environment.Exit(1);
+                            break;
                     }
-                    else Environment.Exit(1);
-                }
-                else
-                {
-                    MessageBox.Show($"Config file {fileName} has invalid parameters:\n" +
-                        $"{ex.Message}.\n" +
-                        $"Reverting to default config.",
-                        "Invalid config parameters",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Error,
-                        MessageBoxDefaultButton.Button1);
-                    Logger.AddLogEntry($"WARNING Config file {fileName} has invalid parameters");
-                    LoadXmlConfig("SettingsDefault.xml");
                 }
             }
-
-            // TODO: call camera controls method, where settings will be applied inside lock(_camsLocker)
-            //       then await results and add logger entry
         }
 
-        internal static void SaveXmlConfig(string fileName)
-        {
-            var config = new XDocument(new XElement("settings",
-                new XElement("image_analysis",
-                    new XElement("lowerBrightnessSd", LowerBrightnessSd),
-                    new XElement("upperBrightnessSd", UpperBrightnessSd),
-                    new XElement("apertureRadius", ApertureRadius),
-                    new XElement("annulusInnerRadius", AnnulusInnerRadius),
-                    new XElement("annulusOuterRadius", AnnulusOuterRadius)),
-                
-                new XElement("cameras",
-                    new XElement("snCamG", SnCamG),
-                    new XElement("snCamR", SnCamR),
-                    new XElement("snCamI", SnCamI),
-                    new XElement("snCamV", SnCamV),
-                    new XElement("numFlushes", NumFlushes),
-                    new XElement("camTemp", CamTemp)),
-                
-                new XElement("survey",
-                    new XElement("mainOutFolder", MainOutFolder)
-                    // new XElement("lastDarksTime", LastDarksTime), 
-                    // new XElement("lastFlatsTime", LastFlatsTime)
-                    ),
-
-                new XElement("comms",
-                    new XElement("focusComId", FocusComId),
-                    new XElement("meteoDomeTcpIpPort", MeteoDomeTcpIpPort),
-                    new XElement("donutsTcpIpPort", DonutsTcpIpPort),
-                    new XElement("siTechExeTcpIpPort", SiTechExeTcpIpPort))
-            ));
-
-            config.Save(fileName);
-            Logger.AddLogEntry($"Config file {fileName} saved");
-        }
-
-        internal static void RestoreDefaultXmlConfig()
+        internal static void RegeneratetXmlConfig()
         {
             var config = new XDocument(new XElement("settings",
                 new XElement("image_analysis",

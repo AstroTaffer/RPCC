@@ -34,7 +34,7 @@ public partial class MainForm : Form
         Logger.LogBox = listBoxLogs;
         Logger.AddLogEntry("Application launched");
 
-        Settings.LoadXmlConfig("SettingsDefault.xml");
+        Settings.LoadXmlConfig();
 
         // Camera controls
         CameraControl.resetUi = ResetCamsUi;
@@ -358,23 +358,14 @@ public partial class MainForm : Form
     #endregion
 
     #region Options
-    private void LoadConfigToolStripMenuItem_Click(object sender, EventArgs e)
+    private void ReloadConfigToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        if (openFileDialogConfig.ShowDialog() == DialogResult.OK)
-            Settings.LoadXmlConfig(openFileDialogConfig.FileName);
+        Settings.LoadXmlConfig();
     }
 
-    private void SaveConfigToolStripMenuItem_Click(object sender, EventArgs e)
+    private void RegenerateConfigToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        if (saveFileDialogConfig.ShowDialog() == DialogResult.OK)
-            Settings.SaveXmlConfig(saveFileDialogConfig.FileName);
-    }
-    #endregion
-
-    #region Debug Menu
-    private void RestoreDefaultConfigFileToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        Settings.RestoreDefaultXmlConfig();
+        Settings.RegeneratetXmlConfig();
     }
     #endregion
 

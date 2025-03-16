@@ -47,10 +47,7 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.reconnectAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.loadConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.saveConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.debugToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.restoreDefaultConfigFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.reloadConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBoxLogs = new System.Windows.Forms.GroupBox();
             this.listBoxLogs = new System.Windows.Forms.ListBox();
             this.contextMenuStripLogs = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -128,6 +125,7 @@
             this.addToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dataGridTextBoxColumn1 = new System.Windows.Forms.DataGridTextBoxColumn();
             this.dataGridTextBoxColumn2 = new System.Windows.Forms.DataGridTextBoxColumn();
+            this.regenerateConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewTasker)).BeginInit();
             this.statusStrip.SuspendLayout();
             this.menuStrip.SuspendLayout();
@@ -220,8 +218,7 @@
             // 
             this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.launchToolStripMenuItem,
-            this.optionsToolStripMenuItem,
-            this.debugToolStripMenuItem});
+            this.optionsToolStripMenuItem});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
             this.menuStrip.Size = new System.Drawing.Size(1140, 24);
@@ -241,14 +238,14 @@
             // findCamerasToolStripMenuItem
             // 
             this.findCamerasToolStripMenuItem.Name = "findCamerasToolStripMenuItem";
-            this.findCamerasToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
+            this.findCamerasToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.findCamerasToolStripMenuItem.Text = "Find cameras";
             this.findCamerasToolStripMenuItem.Click += new System.EventHandler(this.FindCamerasToolStripMenuItem_Click);
             // 
             // findFocusToolStripMenuItem
             // 
             this.findFocusToolStripMenuItem.Name = "findFocusToolStripMenuItem";
-            this.findFocusToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
+            this.findFocusToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.findFocusToolStripMenuItem.Text = "Find focus";
             this.findFocusToolStripMenuItem.Click += new System.EventHandler(this.FindFocusToolStripMenuItem_Click);
             // 
@@ -261,79 +258,57 @@
             this.toolStripSeparator1,
             this.reconnectAllToolStripMenuItem});
             this.reconnectSocketToolStripMenuItem.Name = "reconnectSocketToolStripMenuItem";
-            this.reconnectSocketToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
+            this.reconnectSocketToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.reconnectSocketToolStripMenuItem.Text = "Reconnect socket";
             // 
             // reconnectMeteoDomeToolStripMenuItem
             // 
             this.reconnectMeteoDomeToolStripMenuItem.Name = "reconnectMeteoDomeToolStripMenuItem";
-            this.reconnectMeteoDomeToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
+            this.reconnectMeteoDomeToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.reconnectMeteoDomeToolStripMenuItem.Text = "MeteoDome";
             this.reconnectMeteoDomeToolStripMenuItem.Click += new System.EventHandler(this.ReconnectMeteoDomeToolStripMenuItem_Click);
             // 
             // reconnectDonutsToolStripMenuItem
             // 
             this.reconnectDonutsToolStripMenuItem.Name = "reconnectDonutsToolStripMenuItem";
-            this.reconnectDonutsToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
+            this.reconnectDonutsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.reconnectDonutsToolStripMenuItem.Text = "DONUTS";
             this.reconnectDonutsToolStripMenuItem.Click += new System.EventHandler(this.ReconnectDonutsToolStripMenuItem_Click);
             // 
             // reconnectSiTechExeToolStripMenuItem
             // 
             this.reconnectSiTechExeToolStripMenuItem.Name = "reconnectSiTechExeToolStripMenuItem";
-            this.reconnectSiTechExeToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
+            this.reconnectSiTechExeToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.reconnectSiTechExeToolStripMenuItem.Text = "SiTechExe";
             this.reconnectSiTechExeToolStripMenuItem.Click += new System.EventHandler(this.ReconnectSiTechExeToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(137, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
             // 
             // reconnectAllToolStripMenuItem
             // 
             this.reconnectAllToolStripMenuItem.Name = "reconnectAllToolStripMenuItem";
-            this.reconnectAllToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
+            this.reconnectAllToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.reconnectAllToolStripMenuItem.Text = "All";
             this.reconnectAllToolStripMenuItem.Click += new System.EventHandler(this.ReconnectAllToolStripMenuItem_Click);
             // 
             // optionsToolStripMenuItem
             // 
             this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.loadConfigToolStripMenuItem,
-            this.saveConfigToolStripMenuItem});
+            this.reloadConfigToolStripMenuItem,
+            this.regenerateConfigToolStripMenuItem});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             this.optionsToolStripMenuItem.Text = "Options";
             // 
-            // loadConfigToolStripMenuItem
+            // reloadConfigToolStripMenuItem
             // 
-            this.loadConfigToolStripMenuItem.Name = "loadConfigToolStripMenuItem";
-            this.loadConfigToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.loadConfigToolStripMenuItem.Text = "Load config";
-            this.loadConfigToolStripMenuItem.Click += new System.EventHandler(this.LoadConfigToolStripMenuItem_Click);
-            // 
-            // saveConfigToolStripMenuItem
-            // 
-            this.saveConfigToolStripMenuItem.Name = "saveConfigToolStripMenuItem";
-            this.saveConfigToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.saveConfigToolStripMenuItem.Text = "Save config";
-            this.saveConfigToolStripMenuItem.Click += new System.EventHandler(this.SaveConfigToolStripMenuItem_Click);
-            // 
-            // debugToolStripMenuItem
-            // 
-            this.debugToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.restoreDefaultConfigFileToolStripMenuItem});
-            this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
-            this.debugToolStripMenuItem.Size = new System.Drawing.Size(54, 20);
-            this.debugToolStripMenuItem.Text = "Debug";
-            // 
-            // restoreDefaultConfigFileToolStripMenuItem
-            // 
-            this.restoreDefaultConfigFileToolStripMenuItem.Name = "restoreDefaultConfigFileToolStripMenuItem";
-            this.restoreDefaultConfigFileToolStripMenuItem.Size = new System.Drawing.Size(209, 22);
-            this.restoreDefaultConfigFileToolStripMenuItem.Text = "Restore default config file";
-            this.restoreDefaultConfigFileToolStripMenuItem.Click += new System.EventHandler(this.RestoreDefaultConfigFileToolStripMenuItem_Click);
+            this.reloadConfigToolStripMenuItem.Name = "reloadConfigToolStripMenuItem";
+            this.reloadConfigToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.reloadConfigToolStripMenuItem.Text = "Reload config";
+            this.reloadConfigToolStripMenuItem.Click += new System.EventHandler(this.ReloadConfigToolStripMenuItem_Click);
             // 
             // groupBoxLogs
             // 
@@ -1130,6 +1105,13 @@
             this.dataGridTextBoxColumn2.FormatInfo = null;
             this.dataGridTextBoxColumn2.Width = -1;
             // 
+            // regenerateConfigToolStripMenuItem
+            // 
+            this.regenerateConfigToolStripMenuItem.Name = "regenerateConfigToolStripMenuItem";
+            this.regenerateConfigToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.regenerateConfigToolStripMenuItem.Text = "Regenerate config";
+            this.regenerateConfigToolStripMenuItem.Click += new System.EventHandler(this.RegenerateConfigToolStripMenuItem_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1241,14 +1223,11 @@
         private System.Windows.Forms.MenuStrip menuStrip;
         private System.Windows.Forms.ToolStripMenuItem launchToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem findCamerasToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem debugToolStripMenuItem;
         private System.Windows.Forms.GroupBox groupBoxLogs;
         private System.Windows.Forms.Timer timerUi;
         private System.Windows.Forms.ListBox listBoxLogs;
         private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem loadConfigToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem saveConfigToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem restoreDefaultConfigFileToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem reloadConfigToolStripMenuItem;
         private System.Windows.Forms.SaveFileDialog saveFileDialogConfig;
         private System.Windows.Forms.OpenFileDialog openFileDialogConfig;
         private System.Windows.Forms.GroupBox groupBoxCam1;
@@ -1297,6 +1276,7 @@
         private System.Windows.Forms.GroupBox groupBoxImage1;
         private System.Windows.Forms.Panel panelImage1;
         private System.Windows.Forms.PictureBox pictureBoxImage1;
+        private System.Windows.Forms.ToolStripMenuItem regenerateConfigToolStripMenuItem;
     }
 }
 
