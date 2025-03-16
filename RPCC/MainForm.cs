@@ -129,7 +129,7 @@ public partial class MainForm : Form
                     labelCam3BaseTemp.Text = @$"Base Temp: {CameraControl.cams[2].BaseTemp:F3}";
                     labelCam3CoolerPwr.Text = @$"Cooler Power: {CameraControl.cams[2].CoolerPwr} %";
                     labelCam3Status.Text = @$"Status: {CameraControl.cams[2].Status}";
-                    labelCam3RemTime.Text = @$"Remaining: {CameraControl.cams[2].RemTime / 1000}";
+                    labelCam3RemTime.Text = @$"Remaining: {CameraControl.cams[2].RemTime}";
                     SetProgress(2);
                     goto case 2;
                 case 2:
@@ -137,7 +137,7 @@ public partial class MainForm : Form
                     labelCam2BaseTemp.Text = @$"Base Temp: {CameraControl.cams[1].BaseTemp:F3}";
                     labelCam2CoolerPwr.Text = @$"Cooler Power: {CameraControl.cams[1].CoolerPwr} %";
                     labelCam2Status.Text = @$"Status: {CameraControl.cams[1].Status}";
-                    labelCam2RemTime.Text = @$"Remaining: {CameraControl.cams[1].RemTime / 1000}";
+                    labelCam2RemTime.Text = @$"Remaining: {CameraControl.cams[1].RemTime}";
                     SetProgress(1);
                     goto case 1;
                 case 1:
@@ -145,7 +145,7 @@ public partial class MainForm : Form
                     labelCam1BaseTemp.Text = @$"Base Temp: {CameraControl.cams[0].BaseTemp:F3}";
                     labelCam1CoolerPwr.Text = @$"Cooler Power: {CameraControl.cams[0].CoolerPwr} %";
                     labelCam1Status.Text = @$"Status: {CameraControl.cams[0].Status}";
-                    labelCam1RemTime.Text = @$"Remaining: {CameraControl.cams[0].RemTime / 1000}";
+                    labelCam1RemTime.Text = @$"Remaining: {CameraControl.cams[0].RemTime}";
                     SetProgress(0);
                     break;
             }
@@ -164,10 +164,9 @@ public partial class MainForm : Form
     private void ResetCamsUi()
     {
         // Camera 1
-        groupBoxImage1.Invoke((MethodInvoker)delegate
+        groupBoxCam1.Invoke((MethodInvoker)delegate
         {
             groupBoxCam1.Enabled = false;
-            groupBoxImage1.Enabled = false;
             pictureBoxImage1.Image = null;
             labelCam1Model.Text = @"Model:";
             labelCam1Sn.Text = @"Serial Num:";
@@ -180,7 +179,6 @@ public partial class MainForm : Form
 
             // Camera 2
             groupBoxCam2.Enabled = false;
-            groupBoxImage2.Enabled = false;
             pictureBoxImage2.Image = null;
             labelCam2Model.Text = @"Model:";
             labelCam2Sn.Text = @"Serial Num:";
@@ -193,7 +191,6 @@ public partial class MainForm : Form
 
             // Camera 3
             groupBoxCam3.Enabled = false;
-            groupBoxImage3.Enabled = false;
             pictureBoxImage3.Image = null;
             labelCam3Model.Text = @"Model:";
             labelCam3Sn.Text = @"Serial Num:";
@@ -211,7 +208,6 @@ public partial class MainForm : Form
                 groupBoxCam3.Invoke((MethodInvoker) delegate
                 {
                     groupBoxCam3.Enabled = true;
-                    groupBoxImage3.Enabled = true;
                     labelCam3Model.Text = @$"Model: {CameraControl.cams[2].ModelName}";
                     labelCam3Sn.Text = @$"Serial Num: {CameraControl.cams[2].SerialNumber}";
                     labelCam3Filter.Text = @$"Filter: {CameraControl.cams[2].Filter}"; 
@@ -221,7 +217,6 @@ public partial class MainForm : Form
                 groupBoxCam2.Invoke((MethodInvoker) delegate
                 {
                     groupBoxCam2.Enabled = true;
-                    groupBoxImage2.Enabled = true;
                     labelCam2Model.Text = @$"Model: {CameraControl.cams[1].ModelName}";
                     labelCam2Sn.Text = @$"Serial Num: {CameraControl.cams[1].SerialNumber}";
                     labelCam2Filter.Text = @$"Filter: {CameraControl.cams[1].Filter}";
@@ -231,7 +226,6 @@ public partial class MainForm : Form
                 groupBoxCam1.Invoke((MethodInvoker) delegate
                 {
                     groupBoxCam1.Enabled = true;
-                    groupBoxImage1.Enabled = true;
                     labelCam1Model.Text = @$"Model: {CameraControl.cams[0].ModelName}";
                     labelCam1Sn.Text = @$"Serial Num: {CameraControl.cams[0].SerialNumber}";
                     labelCam1Filter.Text = @$"Filter: {CameraControl.cams[0].Filter}";
@@ -328,7 +322,7 @@ public partial class MainForm : Form
             case StringHolder.FilI:
                 pictureBoxImage3.Image = null;
                 if (CameraControl.cams[2].LatestImageBitmap != null)
-                    groupBoxImage3.Invoke((MethodInvoker)delegate
+                    groupBoxCam3.Invoke((MethodInvoker)delegate
                     {
                         pictureBoxImage3.Image = CameraControl.cams[2].LatestImageBitmap;
                     });
@@ -337,7 +331,7 @@ public partial class MainForm : Form
             case StringHolder.FilR:
                 pictureBoxImage2.Image = null;
                 if (CameraControl.cams[1].LatestImageBitmap != null)
-                    groupBoxImage2.Invoke((MethodInvoker)delegate
+                    groupBoxCam2.Invoke((MethodInvoker)delegate
                     {
                         pictureBoxImage2.Image = CameraControl.cams[1].LatestImageBitmap;
                     });
@@ -347,7 +341,7 @@ public partial class MainForm : Form
             case  StringHolder.FilV:
                 pictureBoxImage1.Image = null;
                 if (CameraControl.cams[0].LatestImageBitmap != null)
-                    groupBoxImage1.Invoke((MethodInvoker)delegate
+                    groupBoxCam1.Invoke((MethodInvoker)delegate
                     {
                         pictureBoxImage1.Image = CameraControl.cams[0].LatestImageBitmap;
                     });
@@ -418,7 +412,7 @@ public partial class MainForm : Form
         }
     }
         
-    private void CheckBoxAutoFocus_CheckedChanged(object sender, EventArgs e)
+    private void checkBoxAutoFocus_CheckedChanged(object sender, EventArgs e)
     {
         var isAutoFocusEnabled = checkBoxAutoFocus.Checked;
 
@@ -433,12 +427,12 @@ public partial class MainForm : Form
         CameraFocus.IsAutoFocus = isAutoFocusEnabled;
     }
 
-    private void NumericUpDownSetDefoc_ValueChanged(object sender, EventArgs e)
+    private void numericUpDownSetDefoc_ValueChanged(object sender, EventArgs e)
     {
         CameraFocus.DeFocus = (int)numericUpDownSetDefoc.Value;
     }
 
-    private void ButtonSetZeroPos_Click(object sender, EventArgs e)
+    private void buttonSetZeroPos_Click(object sender, EventArgs e)
     {
         SerialFocus.Set_Zero();
     }
@@ -454,7 +448,7 @@ public partial class MainForm : Form
         else if (radioButtonRunSlow.Checked) SerialFocus.SRun_To((int)numericUpDownRun.Value);
     }
 
-    private void CheckBoxGoZenith_CheckedChanged(object sender, EventArgs e)
+    private void checkBoxGoZenith_CheckedChanged(object sender, EventArgs e)
     {
         CameraFocus.IsZenith = checkBoxGoZenith.Checked;
     }
@@ -480,7 +474,7 @@ public partial class MainForm : Form
         taskForm?.Show();
     }
 
-    private void CheckBoxHead_CheckedChanged(object sender, EventArgs e)
+    private void checkBoxHead_CheckedChanged(object sender, EventArgs e)
     {
         if (checkBoxHead.Checked) Head.ThinkingTimer.Start();
         else Head.ThinkingTimer.Stop();
@@ -526,6 +520,7 @@ public partial class MainForm : Form
     {
         Logger.DebugMode = checkBoxDebugMode.Checked;
     }
+
 }
 
 public static class StringHolder
