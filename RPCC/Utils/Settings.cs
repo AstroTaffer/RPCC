@@ -13,71 +13,6 @@ namespace RPCC.Utils
         ///     Чтение и запись конфигурационных файлов
         /// </summary>
 
-        #region Analysis and Plotting
-
-        /// <summary>
-        ///     Настройки анализа и построения изображения
-        /// </summary>
-
-        private static double _lowerBrightnessSd;
-        private static double _upperBrightnessSd;
-        private static int _apertureRadius;
-        private static int _annulusInnerRadius;
-        private static int _annulusOuterRadius;
-
-        public static double LowerBrightnessSd
-        {
-            get => _lowerBrightnessSd;
-            set
-            {
-                if (value > 0.0) _lowerBrightnessSd = value;
-                else throw new ArgumentException("Lower brightness SD must be greater than 0.0");
-            }
-        }
-
-        public static double UpperBrightnessSd
-        {
-            get => _upperBrightnessSd;
-            set
-            {
-                if (value > 0.0) _upperBrightnessSd = value;
-                else throw new ArgumentException("Upper brightness SD must be greater than 0.0");
-            }
-        }
-
-        public static int ApertureRadius
-        {
-            get => _apertureRadius;
-            set
-            {
-                if (value > 0) _apertureRadius = value;
-                else throw new ArgumentException("Aperture radius must be greater than 0");
-            }
-        }
-
-        public static int AnnulusInnerRadius
-        {
-            get => _annulusInnerRadius;
-            set
-            {
-                // HACK: Stricter condition may be used - if (value > ApertureRadius)
-                if (value > 0) _annulusInnerRadius = value;
-                else throw new ArgumentException("Annulus inner radius must be greater than 0");
-            }
-        }
-
-        public static int AnnulusOuterRadius
-        {
-            get => _annulusOuterRadius;
-            set
-            {
-                if (value > _annulusInnerRadius) _annulusOuterRadius = value;
-                else throw new ArgumentException("Annulus outer radius must be greater than its inner radius ");
-            }
-        }
-
-        #endregion
-
         #region Cameras
         /// <summary>
         ///     Настройки камер
@@ -157,8 +92,6 @@ namespace RPCC.Utils
         /// </summary>
 
         private static string _mainOutFolder;
-        // private static DateTime _lastDarksTime;
-        // private static DateTime _lastFlatsTime;
 
         public static string MainOutFolder
         {
@@ -170,24 +103,6 @@ namespace RPCC.Utils
                 // Alternative - if (!Exists) CreateDirectory
             }
         }
-
-        // public static DateTime LastDarksTime
-        // {
-        //     get => _lastDarksTime;
-        //     set
-        //     {
-        //         _lastDarksTime = value;
-        //     }
-        // }
-        //
-        // public static DateTime LastFlatsTime
-        // {
-        //     get => _lastFlatsTime;
-        //     set
-        //     {
-        //         _lastFlatsTime = value;
-        //     }
-        // }
         #endregion
 
         #region Comms
@@ -253,14 +168,7 @@ namespace RPCC.Utils
             {
                 var config = XDocument.Load("Settings.xml");
 
-                if (!(config.Root.Elements("image_analysis").Any() &&
-                      config.Root.Elements("image_analysis").Elements("lowerBrightnessSd").Any() &&
-                      config.Root.Elements("image_analysis").Elements("upperBrightnessSd").Any() &&
-                      config.Root.Elements("image_analysis").Elements("apertureRadius").Any() &&
-                      config.Root.Elements("image_analysis").Elements("annulusInnerRadius").Any() &&
-                      config.Root.Elements("image_analysis").Elements("annulusOuterRadius").Any() &&
-
-                      config.Root.Elements("cameras").Any() &&
+                if (!(config.Root.Elements("cameras").Any() &&
                       config.Root.Elements("cameras").Elements("snCamG").Any() &&
                       config.Root.Elements("cameras").Elements("snCamR").Any() &&
                       config.Root.Elements("cameras").Elements("snCamI").Any() &&
@@ -270,8 +178,6 @@ namespace RPCC.Utils
 
                       config.Root.Elements("survey").Any() &&
                       config.Root.Elements("survey").Elements("mainOutFolder").Any() &&
-                      config.Root.Elements("survey").Elements("lastDarksTime").Any() &&
-                      config.Root.Elements("survey").Elements("lastFlatsTime").Any() &&
 
                       config.Root.Elements("comms").Any() &&
                       config.Root.Elements("comms").Elements("focusComId").Any() &&
@@ -280,12 +186,6 @@ namespace RPCC.Utils
                       config.Root.Elements("comms").Elements("siTechExeTcpIpPort").Any()))
                     throw new NullReferenceException();
 
-                LowerBrightnessSd = (double)config.Root.Element("image_analysis").Element("lowerBrightnessSd");
-                UpperBrightnessSd = (double)config.Root.Element("image_analysis").Element("upperBrightnessSd");
-                ApertureRadius = (int)config.Root.Element("image_analysis").Element("apertureRadius");
-                AnnulusInnerRadius = (int)config.Root.Element("image_analysis").Element("annulusInnerRadius");
-                AnnulusOuterRadius = (int)config.Root.Element("image_analysis").Element("annulusOuterRadius");
-
                 SnCamG = (string)config.Root.Element("cameras").Element("snCamG");
                 SnCamR = (string)config.Root.Element("cameras").Element("snCamR");
                 SnCamI = (string)config.Root.Element("cameras").Element("snCamI");
@@ -293,8 +193,6 @@ namespace RPCC.Utils
                 CamTemp = (double)config.Root.Element("cameras").Element("camTemp");
 
                 MainOutFolder = (string)config.Root.Element("survey").Element("mainOutFolder");
-                // LastDarksTime = (DateTime)config.Root.Element("survey").Element("lastDarksTime");
-                // LastFlatsTime = (DateTime)config.Root.Element("survey").Element("lastFlatsTime");
 
                 FocusComId = (int)config.Root.Element("comms").Element("focusComId");
                 MeteoDomeTcpIpPort = (int)config.Root.Element("comms").Element("meteoDomeTcpIpPort");
@@ -360,14 +258,7 @@ namespace RPCC.Utils
 
         internal static void RegeneratetXmlConfig()
         {
-            var config = new XDocument(new XElement("settings",
-                new XElement("image_analysis",
-                    new XElement("lowerBrightnessSd", 1.0),
-                    new XElement("upperBrightnessSd", 2.0),
-                    new XElement("apertureRadius", 6),
-                    new XElement("annulusInnerRadius", 10),
-                    new XElement("annulusOuterRadius", 15)),
-                
+            var config = new XDocument(new XElement("settings",                
                 new XElement("cameras",
                     new XElement("snCamG", "ML0882515"),
                     new XElement("snCamR", "ML0892515"),

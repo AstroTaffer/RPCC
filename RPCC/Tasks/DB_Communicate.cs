@@ -13,7 +13,6 @@ namespace RPCC.Tasks;
 
 public static class DbCommunicate
 {
-    private const string RoboPhotServer = "192.168.240.5";
     private const string Port = "5432";
     private const string UserId = "remote_user";
     private const string Password = "remote_user";
@@ -46,7 +45,7 @@ public static class DbCommunicate
             lock (Loc)  
             {
                 var connString =
-                    $"Server={RoboPhotServer};Port={Port};User Id={UserId};Password={Password}; Database={Database};";
+                    $"Server=127.0.0.1;Port={Port};User Id={UserId};Password={Password}; Database={Database};";
                 var con = new NpgsqlConnection(connString);
                 con.Open();
                     

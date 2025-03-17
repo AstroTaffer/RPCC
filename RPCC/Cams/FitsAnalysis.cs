@@ -5,19 +5,18 @@ namespace RPCC.Cams;
 
 internal class GeneralImageStat
 {
-    internal double DnrColorScale;
-    private double _dnrEnd;
-
-    internal double DnrStart;
-
     /// <summary>
     ///     General FITS image statistics
     /// </summary>
-    private int _max;
 
-    private double _mean;
+    private int _max;
     private int _min;
+    private double _mean;
     private double _stddev;
+
+    internal double DnrStart;
+    private double _dnrEnd;
+    internal double DnrColorScale;
 
     internal GeneralImageStat()
     {
@@ -58,9 +57,9 @@ internal class GeneralImageStat
             sum += Math.Pow(image[i, j] - _mean, 2);
         _stddev = Math.Sqrt(sum / (height * width));
 
-        DnrStart = _mean - Settings.LowerBrightnessSd * _stddev;
+        DnrStart = _mean - 1.0 * _stddev;
         if (DnrStart < _min) DnrStart = _min;
-        _dnrEnd = _mean + Settings.UpperBrightnessSd * _stddev;
+        _dnrEnd = _mean + 2.0 * _stddev;
         if (DnrStart > _max) _dnrEnd = _min;
         DnrColorScale = 255 / (_dnrEnd - DnrStart);
     }
