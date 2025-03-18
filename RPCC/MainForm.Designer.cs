@@ -64,21 +64,19 @@
             this.checkBoxGuiding = new System.Windows.Forms.CheckBox();
             this.checkBoxHead = new System.Windows.Forms.CheckBox();
             this.buttonSurveyStop = new System.Windows.Forms.Button();
-            this.groupBoxInfo = new System.Windows.Forms.GroupBox();
+            this.groupBoxFocusSettings = new System.Windows.Forms.GroupBox();
             this.labelFocusPos = new System.Windows.Forms.Label();
             this.labelEndSwitch = new System.Windows.Forms.Label();
-            this.groupBoxFocusSettings = new System.Windows.Forms.GroupBox();
+            this.checkBoxGoZenith = new System.Windows.Forms.CheckBox();
             this.buttonSetZeroPos = new System.Windows.Forms.Button();
+            this.numericUpDownSetDefoc = new System.Windows.Forms.NumericUpDown();
             this.radioButtonRunSlow = new System.Windows.Forms.RadioButton();
+            this.labelSetDefocus = new System.Windows.Forms.Label();
+            this.checkBoxAutoFocus = new System.Windows.Forms.CheckBox();
             this.radioButtonRunFast = new System.Windows.Forms.RadioButton();
             this.buttonRun = new System.Windows.Forms.Button();
             this.buttonRunStop = new System.Windows.Forms.Button();
             this.numericUpDownRun = new System.Windows.Forms.NumericUpDown();
-            this.groupBoxAutoFocus = new System.Windows.Forms.GroupBox();
-            this.checkBoxGoZenith = new System.Windows.Forms.CheckBox();
-            this.numericUpDownSetDefoc = new System.Windows.Forms.NumericUpDown();
-            this.labelSetDefocus = new System.Windows.Forms.Label();
-            this.checkBoxAutoFocus = new System.Windows.Forms.CheckBox();
             this.groupBoxCam1 = new System.Windows.Forms.GroupBox();
             this.pictureBoxImage1 = new System.Windows.Forms.PictureBox();
             this.panelImage1 = new System.Windows.Forms.Panel();
@@ -129,11 +127,9 @@
             this.tabControlMain.SuspendLayout();
             this.tabPageInfo.SuspendLayout();
             this.groupBoxSurvey.SuspendLayout();
-            this.groupBoxInfo.SuspendLayout();
             this.groupBoxFocusSettings.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownRun)).BeginInit();
-            this.groupBoxAutoFocus.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownSetDefoc)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownRun)).BeginInit();
             this.groupBoxCam1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage1)).BeginInit();
             this.groupBoxCam2.SuspendLayout();
@@ -182,16 +178,16 @@
             dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             this.dataGridViewTasker.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
             this.dataGridViewTasker.RowHeadersVisible = false;
-            this.dataGridViewTasker.Size = new System.Drawing.Size(1350, 607);
+            this.dataGridViewTasker.Size = new System.Drawing.Size(1350, 510);
             this.dataGridViewTasker.TabIndex = 1;
             this.dataGridViewTasker.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.DataGridViewTasker_CellMouseDoubleClick);
             // 
             // statusStrip
             // 
             this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.tSStatusClock });
-            this.statusStrip.Location = new System.Drawing.Point(0, 663);
+            this.statusStrip.Location = new System.Drawing.Point(0, 566);
             this.statusStrip.Name = "statusStrip";
-            this.statusStrip.Size = new System.Drawing.Size(1364, 22);
+            this.statusStrip.Size = new System.Drawing.Size(1210, 22);
             this.statusStrip.SizingGrip = false;
             this.statusStrip.TabIndex = 0;
             this.statusStrip.Text = "statusStrip";
@@ -207,7 +203,7 @@
             this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.launchToolStripMenuItem, this.optionsToolStripMenuItem });
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
-            this.menuStrip.Size = new System.Drawing.Size(1364, 24);
+            this.menuStrip.Size = new System.Drawing.Size(1210, 24);
             this.menuStrip.TabIndex = 1;
             this.menuStrip.Text = "menuStrip";
             // 
@@ -295,11 +291,11 @@
             // 
             // groupBoxLogs
             // 
-            this.groupBoxLogs.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.groupBoxLogs.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.groupBoxLogs.Controls.Add(this.listBoxLogs);
-            this.groupBoxLogs.Location = new System.Drawing.Point(3, 3);
+            this.groupBoxLogs.Location = new System.Drawing.Point(6, 3);
             this.groupBoxLogs.Name = "groupBoxLogs";
-            this.groupBoxLogs.Size = new System.Drawing.Size(645, 603);
+            this.groupBoxLogs.Size = new System.Drawing.Size(500, 506);
             this.groupBoxLogs.TabIndex = 2;
             this.groupBoxLogs.TabStop = false;
             this.groupBoxLogs.Text = "Logs";
@@ -311,7 +307,7 @@
             this.listBoxLogs.FormattingEnabled = true;
             this.listBoxLogs.Location = new System.Drawing.Point(3, 16);
             this.listBoxLogs.Name = "listBoxLogs";
-            this.listBoxLogs.Size = new System.Drawing.Size(639, 584);
+            this.listBoxLogs.Size = new System.Drawing.Size(494, 487);
             this.listBoxLogs.TabIndex = 0;
             this.listBoxLogs.DoubleClick += new System.EventHandler(this.ListBoxLogs_DoubleClick);
             // 
@@ -361,15 +357,13 @@
             this.tabControlMain.Location = new System.Drawing.Point(0, 24);
             this.tabControlMain.Name = "tabControlMain";
             this.tabControlMain.SelectedIndex = 0;
-            this.tabControlMain.Size = new System.Drawing.Size(1364, 639);
+            this.tabControlMain.Size = new System.Drawing.Size(1210, 542);
             this.tabControlMain.TabIndex = 3;
             // 
             // tabPageInfo
             // 
             this.tabPageInfo.Controls.Add(this.groupBoxSurvey);
-            this.tabPageInfo.Controls.Add(this.groupBoxInfo);
             this.tabPageInfo.Controls.Add(this.groupBoxFocusSettings);
-            this.tabPageInfo.Controls.Add(this.groupBoxAutoFocus);
             this.tabPageInfo.Controls.Add(this.groupBoxCam1);
             this.tabPageInfo.Controls.Add(this.groupBoxCam2);
             this.tabPageInfo.Controls.Add(this.groupBoxCam3);
@@ -377,7 +371,7 @@
             this.tabPageInfo.Location = new System.Drawing.Point(4, 22);
             this.tabPageInfo.Name = "tabPageInfo";
             this.tabPageInfo.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageInfo.Size = new System.Drawing.Size(1356, 613);
+            this.tabPageInfo.Size = new System.Drawing.Size(1202, 516);
             this.tabPageInfo.TabIndex = 0;
             this.tabPageInfo.Text = "Main";
             this.tabPageInfo.UseVisualStyleBackColor = true;
@@ -389,9 +383,9 @@
             this.groupBoxSurvey.Controls.Add(this.checkBoxGuiding);
             this.groupBoxSurvey.Controls.Add(this.checkBoxHead);
             this.groupBoxSurvey.Controls.Add(this.buttonSurveyStop);
-            this.groupBoxSurvey.Location = new System.Drawing.Point(654, 515);
+            this.groupBoxSurvey.Location = new System.Drawing.Point(855, 413);
             this.groupBoxSurvey.Name = "groupBoxSurvey";
-            this.groupBoxSurvey.Size = new System.Drawing.Size(182, 91);
+            this.groupBoxSurvey.Size = new System.Drawing.Size(340, 96);
             this.groupBoxSurvey.TabIndex = 28;
             this.groupBoxSurvey.TabStop = false;
             this.groupBoxSurvey.Text = "Survey";
@@ -400,7 +394,7 @@
             // 
             this.checkBoxDebugMode.Checked = true;
             this.checkBoxDebugMode.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxDebugMode.Location = new System.Drawing.Point(9, 62);
+            this.checkBoxDebugMode.Location = new System.Drawing.Point(6, 65);
             this.checkBoxDebugMode.Name = "checkBoxDebugMode";
             this.checkBoxDebugMode.Size = new System.Drawing.Size(93, 25);
             this.checkBoxDebugMode.TabIndex = 30;
@@ -412,7 +406,7 @@
             // 
             this.checkBoxGuiding.Checked = true;
             this.checkBoxGuiding.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxGuiding.Location = new System.Drawing.Point(9, 40);
+            this.checkBoxGuiding.Location = new System.Drawing.Point(6, 41);
             this.checkBoxGuiding.Name = "checkBoxGuiding";
             this.checkBoxGuiding.Size = new System.Drawing.Size(70, 25);
             this.checkBoxGuiding.TabIndex = 29;
@@ -424,7 +418,7 @@
             // 
             this.checkBoxHead.Checked = true;
             this.checkBoxHead.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxHead.Location = new System.Drawing.Point(9, 21);
+            this.checkBoxHead.Location = new System.Drawing.Point(6, 19);
             this.checkBoxHead.Name = "checkBoxHead";
             this.checkBoxHead.Size = new System.Drawing.Size(70, 25);
             this.checkBoxHead.TabIndex = 28;
@@ -435,30 +429,39 @@
             // buttonSurveyStop
             // 
             this.buttonSurveyStop.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonSurveyStop.Location = new System.Drawing.Point(99, 19);
+            this.buttonSurveyStop.Location = new System.Drawing.Point(240, 21);
             this.buttonSurveyStop.Name = "buttonSurveyStop";
-            this.buttonSurveyStop.Size = new System.Drawing.Size(75, 23);
+            this.buttonSurveyStop.Size = new System.Drawing.Size(90, 30);
             this.buttonSurveyStop.TabIndex = 7;
             this.buttonSurveyStop.Text = "Stop";
             this.buttonSurveyStop.UseVisualStyleBackColor = true;
             this.buttonSurveyStop.Click += new System.EventHandler(this.ButtonSurveyStop_Click);
             // 
-            // groupBoxInfo
+            // groupBoxFocusSettings
             // 
-            this.groupBoxInfo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBoxInfo.Controls.Add(this.labelFocusPos);
-            this.groupBoxInfo.Controls.Add(this.labelEndSwitch);
-            this.groupBoxInfo.Location = new System.Drawing.Point(1001, 458);
-            this.groupBoxInfo.Name = "groupBoxInfo";
-            this.groupBoxInfo.Size = new System.Drawing.Size(339, 51);
-            this.groupBoxInfo.TabIndex = 27;
-            this.groupBoxInfo.TabStop = false;
-            this.groupBoxInfo.Text = "Info";
+            this.groupBoxFocusSettings.Controls.Add(this.labelFocusPos);
+            this.groupBoxFocusSettings.Controls.Add(this.labelEndSwitch);
+            this.groupBoxFocusSettings.Controls.Add(this.checkBoxGoZenith);
+            this.groupBoxFocusSettings.Controls.Add(this.buttonSetZeroPos);
+            this.groupBoxFocusSettings.Controls.Add(this.numericUpDownSetDefoc);
+            this.groupBoxFocusSettings.Controls.Add(this.radioButtonRunSlow);
+            this.groupBoxFocusSettings.Controls.Add(this.labelSetDefocus);
+            this.groupBoxFocusSettings.Controls.Add(this.checkBoxAutoFocus);
+            this.groupBoxFocusSettings.Controls.Add(this.radioButtonRunFast);
+            this.groupBoxFocusSettings.Controls.Add(this.buttonRun);
+            this.groupBoxFocusSettings.Controls.Add(this.buttonRunStop);
+            this.groupBoxFocusSettings.Controls.Add(this.numericUpDownRun);
+            this.groupBoxFocusSettings.Location = new System.Drawing.Point(855, 259);
+            this.groupBoxFocusSettings.Name = "groupBoxFocusSettings";
+            this.groupBoxFocusSettings.Size = new System.Drawing.Size(340, 148);
+            this.groupBoxFocusSettings.TabIndex = 26;
+            this.groupBoxFocusSettings.TabStop = false;
+            this.groupBoxFocusSettings.Text = "Focus Settings";
             // 
             // labelFocusPos
             // 
             this.labelFocusPos.AutoSize = true;
-            this.labelFocusPos.Location = new System.Drawing.Point(6, 22);
+            this.labelFocusPos.Location = new System.Drawing.Point(6, 127);
             this.labelFocusPos.Name = "labelFocusPos";
             this.labelFocusPos.Size = new System.Drawing.Size(78, 13);
             this.labelFocusPos.TabIndex = 4;
@@ -467,47 +470,74 @@
             // labelEndSwitch
             // 
             this.labelEndSwitch.AutoSize = true;
-            this.labelEndSwitch.Location = new System.Drawing.Point(219, 20);
+            this.labelEndSwitch.Location = new System.Drawing.Point(240, 127);
             this.labelEndSwitch.Name = "labelEndSwitch";
             this.labelEndSwitch.Size = new System.Drawing.Size(93, 13);
             this.labelEndSwitch.TabIndex = 13;
             this.labelEndSwitch.Text = "Endswitch: unjoint";
             // 
-            // groupBoxFocusSettings
+            // checkBoxGoZenith
             // 
-            this.groupBoxFocusSettings.Controls.Add(this.buttonSetZeroPos);
-            this.groupBoxFocusSettings.Controls.Add(this.radioButtonRunSlow);
-            this.groupBoxFocusSettings.Controls.Add(this.radioButtonRunFast);
-            this.groupBoxFocusSettings.Controls.Add(this.buttonRun);
-            this.groupBoxFocusSettings.Controls.Add(this.buttonRunStop);
-            this.groupBoxFocusSettings.Controls.Add(this.numericUpDownRun);
-            this.groupBoxFocusSettings.Location = new System.Drawing.Point(1000, 259);
-            this.groupBoxFocusSettings.Name = "groupBoxFocusSettings";
-            this.groupBoxFocusSettings.Size = new System.Drawing.Size(340, 102);
-            this.groupBoxFocusSettings.TabIndex = 26;
-            this.groupBoxFocusSettings.TabStop = false;
-            this.groupBoxFocusSettings.Text = "Focus Settings";
+            this.checkBoxGoZenith.AutoSize = true;
+            this.checkBoxGoZenith.Location = new System.Drawing.Point(6, 107);
+            this.checkBoxGoZenith.Name = "checkBoxGoZenith";
+            this.checkBoxGoZenith.Size = new System.Drawing.Size(98, 17);
+            this.checkBoxGoZenith.TabIndex = 16;
+            this.checkBoxGoZenith.Text = "Focus at zenith";
+            this.checkBoxGoZenith.UseVisualStyleBackColor = true;
+            this.checkBoxGoZenith.CheckedChanged += new System.EventHandler(this.checkBoxGoZenith_CheckedChanged);
             // 
             // buttonSetZeroPos
             // 
             this.buttonSetZeroPos.Enabled = false;
-            this.buttonSetZeroPos.Location = new System.Drawing.Point(6, 61);
+            this.buttonSetZeroPos.Location = new System.Drawing.Point(240, 88);
             this.buttonSetZeroPos.Name = "buttonSetZeroPos";
-            this.buttonSetZeroPos.Size = new System.Drawing.Size(207, 29);
+            this.buttonSetZeroPos.Size = new System.Drawing.Size(90, 30);
             this.buttonSetZeroPos.TabIndex = 21;
             this.buttonSetZeroPos.Text = "Set zero position";
             this.buttonSetZeroPos.UseVisualStyleBackColor = true;
             this.buttonSetZeroPos.Click += new System.EventHandler(this.buttonSetZeroPos_Click);
             // 
+            // numericUpDownSetDefoc
+            // 
+            this.numericUpDownSetDefoc.Location = new System.Drawing.Point(150, 51);
+            this.numericUpDownSetDefoc.Minimum = new decimal(new int[] { 100, 0, 0, -2147483648 });
+            this.numericUpDownSetDefoc.Name = "numericUpDownSetDefoc";
+            this.numericUpDownSetDefoc.Size = new System.Drawing.Size(75, 20);
+            this.numericUpDownSetDefoc.TabIndex = 15;
+            this.numericUpDownSetDefoc.ValueChanged += new System.EventHandler(this.numericUpDownSetDefoc_ValueChanged);
+            // 
             // radioButtonRunSlow
             // 
             this.radioButtonRunSlow.AutoSize = true;
-            this.radioButtonRunSlow.Location = new System.Drawing.Point(71, 25);
+            this.radioButtonRunSlow.Location = new System.Drawing.Point(86, 25);
             this.radioButtonRunSlow.Name = "radioButtonRunSlow";
             this.radioButtonRunSlow.Size = new System.Drawing.Size(48, 17);
             this.radioButtonRunSlow.TabIndex = 20;
             this.radioButtonRunSlow.Text = "Slow";
             this.radioButtonRunSlow.UseVisualStyleBackColor = true;
+            // 
+            // labelSetDefocus
+            // 
+            this.labelSetDefocus.AutoSize = true;
+            this.labelSetDefocus.Location = new System.Drawing.Point(6, 63);
+            this.labelSetDefocus.Name = "labelSetDefocus";
+            this.labelSetDefocus.Size = new System.Drawing.Size(128, 13);
+            this.labelSetDefocus.TabIndex = 14;
+            this.labelSetDefocus.Text = "Set defocus (steps) +-100";
+            // 
+            // checkBoxAutoFocus
+            // 
+            this.checkBoxAutoFocus.AutoSize = true;
+            this.checkBoxAutoFocus.Checked = true;
+            this.checkBoxAutoFocus.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxAutoFocus.Location = new System.Drawing.Point(6, 84);
+            this.checkBoxAutoFocus.Name = "checkBoxAutoFocus";
+            this.checkBoxAutoFocus.Size = new System.Drawing.Size(77, 17);
+            this.checkBoxAutoFocus.TabIndex = 12;
+            this.checkBoxAutoFocus.Text = "Auto focus";
+            this.checkBoxAutoFocus.UseVisualStyleBackColor = true;
+            this.checkBoxAutoFocus.CheckedChanged += new System.EventHandler(this.checkBoxAutoFocus_CheckedChanged);
             // 
             // radioButtonRunFast
             // 
@@ -525,9 +555,9 @@
             // 
             this.buttonRun.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonRun.Enabled = false;
-            this.buttonRun.Location = new System.Drawing.Point(260, 25);
+            this.buttonRun.Location = new System.Drawing.Point(240, 16);
             this.buttonRun.Name = "buttonRun";
-            this.buttonRun.Size = new System.Drawing.Size(74, 29);
+            this.buttonRun.Size = new System.Drawing.Size(90, 30);
             this.buttonRun.TabIndex = 18;
             this.buttonRun.Text = "Run";
             this.buttonRun.UseVisualStyleBackColor = true;
@@ -536,9 +566,9 @@
             // buttonRunStop
             // 
             this.buttonRunStop.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonRunStop.Location = new System.Drawing.Point(260, 60);
+            this.buttonRunStop.Location = new System.Drawing.Point(240, 51);
             this.buttonRunStop.Name = "buttonRunStop";
-            this.buttonRunStop.Size = new System.Drawing.Size(74, 29);
+            this.buttonRunStop.Size = new System.Drawing.Size(90, 30);
             this.buttonRunStop.TabIndex = 17;
             this.buttonRunStop.Text = "Stop";
             this.buttonRunStop.UseVisualStyleBackColor = true;
@@ -548,67 +578,12 @@
             // 
             this.numericUpDownRun.Enabled = false;
             this.numericUpDownRun.Increment = new decimal(new int[] { 100, 0, 0, 0 });
-            this.numericUpDownRun.Location = new System.Drawing.Point(138, 25);
+            this.numericUpDownRun.Location = new System.Drawing.Point(150, 16);
             this.numericUpDownRun.Maximum = new decimal(new int[] { 5000, 0, 0, 0 });
             this.numericUpDownRun.Minimum = new decimal(new int[] { 5000, 0, 0, -2147483648 });
             this.numericUpDownRun.Name = "numericUpDownRun";
             this.numericUpDownRun.Size = new System.Drawing.Size(75, 20);
             this.numericUpDownRun.TabIndex = 1;
-            // 
-            // groupBoxAutoFocus
-            // 
-            this.groupBoxAutoFocus.Controls.Add(this.checkBoxGoZenith);
-            this.groupBoxAutoFocus.Controls.Add(this.numericUpDownSetDefoc);
-            this.groupBoxAutoFocus.Controls.Add(this.labelSetDefocus);
-            this.groupBoxAutoFocus.Controls.Add(this.checkBoxAutoFocus);
-            this.groupBoxAutoFocus.Location = new System.Drawing.Point(1000, 367);
-            this.groupBoxAutoFocus.Name = "groupBoxAutoFocus";
-            this.groupBoxAutoFocus.Size = new System.Drawing.Size(340, 87);
-            this.groupBoxAutoFocus.TabIndex = 25;
-            this.groupBoxAutoFocus.TabStop = false;
-            this.groupBoxAutoFocus.Text = "Auto Focus";
-            // 
-            // checkBoxGoZenith
-            // 
-            this.checkBoxGoZenith.AutoSize = true;
-            this.checkBoxGoZenith.Location = new System.Drawing.Point(220, 57);
-            this.checkBoxGoZenith.Name = "checkBoxGoZenith";
-            this.checkBoxGoZenith.Size = new System.Drawing.Size(98, 17);
-            this.checkBoxGoZenith.TabIndex = 16;
-            this.checkBoxGoZenith.Text = "Focus at zenith";
-            this.checkBoxGoZenith.UseVisualStyleBackColor = true;
-            this.checkBoxGoZenith.CheckedChanged += new System.EventHandler(this.checkBoxGoZenith_CheckedChanged);
-            // 
-            // numericUpDownSetDefoc
-            // 
-            this.numericUpDownSetDefoc.Location = new System.Drawing.Point(242, 25);
-            this.numericUpDownSetDefoc.Minimum = new decimal(new int[] { 100, 0, 0, -2147483648 });
-            this.numericUpDownSetDefoc.Name = "numericUpDownSetDefoc";
-            this.numericUpDownSetDefoc.Size = new System.Drawing.Size(76, 20);
-            this.numericUpDownSetDefoc.TabIndex = 15;
-            this.numericUpDownSetDefoc.ValueChanged += new System.EventHandler(this.numericUpDownSetDefoc_ValueChanged);
-            // 
-            // labelSetDefocus
-            // 
-            this.labelSetDefocus.AutoSize = true;
-            this.labelSetDefocus.Location = new System.Drawing.Point(6, 22);
-            this.labelSetDefocus.Name = "labelSetDefocus";
-            this.labelSetDefocus.Size = new System.Drawing.Size(128, 13);
-            this.labelSetDefocus.TabIndex = 14;
-            this.labelSetDefocus.Text = "Set defocus (steps) +-100";
-            // 
-            // checkBoxAutoFocus
-            // 
-            this.checkBoxAutoFocus.AutoSize = true;
-            this.checkBoxAutoFocus.Checked = true;
-            this.checkBoxAutoFocus.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxAutoFocus.Location = new System.Drawing.Point(12, 57);
-            this.checkBoxAutoFocus.Name = "checkBoxAutoFocus";
-            this.checkBoxAutoFocus.Size = new System.Drawing.Size(77, 17);
-            this.checkBoxAutoFocus.TabIndex = 12;
-            this.checkBoxAutoFocus.Text = "Auto focus";
-            this.checkBoxAutoFocus.UseVisualStyleBackColor = true;
-            this.checkBoxAutoFocus.CheckedChanged += new System.EventHandler(this.checkBoxAutoFocus_CheckedChanged);
             // 
             // groupBoxCam1
             // 
@@ -624,7 +599,7 @@
             this.groupBoxCam1.Controls.Add(this.labelCam1Sn);
             this.groupBoxCam1.Controls.Add(this.labelCam1Model);
             this.groupBoxCam1.Enabled = false;
-            this.groupBoxCam1.Location = new System.Drawing.Point(654, 3);
+            this.groupBoxCam1.Location = new System.Drawing.Point(509, 3);
             this.groupBoxCam1.Name = "groupBoxCam1";
             this.groupBoxCam1.Size = new System.Drawing.Size(340, 250);
             this.groupBoxCam1.TabIndex = 22;
@@ -743,7 +718,7 @@
             this.groupBoxCam2.Controls.Add(this.labelCam2Sn);
             this.groupBoxCam2.Controls.Add(this.labelCam2Model);
             this.groupBoxCam2.Enabled = false;
-            this.groupBoxCam2.Location = new System.Drawing.Point(1000, 3);
+            this.groupBoxCam2.Location = new System.Drawing.Point(855, 3);
             this.groupBoxCam2.Name = "groupBoxCam2";
             this.groupBoxCam2.Size = new System.Drawing.Size(340, 250);
             this.groupBoxCam2.TabIndex = 23;
@@ -862,7 +837,7 @@
             this.groupBoxCam3.Controls.Add(this.labelCam3Sn);
             this.groupBoxCam3.Controls.Add(this.labelCam3Model);
             this.groupBoxCam3.Enabled = false;
-            this.groupBoxCam3.Location = new System.Drawing.Point(654, 259);
+            this.groupBoxCam3.Location = new System.Drawing.Point(509, 259);
             this.groupBoxCam3.Name = "groupBoxCam3";
             this.groupBoxCam3.Size = new System.Drawing.Size(340, 250);
             this.groupBoxCam3.TabIndex = 24;
@@ -976,7 +951,7 @@
             this.tabPageTasks.Location = new System.Drawing.Point(4, 22);
             this.tabPageTasks.Name = "tabPageTasks";
             this.tabPageTasks.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageTasks.Size = new System.Drawing.Size(1356, 613);
+            this.tabPageTasks.Size = new System.Drawing.Size(1356, 516);
             this.tabPageTasks.TabIndex = 1;
             this.tabPageTasks.Text = "Tasks";
             this.tabPageTasks.UseVisualStyleBackColor = true;
@@ -988,7 +963,7 @@
             this.dataGridTasks.HeaderForeColor = System.Drawing.SystemColors.ControlText;
             this.dataGridTasks.Location = new System.Drawing.Point(3, 3);
             this.dataGridTasks.Name = "dataGridTasks";
-            this.dataGridTasks.Size = new System.Drawing.Size(1350, 607);
+            this.dataGridTasks.Size = new System.Drawing.Size(1350, 510);
             this.dataGridTasks.TabIndex = 0;
             // 
             // contextMenuStripTasker
@@ -1020,7 +995,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1364, 685);
+            this.ClientSize = new System.Drawing.Size(1210, 588);
             this.Controls.Add(this.tabControlMain);
             this.Controls.Add(this.statusStrip);
             this.Controls.Add(this.menuStrip);
@@ -1041,14 +1016,10 @@
             this.tabControlMain.ResumeLayout(false);
             this.tabPageInfo.ResumeLayout(false);
             this.groupBoxSurvey.ResumeLayout(false);
-            this.groupBoxInfo.ResumeLayout(false);
-            this.groupBoxInfo.PerformLayout();
             this.groupBoxFocusSettings.ResumeLayout(false);
             this.groupBoxFocusSettings.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownRun)).EndInit();
-            this.groupBoxAutoFocus.ResumeLayout(false);
-            this.groupBoxAutoFocus.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownSetDefoc)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownRun)).EndInit();
             this.groupBoxCam1.ResumeLayout(false);
             this.groupBoxCam1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage1)).EndInit();
@@ -1110,7 +1081,6 @@
         private System.Windows.Forms.DataGridTextBoxColumn dataGridTextBoxColumn1;
         private System.Windows.Forms.DataGridTextBoxColumn dataGridTextBoxColumn2;
 
-        private System.Windows.Forms.GroupBox groupBoxInfo;
         private System.Windows.Forms.Label labelFocusPos;
         private System.Windows.Forms.Label labelEndSwitch;
         private System.Windows.Forms.GroupBox groupBoxFocusSettings;
@@ -1120,7 +1090,6 @@
         private System.Windows.Forms.Button buttonRun;
         private System.Windows.Forms.Button buttonRunStop;
         private System.Windows.Forms.NumericUpDown numericUpDownRun;
-        private System.Windows.Forms.GroupBox groupBoxAutoFocus;
         private System.Windows.Forms.CheckBox checkBoxGoZenith;
         private System.Windows.Forms.NumericUpDown numericUpDownSetDefoc;
         private System.Windows.Forms.Label labelSetDefocus;
