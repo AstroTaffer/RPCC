@@ -10,7 +10,6 @@ namespace RPCC.Utils
     {
         internal static ListBox LogBox;
         public static bool DebugMode = false;
-        public static string LogPath = $"{Settings.MainOutFolder}\\LOGS\\RPCC_LOGS";
 
         internal static void AddDebugLogEntry(string entry)
         {
@@ -49,7 +48,7 @@ namespace RPCC.Utils
 
         internal static void SaveLogs()
         {
-            var logsDir = LogPath;
+            var logsDir = $"{Settings.MainOutFolder}\\LOGS\\RPCC_LOGS";
             if (!Directory.Exists(logsDir)) Directory.CreateDirectory(logsDir);
             var logsFileName = $"Logs {DateTime.UtcNow:yyyy-MM-ddTHH-mm-ss}.txt";
             try

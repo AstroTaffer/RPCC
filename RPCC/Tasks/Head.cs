@@ -660,8 +660,8 @@ public static class Head
                                $"Ira = {Math.Round(_kI*_ira, 2)}, Dra = {Math.Round(_kD*dra, 2)}");
             Logger.AddDebugLogEntry($"IsLookingEast = {MountDataCollector.IsLookingEast}");
             if (!isGuid) return;
-            SiTechExeSocket.PulseGuide(outDec > 0 ? "N" : "S", pulseN);
-            SiTechExeSocket.PulseGuide(outRa > 0 ? "E" : "W", pulseE);
+            SiTechExeSocket.PulseGuide(outDec > 0 ? SiTechExeSocket.PulseGuideDirection.N : SiTechExeSocket.PulseGuideDirection.S, pulseN);
+            SiTechExeSocket.PulseGuide(outRa > 0 ? SiTechExeSocket.PulseGuideDirection.E : SiTechExeSocket.PulseGuideDirection.W, pulseE);
             Thread.Sleep(pulseN > pulseE ? pulseN : pulseE);
         }
     }

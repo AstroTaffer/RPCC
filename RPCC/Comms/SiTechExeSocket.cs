@@ -11,10 +11,6 @@ namespace RPCC.Comms
 {
     internal static class SiTechExeSocket
     {
-        // private readonly Logger Logger;
-        // private readonly Settings Settings;
-        // private  readonly MountDataCollector MountDataCollector;
-
         private static readonly Timer MountTimer;
 
         internal static bool IsConnected;
@@ -24,6 +20,13 @@ namespace RPCC.Comms
         private static StreamReader _streamReader;
         private static StreamWriter _streamWriter;
 
+        internal enum PulseGuideDirection
+        {
+            N = 0, // to North Celestial Pole
+            S = 1, // to South Celestial Pole
+            E = 2, // clockwise
+            W = 3  // counterclockwise
+        };
 
         /**
          * "-//-" == default response string
@@ -322,12 +325,13 @@ namespace RPCC.Comms
         // HACK: After completing GoToPark command the scope won't be "parked", but won't be tracking either
         internal static void GoToPark(int parkLocNum)
         {
-            var response = ExchangeMessages($"GoToPark {parkLocNum}");
-            //var response = await ExchangeMessagesAsync($"GoToPark {parkLocNum}");
-            if (CheckResponse(response, $"GoToPark {parkLocNum}"))
+            string request = $"GoToPark {parkLocNum}";
+            var response = ExchangeMessages(request);
+            //var response = await ExchangeMessagesAsync(request);
+            if (CheckResponse(response, request))
             {
                 var message = response[response.Length - 1];
-                if (message == $"_GoToPark {parkLocNum} Command Successful")
+                if (message == $"_{request} Command Successful")
                 {
                     // TODO: Do stuff if good
                 }
@@ -352,9 +356,10 @@ namespace RPCC.Comms
                 Logger.AddLogEntry("Can't goto while slewing");
                 return false;
             }
-            var response = ExchangeMessages($"GoTo {ra} {dec}{(isJ2K ? " J2K" : "")}");
-            //var response = await ExchangeMessagesAsync($"GoTo {ra} {dec}{(isJ2K ? " J2K" : "")}");
-            if (CheckResponse(response, $"GoTo {ra} {dec}{(isJ2K ? " J2K" : "")}"))
+            string request = $"GoTo {ra} {dec}{(isJ2K ? " J2K" : "")}";
+            var response = ExchangeMessages(request);
+            //var response = await ExchangeMessagesAsync(request);
+            if (CheckResponse(response, request))
             {
                 var message = response[response.Length - 1];
                 if (message == "_GoTo Accepted")
@@ -385,9 +390,10 @@ namespace RPCC.Comms
         {
             if (direction == "N" || direction == "S" || direction == "E" || direction == "W")
             {
-                var response = ExchangeMessages($"JogArcSeconds {direction} {distance}");
-                //var response = await ExchangeMessagesAsync($"JogArcSeconds {direction} {distance}");
-                if (CheckResponse(response, $"JogArcSeconds {direction} {distance}"))
+                var request = $"JogArcSeconds {direction} {distance}";
+                var response = ExchangeMessages(request);
+                //var response = await ExchangeMessagesAsync(request);
+                if (CheckResponse(response, request))
                 {
                     var message = response[response.Length - 1];
                     if (message == "__JogArcSeconds Accepted")
@@ -407,9 +413,8 @@ namespace RPCC.Comms
             }
         }
 
-        // Valid directions: N (to North Celestial Pole), S (to South Celestial Pole), W (clockwise), E (counterclockwise)
         // [time] == msec
-        internal static void PulseGuide(string direction, int time)
+        internal static void PulseGuide(PulseGuideDirection direction, int time)
         {
             if (MountDataCollector.IsParked)
             {
@@ -426,59 +431,33 @@ namespace RPCC.Comms
             //     Logger.AddLogEntry("Can't PulseGuide while slewing");
             //     return;
             // }
-            if (direction == "N" || direction == "S" || direction == "E" || direction == "W")
+            string request = $"PulseGuide {direction} {time}";
+            string[] response = null;
+            response = ExchangeMessages(request);
+            //response = await ExchangeMessagesAsync(request);
+            if (CheckResponse(response, request))
             {
-                string[] response = null;
-                switch (direction)
+                var message = response[response.Length - 1];
+                if (message == "_PulseGuide Accepted")
                 {
-                    case "N":
-                        response = ExchangeMessages($"PulseGuide 0 {time}");
-                        //response = await ExchangeMessagesAsync($"PulseGuide 0 {time}");
-                        break;
-                    case "S":
-                        response = ExchangeMessages($"PulseGuide 1 {time}");
-                        //response = await ExchangeMessagesAsync($"PulseGuide 1 {time}");
-                        break;
-                    case "E":
-                        response = ExchangeMessages($"PulseGuide 2 {time}");
-                        //response = await ExchangeMessagesAsync($"PulseGuide 2 {time}");
-                        break;
-                    case "W":
-                        response = ExchangeMessages($"PulseGuide 3 {time}");
-                        //response = await ExchangeMessagesAsync($"PulseGuide 3 {time}");
-                        break;
+                    // TODO: Do stuff if good
+                    Logger.AddLogEntry($"PulseGuide {direction} {time} ms is ok");
                 }
-
-                if (CheckResponse(response, $"PulseGuide {direction} {time}"))
+                else
                 {
-                    var message = response[response.Length - 1];
-                    if (message == "_PulseGuide Accepted")
-                    {
-                        // TODO: Do stuff if good
-                        Logger.AddLogEntry($"PulseGuide {direction} {time} ms is ok");
-                    }
-                    else
-                    {
-                        Logger.AddLogEntry($"WARNING Unable to pulse guide {direction} {time} ms: {message}");
-                        // TODO: Do stuff if bad
-                    }
+                    Logger.AddLogEntry($"WARNING Unable to pulse guide {direction} {time} ms: {message}");
+                    // TODO: Do stuff if bad
                 }
-            }
-            else
-            {
-                Logger.AddLogEntry($"WARNING Unable to pulse guide {direction} {time}: invalid direction");
             }
         }
 
         // [raRate] = [decRate] = [arcsec/sec]
         internal static void SetTrackMode(bool shouldTrack, double raRate = 0.0, double decRate = 0.0)
         {
-            var response = ExchangeMessages(
-                $"SetTrackMode {(shouldTrack ? 1 : 0)} {(raRate == 0.0 && decRate == 0.0 ? 0 : 1)} {raRate} {decRate}");
-            //var response = await ExchangeMessagesAsync(
-            //    $"SetTrackMode {(shouldTrack ? 1 : 0)} {(raRate == 0.0 && decRate == 0.0 ? 0 : 1)} {raRate} {decRate}");
-            if (CheckResponse(response,
-                    $"SetTrackMode {(shouldTrack ? 1 : 0)} {(raRate == 0.0 && decRate == 0.0 ? 0 : 1)} {raRate} {decRate}"))
+            var request = $"SetTrackMode {(shouldTrack ? 1 : 0)} {(raRate == 0.0 && decRate == 0.0 ? 0 : 1)} {raRate} {decRate}";
+            var response = ExchangeMessages(request);
+            //var response = await ExchangeMessagesAsync(request);
+            if (CheckResponse(response, request))
             {
                 var message = response[response.Length - 1];
                 if (message == "_SetTrackMode Command Successful")
