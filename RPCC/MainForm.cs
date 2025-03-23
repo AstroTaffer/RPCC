@@ -64,7 +64,7 @@ public partial class MainForm : Form
         Tasker.ContextMenuStripTasker = contextMenuStripTasker;
         Tasker.SetHeader();
             
-        Fli.SetDebugLevel(Logger.LogPath + "\\FLIdebug.log", Fli.DEBUG.ALL);
+        Fli.SetDebugLevel($"{Settings.MainOutFolder}\\LOGS\\RPCC_LOGS\\FLIdebug.log", Fli.DEBUG.ALL);
             
         // Donuts connect
         DonutsSocket.Connect();
@@ -352,10 +352,6 @@ public partial class MainForm : Form
     #endregion
 
     #region Options
-    private void ReloadConfigToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        Settings.LoadXmlConfig();
-    }
 
     private void RegenerateConfigToolStripMenuItem_Click(object sender, EventArgs e)
     {

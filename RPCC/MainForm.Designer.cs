@@ -47,7 +47,6 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.reconnectAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.reloadConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.regenerateConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBoxLogs = new System.Windows.Forms.GroupBox();
             this.listBoxLogs = new System.Windows.Forms.ListBox();
@@ -178,13 +177,14 @@
             dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             this.dataGridViewTasker.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
             this.dataGridViewTasker.RowHeadersVisible = false;
-            this.dataGridViewTasker.Size = new System.Drawing.Size(1350, 510);
+            this.dataGridViewTasker.Size = new System.Drawing.Size(1196, 510);
             this.dataGridViewTasker.TabIndex = 1;
             this.dataGridViewTasker.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.DataGridViewTasker_CellMouseDoubleClick);
             // 
             // statusStrip
             // 
-            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.tSStatusClock });
+            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tSStatusClock});
             this.statusStrip.Location = new System.Drawing.Point(0, 566);
             this.statusStrip.Name = "statusStrip";
             this.statusStrip.Size = new System.Drawing.Size(1210, 22);
@@ -200,7 +200,9 @@
             // 
             // menuStrip
             // 
-            this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.launchToolStripMenuItem, this.optionsToolStripMenuItem });
+            this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.launchToolStripMenuItem,
+            this.optionsToolStripMenuItem});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
             this.menuStrip.Size = new System.Drawing.Size(1210, 24);
@@ -209,7 +211,10 @@
             // 
             // launchToolStripMenuItem
             // 
-            this.launchToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { this.findCamerasToolStripMenuItem, this.findFocusToolStripMenuItem, this.reconnectSocketToolStripMenuItem });
+            this.launchToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.findCamerasToolStripMenuItem,
+            this.findFocusToolStripMenuItem,
+            this.reconnectSocketToolStripMenuItem});
             this.launchToolStripMenuItem.Name = "launchToolStripMenuItem";
             this.launchToolStripMenuItem.Size = new System.Drawing.Size(58, 20);
             this.launchToolStripMenuItem.Text = "Launch";
@@ -230,7 +235,12 @@
             // 
             // reconnectSocketToolStripMenuItem
             // 
-            this.reconnectSocketToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { this.reconnectMeteoDomeToolStripMenuItem, this.reconnectDonutsToolStripMenuItem, this.reconnectSiTechExeToolStripMenuItem, this.toolStripSeparator1, this.reconnectAllToolStripMenuItem });
+            this.reconnectSocketToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.reconnectMeteoDomeToolStripMenuItem,
+            this.reconnectDonutsToolStripMenuItem,
+            this.reconnectSiTechExeToolStripMenuItem,
+            this.toolStripSeparator1,
+            this.reconnectAllToolStripMenuItem});
             this.reconnectSocketToolStripMenuItem.Name = "reconnectSocketToolStripMenuItem";
             this.reconnectSocketToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
             this.reconnectSocketToolStripMenuItem.Text = "Reconnect socket";
@@ -270,22 +280,16 @@
             // 
             // optionsToolStripMenuItem
             // 
-            this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { this.reloadConfigToolStripMenuItem, this.regenerateConfigToolStripMenuItem });
+            this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.regenerateConfigToolStripMenuItem});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             this.optionsToolStripMenuItem.Text = "Options";
             // 
-            // reloadConfigToolStripMenuItem
-            // 
-            this.reloadConfigToolStripMenuItem.Name = "reloadConfigToolStripMenuItem";
-            this.reloadConfigToolStripMenuItem.Size = new System.Drawing.Size(170, 22);
-            this.reloadConfigToolStripMenuItem.Text = "Reload config";
-            this.reloadConfigToolStripMenuItem.Click += new System.EventHandler(this.ReloadConfigToolStripMenuItem_Click);
-            // 
             // regenerateConfigToolStripMenuItem
             // 
             this.regenerateConfigToolStripMenuItem.Name = "regenerateConfigToolStripMenuItem";
-            this.regenerateConfigToolStripMenuItem.Size = new System.Drawing.Size(170, 22);
+            this.regenerateConfigToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.regenerateConfigToolStripMenuItem.Text = "Regenerate config";
             this.regenerateConfigToolStripMenuItem.Click += new System.EventHandler(this.RegenerateConfigToolStripMenuItem_Click);
             // 
@@ -313,7 +317,9 @@
             // 
             // contextMenuStripLogs
             // 
-            this.contextMenuStripLogs.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.clearToolStripMenuItem, this.saveToolStripMenuItem });
+            this.contextMenuStripLogs.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.clearToolStripMenuItem,
+            this.saveToolStripMenuItem});
             this.contextMenuStripLogs.Name = "contextMenuStrip1";
             this.contextMenuStripLogs.Size = new System.Drawing.Size(102, 48);
             // 
@@ -501,7 +507,11 @@
             // numericUpDownSetDefoc
             // 
             this.numericUpDownSetDefoc.Location = new System.Drawing.Point(150, 51);
-            this.numericUpDownSetDefoc.Minimum = new decimal(new int[] { 100, 0, 0, -2147483648 });
+            this.numericUpDownSetDefoc.Minimum = new decimal(new int[] {
+            100,
+            0,
+            0,
+            -2147483648});
             this.numericUpDownSetDefoc.Name = "numericUpDownSetDefoc";
             this.numericUpDownSetDefoc.Size = new System.Drawing.Size(75, 20);
             this.numericUpDownSetDefoc.TabIndex = 15;
@@ -577,10 +587,22 @@
             // numericUpDownRun
             // 
             this.numericUpDownRun.Enabled = false;
-            this.numericUpDownRun.Increment = new decimal(new int[] { 100, 0, 0, 0 });
+            this.numericUpDownRun.Increment = new decimal(new int[] {
+            100,
+            0,
+            0,
+            0});
             this.numericUpDownRun.Location = new System.Drawing.Point(150, 16);
-            this.numericUpDownRun.Maximum = new decimal(new int[] { 5000, 0, 0, 0 });
-            this.numericUpDownRun.Minimum = new decimal(new int[] { 5000, 0, 0, -2147483648 });
+            this.numericUpDownRun.Maximum = new decimal(new int[] {
+            5000,
+            0,
+            0,
+            0});
+            this.numericUpDownRun.Minimum = new decimal(new int[] {
+            5000,
+            0,
+            0,
+            -2147483648});
             this.numericUpDownRun.Name = "numericUpDownRun";
             this.numericUpDownRun.Size = new System.Drawing.Size(75, 20);
             this.numericUpDownRun.TabIndex = 1;
@@ -951,7 +973,7 @@
             this.tabPageTasks.Location = new System.Drawing.Point(4, 22);
             this.tabPageTasks.Name = "tabPageTasks";
             this.tabPageTasks.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageTasks.Size = new System.Drawing.Size(1356, 516);
+            this.tabPageTasks.Size = new System.Drawing.Size(1202, 516);
             this.tabPageTasks.TabIndex = 1;
             this.tabPageTasks.Text = "Tasks";
             this.tabPageTasks.UseVisualStyleBackColor = true;
@@ -963,12 +985,13 @@
             this.dataGridTasks.HeaderForeColor = System.Drawing.SystemColors.ControlText;
             this.dataGridTasks.Location = new System.Drawing.Point(3, 3);
             this.dataGridTasks.Name = "dataGridTasks";
-            this.dataGridTasks.Size = new System.Drawing.Size(1350, 510);
+            this.dataGridTasks.Size = new System.Drawing.Size(1196, 510);
             this.dataGridTasks.TabIndex = 0;
             // 
             // contextMenuStripTasker
             // 
-            this.contextMenuStripTasker.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.addToolStripMenuItem });
+            this.contextMenuStripTasker.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.addToolStripMenuItem});
             this.contextMenuStripTasker.Name = "contextMenuStripTasker";
             this.contextMenuStripTasker.Size = new System.Drawing.Size(97, 26);
             // 
@@ -1036,6 +1059,7 @@
             this.contextMenuStripTasker.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
+
         }
         
         private System.Windows.Forms.PictureBox pictureBoxImage1;
@@ -1113,7 +1137,6 @@
         private System.Windows.Forms.Timer timerUi;
         private System.Windows.Forms.ListBox listBoxLogs;
         private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem reloadConfigToolStripMenuItem;
         private System.Windows.Forms.SaveFileDialog saveFileDialogConfig;
         private System.Windows.Forms.OpenFileDialog openFileDialogConfig;
         private System.Windows.Forms.GroupBox groupBoxCam1;
