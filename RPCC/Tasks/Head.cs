@@ -17,8 +17,15 @@ namespace RPCC.Tasks;
 public static class Head
 {
     private const short TotalMinutes2StartTask = 5; //TODO add in .cfg
-    private const short FlatExp = 2; // in s 
+    private const short FlatExp = 2; // in s  TODO add in .cfg
     private const short FlatDarkQuantity = 10; //TODO add in .cfg
+    private static readonly short[] DarkExps = {2, 5, 10, 15, 20, 30, 50, 80, 120, 180}; //TODO add in .cfg
+    private const double PulseGuideVelocityRa = 6; //sec in sec TODO add in .cfg
+    private const double PulseGuideVelocityDec = 2; //sec in sec TODO add in .cfg
+    private static double _kP = 1.2; // //TODO add in .cfg
+    private static double _kI = 0.00005; //0.28 //TODO add in .cfg
+    private static double _kD = 25; //2.9 //TODO add in .cfg
+    
     public static readonly Timer ThinkingTimer = new();
     public static ObservationTask currentTask;
     private static bool _isObserve;
@@ -27,13 +34,9 @@ public static class Head
     public static bool isOnPause;
     private static string _firstFrame;
     private static bool _firstFrameLookingEast;
-    private static double _cd11 = 100;  
-    private static double _cd12 = 100;  
-    private const double PulseGuideVelocityDec = 2; //sec in sec TODO add in .cfg
-    private const double PulseGuideVelocityRa = 6; //sec in sec TODO add in .cfg
+    private static double _cd11 = 100;
+    private static double _cd12 = 100;
     public static bool isThinking;
-
-    private static readonly short[] DarkExps = {2, 5, 10, 15, 20, 30, 50, 80, 120, 180};
 
     public static bool isGuid = true;
     private static int _troubles;
@@ -41,11 +44,7 @@ public static class Head
     private static double _ira;
     private static double _oldErrDec;
     private static double _oldErrRa;
-    private static double _kP = 1.2; //
-    private static double _kI = 0.00005; //0.28
-    private static double _kD = 25; //2.9
-        
-        
+    
     public static void StartThinking()
     {
         ThinkingTimer.Elapsed += Thinking;
@@ -65,6 +64,7 @@ public static class Head
             if (!CameraControl.ReconnectCameras())
             {
                 Logger.AddLogEntry("WARNING: Can't thinking, no connection to cameras");
+                isThinking = false;
                 return;
             }
         }
@@ -73,6 +73,7 @@ public static class Head
             if (!DonutsSocket.Connect())
             {
                 Logger.AddLogEntry("WARNING: Can't thinking, no connection to Donuts");
+                isThinking = false;
                 return;
             }
         }
@@ -81,11 +82,12 @@ public static class Head
             if (!SiTechExeSocket.Connect().Result)
             {
                 Logger.AddLogEntry("WARNING: Can't thinking, no connection to SiTechExeSocket");
+                isThinking = false;
                 return;
             }
         }
 
-        if (MountDataCollector.IsInBlinky)
+        if (MountDataCollector.IsInBlinky) 
         {
             _troubles += 1;
             SiTechExeSocket.MotorsToAuto();
@@ -96,7 +98,8 @@ public static class Head
         {
             if (currentTask is not null)
             {
-                Logger.AddLogEntry("WARNING: Troubles with motors");
+                Logger.AddLogEntry("WARNING: Troubles with motors, stop task");
+                isThinking = false;
                 EndTask(5);
             }
         }
@@ -126,13 +129,15 @@ public static class Head
 
         if (string.IsNullOrEmpty(_firstFrame) & currentTask is not null & _isObserve)
         {
-            if (currentTask.RepointTimes.Count == 0) //Корректировать положение монтировки
-                                                     //можно только тогда, когда не надо делать репоинты 
-            {
-                _firstFrame = DbCommunicate.GetPath2FirstAssFrame(currentTask.TaskNumber);
-                _firstFrameLookingEast = MountDataCollector.IsLookingEast;
-                Logger.AddDebugLogEntry($"Set first frame. lookingEast = {_firstFrameLookingEast}");
-            } 
+            if (currentTask.RepointTimes is not null){
+                if (currentTask.RepointTimes.Count == 0) //Корректировать положение монтировки
+                                                         //можно только тогда, когда не надо делать репоинты 
+                {
+                    _firstFrame = DbCommunicate.GetPath2FirstAssFrame(currentTask.TaskNumber);
+                    _firstFrameLookingEast = MountDataCollector.IsLookingEast;
+                    Logger.AddDebugLogEntry($"Set first frame. lookingEast = {_firstFrameLookingEast}");
+                } 
+            }
         }
 
         if (!string.IsNullOrEmpty(_firstFrame) & _cd11 > 99)
@@ -289,7 +294,12 @@ public static class Head
             }
         } else 
         {
-            if (currentTask.Status > 0 & isOnPause) EndTask(currentTask.Status); 
+            if (currentTask.Status > 1)
+            {
+                EndTask(currentTask.Status);
+                ThinkingTimer.Start();
+                return;
+            }
             //Если у текущего задания
             //вышло время, но оно на паузе и
             //не вызовет коллбек,
@@ -346,6 +356,7 @@ public static class Head
         Logger.AddLogEntry($"Start task# {currentTask.TaskNumber}, type: {currentTask.FrameType}");
         if (!UnparkAndGoTo()) return;
         currentTask.Filters = CheckFil();
+        
         StartExpAndCheckFuckup();
     }
     
@@ -375,8 +386,13 @@ public static class Head
 
     private static void EndTask(short endStatus)
     {
+        Logger.AddLogEntry($"End task №{currentTask.TaskNumber}, status {endStatus}");
         currentTask.Status = endStatus;
-        DbCommunicate.UpdateTaskInDb(currentTask);
+        if (currentTask.TaskNumber > 0) 
+        {
+            DbCommunicate.UpdateTaskInDb(currentTask);
+        }
+        
         _isObserve = false;
         _isDoDarks = false;
         _isDoFlats = false;
@@ -442,16 +458,19 @@ public static class Head
                         return;
                     }
 
-                    if (currentTask.RepointTimes.Count > 0)  //репоинт для объектов СС
+                    if (currentTask.RepointTimes is not null)
                     {
-                        if (currentTask.RepointTimes[0] < DateTime.UtcNow)
-                        {   
-                            currentTask.ComputeRaDec(currentTask.RepointCoords[0]);
-                            if (SiTechExeSocket.GoTo(currentTask.Ra, currentTask.Dec, true))
-                            {
-                                currentTask.RepointTimes.RemoveAt(0);
-                                currentTask.RepointCoords.RemoveAt(0);
-                                DbCommunicate.UpdateTaskInDb(currentTask);
+                        if (currentTask.RepointTimes.Count > 0)  //репоинт для объектов СС
+                        {
+                            if (currentTask.RepointTimes[0] < DateTime.UtcNow)
+                            {   
+                                currentTask.ComputeRaDec(currentTask.RepointCoords[0]);
+                                if (SiTechExeSocket.GoTo(currentTask.Ra, currentTask.Dec, true))
+                                {
+                                    currentTask.RepointTimes.RemoveAt(0);
+                                    currentTask.RepointCoords.RemoveAt(0);
+                                    DbCommunicate.UpdateTaskInDb(currentTask);
+                                }
                             }
                         }
                     }
@@ -727,7 +746,7 @@ public static class Head
         if (!WeatherDataCollector.Obs & !WeatherDataCollector.Flat)
         {
             _isDoDarks = true;
-            Logger.AddLogEntry($"Start task# {currentTask.TaskNumber}, type: {currentTask.FrameType}");
+            Logger.AddLogEntry($"Start task# {currentTask.TaskNumber}, type: {currentTask.FrameType}, exp: {currentTask.Exp}");
 
             currentTask.Status = 1;
             currentTask.Filters = CheckFil();
@@ -753,11 +772,19 @@ public static class Head
     internal static void StartExpAndCheckFuckup(ObservationTask task=null)
     {
         task ??= currentTask;
-        if (CameraControl.StartExposure(task))
+        if (task.TaskNumber == 0)
         {
-            DbCommunicate.UpdateTaskInDb(task);
-            return;
+            if (!DbCommunicate.AddTaskToDb(task))
+            {
+                EndTask(4);
+                return;
+            }
         }
-        EndTask(4);
+        
+        if (!CameraControl.StartExposure(task))
+        {
+            EndTask(4);
+        }
+        
     }
 }
