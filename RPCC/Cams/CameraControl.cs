@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
+using System.Xml.Linq;
 using APOGEELib;
 using ASCOM.Tools;
-using RPCC.Comms;
 using RPCC.Focus;
 using RPCC.Tasks;
 using RPCC.Utils;
@@ -55,7 +54,7 @@ internal static class CameraControl
             }
             catch (Exception e)
             {
-                Logger.AddLogEntry($"ERROR WHILE search fli cams, {e.Message}");
+                Logger.AddError("search fli cams", e);
             }
 
             if (fliCamerasNames is null) return false;
@@ -66,11 +65,25 @@ internal static class CameraControl
                 // connect apogees
                 ICamDiscover discover = new CamDiscover(); 
                 discover.DlgCheckUsb = true;
-                var cums = discover.ListUsbDevices;
-                for (var i = 0; i < 3-cams.Count; i++)
+                var cums = "";
+                try
                 {
-                    if (!cums.Contains(i.ToString())) break;
-                    cams.Add(new ApogeeCameraDevice(i));
+                    cums = discover.ListUsbDevices;  // какая-то внешняя ошибка Apogee
+                }catch (Exception e)
+                {
+                    Logger.AddLogEntry($"CAN'T CONNECT TO APOGEE CAMERA: {e}");
+                }
+                
+                if (!string.IsNullOrEmpty(cums))
+                {
+                    var cum = XDocument.Parse(cums);
+                    foreach (var c in cum.Elements("d"))
+                    {
+                        if (string.IsNullOrEmpty(c.Value)) continue;
+                        var fuckingbullshit = c.Value.Split(',')[0].Split('=')[1];
+                        var i = int.Parse(fuckingbullshit);
+                        cams.Add(new ApogeeCameraDevice(i));
+                    }
                 }
             }
 
@@ -90,6 +103,7 @@ internal static class CameraControl
             }).ToList();
 
             if (cams.Count <= 0) return false;
+            GetCamsStatusAlt();
             CamsTimer.Elapsed += CamsTimerTickAlt;
             CamsTimer.Start();
             resetUi();
@@ -132,6 +146,11 @@ internal static class CameraControl
             foreach (var unused in cams.Where(cam => cam.Status == StringHolder.Exposing))
                 allReady = false;
 
+            if (cams.Count <= 0)
+            {
+                DisconnectCameras();
+                return;
+            }
             if (allReady)
             {
                 _isCallbackRequired = false;
@@ -154,6 +173,11 @@ internal static class CameraControl
                         case StringHolder.Error:
                             cam.Close();
                             cams.Remove(cam);
+                            if (cams.Count <= 0)
+                            {
+                                DisconnectCameras();
+                                return;
+                            }
                             continue;
                     }
 
@@ -203,9 +227,9 @@ internal static class CameraControl
         foreach (var t in cams)
         {
             if (t.GetCamStatusAlt()) continue;
-            Thread.Sleep(5000);
-            if (ReconnectCameras()) continue;
-            Logger.AddLogEntry("ERROR cam can't reconect, stop cam timer");
+            // Thread.Sleep(5000);
+            // if (ReconnectCameras()) continue;
+            Logger.AddLogEntry("Stop cam timer");
             CamsTimer.Stop();
             Logger.SaveLogs();
         }
@@ -308,25 +332,25 @@ internal static class CameraControl
         var imageFits = cam.GetRpccFits();
         if (imageFits is null)
         {
+            Logger.AddLogEntry($"ERROR while read image, return null and close cam {cam.Filter}");
             cam.Close();
             cams.Remove(cam);
             return null;
         }
-
-
+            
         // Mirror image
-        switch (cam.Filter)
-        {
-            case StringHolder.FilG:
-                if (MountDataCollector.IsLookingEast) imageFits.Data = Rotate(imageFits.Data);
-                break;
-            case StringHolder.FilR:
-                if (!MountDataCollector.IsLookingEast) imageFits.Data = Rotate(imageFits.Data);
-                break;
-            case StringHolder.FilI:
-                imageFits.Data = MountDataCollector.IsLookingEast ? FlipV(imageFits.Data) : FlipH(imageFits.Data);
-                break;
-        }
+        // switch (cam.Filter) // IsLookingEast ХУЁВО ОПРЕДЕЛЯЕТСЯ В ЗЕНИТЕ АААААААА
+        // {
+        //     case StringHolder.FilG:
+        //         if (MountDataCollector.IsLookingEast) imageFits.Data = Rotate(imageFits.Data);
+        //         break;
+        //     case StringHolder.FilR:
+        //         if (!MountDataCollector.IsLookingEast) imageFits.Data = Rotate(imageFits.Data);
+        //         break;
+        //     case StringHolder.FilI:
+        //         imageFits.Data = MountDataCollector.IsLookingEast ? FlipV(imageFits.Data) : FlipH(imageFits.Data);
+        //         break;
+        // }
 
         return imageFits;
     }

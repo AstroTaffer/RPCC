@@ -13,7 +13,7 @@ internal class ApogeeCameraDevice : ICameraDevice
 {
 
     private readonly ICamera2 _cam;
-    public int[] ImageArea { get; set; }
+    public int[] ImageArea { get; set; } = new int[4];
 
     public string FileName { get; set; }
     public string ModelName { get; set; }
@@ -32,6 +32,7 @@ internal class ApogeeCameraDevice : ICameraDevice
     public string LatestImageFilename { get; set; }
     public ushort[,] LatestImageData { get; set; }  
     public Bitmap LatestImageBitmap { get; set; }
+    private DateTime startExp;
 
     public ApogeeCameraDevice(int camIdOne)
     {
@@ -55,21 +56,22 @@ internal class ApogeeCameraDevice : ICameraDevice
         
         try
         {
-            SerialNumber = _cam.CameraSerialNumber;
+            // SerialNumber = _cam.CameraSerialNumber; не то, что надо
+            SerialNumber = StringHolder.Unknown;
         
-            if (SerialNumber == Settings.SnCamG)
+            if (ModelName == Settings.SnCamG)
             {
                 Filter = StringHolder.FilG;
             }
-            else if (SerialNumber == Settings.SnCamR)
+            else if (ModelName == Settings.SnCamR)
             {
                 Filter = StringHolder.FilR;
             }
-            else if (SerialNumber == Settings.SnCamI)
+            else if (ModelName == Settings.SnCamI)
             {
                 Filter = StringHolder.FilI;
             }
-            else if (SerialNumber == Settings.SnCamV)
+            else if (ModelName == Settings.SnCamV)
             {
                 Filter = StringHolder.FilV;
             }
@@ -128,7 +130,7 @@ internal class ApogeeCameraDevice : ICameraDevice
         // Allocating array of image size (width * height)
         // where pixel is size of unsigned short (2 BYTES)
         // possible values: 0 to 65535
-        ushort[,] buff = new ushort[width, height];
+        ushort[] buff = new ushort[width * height];
         // Gets pointer to allocated array and fixes it, 
         // so that it won't be moved by Garbage Collector
 
@@ -145,10 +147,19 @@ internal class ApogeeCameraDevice : ICameraDevice
         {
             buffGch.Free();
         }
-        if (buff.Length * sizeof(ushort) != buff.Length)
-            throw new InvalidOperationException("bytesgrabbed != sizeof(buff)");
+        // if (buff.Length * sizeof(ushort) != buff.Length)
+        //     throw new InvalidOperationException($"bytesgrabbed ({buff.Length * sizeof(ushort)}) != " +
+        //                                         $"sizeof(buff)({buff.Length})");
+        var buff2 = new ushort[width, height];
+        for (var i = 0; i < height; i++)
+        {
+            for (var j = 0; j < width; j++)
+            {
+                buff2[i, j] = buff[j + i*width];
+            }
+        }
 
-        return buff;
+        return buff2;
     }
 
     public bool Close()
@@ -172,22 +183,39 @@ internal class ApogeeCameraDevice : ICameraDevice
         {
             CcdTemp = _cam.TempCCD;
             BaseTemp = _cam.TempHeatsink;
-            CoolerPwr = _cam.CoolerDrive;
+            CoolerPwr = Math.Round(_cam.CoolerDrive, 1);
             
             var cum = _cam.ImagingStatus;
             switch (cum)
             {
                 case Apn_Status.Apn_Status_Exposing:
                     Status = StringHolder.Exposing;
+                    if (CameraControl.loadedTask is not null)
+                    {
+                        RemTime = CameraControl.loadedTask.Exp - (int)(DateTime.UtcNow - startExp).TotalSeconds;
+                    }
+                    else
+                    {
+                        Logger.AddLogEntry("APOGEE WARNING: STATUS IS EXPOSING BUT THERE ISN'T ANY LOADED TASK");
+                    }
+
                     break;
                 case Apn_Status.Apn_Status_Flushing:
                 case Apn_Status.Apn_Status_Idle:
                 case Apn_Status.Apn_Status_ImageReady:
                     Status = StringHolder.Idle;
+                    RemTime = 0;
                     break;
                 case Apn_Status.Apn_Status_DataError:
+                    Logger.AddLogEntry("Apogee status DataError");
+                    Status = StringHolder.Error;
+                    break;
                 case Apn_Status.Apn_Status_ConnectionError:
+                    Logger.AddLogEntry("Apogee status ConnectionError");
+                    Status = StringHolder.Error;
+                    break;
                 case Apn_Status.Apn_Status_PatternError:
+                    Logger.AddLogEntry("Apogee status PatternError");
                     Status = StringHolder.Error;
                     break;
                 case Apn_Status.Apn_Status_WaitingOnTrigger:
@@ -299,6 +327,7 @@ internal class ApogeeCameraDevice : ICameraDevice
             return false;
         }
 
+        startExp = DateTime.UtcNow;
         return true;
     }
 }

@@ -48,8 +48,8 @@ internal class RpccFits
 
     internal string SaveFitsFile(ICameraDevice cam)
     {
-        short[][] convertedData = new short[Data.Length][];
-        for (var i = 0; i < convertedData.Length; i++)
+        short[][] convertedData = new short[Data.GetLength(1)][];
+        for (var i = 0; i < convertedData.GetLength(0); i++)
         {
             convertedData[i] = new short[Data.GetLength(0)];
             for (var j = 0; j < convertedData[i].Length; j++)

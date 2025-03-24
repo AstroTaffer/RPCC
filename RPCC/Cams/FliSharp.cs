@@ -15,8 +15,8 @@ namespace RPCC.Cams
     {   
         //
         #region Constants
-        //
-        private const string DllPath = ".\\Cams\\libfli.dl";
+        //RPCC/Cams/dll/libfli.dll
+        private const string DllPath = ".\\Cams\\dll\\libfli.dll";
         
         /// <summary>
         /// max string size for all APIs

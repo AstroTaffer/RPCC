@@ -22,7 +22,7 @@ internal interface ICameraDevice
     internal double BaseTemp { get; set; }
     internal double CoolerPwr { get; set; }
     internal string Status { get; set; }
-    internal int RemTime { get; set; }
+    internal int RemTime { get; set; }  //in sec
 
     // exposure
     // internal bool IsSelected { get; set; }

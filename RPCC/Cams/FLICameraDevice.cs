@@ -166,7 +166,7 @@ internal class FliCameraDevice : ICameraDevice
                         Status = StringHolder.Exposing;
                         // int buff;
                         // errorStatus += NativeMethods.FLIGetExposureStatus(Handle, out buff);
-                        RemTime = _cam.GetExposureStatus();
+                        RemTime = _cam.GetExposureStatus() / 1000;
                         break;
                     // 0x03 = FLI_CAMERA_STATUS_READING_CCD
                     case Fli.STATUS.CAMERA_STATUS_READING_CCD:
