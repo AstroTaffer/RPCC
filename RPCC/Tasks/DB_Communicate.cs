@@ -17,26 +17,7 @@ public static class DbCommunicate
     private const string UserId = "remote_user";
     private const string Password = "remote_user";
     private const string Database = "postgres";
-
-    private const string QueryForLoadDbTable = "SELECT task_id, get_hms_dms(start_coord2000) as coord2000, " +
-                                               "time_add, time_start, time_end, " +
-                                               "duration, exp_time, done_frames, all_frames, time_last_exp, " +
-                                               "is_filter_g, is_filter_r, is_filter_i, object_name, object_type, " +
-                                               "status, observer, frame_type, x_bin, y_bin, " +
-                                               "repoint_coords, repoint_times, is_filter_V " +
-                                               "FROM robophot_tasks ORDER BY time_start DESC LIMIT 50";
-
-    private const string QueryGetTableForThinking = "SELECT task_id, get_hms_dms(start_coord2000) as coord2000, " +
-                                                    "time_add, time_start, time_end, " +
-                                                    "duration, exp_time, done_frames, all_frames, time_last_exp, " +
-                                                    "is_filter_g, is_filter_r, is_filter_i, object_name, object_type, " +
-                                                    "status, observer, frame_type, x_bin, y_bin, " +
-                                                    "repoint_coords, repoint_times, is_filter_V " +
-                                                    "FROM robophot_tasks WHERE status < 2 order by time_start ASC";
-    // public static NpgsqlConnection Con;
     private static readonly object Loc = new();
-
-
         
     private static NpgsqlConnection ConnectToDb()
     {
@@ -48,18 +29,14 @@ public static class DbCommunicate
                     $"Server=127.0.0.1;Port={Port};User Id={UserId};Password={Password}; Database={Database};";
                 var con = new NpgsqlConnection(connString);
                 con.Open();
-                    
-                // var dataSourceBuilder = new NpgsqlDataSourceBuilder(connString);
-                // dataSourceBuilder.MapComposite<Spoint>("spoint");
-                // using var dataSource = dataSourceBuilder.Build();
+                
                 return con;
             }   
 
         }
         catch (Exception e)
         {
-            Logger.AddLogEntry(@"Can't connect to data base");
-            Logger.AddLogEntry(e.Message);
+            Logger.AddError("Can't connect to data base", e);
             return null;
         }
     }
@@ -67,9 +44,16 @@ public static class DbCommunicate
     public static void LoadDbTable()
     {
         lock (Loc)
-        {
+        {   
+             const string queryForLoadDbTable = "SELECT task_id, get_hms_dms(start_coord2000) as coord2000, " +
+                                                "time_add, time_start, time_end, " +
+                                                "duration, exp_time, done_frames, all_frames, time_last_exp, " +
+                                                "is_filter_g, is_filter_r, is_filter_i, object_name, object_type, " +
+                                                "status, observer, frame_type, x_bin, y_bin, " +
+                                                "repoint_coords, repoint_times, is_filter_v " + 
+                                                "FROM robophot_tasks ORDER BY time_start DESC LIMIT 50";
             using var con = ConnectToDb();
-            var com = new NpgsqlCommand(QueryForLoadDbTable, con);
+            var com = new NpgsqlCommand(queryForLoadDbTable, con);
             using var reader = com.ExecuteReader();
             if (!reader.HasRows) return;
             var dt = new DataTable();
@@ -83,11 +67,18 @@ public static class DbCommunicate
     }
 
     public static DataTable GetTableForThinking()
-    {
+    {   
+        const string queryGetTableForThinking = "SELECT task_id, get_hms_dms(start_coord2000) as coord2000, " +
+                                                "time_add, time_start, time_end, " +
+                                                "duration, exp_time, done_frames, all_frames, time_last_exp, " +
+                                                "is_filter_g, is_filter_r, is_filter_i, object_name, object_type, " +
+                                                "status, observer, frame_type, x_bin, y_bin, " +
+                                                "repoint_coords, repoint_times, is_filter_v " +
+                                                "FROM robophot_tasks WHERE status < 2 order by time_start";
         lock (Loc)
         {
             using var con = ConnectToDb();
-            var com = new NpgsqlCommand(QueryGetTableForThinking, con);
+            var com = new NpgsqlCommand(queryGetTableForThinking, con);
             using var reader = com.ExecuteReader();
             var dt = new DataTable();
             if (reader.HasRows)
@@ -100,63 +91,50 @@ public static class DbCommunicate
                 
     public static void UpdateTaskFromDb(ref ObservationTask observationTask)   
     {
-        lock (Loc)
-        {
-            var query = "SELECT task_id, get_hms_dms(start_coord2000) as coord2000, " +
-                        "time_add, time_start, time_end, " +
-                        "duration, exp_time, done_frames, all_frames, time_last_exp, " +
-                        "is_filter_g, is_filter_r, is_filter_i, object_name, object_type, " +
-                        "status, observer, frame_type, x_bin, y_bin, repoint_coords, repoint_times, is_filter_V " +
-                        $"FROM robophot_tasks WHERE task_id = {observationTask.TaskNumber}";
-            using var con = ConnectToDb();
-            var com = new NpgsqlCommand(query, con);
-            using var reader = com.ExecuteReader();
-            var dt = new DataTable();
-            if (reader.HasRows)
-            {
-                dt.Load(reader);
-            }
-            Tasker.GetTaskFromRow(dt.Rows[0], ref observationTask);
-        }
-    }
-
-    // private static string TaskQueryBuilder(ObservationTask observationTask)
-    // {
-    //     return $"(({observationTask.Ra*360/24}, {observationTask.Dec})::spoint_domen, " +
-    //            $"'{observationTask.TimeAdd}'::timestamp, " +
-    //            $"'{observationTask.TimeStart}'::timestamp, " +
-    //            $"'{observationTask.TimeEnd}'::timestamp, " +
-    //            $"'{observationTask.TimeLastExp}'::timestamp, " +
-    //            $"{observationTask.Duration}, " +
-    //            $"{observationTask.Exp}, " +
-    //            $"{observationTask.DoneFrames}, {observationTask.AllFrames}, " +
-    //            $"{observationTask.Filters.Contains(StringHolder.FilG)}, " +
-    //            $"{observationTask.Filters.Contains(StringHolder.FilR)}, " +
-    //            $"{observationTask.Filters.Contains(StringHolder.FilI)}, " +
-    //            $"'{observationTask.Object}', '{observationTask.ObjectType}', " +
-    //            $"{observationTask.Status}, '{observationTask.Observer}', " +
-    //            $"'{observationTask.FrameType}', {observationTask.Xbin}, {observationTask.Ybin}, " +
-    //            $"{(observationTask.RepointCoords?.Count > 0 ? "'ARRAY" + observationTask.RepointCoords + "'" : "NULL")}, " +
-    //            $"{(observationTask.RepointTimes?.Count > 0 ? "'ARRAY" + observationTask.RepointTimes + "'::timestamp[]" : "NULL")}, " +
-    //            $"{observationTask.Filters.Contains(StringHolder.FilI)})";
-    // }
-
-    public static bool AddTaskToDb(ObservationTask observationTask)
-    {
         try
         {
             lock (Loc)
             {
-                var query = "INSERT INTO robophot_tasks " +
-                            "(start_coord2000, " +
-                            "time_add, time_start, time_end, time_last_exp, " +
-                            "duration, exp_time, done_frames, all_frames, " +
-                            "is_filter_g, is_filter_r, is_filter_i, " +
-                            "object_name, object_type, status, observer, frame_type, x_bin, y_bin, " +
-                            "repoint_coords, repoint_times, is_filter_V) VALUES " +
-                            "($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, " +
-                            "$14, $15, $16, $17, $18, $19, $20, $21, $22)  " +
-                            "RETURNING task_id";
+                var query = "SELECT task_id, get_hms_dms(start_coord2000) as coord2000, " +
+                            "time_add, time_start, time_end, " +
+                            "duration, exp_time, done_frames, all_frames, time_last_exp, " +
+                            "is_filter_g, is_filter_r, is_filter_i, object_name, object_type, " +
+                            "status, observer, frame_type, x_bin, y_bin, repoint_coords, repoint_times, is_filter_v " +
+                            $"FROM robophot_tasks WHERE task_id = {observationTask.TaskNumber}";
+                using var con = ConnectToDb();
+                var com = new NpgsqlCommand(query, con);
+                using var reader = com.ExecuteReader();
+                var dt = new DataTable();
+                if (reader.HasRows)
+                {
+                    dt.Load(reader);
+                }
+                Tasker.GetTaskFromRow(dt.Rows[0], ref observationTask);
+            }
+        }
+        catch (Exception e)
+        {
+            Logger.AddError("UpdateTaskFromDb", e);
+        }
+    }
+
+    public static bool AddTaskToDb(ObservationTask observationTask)
+    {
+        // if(observationTask.TimeAdd.ToUniversalTime())
+        try
+        {
+            lock (Loc)
+            {
+                const string query = "INSERT INTO robophot_tasks " +
+                                     "(start_coord2000, " +
+                                     "time_add, time_start, time_end, time_last_exp, " +
+                                     "duration, exp_time, done_frames, all_frames, " +
+                                     "is_filter_g, is_filter_r, is_filter_i, " +
+                                     "object_name, object_type, status, observer, frame_type, x_bin, y_bin, " +
+                                     "repoint_coords, repoint_times, is_filter_v) VALUES " +
+                                     "($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, " +
+                                     "$14, $15, $16, $17, $18, $19, $20, $21, $22)  " +
+                                     "RETURNING task_id";
                 using var con = ConnectToDb();
                 var com = new NpgsqlCommand(query, con)
                 {
@@ -166,10 +144,10 @@ public static class DbCommunicate
                             TargetRa = observationTask.Ra*360/24,
                             TargetDec = observationTask.Dec
                         }, DataTypeName = "spoint_domen"},
-                        new NpgsqlParameter {ParameterName = "time_add", Value = observationTask.TimeAdd },
-                        new NpgsqlParameter { Value = observationTask.TimeStart },
-                        new NpgsqlParameter { Value = observationTask.TimeEnd },
-                        new NpgsqlParameter { Value = observationTask.TimeLastExp },
+                        new NpgsqlParameter { Value = observationTask.TimeAdd.ToUniversalTime(), NpgsqlDbType = NpgsqlDbType.TimestampTz },
+                        new NpgsqlParameter { Value = observationTask.TimeStart.ToUniversalTime(), NpgsqlDbType = NpgsqlDbType.TimestampTz },
+                        new NpgsqlParameter { Value = observationTask.TimeEnd.ToUniversalTime(), NpgsqlDbType = NpgsqlDbType.TimestampTz },
+                        new NpgsqlParameter { Value = observationTask.TimeLastExp.ToUniversalTime(), NpgsqlDbType = NpgsqlDbType.TimestampTz },
                         new NpgsqlParameter { Value = observationTask.Duration },
                         new NpgsqlParameter { Value = observationTask.Exp },
                         new NpgsqlParameter { Value = observationTask.DoneFrames },
@@ -202,8 +180,7 @@ public static class DbCommunicate
         }
         catch (Exception e)
         {
-            Logger.AddLogEntry("AddTaskToDb error");
-            Logger.AddLogEntry(e.Message);
+            Logger.AddError("AddTaskToDb", e);
             return false;
         }
         LoadDbTable();
@@ -223,7 +200,7 @@ public static class DbCommunicate
                             "duration, exp_time, done_frames, all_frames, " +
                             "is_filter_g, is_filter_r, is_filter_i, " +
                             "object_name, object_type, status, observer, frame_type, x_bin, y_bin, " +
-                            "repoint_coords, repoint_times, is_filter_V) = " +
+                            "repoint_coords, repoint_times, is_filter_v) = " +
                             "($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, " +
                             "$14, $15, $16, $17, $18, $19, $20, $21, $22)  " +
                             $" WHERE task_id = {observationTask.TaskNumber}";
@@ -236,10 +213,10 @@ public static class DbCommunicate
                             TargetRa = observationTask.Ra*360/24,
                             TargetDec = observationTask.Dec
                         }, DataTypeName = "spoint_domen"},
-                        new NpgsqlParameter {ParameterName = "time_add", Value = observationTask.TimeAdd },
-                        new NpgsqlParameter { Value = observationTask.TimeStart },
-                        new NpgsqlParameter { Value = observationTask.TimeEnd },
-                        new NpgsqlParameter { Value = observationTask.TimeLastExp },
+                        new NpgsqlParameter { Value = observationTask.TimeAdd.ToUniversalTime(), NpgsqlDbType = NpgsqlDbType.TimestampTz},
+                        new NpgsqlParameter { Value = observationTask.TimeStart.ToUniversalTime(), NpgsqlDbType = NpgsqlDbType.TimestampTz },
+                        new NpgsqlParameter { Value = observationTask.TimeEnd.ToUniversalTime(), NpgsqlDbType = NpgsqlDbType.TimestampTz },
+                        new NpgsqlParameter { Value = observationTask.TimeLastExp.ToUniversalTime(), NpgsqlDbType = NpgsqlDbType.TimestampTz },
                         new NpgsqlParameter { Value = observationTask.Duration },
                         new NpgsqlParameter { Value = observationTask.Exp },
                         new NpgsqlParameter { Value = observationTask.DoneFrames },
@@ -272,8 +249,7 @@ public static class DbCommunicate
         }
         catch (Exception e)
         {
-            Logger.AddLogEntry("UpdateTaskInDb error");
-            Logger.AddLogEntry(e.Message);
+            Logger.AddError("UpdateTaskInDb", e);
             return false;
         }
         LoadDbTable();
@@ -300,8 +276,7 @@ public static class DbCommunicate
         }
         catch (Exception e)
         {
-            Logger.AddLogEntry("AddFrameToDb error");
-            Logger.AddLogEntry(e.Message);
+            Logger.AddError("AddFrameToDb", e);
             return false;
         }
         return true;
@@ -316,6 +291,7 @@ public static class DbCommunicate
                 var fils = observationTask.Filters.Split(' ');
                 foreach (var fil in fils)
                 {
+                    if (string.IsNullOrEmpty(fil)) continue;
                     var cam = CameraControl.cams.Last(c => c.Filter == fil);
                     var query = "INSERT INTO robophot_master_frames (m_frame_type, m_frame_filter, fk_task_id, " +
                                 $"m_camera_sn, m_x_bin, m_y_bin, m_exp_time) VALUES " +
@@ -328,8 +304,7 @@ public static class DbCommunicate
             }
             catch (Exception e)
             {
-                Logger.AddLogEntry("AddFrameToDb error");
-                Logger.AddLogEntry(e.Message);
+                Logger.AddError("AddMFrameToBd", e);
                 return false;
             }
             return true;

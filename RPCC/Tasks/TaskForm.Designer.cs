@@ -88,7 +88,7 @@ namespace RPCC.Tasks
             this.groupBoxCoords.Controls.Add(this.labelTimeStart);
             this.groupBoxCoords.Controls.Add(this.textBoxCoords);
             this.groupBoxCoords.Controls.Add(this.labelCoords);
-            this.groupBoxCoords.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (204)));
+            this.groupBoxCoords.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.groupBoxCoords.Location = new System.Drawing.Point(12, 12);
             this.groupBoxCoords.Name = "groupBoxCoords";
             this.groupBoxCoords.Size = new System.Drawing.Size(433, 219);
@@ -99,7 +99,7 @@ namespace RPCC.Tasks
             // comboBoxObjectType
             // 
             this.comboBoxObjectType.FormattingEnabled = true;
-            this.comboBoxObjectType.Items.AddRange(new object[] {"Exoplanet", "Brown dwarf", "White dwarf", "Nova", "Super nova", "Planet", "Asteroid", "Satellite", "Variable star", "Star cluster", "Nebula", "Galaxy", "Alert", "Other"});
+            this.comboBoxObjectType.Items.AddRange(new object[] { "Exoplanet", "Brown dwarf", "White dwarf", "Nova", "Super nova", "Planet", "Asteroid", "Satellite", "Variable star", "Star cluster", "Nebula", "Galaxy", "Alert", "Other" });
             this.comboBoxObjectType.Location = new System.Drawing.Point(6, 181);
             this.comboBoxObjectType.Name = "comboBoxObjectType";
             this.comboBoxObjectType.Size = new System.Drawing.Size(202, 28);
@@ -186,7 +186,7 @@ namespace RPCC.Tasks
             // 
             this.groupBoxFrame.Controls.Add(this.groupBox2);
             this.groupBoxFrame.Controls.Add(this.groupBoxFilters);
-            this.groupBoxFrame.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (204)));
+            this.groupBoxFrame.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.groupBoxFrame.Location = new System.Drawing.Point(12, 237);
             this.groupBoxFrame.Name = "groupBoxFrame";
             this.groupBoxFrame.Size = new System.Drawing.Size(433, 200);
@@ -237,7 +237,7 @@ namespace RPCC.Tasks
             // comboBoxFrameType
             // 
             this.comboBoxFrameType.FormattingEnabled = true;
-            this.comboBoxFrameType.Items.AddRange(new object[] {"Object", "Dark", "Flat", "Test"});
+            this.comboBoxFrameType.Items.AddRange(new object[] { "Object", "Dark", "Flat", "Test" });
             this.comboBoxFrameType.Location = new System.Drawing.Point(113, 117);
             this.comboBoxFrameType.Name = "comboBoxFrameType";
             this.comboBoxFrameType.Size = new System.Drawing.Size(107, 28);
@@ -247,7 +247,7 @@ namespace RPCC.Tasks
             // comboBoxExp
             // 
             this.comboBoxExp.FormattingEnabled = true;
-            this.comboBoxExp.Items.AddRange(new object[] {"2", "5", "10", "15", "20", "30", "50", "80", "120", "180"});
+            this.comboBoxExp.Items.AddRange(new object[] { "2", "5", "10", "15", "20", "30", "50", "80", "120", "180" });
             this.comboBoxExp.Location = new System.Drawing.Point(113, 49);
             this.comboBoxExp.Name = "comboBoxExp";
             this.comboBoxExp.Size = new System.Drawing.Size(107, 28);
@@ -385,7 +385,7 @@ namespace RPCC.Tasks
             this.groupBoxSSObjects.Controls.Add(this.label6);
             this.groupBoxSSObjects.Controls.Add(this.textBoxCoordsSSObjects);
             this.groupBoxSSObjects.Controls.Add(this.label7);
-            this.groupBoxSSObjects.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (204)));
+            this.groupBoxSSObjects.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.groupBoxSSObjects.Location = new System.Drawing.Point(451, 12);
             this.groupBoxSSObjects.Name = "groupBoxSSObjects";
             this.groupBoxSSObjects.Size = new System.Drawing.Size(433, 462);
@@ -437,8 +437,7 @@ namespace RPCC.Tasks
             this.Controls.Add(this.buttonAdd);
             this.Controls.Add(this.groupBoxFrame);
             this.Controls.Add(this.groupBoxCoords);
-            this.Enabled = false;
-            this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "TaskForm";
             this.Text = "TaskForm";
             this.groupBoxCoords.ResumeLayout(false);

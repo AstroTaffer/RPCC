@@ -470,7 +470,7 @@ public partial class MainForm : Form
         if (CameraControl.cams[indx].IsExposing)
         {
             if (Head.currentTask is null) return;
-            value = 100 - CameraControl.cams[indx].RemTime / 10 / Head.currentTask.Exp;
+            value = 100 - CameraControl.cams[indx].RemTime * 100 / Head.currentTask.Exp;
             if (value < 0)
             {
                 value = 0;

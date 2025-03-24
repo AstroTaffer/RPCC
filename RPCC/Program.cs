@@ -9,8 +9,9 @@ namespace RPCC
         ///     Главная точка входа для приложения.
         /// </summary>
         [STAThread]
+        [Obsolete("Obsolete")]
         private static void Main()
-        {
+        {   
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainForm());

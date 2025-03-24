@@ -189,6 +189,7 @@ namespace RPCC.Utils
                 SnCamG = (string)config.Root.Element("cameras").Element("snCamG");
                 SnCamR = (string)config.Root.Element("cameras").Element("snCamR");
                 SnCamI = (string)config.Root.Element("cameras").Element("snCamI");
+                SnCamV = (string)config.Root.Element("cameras").Element("snCamV");
                 NumFlushes = (int)config.Root.Element("cameras").Element("numFlushes");
                 CamTemp = (double)config.Root.Element("cameras").Element("camTemp");
 
@@ -263,7 +264,7 @@ namespace RPCC.Utils
                     new XElement("snCamG", "ML0882515"),
                     new XElement("snCamR", "ML0892515"),
                     new XElement("snCamI", "ML0742515"),
-                    new XElement("snCamV", "Alta-U6"), // TODO find sn
+                    new XElement("snCamV", "AltaU-6"), // TODO find sn
                     new XElement("numFlushes", 5),
                     new XElement("camTemp", -20.0)),
                 
@@ -286,7 +287,7 @@ namespace RPCC.Utils
                     )
             ));
 
-            config.Save("SettingsDefault.xml");
+            config.Save("Settings.xml");
             Logger.AddLogEntry("Default config file restored");
         }
         #endregion

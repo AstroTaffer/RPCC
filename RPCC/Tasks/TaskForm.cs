@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
+using RPCC.Cams;
 using RPCC.Comms;
 using RPCC.Utils;
 
@@ -38,10 +39,11 @@ public partial class TaskForm : Form
             {
                 _task = Tasker.GetTaskByRowIndex(_rowIndex);
             }
-            catch
+            catch (Exception e)
             {
-                Tasker.DeleteTaskByRowIndex(_rowIndex);
-                Tasker.PaintTable();
+                Logger.AddError("get task by row index", e, CameraControl.cams[0]);
+                // Tasker.DeleteTaskByRowIndex(_rowIndex);
+                // Tasker.PaintTable();
                 Close();
                 return;
             }

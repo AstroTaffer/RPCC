@@ -65,10 +65,15 @@ namespace RPCC.Utils
 
         internal static void AddError(string proc, Exception e, ICameraDevice cam)
         { 
-            AddLogEntry($"ERROR WHILE {proc}: {e.Message}");
+            AddLogEntry($"ERROR WHILE {proc}: {e}");
             AddLogEntry($"ERROR WHILE {proc}: filter {cam.Filter}, SN {cam.SerialNumber}, model {cam.ModelName}, file {cam.FileName}");
         }
 
+        internal static void AddError(string proc, Exception e)
+        { 
+            AddLogEntry($"ERROR WHILE {proc}: {e}");
+        }
+        
         internal static void ClearLogs()
         {
             LogBox.Items.Clear();
