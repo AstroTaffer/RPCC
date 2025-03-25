@@ -215,9 +215,14 @@ public partial class MainForm : Form
 
     #region Options
 
-    private void RegenerateConfigToolStripMenuItem_Click(object sender, EventArgs e)
+    private void ResetConfigToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        Settings.RegeneratetXmlConfig();
+        if (MessageBox.Show("Are you sure?\n"
+            + "This action cannot be reverted.",
+            "Reset config?",
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Warning,
+            MessageBoxDefaultButton.Button1) == DialogResult.Yes) Settings.ResetXmlConfig();
     }
     #endregion
 

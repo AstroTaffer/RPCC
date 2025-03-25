@@ -47,7 +47,7 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.reconnectAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.regenerateConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.resetConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBoxLogs = new System.Windows.Forms.GroupBox();
             this.listBoxLogs = new System.Windows.Forms.ListBox();
             this.contextMenuStripLogs = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -270,16 +270,18 @@
             // 
             // optionsToolStripMenuItem
             // 
+            this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.resetConfigToolStripMenuItem});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             this.optionsToolStripMenuItem.Text = "Options";
             // 
-            // regenerateConfigToolStripMenuItem
+            // resetConfigToolStripMenuItem
             // 
-            this.regenerateConfigToolStripMenuItem.Name = "regenerateConfigToolStripMenuItem";
-            this.regenerateConfigToolStripMenuItem.Size = new System.Drawing.Size(170, 22);
-            this.regenerateConfigToolStripMenuItem.Text = "Regenerate config";
-            this.regenerateConfigToolStripMenuItem.Click += new System.EventHandler(this.RegenerateConfigToolStripMenuItem_Click);
+            this.resetConfigToolStripMenuItem.Name = "resetConfigToolStripMenuItem";
+            this.resetConfigToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.resetConfigToolStripMenuItem.Text = "Reset config";
+            this.resetConfigToolStripMenuItem.Click += new System.EventHandler(this.ResetConfigToolStripMenuItem_Click);
             // 
             // groupBoxLogs
             // 

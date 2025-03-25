@@ -162,7 +162,7 @@ namespace RPCC.Utils
         internal static void LoadXmlConfig()
         {
             bool isConfigBad = false;
-            DialogResult isRegenRequested = DialogResult.No;
+            DialogResult isResetRequested = DialogResult.No;
 
             try
             {
@@ -205,7 +205,7 @@ namespace RPCC.Utils
             catch (FileNotFoundException)
             {
                 isConfigBad = true;
-                isRegenRequested = MessageBox.Show("Config file not found.\n"
+                isResetRequested = MessageBox.Show("Config file not found.\n"
                     + "Would you like to regenerate it (\"YES\")\n"
                     + "or just close the application (\"NO\")?",
                     "Config not found",
@@ -217,7 +217,7 @@ namespace RPCC.Utils
             catch (NullReferenceException)
             {
                 isConfigBad = true;
-                isRegenRequested = MessageBox.Show("Config file has invalid structure.\n"
+                isResetRequested = MessageBox.Show("Config file has invalid structure.\n"
                     + "Would you like to regenerate it (\"YES\")\n"
                     + "or just close the application (\"NO\")?",
                     "Invalid config structure",
@@ -229,7 +229,7 @@ namespace RPCC.Utils
             catch (Exception ex) when (ex is ArgumentException || ex is FormatException)
             {
                 isConfigBad = true;
-                isRegenRequested = MessageBox.Show("Config file has invalid parameters:\n"
+                isResetRequested = MessageBox.Show("Config file has invalid parameters:\n"
                     + $"{ex.Message}.\n"
                     + "Would you like to regenerate it (\"YES\")\n"
                     + "or just close the application (\"NO\")?",
@@ -243,10 +243,10 @@ namespace RPCC.Utils
             {
                 if (isConfigBad)
                 {
-                    switch (isRegenRequested)
+                    switch (isResetRequested)
                     {
                         case DialogResult.Yes:
-                            RegeneratetXmlConfig();
+                            ResetXmlConfig();
                             LoadXmlConfig();
                             break;
                         case DialogResult.No:
@@ -257,38 +257,71 @@ namespace RPCC.Utils
             }
         }
 
-        internal static void RegeneratetXmlConfig()
+        internal static void ResetXmlConfig()
         {
-            var config = new XDocument(new XElement("settings",                
-                new XElement("cameras",
-                    new XElement("snCamG", "ML0882515"),
-                    new XElement("snCamR", "ML0892515"),
-                    new XElement("snCamI", "ML0742515"),
-                    new XElement("snCamV", "AltaU-6"), // TODO find sn
-                    new XElement("numFlushes", 5),
-                    new XElement("camTemp", -20.0)),
-                
-                new XElement("survey",
-                  new XElement("mainOutFolder", Directory.Exists("D:") ? 
-                  "D:" : Directory.GetCurrentDirectory())),
-
-                new XElement("comms",
-                    new XElement("focusComId", 4),  // for server
-                    new XElement("meteoDomeTcpIpPort", 8085),
-                    new XElement("donutsTcpIpPort", 3030),
-                    new XElement("siTechExeTcpIpPort", 8079)),
-                
-                new XElement("database",
-                    new XElement("dbIP", "192.168.240.5"),
-                    new XElement("dbPort", "5432"),
-                    new XElement("dbUserId", "remote_user"),
-                    new XElement("dbPassword", "remote_user"),
-                    new XElement("database", "postgres")
+            var config = new XElement("Settings",
+                new XElement("Cameras",
+                    new XComment(" [Gain] = e/ADU, [Rate] = kPix/sec, [RdNoise] = e "),
+                    new XElement("Camera",
+                        new XAttribute("SerialNumber", "UNKNOWN"),
+                        new XComment(" This is the default/fallback settings set. Do not delete it! "),
+                        new XElement("Filter", "UNKNOWN"),
+                        new XElement("TempSetpoint", -20.0),
+                        new XElement("Bin", 1),
+                        new XElement("ExpStartFlushesNum", 5),
+                        new XElement("Model", "UNKNOWN"),
+                        new XElement("Detector", "UNKNOWN"),
+                        new XElement("Gain", 1.4),
+                        new XElement("Rate", 500.0),
+                        new XElement("RdNoise", 14.0)
+                        )
+                    ),
+                new XElement("Survey",
+                    new XComment(" [TaskPrepDuration] = min, [ClbTasksTimeout] = d, [Exp] = sec "),
+                    new XElement("MainOutputFolder", Directory.Exists("D:")
+                        ? "D:"
+                        : Directory.GetCurrentDirectory()),
+                    new XElement("TaskPrepDuration", 5),
+                    new XElement("ClbTasksTimeout", 1),
+                    new XElement("ClbTaskFramesNum", 10),
+                    new XElement("DarkExps",
+                        new XElement("Exp", 2),
+                        new XElement("Exp", 5),
+                        new XElement("Exp", 10),
+                        new XElement("Exp", 15),
+                        new XElement("Exp", 20),
+                        new XElement("Exp", 30),
+                        new XElement("Exp", 50),
+                        new XElement("Exp", 80),
+                        new XElement("Exp", 120),
+                        new XElement("Exp", 180)
+                        ),
+                    new XElement("FlatExps",
+                        new XElement("Exp", 2)
+                        )
+                    ),
+                new XElement("Guide",
+                    new XComment(" [PulseGuideVelocity] = arcsec/sec "),
+                    new XElement("PulseGuideVelocityRa", 6.0),
+                    new XElement("PulseGuideVelocityDec", 2.0),
+                    new XElement("Kp", 1.2),
+                    new XElement("Ki", 0.00005),
+                    new XElement("Kd", 25)
+                    ),
+                new XElement("Comms",
+                    new XElement("FocusComPort", 4),
+                    new XElement("MeteoDomeTcpIpPort", 8085),
+                    new XElement("DonutsTcpIpPort", 3030),
+                    new XElement("SiTechExeTcpIpPort", 8079),
+                    new XElement("DbPort", "5432"),
+                    new XElement("DbUserId", "remote_user"),
+                    new XElement("DbPassword", "remote_user"),
+                    new XElement("Database", "postgres")
                     )
-            ));
+                );
 
             config.Save("Settings.xml");
-            Logger.AddLogEntry("Default config file restored");
+            Logger.AddLogEntry("Config file reset");
         }
         #endregion
     }
