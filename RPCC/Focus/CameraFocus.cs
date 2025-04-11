@@ -16,8 +16,7 @@ namespace RPCC.Focus
         /// </summary>
         private const int MaxFocCycles = 5;
         private const int MaxFocBadFrames = 3;
-        private const int MaxSumShifts = 1000;
-        // public static double FwhmBest { get; set; }
+        private const int MaxSumShifts = 500;
         public static bool IsAutoFocus { get; set; }
         public static bool IsZenith { get; set; }
         public static int DeFocus { get; set; }
@@ -30,10 +29,12 @@ namespace RPCC.Focus
         private static short _sumShift;
         private static ObservationTask _taskForFocus;
         private static short _phase;
-        private static double _oldFwhm;
+        private static double _oldFwhm; 
         private const short FocusExp = 20;
         public static double Seeing = 1;
         public static bool IsFocusing;
+        private static short _objExp;
+        private static float DefocEpsilon = 3;
 
         public static void StartAutoFocus(ObservationTask observationTask)
         {
@@ -41,8 +42,9 @@ namespace RPCC.Focus
             IsFocusing = true;
             _taskForFocus = observationTask.Copy();
             _taskForFocus.FrameType = StringHolder.Focus;
-            if (Head.currentTask.Exp > FocusExp)
+            if (Head.CurrentTask.Exp > FocusExp)
             {
+                _objExp = Head.CurrentTask.Exp;
                 _taskForFocus.Exp = FocusExp;
             }
             
@@ -50,7 +52,7 @@ namespace RPCC.Focus
             _focBadFrames = 0; //
             Frames.Clear();
             _startFocusPos = SerialFocus.CurrentPosition;
-            _shift = -150;
+            _shift = -50;
             _sumShift = 0;
             _phase = 0;
             // _frameCounter = 0;
@@ -72,7 +74,7 @@ namespace RPCC.Focus
             if (!WeatherDataCollector.Obs)
             {
                 Logger.AddLogEntry($"Weather is bad, pause task #{_taskForFocus.TaskNumber}");
-                Head.isOnPause = true;
+                Head.IsOnPause = true;
             }
 
             if (Math.Abs(_sumShift) > MaxSumShifts)
@@ -90,7 +92,7 @@ namespace RPCC.Focus
                 return;
             }
 
-            if (Head.currentTask.Status != 1) 
+            if (Head.CurrentTask.Status > 1) 
             {
                 Logger.AddLogEntry("FOCUS: task ended, return focus and exit");
                 ReturnFocusAndExit();
@@ -104,9 +106,9 @@ namespace RPCC.Focus
                 case 1:
                     PhaseTwo(focusImPath);
                     break;
-                case 2:
-                    PhaseThree(focusImPath);
-                    break;
+                // case 2:
+                //     PhaseThree(focusImPath);
+                //     break;
             }
         }
 
@@ -184,9 +186,17 @@ namespace RPCC.Focus
                 return;
             }
             
-            //проверяем FWHM, если больше 6, то рассчитываем сдвиг в ту же сторону еще на 90*(6-FWHM)
-            if (Frames.Last().Fwhm < 6)
+            // //проверяем FWHM, если больше 6, то рассчитываем сдвиг в ту же сторону еще на 90*(6-FWHM)
+            // if (Frames.Last().Fwhm < 6)
+            // {
+            //     _shift = BigShift(Frames.Last().Fwhm, _shift);
+            //     GetImForFocus(_shift);
+            //     return;
+            // }
+
+            if (_oldFwhm == 0)
             {
+                _oldFwhm = Frames.Last().Fwhm;
                 _shift = BigShift(Frames.Last().Fwhm, _shift);
                 GetImForFocus(_shift);
                 return;
@@ -194,6 +204,11 @@ namespace RPCC.Focus
 
             _phase = 1;
 
+            if (_oldFwhm + DefocEpsilon < Frames.Last().Fwhm)
+            {
+                _shift = (short)(-1 * _shift);
+            }
+            
             //теперь точно в дефокусе и точно знаем где фокус
             //начинаем движение в сторону фокуса
             Logger.AddLogEntry("FOCUS: phase 2, focusing");
@@ -258,23 +273,29 @@ namespace RPCC.Focus
                 FocusingDone(fwhm);
                 return;
             }
-            if (_oldFwhm < fwhm)
+            if (_oldFwhm + DefocEpsilon < fwhm)
             {
                 Logger.AddLogEntry("FOCUS: Old_FWHM < FWHM");
-                if (fwhm<3)
-                {
-                    Logger.AddLogEntry("FOCUS: image is focused");
-                    FocusingDone(fwhm);
-                    return;
-                }
+                // if (fwhm<3)
+                // {
+                //     Logger.AddLogEntry("FOCUS: image is focused");
+                //     FocusingDone(fwhm);
+                //     return;
+                // }
                 _shift *= -1;
-                Logger.AddLogEntry("FOCUS: Old_FWHM < FWHM, but fwhm > 3, reverse");
+                Logger.AddLogEntry("FOCUS: Old_FWHM + eps < FWHM, but FWHM > 3, reverse");
             }
             if (Math.Abs(_oldFwhm - fwhm) < 0.2)
             {
                 Logger.AddLogEntry("FOCUS: Math.Abs(Old_FWHM - FWHM)<0.2");
                 Logger.AddLogEntry("FOCUS: image is focused");
-                GoFocus((Frames[-1].Focus + Frames[-2].Focus)/2);
+                var s = (Frames[-1].Focus + Frames[-2].Focus) / 2;
+                if (s > 0)
+                {
+                    Logger.AddLogEntry($"FOCUS: Move focus {s}"); 
+                    GoFocus(s);
+                }
+                
                 FocusingDone(fwhm);
                 return;
             }
@@ -294,36 +315,44 @@ namespace RPCC.Focus
             ReturnFocusAndExit();
         }
     
-        private static void PhaseThree(string focusImPath)
-        {
-            var testShot = new GetDataFromFits(focusImPath);
-            Logger.LogFrameInfo(testShot, CameraControl.cams.Last().Filter);
-            if (testShot.Focused)
-            {
-                // FwhmBest = testShot.Fwhm;
-                Logger.AddLogEntry("FOCUS: image is focused");
-                FocusingDone(testShot.Fwhm);
-                return;
-            }
-            
-            Frames.Clear();
-            // _zs.Clear();
-            
-            Logger.AddLogEntry("FOCUS: start curve algorithm on new frames, phase 4");
-            _phase = 3;
-            Logger.AddLogEntry(@"FOCUS: move to -1000");
-            GetImForFocus(-1000);//переводим фокусер
-                        //в крайнее положение,
-                        //чтобы равномерно пройтись
-                        //по диапазону 
-        }
+        // private static void PhaseThree(string focusImPath)
+        // {
+        //     var testShot = new GetDataFromFits(focusImPath);
+        //     Logger.LogFrameInfo(testShot, CameraControl.cams.Last().Filter);
+        //     if (testShot.Focused)
+        //     {
+        //         // FwhmBest = testShot.Fwhm;
+        //         Logger.AddLogEntry("FOCUS: image is focused");
+        //         FocusingDone(testShot.Fwhm);
+        //         return;
+        //     }
+        //     
+        //     Frames.Clear();
+        //     // _zs.Clear();
+        //     
+        //     Logger.AddLogEntry("FOCUS: start curve algorithm on new frames, phase 4");
+        //     _phase = 3;
+        //     Logger.AddLogEntry(@"FOCUS: move to -1000");
+        //     GetImForFocus(-1000);//переводим фокусер
+        //                 //в крайнее положение,
+        //                 //чтобы равномерно пройтись
+        //                 //по диапазону 
+        // }
         #endregion
 
         #region Utils
 
         private static short BigShift(double fwhm, float shift)
         {   
-            return (short) (Math.Sign(shift) * 55.4 * (6 - fwhm));
+            // if (fwhm < 7)
+            // {
+            return (short) (Math.Sign(shift) * 55.4 * (fwhm - 1.5));
+            // }
+            // else
+            // {
+            //     return (short)(shift * 1.25);
+            // }
+            
         }   
         
         private static short SmallShift(double fwhm, float shift)
@@ -340,7 +369,7 @@ namespace RPCC.Focus
                 Logger.AddLogEntry("FOCUS: SumShift=" + _sumShift);
                 GoFocus(z);
             }
-            if (!Head.isOnPause)
+            if (!Head.IsOnPause)
             {
                 Head.StartExpAndCheckFuckup(_taskForFocus);
             }
@@ -348,15 +377,20 @@ namespace RPCC.Focus
 
         private static void GoFocus(int z)
         {
+            var start = SerialFocus.CurrentPosition;
             SerialFocus.FRun_To(z);
-            var waitTime = 1000 + Math.Abs(z) / 100;
-            Logger.AddLogEntry($"FOCUS: WaitTime={waitTime}");
-            Thread.Sleep(waitTime);
+            Logger.AddDebugLogEntry($"FOCUS: Wait while GoFocus");
+            while (Math.Abs(start+z-SerialFocus.CurrentPosition) > 10)
+            {
+                Thread.Sleep(1000);
+            }
+            Logger.AddDebugLogEntry($"FOCUS: GoFocus ended");
         }
 
         private static void ReturnFocusAndExit()
         {
             GoFocus(_startFocusPos - SerialFocus.CurrentPosition);
+            IsAutoFocus = false;
             _sumShift = 0;
             FocusingDone(1);
         }
@@ -364,6 +398,8 @@ namespace RPCC.Focus
         private static void FocusingDone(double see)
         {
             Seeing = see;
+            Head.CurrentTask.FrameType = StringHolder.Light;
+            Head.CurrentTask.Exp = _objExp;
             Logger.AddLogEntry($"FOCUS: Set seeing for autofocus = {see}");
             if (DeFocus != 0)
             {
@@ -372,7 +408,7 @@ namespace RPCC.Focus
             }
             IsFocusing = false;
             // CameraControl.PrepareToObs(Head.currentTask);
-            if (!Head.isOnPause)
+            if (!Head.IsOnPause)
             {
                 Logger.AddLogEntry("FOCUS: return to observation");
                 Head.StartExpAndCheckFuckup();

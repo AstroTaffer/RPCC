@@ -21,8 +21,7 @@ internal static class CameraControl
 
     private static readonly Timer CamsTimer = new(1000);
     private static readonly List<Task> ReadyImagesProcessList = [];
-    internal static ResetUi resetUi;
-    internal static ResetPics resetPics;
+    // internal static ResetUi resetUi;
 
     internal static List<ICameraDevice> cams = [];
 
@@ -103,10 +102,71 @@ internal static class CameraControl
             }).ToList();
 
             if (cams.Count <= 0) return false;
+            foreach (var cam in cams)
+            {
+                switch (cam.Filter)
+                {
+                    case StringHolder.FilG:
+                    case StringHolder.FilV:
+                        cam.UiBlock = new CameraUiBlock
+                        {
+                            GroupBoxCam = MainForm.Instance.groupBoxCam1,
+                            LabelCcdTemp = MainForm.Instance.labelCam1CcdTemp,
+                            LabelBaseTemp = MainForm.Instance.labelCam1BaseTemp,
+                            LabelCoolerPwr = MainForm.Instance.labelCam1CoolerPwr,
+                            LabelStatus = MainForm.Instance.labelCam1Status,
+                            LabelRemTime = MainForm.Instance.labelCam1RemTime,
+                            
+                            PictureBoxPreview = MainForm.Instance.pictureBoxImage1,
+                            ExposureProgressBar = MainForm.Instance.progressBarG,
+                            LabelFilter = MainForm.Instance.labelCam1Filter,
+                            LabelModel = MainForm.Instance.labelCam1Model,
+                            LabelSerial = MainForm.Instance.labelCam1Sn
+                        };
+                        break;
+
+                    case StringHolder.FilR:
+                        cam.UiBlock = new CameraUiBlock
+                        {
+                            GroupBoxCam = MainForm.Instance.groupBoxCam2,
+                            LabelCcdTemp = MainForm.Instance.labelCam2CcdTemp,
+                            LabelBaseTemp = MainForm.Instance.labelCam2BaseTemp,
+                            LabelCoolerPwr = MainForm.Instance.labelCam2CoolerPwr,
+                            LabelStatus = MainForm.Instance.labelCam2Status,
+                            LabelRemTime = MainForm.Instance.labelCam2RemTime,
+                            
+                            PictureBoxPreview = MainForm.Instance.pictureBoxImage2,
+                            ExposureProgressBar = MainForm.Instance.progressBarR,
+                            LabelFilter = MainForm.Instance.labelCam2Filter,
+                            LabelModel = MainForm.Instance.labelCam2Model,
+                            LabelSerial = MainForm.Instance.labelCam2Sn
+                        };
+                        break;
+
+                    case StringHolder.FilI:
+                        cam.UiBlock = new CameraUiBlock
+                        {
+                            GroupBoxCam = MainForm.Instance.groupBoxCam3,
+                            LabelCcdTemp = MainForm.Instance.labelCam3CcdTemp,
+                            LabelBaseTemp = MainForm.Instance.labelCam3BaseTemp,
+                            LabelCoolerPwr = MainForm.Instance.labelCam3CoolerPwr,
+                            LabelStatus = MainForm.Instance.labelCam3Status,
+                            LabelRemTime = MainForm.Instance.labelCam3RemTime,
+                            
+                            PictureBoxPreview = MainForm.Instance.pictureBoxImage3,
+                            ExposureProgressBar = MainForm.Instance.progressBarI,
+                            LabelFilter = MainForm.Instance.labelCam3Filter,
+                            LabelModel = MainForm.Instance.labelCam3Model,
+                            LabelSerial = MainForm.Instance.labelCam3Sn
+                        };
+                        break;
+                }
+            }
+
             GetCamsStatusAlt();
             CamsTimer.Elapsed += CamsTimerTickAlt;
             CamsTimer.Start();
-            resetUi();
+            // resetUi();
             isConnected = true;
             return isAllGood;
         }
@@ -122,9 +182,10 @@ internal static class CameraControl
             CamsTimer.Stop();
             CamsTimer.Elapsed -= CamsTimerTickAlt;
             isConnected = false;
-            foreach (var cam in cams) isAllGood &= cam.Close();
+            foreach (var cam in cams)
+                isAllGood &= cam.Close();
+
             cams = [];
-            resetUi();
         }
 
         return isAllGood;
@@ -142,6 +203,9 @@ internal static class CameraControl
         lock (CamsLocker)
         {
             GetCamsStatusAlt();
+            foreach (var cam in cams)
+                cam.UpdateUi();
+            
             var allReady = true;
             foreach (var unused in cams.Where(cam => cam.Status == StringHolder.Exposing))
                 allReady = false;
@@ -187,15 +251,17 @@ internal static class CameraControl
 
                     if (_isCallbackRequired && _readyCamNum == cams.Count)
                     {
-                        switch (Head.currentTask.FrameType)
+                        
+                        StatusUpdater.RunPreviewGenerator();
+                        if (CameraFocus.IsFocusing)
                         {
-                            case "Focus":
-                                CameraFocus.CamFocusCallback();
-                                break;
-                            default:
-                                Head.CamCallback();
-                                break;
+                            CameraFocus.CamFocusCallback();
                         }
+                        else
+                        {
+                            Head.CamCallback();
+                        }
+                        
 
                         ReadyImagesProcessList.Clear();
                         foreach (var cam in cams)
@@ -216,6 +282,14 @@ internal static class CameraControl
 
                     ReadyImagesProcessList.Clear();
                 }
+            }
+            else
+            {
+                foreach (var cam in cams)
+                {
+                    cam.UpdateProgressBar(loadedTask.Exp);
+                }
+                
             }
         }
 
@@ -375,8 +449,7 @@ internal static class CameraControl
             if (pixelColor > 255) pixelColor = 255;
             cam.LatestImageBitmap.SetPixel(j, i, Color.FromArgb(pixelColor, pixelColor, pixelColor));
         }
-
-        resetPics(cam);
+        cam.UpdatePreview();
     }
 
     #endregion

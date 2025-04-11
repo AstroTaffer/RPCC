@@ -118,6 +118,7 @@
             this.addToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dataGridTextBoxColumn1 = new System.Windows.Forms.DataGridTextBoxColumn();
             this.dataGridTextBoxColumn2 = new System.Windows.Forms.DataGridTextBoxColumn();
+            this.labelStatusInfo = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewTasker)).BeginInit();
             this.statusStrip.SuspendLayout();
             this.menuStrip.SuspendLayout();
@@ -177,7 +178,7 @@
             dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             this.dataGridViewTasker.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
             this.dataGridViewTasker.RowHeadersVisible = false;
-            this.dataGridViewTasker.Size = new System.Drawing.Size(1196, 510);
+            this.dataGridViewTasker.Size = new System.Drawing.Size(1230, 510);
             this.dataGridViewTasker.TabIndex = 1;
             this.dataGridViewTasker.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.DataGridViewTasker_CellMouseDoubleClick);
             // 
@@ -186,7 +187,7 @@
             this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.tSStatusClock });
             this.statusStrip.Location = new System.Drawing.Point(0, 566);
             this.statusStrip.Name = "statusStrip";
-            this.statusStrip.Size = new System.Drawing.Size(1210, 22);
+            this.statusStrip.Size = new System.Drawing.Size(1244, 22);
             this.statusStrip.SizingGrip = false;
             this.statusStrip.TabIndex = 0;
             this.statusStrip.Text = "statusStrip";
@@ -202,7 +203,7 @@
             this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.launchToolStripMenuItem, this.optionsToolStripMenuItem });
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
-            this.menuStrip.Size = new System.Drawing.Size(1210, 24);
+            this.menuStrip.Size = new System.Drawing.Size(1244, 24);
             this.menuStrip.TabIndex = 1;
             this.menuStrip.Text = "menuStrip";
             // 
@@ -272,7 +273,6 @@
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             this.optionsToolStripMenuItem.Text = "Options";
-
             // 
             // regenerateConfigToolStripMenuItem
             // 
@@ -287,7 +287,7 @@
             this.groupBoxLogs.Controls.Add(this.listBoxLogs);
             this.groupBoxLogs.Location = new System.Drawing.Point(6, 3);
             this.groupBoxLogs.Name = "groupBoxLogs";
-            this.groupBoxLogs.Size = new System.Drawing.Size(500, 506);
+            this.groupBoxLogs.Size = new System.Drawing.Size(510, 506);
             this.groupBoxLogs.TabIndex = 2;
             this.groupBoxLogs.TabStop = false;
             this.groupBoxLogs.Text = "Logs";
@@ -303,7 +303,7 @@
             this.listBoxLogs.Location = new System.Drawing.Point(3, 16);
             this.listBoxLogs.Name = "listBoxLogs";
             this.listBoxLogs.ScrollAlwaysVisible = true;
-            this.listBoxLogs.Size = new System.Drawing.Size(494, 487);
+            this.listBoxLogs.Size = new System.Drawing.Size(504, 487);
             this.listBoxLogs.TabIndex = 0;
             this.listBoxLogs.DoubleClick += new System.EventHandler(this.ListBoxLogs_DoubleClick);
             // 
@@ -353,7 +353,7 @@
             this.tabControlMain.Location = new System.Drawing.Point(0, 24);
             this.tabControlMain.Name = "tabControlMain";
             this.tabControlMain.SelectedIndex = 0;
-            this.tabControlMain.Size = new System.Drawing.Size(1210, 542);
+            this.tabControlMain.Size = new System.Drawing.Size(1244, 542);
             this.tabControlMain.TabIndex = 3;
             // 
             // tabPageInfo
@@ -367,7 +367,7 @@
             this.tabPageInfo.Location = new System.Drawing.Point(4, 22);
             this.tabPageInfo.Name = "tabPageInfo";
             this.tabPageInfo.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageInfo.Size = new System.Drawing.Size(1202, 516);
+            this.tabPageInfo.Size = new System.Drawing.Size(1236, 516);
             this.tabPageInfo.TabIndex = 0;
             this.tabPageInfo.Text = "Main";
             this.tabPageInfo.UseVisualStyleBackColor = true;
@@ -379,9 +379,9 @@
             this.groupBoxSurvey.Controls.Add(this.checkBoxGuiding);
             this.groupBoxSurvey.Controls.Add(this.checkBoxHead);
             this.groupBoxSurvey.Controls.Add(this.buttonSurveyStop);
-            this.groupBoxSurvey.Location = new System.Drawing.Point(855, 413);
+            this.groupBoxSurvey.Location = new System.Drawing.Point(878, 413);
             this.groupBoxSurvey.Name = "groupBoxSurvey";
-            this.groupBoxSurvey.Size = new System.Drawing.Size(340, 96);
+            this.groupBoxSurvey.Size = new System.Drawing.Size(350, 96);
             this.groupBoxSurvey.TabIndex = 28;
             this.groupBoxSurvey.TabStop = false;
             this.groupBoxSurvey.Text = "Survey";
@@ -427,7 +427,7 @@
             this.buttonSurveyStop.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonSurveyStop.Location = new System.Drawing.Point(240, 21);
             this.buttonSurveyStop.Name = "buttonSurveyStop";
-            this.buttonSurveyStop.Size = new System.Drawing.Size(90, 30);
+            this.buttonSurveyStop.Size = new System.Drawing.Size(100, 30);
             this.buttonSurveyStop.TabIndex = 7;
             this.buttonSurveyStop.Text = "Stop";
             this.buttonSurveyStop.UseVisualStyleBackColor = true;
@@ -435,6 +435,7 @@
             // 
             // groupBoxFocusSettings
             // 
+            this.groupBoxFocusSettings.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBoxFocusSettings.Controls.Add(this.labelFocusPos);
             this.groupBoxFocusSettings.Controls.Add(this.labelEndSwitch);
             this.groupBoxFocusSettings.Controls.Add(this.checkBoxGoZenith);
@@ -447,9 +448,9 @@
             this.groupBoxFocusSettings.Controls.Add(this.buttonRun);
             this.groupBoxFocusSettings.Controls.Add(this.buttonRunStop);
             this.groupBoxFocusSettings.Controls.Add(this.numericUpDownRun);
-            this.groupBoxFocusSettings.Location = new System.Drawing.Point(855, 259);
+            this.groupBoxFocusSettings.Location = new System.Drawing.Point(878, 259);
             this.groupBoxFocusSettings.Name = "groupBoxFocusSettings";
-            this.groupBoxFocusSettings.Size = new System.Drawing.Size(340, 148);
+            this.groupBoxFocusSettings.Size = new System.Drawing.Size(350, 148);
             this.groupBoxFocusSettings.TabIndex = 26;
             this.groupBoxFocusSettings.TabStop = false;
             this.groupBoxFocusSettings.Text = "Focus Settings";
@@ -486,9 +487,9 @@
             // buttonSetZeroPos
             // 
             this.buttonSetZeroPos.Enabled = false;
-            this.buttonSetZeroPos.Location = new System.Drawing.Point(240, 88);
+            this.buttonSetZeroPos.Location = new System.Drawing.Point(240, 89);
             this.buttonSetZeroPos.Name = "buttonSetZeroPos";
-            this.buttonSetZeroPos.Size = new System.Drawing.Size(90, 30);
+            this.buttonSetZeroPos.Size = new System.Drawing.Size(100, 30);
             this.buttonSetZeroPos.TabIndex = 21;
             this.buttonSetZeroPos.Text = "Set zero position";
             this.buttonSetZeroPos.UseVisualStyleBackColor = true;
@@ -553,7 +554,7 @@
             this.buttonRun.Enabled = false;
             this.buttonRun.Location = new System.Drawing.Point(240, 16);
             this.buttonRun.Name = "buttonRun";
-            this.buttonRun.Size = new System.Drawing.Size(90, 30);
+            this.buttonRun.Size = new System.Drawing.Size(100, 30);
             this.buttonRun.TabIndex = 18;
             this.buttonRun.Text = "Run";
             this.buttonRun.UseVisualStyleBackColor = true;
@@ -564,7 +565,7 @@
             this.buttonRunStop.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonRunStop.Location = new System.Drawing.Point(240, 51);
             this.buttonRunStop.Name = "buttonRunStop";
-            this.buttonRunStop.Size = new System.Drawing.Size(90, 30);
+            this.buttonRunStop.Size = new System.Drawing.Size(100, 30);
             this.buttonRunStop.TabIndex = 17;
             this.buttonRunStop.Text = "Stop";
             this.buttonRunStop.UseVisualStyleBackColor = true;
@@ -583,6 +584,7 @@
             // 
             // groupBoxCam1
             // 
+            this.groupBoxCam1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBoxCam1.Controls.Add(this.pictureBoxImage1);
             this.groupBoxCam1.Controls.Add(this.panelImage1);
             this.groupBoxCam1.Controls.Add(this.progressBarG);
@@ -595,9 +597,9 @@
             this.groupBoxCam1.Controls.Add(this.labelCam1Sn);
             this.groupBoxCam1.Controls.Add(this.labelCam1Model);
             this.groupBoxCam1.Enabled = false;
-            this.groupBoxCam1.Location = new System.Drawing.Point(509, 3);
+            this.groupBoxCam1.Location = new System.Drawing.Point(522, 3);
             this.groupBoxCam1.Name = "groupBoxCam1";
-            this.groupBoxCam1.Size = new System.Drawing.Size(340, 250);
+            this.groupBoxCam1.Size = new System.Drawing.Size(350, 250);
             this.groupBoxCam1.TabIndex = 22;
             this.groupBoxCam1.TabStop = false;
             this.groupBoxCam1.Text = "Camera 1";
@@ -703,6 +705,7 @@
             // 
             // groupBoxCam2
             // 
+            this.groupBoxCam2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBoxCam2.Controls.Add(this.panelImage2);
             this.groupBoxCam2.Controls.Add(this.progressBarR);
             this.groupBoxCam2.Controls.Add(this.labelCam2RemTime);
@@ -714,9 +717,9 @@
             this.groupBoxCam2.Controls.Add(this.labelCam2Sn);
             this.groupBoxCam2.Controls.Add(this.labelCam2Model);
             this.groupBoxCam2.Enabled = false;
-            this.groupBoxCam2.Location = new System.Drawing.Point(855, 3);
+            this.groupBoxCam2.Location = new System.Drawing.Point(878, 3);
             this.groupBoxCam2.Name = "groupBoxCam2";
-            this.groupBoxCam2.Size = new System.Drawing.Size(340, 250);
+            this.groupBoxCam2.Size = new System.Drawing.Size(350, 250);
             this.groupBoxCam2.TabIndex = 23;
             this.groupBoxCam2.TabStop = false;
             this.groupBoxCam2.Text = "Camera 2";
@@ -833,9 +836,9 @@
             this.groupBoxCam3.Controls.Add(this.labelCam3Sn);
             this.groupBoxCam3.Controls.Add(this.labelCam3Model);
             this.groupBoxCam3.Enabled = false;
-            this.groupBoxCam3.Location = new System.Drawing.Point(509, 259);
+            this.groupBoxCam3.Location = new System.Drawing.Point(522, 260);
             this.groupBoxCam3.Name = "groupBoxCam3";
-            this.groupBoxCam3.Size = new System.Drawing.Size(340, 250);
+            this.groupBoxCam3.Size = new System.Drawing.Size(350, 250);
             this.groupBoxCam3.TabIndex = 24;
             this.groupBoxCam3.TabStop = false;
             this.groupBoxCam3.Text = "Camera 3";
@@ -947,7 +950,7 @@
             this.tabPageTasks.Location = new System.Drawing.Point(4, 22);
             this.tabPageTasks.Name = "tabPageTasks";
             this.tabPageTasks.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageTasks.Size = new System.Drawing.Size(1202, 516);
+            this.tabPageTasks.Size = new System.Drawing.Size(1236, 516);
             this.tabPageTasks.TabIndex = 1;
             this.tabPageTasks.Text = "Tasks";
             this.tabPageTasks.UseVisualStyleBackColor = true;
@@ -959,7 +962,7 @@
             this.dataGridTasks.HeaderForeColor = System.Drawing.SystemColors.ControlText;
             this.dataGridTasks.Location = new System.Drawing.Point(3, 3);
             this.dataGridTasks.Name = "dataGridTasks";
-            this.dataGridTasks.Size = new System.Drawing.Size(1196, 510);
+            this.dataGridTasks.Size = new System.Drawing.Size(1230, 510);
             this.dataGridTasks.TabIndex = 0;
             // 
             // contextMenuStripTasker
@@ -987,11 +990,20 @@
             this.dataGridTextBoxColumn2.FormatInfo = null;
             this.dataGridTextBoxColumn2.Width = -1;
             // 
+            // labelStatusInfo
+            // 
+            this.labelStatusInfo.Location = new System.Drawing.Point(672, 569);
+            this.labelStatusInfo.Name = "labelStatusInfo";
+            this.labelStatusInfo.Size = new System.Drawing.Size(568, 19);
+            this.labelStatusInfo.TabIndex = 4;
+            this.labelStatusInfo.Text = "0 = Wait, 1 = In progress,2 = Ended complete, 3 = Rejected by observer, 4 = Not o" + "bserved, 5 = Ended not complete";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1210, 588);
+            this.ClientSize = new System.Drawing.Size(1244, 588);
+            this.Controls.Add(this.labelStatusInfo);
             this.Controls.Add(this.tabControlMain);
             this.Controls.Add(this.statusStrip);
             this.Controls.Add(this.menuStrip);
@@ -1033,32 +1045,34 @@
             this.ResumeLayout(false);
             this.PerformLayout();
         }
-        
-        private System.Windows.Forms.PictureBox pictureBoxImage1;
-        private System.Windows.Forms.Panel panelImage1;
-        private System.Windows.Forms.ProgressBar progressBarG;
-        private System.Windows.Forms.GroupBox groupBoxCam2;
-        private System.Windows.Forms.Panel panelImage2;
-        private System.Windows.Forms.PictureBox pictureBoxImage2;
-        private System.Windows.Forms.ProgressBar progressBarR;
-        private System.Windows.Forms.Label labelCam2RemTime;
-        private System.Windows.Forms.Label labelCam2Status;
-        private System.Windows.Forms.Label labelCam2CoolerPwr;
-        private System.Windows.Forms.Label labelCam2BaseTemp;
-        private System.Windows.Forms.Label labelCam2CcdTemp;
-        private System.Windows.Forms.Label labelCam2Filter;
-        private System.Windows.Forms.Label labelCam2Sn;
-        private System.Windows.Forms.GroupBox groupBoxCam3;
-        private System.Windows.Forms.Panel panelImage3;
-        private System.Windows.Forms.PictureBox pictureBoxImage3;
-        private System.Windows.Forms.ProgressBar progressBarI;
-        private System.Windows.Forms.Label labelCam3RemTime;
-        private System.Windows.Forms.Label labelCam3Status;
-        private System.Windows.Forms.Label labelCam3CoolerPwr;
-        private System.Windows.Forms.Label labelCam3BaseTemp;
-        private System.Windows.Forms.Label labelCam3CcdTemp;
-        private System.Windows.Forms.Label labelCam3Filter;
-        private System.Windows.Forms.Label labelCam3Sn;
+
+        private System.Windows.Forms.Label labelStatusInfo;
+
+        internal System.Windows.Forms.PictureBox pictureBoxImage1;
+        internal System.Windows.Forms.Panel panelImage1;
+        internal System.Windows.Forms.ProgressBar progressBarG;
+        internal System.Windows.Forms.GroupBox groupBoxCam2;
+        internal System.Windows.Forms.Panel panelImage2;
+        internal System.Windows.Forms.PictureBox pictureBoxImage2;
+        internal System.Windows.Forms.ProgressBar progressBarR;
+        internal  System.Windows.Forms.Label labelCam2RemTime;
+        internal  System.Windows.Forms.Label labelCam2Status;
+        internal  System.Windows.Forms.Label labelCam2CoolerPwr;
+        internal  System.Windows.Forms.Label labelCam2BaseTemp;
+        internal  System.Windows.Forms.Label labelCam2CcdTemp;
+        internal  System.Windows.Forms.Label labelCam2Filter;
+        internal  System.Windows.Forms.Label labelCam2Sn;
+        internal System.Windows.Forms.GroupBox groupBoxCam3;
+        internal System.Windows.Forms.Panel panelImage3;
+        internal System.Windows.Forms.PictureBox pictureBoxImage3;
+        internal System.Windows.Forms.ProgressBar progressBarI;
+        internal  System.Windows.Forms.Label labelCam3RemTime;
+        internal  System.Windows.Forms.Label labelCam3Status;
+        internal  System.Windows.Forms.Label labelCam3CoolerPwr;
+        internal  System.Windows.Forms.Label labelCam3BaseTemp;
+        internal  System.Windows.Forms.Label labelCam3CcdTemp;
+        internal  System.Windows.Forms.Label labelCam3Filter;
+        internal  System.Windows.Forms.Label labelCam3Sn;
 
         private System.Windows.Forms.CheckBox checkBoxDebugMode;
 
@@ -1100,38 +1114,38 @@
 
         #endregion
 
-        private System.Windows.Forms.StatusStrip statusStrip;
-        private System.Windows.Forms.ToolStripStatusLabel tSStatusClock;
-        private System.Windows.Forms.MenuStrip menuStrip;
-        private System.Windows.Forms.ToolStripMenuItem launchToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem findCamerasToolStripMenuItem;
-        private System.Windows.Forms.GroupBox groupBoxLogs;
-        private System.Windows.Forms.Timer timerUi;
-        private System.Windows.Forms.ListBox listBoxLogs;
-        private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
-        private System.Windows.Forms.SaveFileDialog saveFileDialogConfig;
-        private System.Windows.Forms.OpenFileDialog openFileDialogConfig;
-        private System.Windows.Forms.GroupBox groupBoxCam1;
-        private System.Windows.Forms.Label labelCam1Filter;
-        private System.Windows.Forms.Label labelCam1Sn;
-        private System.Windows.Forms.Label labelCam1Model;
-        private System.Windows.Forms.Label labelCam1RemTime;
-        private System.Windows.Forms.Label labelCam1Status;
-        private System.Windows.Forms.Label labelCam1CoolerPwr;
-        private System.Windows.Forms.Label labelCam1BaseTemp;
-        private System.Windows.Forms.Label labelCam1CcdTemp;
-        private System.Windows.Forms.Label labelCam2Model;
-        private System.Windows.Forms.Label labelCam3Model;
-        private System.Windows.Forms.GroupBox groupBoxSurvey;
-        private System.Windows.Forms.Button buttonSurveyStop;
-        private System.Windows.Forms.ToolStripMenuItem findFocusToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem reconnectSocketToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem reconnectMeteoDomeToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem reconnectDonutsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem reconnectSiTechExeToolStripMenuItem;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.ToolStripMenuItem reconnectAllToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem regenerateConfigToolStripMenuItem;
+        internal System.Windows.Forms.StatusStrip statusStrip;
+        internal System.Windows.Forms.ToolStripStatusLabel tSStatusClock;
+        internal System.Windows.Forms.MenuStrip menuStrip;
+        internal System.Windows.Forms.ToolStripMenuItem launchToolStripMenuItem;
+        internal System.Windows.Forms.ToolStripMenuItem findCamerasToolStripMenuItem;
+        internal System.Windows.Forms.GroupBox groupBoxLogs;
+        internal System.Windows.Forms.Timer timerUi;
+        internal System.Windows.Forms.ListBox listBoxLogs;
+        internal System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
+        internal System.Windows.Forms.SaveFileDialog saveFileDialogConfig;
+        internal System.Windows.Forms.OpenFileDialog openFileDialogConfig;
+        internal System.Windows.Forms.GroupBox groupBoxCam1;
+        internal System.Windows.Forms.Label labelCam1Filter;
+        internal System.Windows.Forms.Label labelCam1Sn;
+        internal System.Windows.Forms.Label labelCam1Model;
+        internal System.Windows.Forms.Label labelCam1RemTime;
+        internal System.Windows.Forms.Label labelCam1Status;
+        internal System.Windows.Forms.Label labelCam1CoolerPwr;
+        internal System.Windows.Forms.Label labelCam1BaseTemp;
+        internal System.Windows.Forms.Label labelCam1CcdTemp;
+        internal System.Windows.Forms.Label labelCam2Model;
+        internal System.Windows.Forms.Label labelCam3Model;
+        internal System.Windows.Forms.GroupBox groupBoxSurvey;
+        internal System.Windows.Forms.Button buttonSurveyStop;
+        internal System.Windows.Forms.ToolStripMenuItem findFocusToolStripMenuItem;
+        internal System.Windows.Forms.ToolStripMenuItem reconnectSocketToolStripMenuItem;
+        internal System.Windows.Forms.ToolStripMenuItem reconnectMeteoDomeToolStripMenuItem;
+        internal System.Windows.Forms.ToolStripMenuItem reconnectDonutsToolStripMenuItem;
+        internal System.Windows.Forms.ToolStripMenuItem reconnectSiTechExeToolStripMenuItem;
+        internal System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        internal System.Windows.Forms.ToolStripMenuItem reconnectAllToolStripMenuItem;
+        internal System.Windows.Forms.ToolStripMenuItem regenerateConfigToolStripMenuItem;
     }
 }
 

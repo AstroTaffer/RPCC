@@ -104,10 +104,10 @@ public partial class TaskForm : Form
 
         string[] validFrameTypes =
         [StringHolder.Light, StringHolder.Dark, 
-            StringHolder.Flat, StringHolder.Focus];
+            StringHolder.Flat, StringHolder.Focus, StringHolder.Test];
         if (!Array.Exists(validFrameTypes, element => element == _task.FrameType))
         {
-            Logger.AddLogEntry($"WARNING Unknown frame type {_task.FrameType}");
+            Logger.AddLogEntry($"TASKFORM WARNING: Unknown frame type {_task.FrameType}");
             return;
         }
         

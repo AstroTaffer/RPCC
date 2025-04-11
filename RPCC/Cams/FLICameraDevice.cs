@@ -9,6 +9,7 @@ internal class FliCameraDevice : ICameraDevice
 {
     // _camsDomain = bitwise OR of 0x02 (USB interface) and 0x100 (Camera device)
     // public int CamsDomain { get; set; } = 0x02 | 0x100;
+    public CameraUiBlock UiBlock { get; set; }
     private readonly Fli _cam;
     public int[] ImageArea { get; set; } = new int[4];
     // public int Handle { get; set; }
@@ -44,14 +45,18 @@ internal class FliCameraDevice : ICameraDevice
         var buff = new ushort[imageHeight, imageWidth];
         try
         {
-            _cam.GrabFrame(buff);
+            // _cam.GrabFrame(buff);
+            for (var i = 0; i < imageHeight; i++)
+            {
+                _cam.GrabRow(buff, i);
+            }
+            
         }
         catch (Exception e)
         {
             Logger.AddError("grab frame", e, this);
             return null;
         }
-        
         return new RpccFits{Data = buff};
     }
     
@@ -101,8 +106,8 @@ internal class FliCameraDevice : ICameraDevice
             }
 
             _cam.GetPixelSize(out var xbuf, out var ybuf);
-            PixelSizeX = xbuf;
-            PixelSizeY = ybuf;
+            PixelSizeX = Math.Round(xbuf * 1e6, 2);
+            PixelSizeY = Math.Round(ybuf * 1e6, 2);
             
             _cam.SetFanSpeed(Fli.FAN_SPEED.ON);
             _cam.SetBitDepth(Fli.BIT_DEPTH.MODE_16BIT);
@@ -120,7 +125,7 @@ internal class FliCameraDevice : ICameraDevice
         
         Logger.AddLogEntry($"Connect camera: Filename {FileName} | " +
                            $"Model {ModelName} | Serial Number {SerialNumber} | " +
-                           $"Filter {Filter} | PixelSizeX {PixelSizeX} | PixelSizeY {PixelSizeY}");
+                           $"Filter {Filter} | PixelSizeX {PixelSizeX} um | PixelSizeY {PixelSizeY} um");
     }
 
     public bool Close()
@@ -154,6 +159,7 @@ internal class FliCameraDevice : ICameraDevice
                 switch (deviceStatus)
                 {
                     // 0x00 = FLI_CAMERA_STATUS_IDLE
+                    case Fli.STATUS.CAMERA_DATA_READY:
                     case Fli.STATUS.CAMERA_STATUS_IDLE:
                         Status = StringHolder.Idle;
                         break;
@@ -173,7 +179,6 @@ internal class FliCameraDevice : ICameraDevice
                         Status = StringHolder.Reading;
                         break;
                     case Fli.STATUS.CAMERA_STATUS_UNKNOWN:
-                    case Fli.STATUS.CAMERA_DATA_READY:
                     case Fli.STATUS.FOCUSER_STATUS_HOMING:
                     case Fli.STATUS.FOCUSER_STATUS_MOVING_MASK:
                     case Fli.STATUS.FOCUSER_STATUS_HOME:
@@ -184,10 +189,12 @@ internal class FliCameraDevice : ICameraDevice
                     case Fli.STATUS.FILTER_POSITION_UNKNOWN:
                     case Fli.STATUS.FILTER_POSITION_CURRENT:
                     case Fli.STATUS.FILTER_STATUS_HOME_SUCCEEDED:
-                    default:
                         Status = StringHolder.Unknown;
-                        Logger.AddLogEntry($"WARNING Unknown status {deviceStatus}");
                         break;
+                    // default:
+                    //     // Logger.AddLogEntry($"WARNING Unknown status {deviceStatus}");
+                    //     Status = StringHolder.Unknown;
+                    //     break;
                 }
             }
             catch (Exception e)
@@ -330,5 +337,19 @@ internal class FliCameraDevice : ICameraDevice
         }
 
         return true;
+    }
+    public void UpdateUi()
+    {
+        UiBlock?.Update(CcdTemp, BaseTemp, CoolerPwr, Status, RemTime, ModelName, SerialNumber, Filter);
+    }
+    
+    public void UpdatePreview()
+    {
+        UiBlock?.UpdatePreview(LatestImageBitmap);
+    }
+
+    public void UpdateProgressBar(int exp)
+    {
+        UiBlock?.UpdateProgressBar(ExpStartDt, exp);
     }
 }

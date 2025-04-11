@@ -91,7 +91,7 @@ def calc_fwhm(path):
             #     print('Centriod: ', Mx, My, '\t FWHM: ', _fwhm)
             FWHM.append(_fwhm)
             ELL.append(ell)
-        fwhm = np.round((np.nanmedian(np.asarray(FWHM))-2.2) * 0.65 * header['XBINNING'], 2)
+        fwhm = np.round((np.nanmedian(np.asarray(FWHM))-2.2) * 0.65 * header['XBINNING'], 2) # fwhm-2.2
         ell = np.round(np.nanmedian(np.asarray(ELL)), 2)
         stars_num = len(FWHM)
         b = np.round(bkg.background_median, 2)
@@ -111,20 +111,19 @@ def calc_source_catalog(path):
         bkg = Background2D(image, (32, 32), filter_size=(9, 9),
                            sigma_clip=sigmaclip, bkg_estimator=bkg_estimator)
         Data_without_background = image - bkg.background
-        # Sky = bkg.background_median
-        # print('Sky={0:.1f}'.format(Sky))
+        b = np.round(bkg.background_median, 2)
         s_sky = sigma_clip(Data_without_background, stdfunc=mad_std).filled(np.nan)
         s_sky = np.nanstd(s_sky)
-        # print('S_Sky = ', s_sky)
         sigma = 9.0 * gaussian_fwhm_to_sigma  # FWHM = 3.
         kernel = Gaussian2DKernel(sigma, x_size=3, y_size=3)
         kernel.normalize()
-        segm = detect_sources(convolve(Data_without_background, kernel), 50 * s_sky, npixels=5)
+        segm = detect_sources(convolve(Data_without_background, kernel), 50 * s_sky,
+                              npixels=np.round(50/header['XBINNING']))
+        if not segm:
+            return header['FOCUS'], 0, 0, 0, b
         cat = SourceCatalog(Data_without_background, segm)
-        # cat.moments
         fwhm = np.round(np.median(cat.fwhm.value) * 0.65 * header['XBINNING'], 2)
         ell = np.round(np.median(cat.ellipticity.value), 2)
-        b = np.round(bkg.background_median, 2)
         stars_num = len(cat.fwhm.value)
         if np.isnan(fwhm):
             return 'fail'
@@ -164,8 +163,6 @@ def calc_don_shifts(data):
 
 
 def pars_req(req: str) -> str:
-    # if 'ping' in req:
-    #     return 'pong'
     data = req.split('~')
     if len(data) < 2:
         return 'fail while split'
@@ -183,8 +180,6 @@ def pars_req(req: str) -> str:
         try:
             print(data)
             focus, fwhm, ell, stars_num, b = calc_source_catalog(data[1])
-            if fwhm > 4.5:
-                focus, fwhm, ell, stars_num, b = calc_fwhm(data[1])
             write_to_fits(data[1], fwhm, ell, stars_num, b)
         except Exception as e:
             print(e)

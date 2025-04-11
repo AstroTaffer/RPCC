@@ -6,6 +6,8 @@ namespace RPCC.Cams;
 
 internal interface ICameraDevice
 {
+    public CameraUiBlock UiBlock { get; set; }
+    internal void UpdateUi();  
     int[] ImageArea { get; set; }
     // public int CamsDomain { get; set; }
     // id
@@ -45,5 +47,9 @@ internal interface ICameraDevice
     bool SetBin(int vBin, int hBin);
     // bool SetImageArea(int xbin, int ybin);  
     // bool SetCameraReadoutMode(int mode);
-    bool Exposure(ObservationTask task);
+    bool Exposure(ObservationTask task);    
+    public void UpdatePreview();
+    public void UpdateProgressBar(int exp);
+
+
 }

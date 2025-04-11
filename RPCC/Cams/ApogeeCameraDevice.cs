@@ -11,7 +11,7 @@ namespace RPCC.Cams;
 //https://github.com/pawelDylag/SarcusImaging/tree/master
 internal class ApogeeCameraDevice : ICameraDevice
 {
-
+    public CameraUiBlock UiBlock { get; set; }
     private readonly ICamera2 _cam;
     public int[] ImageArea { get; set; } = new int[4];
 
@@ -168,6 +168,7 @@ internal class ApogeeCameraDevice : ICameraDevice
         {
             _cam.StopExposure(false);
             _cam.Close();
+            UiBlock?.Clear();
         }
         catch (Exception e)
         {
@@ -330,4 +331,19 @@ internal class ApogeeCameraDevice : ICameraDevice
         startExp = DateTime.UtcNow;
         return true;
     }
+    public void UpdateUi()
+    {
+        UiBlock?.Update(CcdTemp, BaseTemp, CoolerPwr, Status, RemTime, ModelName, SerialNumber, Filter);
+        
+    }
+    public void UpdatePreview()
+    {
+        UiBlock?.UpdatePreview(LatestImageBitmap);
+    }
+
+    public void UpdateProgressBar(int exp)
+    {
+        UiBlock?.UpdateProgressBar(ExpStartDt, exp);
+    }
+
 }

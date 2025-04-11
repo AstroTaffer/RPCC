@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
+using Newtonsoft.Json.Linq;
 using RPCC.Utils;
 
 namespace RPCC.Comms
@@ -211,7 +212,59 @@ namespace RPCC.Comms
                 var message = response[response.Length - 1];
                 if (message == "_")
                 {
-                    // TODO: Do stuff if good
+                    if (MountDataCollector.IsTracking)
+                    {
+                        // StatusUpdater.UpdateStatusSection("mount", JObject.FromObject("tracking"));
+                        StatusUpdater.UpdateNestedField(
+                            new[] { "mount" },
+                            JToken.FromObject("tracking")
+                        );
+
+                    }
+                    if (MountDataCollector.IsSlewing)
+                    {
+                        // StatusUpdater.UpdateStatusSection("mount", JObject.FromObject("slewing"));
+                        StatusUpdater.UpdateNestedField(
+                            new[] { "mount" },
+                            JToken.FromObject("slewing")
+                        );
+                    }
+                
+                    if (MountDataCollector.IsParking)
+                    {
+                        // StatusUpdater.UpdateStatusSection("mount", JObject.FromObject("parking"));
+                        StatusUpdater.UpdateNestedField(
+                            new[] { "mount" },
+                            JToken.FromObject("parking")
+                        );
+                    }
+                    
+                    if (MountDataCollector.IsParked)
+                    {
+                        StatusUpdater.UpdateNestedField(
+                            new[] { "mount" },
+                            JToken.FromObject("parked")
+                        );
+
+                    }
+                    
+                    if (MountDataCollector.IsInBlinky)
+                    {
+                        // StatusUpdater.UpdateStatusSection("mount", JObject.FromObject("in blinky"));
+                        StatusUpdater.UpdateNestedField(
+                            new[] { "mount" },
+                            JToken.FromObject("in blinky")
+                        );
+                    }
+
+                    if (MountDataCollector.IsCommFault)
+                    {
+                        // StatusUpdater.UpdateStatusSection("mount", JObject.FromObject("comm fault"));
+                        StatusUpdater.UpdateNestedField(
+                            new[] { "mount" },
+                            JToken.FromObject("comm fault")
+                        );
+                    }
                 }
                 else
                 {
