@@ -29,6 +29,7 @@ internal class FliCameraDevice : ICameraDevice
     public DateTime ExpStartDt { get; set; }
     public double ExpStartJd { get; set; }
     public string LatestImageFilename { get; set; }
+    public int LastImageId { get; set; }
     public ushort[,] LatestImageData { get; set; }
     public Bitmap LatestImageBitmap { get; set; }
     
@@ -348,8 +349,8 @@ internal class FliCameraDevice : ICameraDevice
         UiBlock?.UpdatePreview(LatestImageBitmap);
     }
 
-    public void UpdateProgressBar(int exp)
+    public void UpdateProgressBar()
     {
-        UiBlock?.UpdateProgressBar(ExpStartDt, exp);
+        UiBlock?.UpdateProgressBar(ExpStartDt);
     }
 }

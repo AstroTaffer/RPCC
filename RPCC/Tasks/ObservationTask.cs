@@ -106,8 +106,13 @@ namespace RPCC.Tasks
                 AllFrames = AllFrames,
                 FrameType = FrameType,
                 DoneFrames = DoneFrames,
-                ObjectType = ObjectType
+                ObjectType = ObjectType,
+
+                // Глубокая копия списков
+                RepointCoords = [..RepointCoords],
+                RepointTimes = [..RepointTimes]
             };
+
             return t;
         }
     }

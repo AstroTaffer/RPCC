@@ -33,21 +33,19 @@ namespace RPCC.Focus
         private const short FocusExp = 20;
         public static double Seeing = 1;
         public static bool IsFocusing;
-        private static short _objExp;
-        private static float DefocEpsilon = 3;
+        private static readonly float DefocEpsilon = 3;
 
-        public static void StartAutoFocus(ObservationTask observationTask)
+        public static void StartAutoFocus()
         {
             Logger.AddLogEntry("FOCUS: phase 1: defocusing");
             IsFocusing = true;
-            _taskForFocus = observationTask.Copy();
+            _taskForFocus = Head.CurrentTask.Copy();
+            _taskForFocus.TaskNumber = -1;
             _taskForFocus.FrameType = StringHolder.Focus;
             if (Head.CurrentTask.Exp > FocusExp)
             {
-                _objExp = Head.CurrentTask.Exp;
                 _taskForFocus.Exp = FocusExp;
             }
-            
             _focCycles = 0; //
             _focBadFrames = 0; //
             Frames.Clear();
@@ -84,13 +82,13 @@ namespace RPCC.Focus
                 return;
             }
             // Head.Guiding();
-            var focusImPath = CameraControl.cams.Last().LatestImageFilename;
-            if (string.IsNullOrEmpty(focusImPath))
-            {
-                Logger.AddLogEntry("FOCUS: no data available, stop obs");
-                ReturnFocusAndExit();
-                return;
-            }
+            // var focusImPath = CameraControl.cams.Last().LatestImageFilename;
+            // if (string.IsNullOrEmpty(focusImPath))
+            // {
+            //     Logger.AddLogEntry("FOCUS: no data available, stop obs");
+            //     ReturnFocusAndExit();
+            //     return;
+            // }
 
             if (Head.CurrentTask.Status > 1) 
             {
@@ -101,10 +99,10 @@ namespace RPCC.Focus
             switch (_phase)
             {
                 case 0: 
-                    PhaseOne(focusImPath);
+                    PhaseOne();
                     break;
                 case 1:
-                    PhaseTwo(focusImPath);
+                    PhaseTwo();
                     break;
                 // case 2:
                 //     PhaseThree(focusImPath);
@@ -113,7 +111,7 @@ namespace RPCC.Focus
         }
 
         #region Phases
-        private static void PhaseOne(string focusImPath)
+        private static void PhaseOne()
         {
             // if (IsZenith)
             // {
@@ -126,7 +124,7 @@ namespace RPCC.Focus
                 _focCycles++;
             }
             
-            Frames.Add(new GetDataFromFits(focusImPath));
+            Frames.Add(new GetDataFromFits(CameraControl.cams.Last()));
             Logger.LogFrameInfo(Frames.Last(), CameraControl.cams.Last().Filter);
             
             if (!Frames.Last().Status)
@@ -220,10 +218,10 @@ namespace RPCC.Focus
             GetImForFocus(_shift);
         }
 
-        private static void PhaseTwo(string focusImPath)
+        private static void PhaseTwo()
         {
             Logger.AddLogEntry("FOCUS: Focus cycle #" + _focCycles);
-            Frames.Add(new GetDataFromFits(focusImPath));
+            Frames.Add(new GetDataFromFits(CameraControl.cams.Last()));
             Logger.LogFrameInfo(Frames.Last(), CameraControl.cams.Last().Filter);
             var fwhm = Frames.Last().Fwhm;
             
@@ -373,6 +371,10 @@ namespace RPCC.Focus
             {
                 Head.StartExpAndCheckFuckup(_taskForFocus);
             }
+            else
+            {
+                Logger.AddLogEntry("FOCUS: can't GetImage, obs on pause");
+            }
         }
 
         private static void GoFocus(int z)
@@ -380,9 +382,24 @@ namespace RPCC.Focus
             var start = SerialFocus.CurrentPosition;
             SerialFocus.FRun_To(z);
             Logger.AddDebugLogEntry($"FOCUS: Wait while GoFocus");
-            while (Math.Abs(start+z-SerialFocus.CurrentPosition) > 10)
+            var iter = 0;
+            while (Math.Abs(start+z-SerialFocus.CurrentPosition) > 10) //10276 - 50 -
             {
-                Thread.Sleep(1000);
+                Thread.Sleep(3000);
+                if(start == SerialFocus.CurrentPosition) 
+                {
+                    if (iter > 2)
+                    {
+                        Logger.AddDebugLogEntry("GoFocus WARNING: soft lock, too many times");
+                        IsFocusing = false;
+                        IsAutoFocus = false;
+                        FocusingDone(1);
+                        return;
+                    }
+                    Logger.AddDebugLogEntry("GoFocus WARNING: soft lock");
+                    SerialFocus.FRun_To(z);
+                    iter++;
+                }
             }
             Logger.AddDebugLogEntry($"FOCUS: GoFocus ended");
         }
@@ -398,8 +415,6 @@ namespace RPCC.Focus
         private static void FocusingDone(double see)
         {
             Seeing = see;
-            Head.CurrentTask.FrameType = StringHolder.Light;
-            Head.CurrentTask.Exp = _objExp;
             Logger.AddLogEntry($"FOCUS: Set seeing for autofocus = {see}");
             if (DeFocus != 0)
             {

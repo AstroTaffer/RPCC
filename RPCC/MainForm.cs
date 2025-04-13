@@ -98,9 +98,6 @@ public partial class MainForm : Form
         Logger.SaveLogs();
         timerUi.Stop();
             
-        // Tasker.SaveTasksToXml();
-        // DbCommunicate.DisconnectFromDb();
-            
         WeatherSocket.Disconnect();
         DonutsSocket.Disconnect();
         SiTechExeSocket.Disconnect();
@@ -120,119 +117,14 @@ public partial class MainForm : Form
         checkBoxHead.Checked = Head.IsThinking;
         checkBoxGuiding.Checked = Head.IsGuid;
         checkBoxAutoFocus.Checked = CameraFocus.IsAutoFocus;
-        // try
-        // {
-        //     switch (CameraControl.cams.Count)
-        //     {
-        //         case 3:
-        //             labelCam3CcdTemp.Text = @$"CCD Temp: {CameraControl.cams[2].CcdTemp:F3}";
-        //             labelCam3BaseTemp.Text = @$"Base Temp: {CameraControl.cams[2].BaseTemp:F3}";
-        //             labelCam3CoolerPwr.Text = @$"Cooler Power: {CameraControl.cams[2].CoolerPwr} %";
-        //             labelCam3Status.Text = @$"Status: {CameraControl.cams[2].Status}";
-        //             labelCam3RemTime.Text = @$"Remaining: {CameraControl.cams[2].RemTime}";
-        //             SetProgress(2);
-        //             goto case 2;
-        //         case 2:
-        //             labelCam2CcdTemp.Text = @$"CCD Temp: {CameraControl.cams[1].CcdTemp:F3}";
-        //             labelCam2BaseTemp.Text = @$"Base Temp: {CameraControl.cams[1].BaseTemp:F3}";
-        //             labelCam2CoolerPwr.Text = @$"Cooler Power: {CameraControl.cams[1].CoolerPwr} %";
-        //             labelCam2Status.Text = @$"Status: {CameraControl.cams[1].Status}";
-        //             labelCam2RemTime.Text = @$"Remaining: {CameraControl.cams[1].RemTime}";
-        //             SetProgress(1);
-        //             goto case 1;
-        //         case 1:
-        //             labelCam1CcdTemp.Text = @$"CCD Temp: {CameraControl.cams[0].CcdTemp:F3}";
-        //             labelCam1BaseTemp.Text = @$"Base Temp: {CameraControl.cams[0].BaseTemp:F3}";
-        //             labelCam1CoolerPwr.Text = @$"Cooler Power: {CameraControl.cams[0].CoolerPwr} %";
-        //             labelCam1Status.Text = @$"Status: {CameraControl.cams[0].Status}";
-        //             labelCam1RemTime.Text = @$"Remaining: {CameraControl.cams[0].RemTime}";
-        //             SetProgress(0);
-        //             break;
-        //     }
-        // }
-        // catch (IndexOutOfRangeException)
-        // {
-        //     Logger.AddLogEntry("WARNING Cameras list has been reset while updating GUI");
-        //     // If the cameras have been disconnected when we were updating the labels,
-        //     // IndexOutOfRangeException will be raised and silenced. It's not the best solution,
-        //     // but Monitor.Enter will stop the GUI thread and Monitor.TryEnter may cause some
-        //     // loops to be skipped if GUI timer and Cams timer would elapse at the same time.
-        //     // Though I think it's really unlikely. Use Monitor.TryEnter in case of bugs.
-        // }
-    }
+        foreach (var cam in CameraControl.cams)
+        {
 
-    // private void ResetCamsUi()
-    // {
-    //     // Camera 1
-    //     groupBoxCam1.Invoke((MethodInvoker)delegate
-    //     {
-    //         groupBoxCam1.Enabled = false;
-    //         pictureBoxImage1.Image = null;
-    //         labelCam1Model.Text = @"Model:";
-    //         labelCam1Sn.Text = @"Serial Num:";
-    //         labelCam1Filter.Text = @"Filter:";
-    //         labelCam1CcdTemp.Text = @"CCD Temp:";
-    //         labelCam1BaseTemp.Text = @"Base Temp:";
-    //         labelCam1CoolerPwr.Text = @"Cooler Power:";
-    //         labelCam1Status.Text = @"Status:";
-    //         labelCam1RemTime.Text = @"Remaining:";
-    //
-    //         // Camera 2
-    //         groupBoxCam2.Enabled = false;
-    //         pictureBoxImage2.Image = null;
-    //         labelCam2Model.Text = @"Model:";
-    //         labelCam2Sn.Text = @"Serial Num:";
-    //         labelCam2Filter.Text = @"Filter:";
-    //         labelCam2CcdTemp.Text = @"CCD Temp:";
-    //         labelCam2BaseTemp.Text = @"Base Temp:";
-    //         labelCam2CoolerPwr.Text = @"Cooler Power:";
-    //         labelCam2Status.Text = @"Status:";
-    //         labelCam2RemTime.Text = @"Remaining:";
-    //
-    //         // Camera 3
-    //         groupBoxCam3.Enabled = false;
-    //         pictureBoxImage3.Image = null;
-    //         labelCam3Model.Text = @"Model:";
-    //         labelCam3Sn.Text = @"Serial Num:";
-    //         labelCam3Filter.Text = @"Filter:";
-    //         labelCam3CcdTemp.Text = @"CCD Temp:";
-    //         labelCam3BaseTemp.Text = @"Base Temp:";
-    //         labelCam3CoolerPwr.Text = @"Cooler Power:";
-    //         labelCam3Status.Text = @"Status:";
-    //         labelCam3RemTime.Text = @"Remaining:";
-    //     });
-    //         
-    //     switch (CameraControl.cams.Count)
-    //     {
-    //         case 3:
-    //             groupBoxCam3.Invoke((MethodInvoker) delegate
-    //             {
-    //                 groupBoxCam3.Enabled = true;
-    //                 labelCam3Model.Text = @$"Model: {CameraControl.cams[2].ModelName}";
-    //                 labelCam3Sn.Text = @$"Serial Num: {CameraControl.cams[2].SerialNumber}";
-    //                 labelCam3Filter.Text = @$"Filter: {CameraControl.cams[2].Filter}"; 
-    //             });
-    //             goto case 2;
-    //         case 2:
-    //             groupBoxCam2.Invoke((MethodInvoker) delegate
-    //             {
-    //                 groupBoxCam2.Enabled = true;
-    //                 labelCam2Model.Text = @$"Model: {CameraControl.cams[1].ModelName}";
-    //                 labelCam2Sn.Text = @$"Serial Num: {CameraControl.cams[1].SerialNumber}";
-    //                 labelCam2Filter.Text = @$"Filter: {CameraControl.cams[1].Filter}";
-    //             });
-    //             goto case 1;
-    //         case 1:
-    //             groupBoxCam1.Invoke((MethodInvoker) delegate
-    //             {
-    //                 groupBoxCam1.Enabled = true;
-    //                 labelCam1Model.Text = @$"Model: {CameraControl.cams[0].ModelName}";
-    //                 labelCam1Sn.Text = @$"Serial Num: {CameraControl.cams[0].SerialNumber}";
-    //                 labelCam1Filter.Text = @$"Filter: {CameraControl.cams[0].Filter}";
-    //             });
-    //             break;
-    //     }
-    // }
+            cam.UpdateProgressBar();
+            // cam.UpdatePreview();
+            cam.UpdateUi();
+        }
+    }
 
     private void ButtonSurveyStop_Click(object sender, EventArgs e)
     {
@@ -378,7 +270,7 @@ public partial class MainForm : Form
         Thread.Sleep(waitTime);
         try
         {
-            labelFocusPos.Invoke((MethodInvoker) delegate
+            labelFocusPos?.Invoke((MethodInvoker) delegate
             {
                 labelFocusPos.Text = $@"Focus position: {SerialFocus.CurrentPosition}";
             });

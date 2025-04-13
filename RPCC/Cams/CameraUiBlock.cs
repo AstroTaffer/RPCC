@@ -22,6 +22,8 @@ namespace RPCC.Cams
         public void Update(double ccdTemp, double baseTemp, double coolerPwr, string status, 
             int remTime, string model, string sn, string filter)
         {
+            if (GroupBoxCam == null || GroupBoxCam.IsDisposed)
+                return;
             GroupBoxCam.Enabled = true;
 
             if (LabelSerial != null) LabelSerial.Text = @$"Serial Num: {sn}";
@@ -37,27 +39,30 @@ namespace RPCC.Cams
 
         public void UpdatePreview(Bitmap preview)
         {
-            if (PictureBoxPreview != null)
+            PictureBoxPreview?.Invoke((MethodInvoker)delegate
             {
                 PictureBoxPreview.Image?.Dispose();
                 PictureBoxPreview.Image = (Bitmap)preview.Clone();
-            }
+            });
         }
 
-        public void UpdateProgressBar(DateTime startTime, int expDurationSec)
+        public void UpdateProgressBar(DateTime startTime)
         {
-            if (ExposureProgressBar == null)
+            if (ExposureProgressBar is null)
                 return;
-
-            var elapsed = (DateTime.UtcNow - startTime).TotalSeconds;
-            if (elapsed < 0 || expDurationSec <= 0)
+            if (CameraControl.loadedTask is null)
             {
-                ExposureProgressBar.Visible = false;
+                ExposureProgressBar.Value = 0;
                 return;
             }
-
-            var percent = Math.Min(100, (int)(elapsed / expDurationSec * 100));
-            ExposureProgressBar.Value = Math.Max(0, Math.Min(percent, 100));
+            var elapsed = (DateTime.UtcNow - startTime).TotalSeconds;
+            if (elapsed < 0)
+            {
+                ExposureProgressBar.Value = 0;
+                return;
+            }
+            var percent = Math.Min(100, (int)(elapsed / CameraControl.loadedTask.Exp * 100));
+            ExposureProgressBar.Value = Math.Max(0, percent);
             ExposureProgressBar.Visible = true;
         }
 

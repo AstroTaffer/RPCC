@@ -1,5 +1,7 @@
 ﻿using System;
+using RPCC.Cams;
 using RPCC.Comms;
+using RPCC.Tasks;
 using RPCC.Utils;
 
 
@@ -10,29 +12,30 @@ namespace RPCC.Focus
 {
     public class GetDataFromFits
     {
-        private const double MaxEll = 0.3;
+        private const float MaxEll = 0.3f;
         private const int MinStars = 1;
-        private const double FwhmFocused = 3.3;
+        private const float FwhmFocused = 3.3f;
 
         
         public bool Status { get; }
         public int Focus { get; }
         public bool Focused { get; }
-        public double Fwhm { get; }
-        public double Ell { get; }
+        public float Fwhm { get; }
+        public float Ell { get; }
         public int StarsNum { get; }
-        public double Bkg { get; }
+        public float Bkg { get; }
         public bool Quality { get; }
 
-        public GetDataFromFits(string path2Fits)
+        public GetDataFromFits(ICameraDevice cam)
         {
-            if (string.IsNullOrEmpty(path2Fits)) return;
-            var resp = DonutsSocket.GetImageFwhm(path2Fits);
+            // if (string.IsNullOrEmpty(path2Fits)) return;
+            var resp = DonutsSocket.GetImageFwhm(cam.LatestImageFilename);
             Focus = (int) resp[0];
-            Fwhm = Math.Round(resp[1], 2);
-            Ell = Math.Round(resp[2], 2);
+            Fwhm = (float)Math.Round(resp[1], 2);
+            Ell = (float)Math.Round(resp[2], 2);
             StarsNum = (int) resp[3];
             Bkg = resp[4];
+            DbCommunicate.AddSexToDb(cam.LastImageId, Fwhm, Ell, Bkg);
             if (StarsNum == 0)
             {
                 Status = false;

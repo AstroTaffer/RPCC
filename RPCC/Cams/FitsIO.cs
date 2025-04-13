@@ -9,7 +9,7 @@ using RPCC.Utils;
 
 namespace RPCC.Cams;
 
-internal class RpccFits
+public class RpccFits
 {
     internal ushort[,] Data;
     // internal Header header;
@@ -21,32 +21,8 @@ internal class RpccFits
         // Because in all implementations that I can think of we'll end up generating
         // false or useless information. All thanks to ushort[][] and short[][] difference.
     }
-
-    // Create RpccFits by reading an existing FITS file
-    // internal RpccFits(string fitsFileName)
-    // {
-    //     var fitsFile = new Fits(fitsFileName);
-    //     var fitsHdu = (ImageHDU)fitsFile.ReadHDU();
-    //     header = fitsHdu.Header;
-    //     var fitsDataRaw = (Array[])fitsHdu.Kernel;
-    //     fitsFile.Close();
-    //
-    //     var dataHeight = fitsDataRaw.Length;
-    //     var dataWidth = fitsDataRaw[0].Length;
-    //     Data = new ushort[dataHeight][];
-    //     for (var i = 0; i < dataHeight; i++)
-    //     {
-    //         Data[i] = new ushort[dataWidth];
-    //         for (var j = 0; j < dataWidth; j++)
-    //         {
-    //             // Convert short (used in nom.tam.fits) to ushort (used in LibFli and RpccFits)
-    //             var buff = short.MaxValue + (short)fitsDataRaw[i].GetValue(j) + 1;
-    //             Data[i][j] = (ushort)buff;
-    //         }
-    //     }
-    // }
-
-    internal string SaveFitsFile(ICameraDevice cam)
+    
+    internal void SaveFitsFile(ICameraDevice cam)
     {
         short[][] convertedData = new short[Data.GetLength(1)][];
         for (var i = 0; i < convertedData.GetLength(0); i++)
@@ -124,10 +100,11 @@ internal class RpccFits
         outStream.Flush();
         outStream.Close();
 
-        DbCommunicate.AddFrameToDb(CameraControl.loadedTask, outFilePath, 
+        cam.LastImageId = DbCommunicate.AddFrameToDb(CameraControl.loadedTask, outFilePath, 
             MountDataCollector.RightAsc, MountDataCollector.Declination,
             cam.Filter, cam.ExpStartDt, WeatherDataCollector.Extinction, cam.CcdTemp, cam.SerialNumber);
-        return outFilePath;
+        cam.LatestImageFilename = outFilePath;
+        // return outFilePath, id;
     }
 
     internal void FillInHeader(ICameraDevice cam, Header head)

@@ -172,7 +172,14 @@ namespace RPCC.Comms
                 RedirectStandardOutput = true,
                 CreateNoWindow = true
             };
-            Process.Start(start);
+            using var process = Process.Start(start);
+            // string output = process.StandardOutput.ReadToEnd();
+            // string error = process.StandardError.ReadToEnd();
+            // // process.WaitForExit();
+            //
+            // // (опционально) логировать
+            // Console.WriteLine(output);
+            // Console.Error.WriteLine(error);
         }
 
         public static string PingServer()

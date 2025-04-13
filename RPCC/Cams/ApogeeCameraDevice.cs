@@ -30,6 +30,7 @@ internal class ApogeeCameraDevice : ICameraDevice
     public DateTime ExpStartDt { get; set; }
     public double ExpStartJd { get; set; }
     public string LatestImageFilename { get; set; }
+    public int LastImageId { get; set; }
     public ushort[,] LatestImageData { get; set; }  
     public Bitmap LatestImageBitmap { get; set; }
     private DateTime startExp;
@@ -341,9 +342,9 @@ internal class ApogeeCameraDevice : ICameraDevice
         UiBlock?.UpdatePreview(LatestImageBitmap);
     }
 
-    public void UpdateProgressBar(int exp)
+    public void UpdateProgressBar()
     {
-        UiBlock?.UpdateProgressBar(ExpStartDt, exp);
+        UiBlock?.UpdateProgressBar(ExpStartDt);
     }
 
 }

@@ -135,7 +135,8 @@ public static class Head
                 // {
                     _firstFrame = DbCommunicate.GetPath2FirstAssFrame(CurrentTask.TaskNumber);
                     _firstFrameLookingEast = MountDataCollector.IsLookingEast;
-                    Logger.AddDebugLogEntry($"Set first frame {_firstFrame}. lookingEast = {_firstFrameLookingEast}");
+                    if(!string.IsNullOrEmpty(_firstFrame))
+                        Logger.AddDebugLogEntry($"Set first frame {_firstFrame}. lookingEast = {_firstFrameLookingEast}");
                 // } 
             }
         }
@@ -353,7 +354,7 @@ public static class Head
     {
         _isObserve = true;
         CurrentTask.Status = 1;
-        Logger.AddLogEntry($"Start task# {CurrentTask.TaskNumber}, type: {CurrentTask.FrameType}");
+        Logger.AddLogEntry($"Start task #{CurrentTask.TaskNumber}, type: {CurrentTask.FrameType}, exp: {CurrentTask.Exp}");
         if (!UnparkAndGoTo()) return;
         CurrentTask.Filters = CheckFil();
         
@@ -392,7 +393,8 @@ public static class Head
         {
             DbCommunicate.UpdateTaskInDb(CurrentTask);
         }
-        
+
+        CameraControl.loadedTask = null;
         _isObserve = false;
         _isDoDarks = false;
         _isDoFlats = false;
@@ -446,7 +448,7 @@ public static class Head
                     {
                         if (!string.IsNullOrEmpty(cam.LatestImageFilename))
                         {
-                            fitsAnalysis = new GetDataFromFits(cam.LatestImageFilename); //TODO распараллелить?
+                            fitsAnalysis = new GetDataFromFits(cam); 
                             Logger.LogFrameInfo(fitsAnalysis, cam.Filter);
                         }
                     }
@@ -487,7 +489,7 @@ public static class Head
                         {
                             if (!fitsAnalysis.Focused)
                             {
-                                CameraFocus.StartAutoFocus(CurrentTask);
+                                CameraFocus.StartAutoFocus();
                             }
                             else
                             {
@@ -516,7 +518,7 @@ public static class Head
                     {
                         if (!string.IsNullOrEmpty(cam.LatestImageFilename))
                         {
-                            fitsAnalysis = new GetDataFromFits(cam.LatestImageFilename); //TODO распараллелить
+                            fitsAnalysis = new GetDataFromFits(cam); 
                             Logger.LogFrameInfo(fitsAnalysis, cam.Filter);
                         }
                     }
@@ -531,7 +533,7 @@ public static class Head
                     {
                         if (!fitsAnalysis.Focused)
                         {
-                            CameraFocus.StartAutoFocus(CurrentTask);
+                            CameraFocus.StartAutoFocus();
                         }
                         else
                         {
@@ -747,7 +749,7 @@ public static class Head
         if (!WeatherDataCollector.Obs & !WeatherDataCollector.Flat)
         {
             _isDoDarks = true;
-            Logger.AddLogEntry($"Start task# {CurrentTask.TaskNumber}, type: {CurrentTask.FrameType}, exp: {CurrentTask.Exp}");
+            Logger.AddLogEntry($"Start task #{CurrentTask.TaskNumber}, type: {CurrentTask.FrameType}, exp: {CurrentTask.Exp}");
 
             CurrentTask.Status = 1;
             CurrentTask.Filters = CheckFil();
@@ -781,7 +783,7 @@ public static class Head
                 return;
             }
         }
-        else
+        else if (task.TaskNumber != -1)
         {
             DbCommunicate.UpdateTaskInDb(task);
         }

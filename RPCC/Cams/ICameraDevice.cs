@@ -4,7 +4,7 @@ using RPCC.Tasks;
 
 namespace RPCC.Cams;
 
-internal interface ICameraDevice
+public interface ICameraDevice
 {
     public CameraUiBlock UiBlock { get; set; }
     internal void UpdateUi();  
@@ -34,11 +34,12 @@ internal interface ICameraDevice
 
     // latest image
     internal string LatestImageFilename { get; set; }
+    internal int LastImageId { get; set; }
     internal ushort[,] LatestImageData { get; set; }
     internal Bitmap LatestImageBitmap { get; set; }
-    
+        
     // bool GrabRow(ushort[] buff);
-    RpccFits GetRpccFits();
+    public RpccFits GetRpccFits();
     // bool Initialize();
     bool Close();
     bool GetCamStatusAlt();
@@ -49,7 +50,7 @@ internal interface ICameraDevice
     // bool SetCameraReadoutMode(int mode);
     bool Exposure(ObservationTask task);    
     public void UpdatePreview();
-    public void UpdateProgressBar(int exp);
+    public void UpdateProgressBar();
 
 
 }

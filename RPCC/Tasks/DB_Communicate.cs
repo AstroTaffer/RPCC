@@ -245,7 +245,6 @@ public static class DbCommunicate
                 };
                 com.ExecuteReader();
             }
-
         }
         catch (Exception e)
         {
@@ -255,20 +254,47 @@ public static class DbCommunicate
         LoadDbTable();
         return true;
     }
-        
-    public static bool AddFrameToDb(ObservationTask observationTask, string path, double ra, double dec, 
+            
+    public static int AddFrameToDb(ObservationTask observationTask, string path, double ra, double dec, 
         string fil, DateTime date, double ext, double temp, string sn) 
     {       
+        int id = 0;
         try
         {
             lock (Loc)
             {
+                
                 var query = "INSERT INTO robophot_frames (fk_task_id, " +
                             "frame_path, coord2000, frame_filter, " +
                             "date_utc, extinction, ccd_temp, camera_sn, is_focus, is_looking_east) VALUES " + 
                             $"({observationTask.TaskNumber}, '{path}', ({ra*360/24}, {dec})::spoint_domen, '{fil}', " +
                             $"'{date}'::timestamp, {ext}, {temp}, '{sn}', {observationTask.FrameType == StringHolder.Focus}, " +
-                            $"{MountDataCollector.IsLookingEast})";
+                            $"{MountDataCollector.IsLookingEast}) RETURNING frame_id";
+                using var con = ConnectToDb();
+                using var com = new NpgsqlCommand(query, con);
+                using var reader = com.ExecuteReader();
+                while (reader.Read()) id = Convert.ToInt32(reader[0]);
+            }
+        }
+        catch (Exception e)
+        {
+            Logger.AddError("AddFrameToDb", e);
+            return 0;
+        }
+        return id;
+    }
+    
+    public static bool AddSexToDb(int frameId, float fwhm, float ell, float bkg) 
+    {       
+        try
+        {
+            lock (Loc)
+            {
+                var query =
+                    $"""
+                    UPDATE robophot_frames SET (sex_fwhm, sex_ell, sex_background, 
+                    is_do_sex) = ({fwhm}, {ell}, {bkg}, true) WHERE frame_id = {frameId}
+                    """;
                 using var con = ConnectToDb();
                 using var com = new NpgsqlCommand(query, con);
                 com.ExecuteReader();
@@ -276,7 +302,7 @@ public static class DbCommunicate
         }
         catch (Exception e)
         {
-            Logger.AddError("AddFrameToDb", e);
+            Logger.AddError("AddSexToDb", e);
             return false;
         }
         return true;

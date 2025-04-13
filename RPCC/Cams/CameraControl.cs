@@ -21,8 +21,6 @@ internal static class CameraControl
 
     private static readonly Timer CamsTimer = new(1000);
     private static readonly List<Task> ReadyImagesProcessList = [];
-    // internal static ResetUi resetUi;
-
     internal static List<ICameraDevice> cams = [];
 
     internal static bool isConnected;
@@ -30,9 +28,6 @@ internal static class CameraControl
     private static int _readyCamNum;
     private static readonly string[] FilterOrder = [StringHolder.FilG, StringHolder.FilV, StringHolder.FilR, StringHolder.FilI];
     internal static ObservationTask loadedTask;
-    internal delegate void ResetUi();
-
-    internal delegate void ResetPics(ICameraDevice camera);
 
 
     #region Connect & Disconnect
@@ -203,8 +198,8 @@ internal static class CameraControl
         lock (CamsLocker)
         {
             GetCamsStatusAlt();
-            foreach (var cam in cams)
-                cam.UpdateUi();
+            // foreach (var cam in cams)
+            //     cam.UpdateUi();
             
             var allReady = true;
             foreach (var unused in cams.Where(cam => cam.Status == StringHolder.Exposing))
@@ -283,14 +278,14 @@ internal static class CameraControl
                     ReadyImagesProcessList.Clear();
                 }
             }
-            else
-            {
-                foreach (var cam in cams)
-                {
-                    cam.UpdateProgressBar(loadedTask.Exp);
-                }
-                
-            }
+            // else
+            // {
+            //     foreach (var cam in cams)
+            //     {
+            //         cam.UpdateProgressBar(loadedTask.Exp);
+            //     }
+            //     
+            // }
         }
 
         if (isConnected) CamsTimer.Start();
@@ -396,7 +391,7 @@ internal static class CameraControl
             return;
         }
         cam.LatestImageData = latestImage.Data;
-        cam.LatestImageFilename = latestImage.SaveFitsFile(cam);
+        latestImage.SaveFitsFile(cam);
     }
 
     private static RpccFits ReadImage(ICameraDevice cam)
@@ -411,20 +406,6 @@ internal static class CameraControl
             cams.Remove(cam);
             return null;
         }
-            
-        // Mirror image
-        // switch (cam.Filter) // IsLookingEast ХУЁВО ОПРЕДЕЛЯЕТСЯ В ЗЕНИТЕ АААААААА
-        // {
-        //     case StringHolder.FilG:
-        //         if (MountDataCollector.IsLookingEast) imageFits.Data = Rotate(imageFits.Data);
-        //         break;
-        //     case StringHolder.FilR:
-        //         if (!MountDataCollector.IsLookingEast) imageFits.Data = Rotate(imageFits.Data);
-        //         break;
-        //     case StringHolder.FilI:
-        //         imageFits.Data = MountDataCollector.IsLookingEast ? FlipV(imageFits.Data) : FlipH(imageFits.Data);
-        //         break;
-        // }
 
         return imageFits;
     }
@@ -453,64 +434,64 @@ internal static class CameraControl
     }
 
     #endregion
-
-    #region Matrix rotate and flip
-
-    private static ushort[,] Rotate(ushort[,] matrix)
-    {
-        // (I2, I1) = (I1, I2);     
-        var xUp = matrix.GetUpperBound(0);
-        for (var x = 0; x <= xUp; x++)
-        {
-            var yUp = matrix.GetUpperBound(1);
-            for (var y = 0; y <= yUp / 2; y++)
-            {
-                var newX = xUp - x;
-                var newY = yUp - y;
-                if ((newX == x) & (newY == y)) continue;
-                (matrix[x, y], matrix[newX, newY]) =
-                    (matrix[newX, newY], matrix[x, y]);
-            }
-        }
-
-        return matrix;
-    }
-
-    private static ushort[,] FlipV(ushort[,] matrix)
-    {
-        var yUp = matrix.GetUpperBound(1);
-        for (var y = 0; y <= yUp; y++)
-        {
-            var xUp = matrix.GetUpperBound(0);
-            for (var x = 0; x <= xUp / 2; x++)
-            {
-                var newX = xUp - x;
-                if (newX == x) continue;
-                (matrix[x, y], matrix[newX, y]) =
-                    (matrix[newX, y], matrix[x, y]);
-            }
-        }
-
-        return matrix;
-    }
-
-    private static ushort[,] FlipH(ushort[,] matrix)
-    {
-        var xUp = matrix.GetUpperBound(0);
-        for (var x = 0; x <= xUp; x++)
-        {
-            var yUp = matrix.GetUpperBound(1);
-            for (var y = 0; y <= yUp / 2; y++)
-            {
-                var newY = yUp - y;
-                if (newY == y) continue;
-                (matrix[x, y], matrix[x, newY]) =
-                    (matrix[x, newY], matrix[x, y]);
-            }
-        }
-
-        return matrix;
-    }
-
-    #endregion
+    //
+    // #region Matrix rotate and flip
+    //
+    // private static ushort[,] Rotate(ushort[,] matrix)
+    // {
+    //     // (I2, I1) = (I1, I2);     
+    //     var xUp = matrix.GetUpperBound(0);
+    //     for (var x = 0; x <= xUp; x++)
+    //     {
+    //         var yUp = matrix.GetUpperBound(1);
+    //         for (var y = 0; y <= yUp / 2; y++)
+    //         {
+    //             var newX = xUp - x;
+    //             var newY = yUp - y;
+    //             if ((newX == x) & (newY == y)) continue;
+    //             (matrix[x, y], matrix[newX, newY]) =
+    //                 (matrix[newX, newY], matrix[x, y]);
+    //         }
+    //     }
+    //
+    //     return matrix;
+    // }
+    //
+    // private static ushort[,] FlipV(ushort[,] matrix)
+    // {
+    //     var yUp = matrix.GetUpperBound(1);
+    //     for (var y = 0; y <= yUp; y++)
+    //     {
+    //         var xUp = matrix.GetUpperBound(0);
+    //         for (var x = 0; x <= xUp / 2; x++)
+    //         {
+    //             var newX = xUp - x;
+    //             if (newX == x) continue;
+    //             (matrix[x, y], matrix[newX, y]) =
+    //                 (matrix[newX, y], matrix[x, y]);
+    //         }
+    //     }
+    //
+    //     return matrix;
+    // }
+    //
+    // private static ushort[,] FlipH(ushort[,] matrix)
+    // {
+    //     var xUp = matrix.GetUpperBound(0);
+    //     for (var x = 0; x <= xUp; x++)
+    //     {
+    //         var yUp = matrix.GetUpperBound(1);
+    //         for (var y = 0; y <= yUp / 2; y++)
+    //         {
+    //             var newY = yUp - y;
+    //             if (newY == y) continue;
+    //             (matrix[x, y], matrix[x, newY]) =
+    //                 (matrix[x, newY], matrix[x, y]);
+    //         }
+    //     }
+    //
+    //     return matrix;
+    // }
+    //
+    // #endregion
 }
