@@ -29,12 +29,13 @@ namespace RPCC.Focus
         public GetDataFromFits(ICameraDevice cam)
         {
             // if (string.IsNullOrEmpty(path2Fits)) return;
-            var resp = DonutsSocket.GetImageFwhm(cam.LatestImageFilename);
-            Focus = (int) resp[0];
-            Fwhm = (float)Math.Round(resp[1], 2);
-            Ell = (float)Math.Round(resp[2], 2);
-            StarsNum = (int) resp[3];
-            Bkg = resp[4];
+            var resp = DonutsRunner.GetImageMetrics(cam.LatestImageFilename);
+            // var resp = DonutsSocket.GetImageFwhm(cam.LatestImageFilename);
+            Focus = resp.Focus;
+            Fwhm = resp.Fwhm;
+            Ell = resp.Ell;
+            StarsNum = resp.Stars;
+            Bkg = resp.Bkg;
             DbCommunicate.AddSexToDb(cam.LastImageId, Fwhm, Ell, Bkg);
             if (StarsNum == 0)
             {

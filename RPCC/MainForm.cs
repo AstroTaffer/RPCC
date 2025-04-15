@@ -66,7 +66,7 @@ public partial class MainForm : Form
         Fli.SetDebugLevel($"{Settings.MainOutFolder}\\LOGS\\RPCC_LOGS\\FLIdebug.log", Fli.DEBUG.ALL);
             
         // Donuts connect
-        DonutsSocket.Connect();
+        // DonutsSocket.Connect();
             
         progressBarG.Style = ProgressBarStyle.Continuous;
         progressBarR.Style = ProgressBarStyle.Continuous;
@@ -99,7 +99,7 @@ public partial class MainForm : Form
         timerUi.Stop();
             
         WeatherSocket.Disconnect();
-        DonutsSocket.Disconnect();
+        // DonutsSocket.Disconnect();
         SiTechExeSocket.Disconnect();
 
         CameraControl.DisconnectCameras();
@@ -167,7 +167,7 @@ public partial class MainForm : Form
     private void ReconnectDonutsToolStripMenuItem_Click(object sender, EventArgs e)
     {
         // if(_donutsSocket.isConnected) _donutsSocket.Disconnect();
-        DonutsSocket.Connect();
+        // DonutsSocket.Connect();
     }
 
     private void ReconnectSiTechExeToolStripMenuItem_Click(object sender, EventArgs e)

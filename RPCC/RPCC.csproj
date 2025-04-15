@@ -312,7 +312,6 @@
     <Compile Include="Cams\ICameraDevice.cs" />
     <Compile Include="Cams\LibFliNative.cs" />
     <Compile Include="Comms\SiTechExeSocket.cs" />
-    <Compile Include="Comms\DonutsSocket.cs" />
     <Compile Include="Comms\WeatherSocket.cs" />
     <Compile Include="Focus\CameraFocus.cs" />
     <Compile Include="Focus\GetDataFromFITS.cs" />
@@ -337,6 +336,7 @@
     </Compile>
     <Compile Include="Test.cs" />
     <Compile Include="Utils\CoordinatesManager.cs" />
+    <Compile Include="Utils\DonutsRunner.cs" />
     <Compile Include="Utils\JsonHelper.cs" />
     <Compile Include="Utils\Logger.cs" />
     <Compile Include="Utils\Settings.cs" />
@@ -383,7 +383,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="FliLogoMod.ico" />
-    <Content Include="fwhm_test.py" />
     <Content Include="ILLink\ILLink.Descriptors.LibraryBuild.xml" />
     <Content Include="JPLEPH" />
     <Content Include="Sex\default.nnw">

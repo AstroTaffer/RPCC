@@ -1,6 +1,8 @@
-import datetime
-import socket
-import threading
+import json
+import os
+import sys
+import traceback
+
 from filelock import FileLock, Timeout
 import numpy as np
 from astropy.io import fits
@@ -14,15 +16,10 @@ from photutils.segmentation import detect_sources, SourceCatalog
 from astropy import wcs
 from astropy.stats import SigmaClip, mad_std, sigma_clip
 
-time_last_message = None
-time_wait_sec = 3
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
 
 def write_to_fits(path, fwhm, ell, stars_num, b):
     try:
         with FileLock(f"{path}.lock").acquire(timeout=5):
-            print("Файл успешно захвачен")
             with fits.open(path, memmap=False, mode='update') as hdulist:
                 fwhm_card = fits.Card('FWHM', 'nan' if np.isnan(fwhm) else fwhm, 'Median FWHM [arcsec]')
                 ell_card = fits.Card('ELL', 'nan' if np.isnan(ell) else ell, 'Median ellipticity')
@@ -38,9 +35,6 @@ def write_to_fits(path, fwhm, ell, stars_num, b):
 
 
 def calc_fwhm(header, image):
-    # with fits.open(path, memmap=False, mode='update') as hdulist:
-    #     header = hdulist[0].header
-    #     image = hdulist[0].data.copy()
     sigma_clip = SigmaClip(sigma=3.0)
     bkg_estimator = MedianBackground()
     bkg = Background2D(image, (32, 32), filter_size=(3, 3),
@@ -103,14 +97,13 @@ def calc_fwhm(header, image):
     b = np.round(bkg.background_median, 2)
     if np.isnan(fwhm):
         return 'fail'
-    # return '~'.join([str(header['FOCUS']), str(fwhm), str(ell), str(stars_num), str(b)])
     return header['FOCUS'], fwhm, ell, stars_num, b
 
 
 def calc_source_catalog(path):
     try:
         with FileLock(f"{path}.lock").acquire(timeout=5):
-            print("Файл успешно захвачен")
+            # print("Файл успешно захвачен")
             with fits.open(path, memmap=False) as hdulist:
                 header = hdulist[0].header.copy()
                 image = hdulist[0].data.copy()
@@ -141,24 +134,15 @@ def calc_source_catalog(path):
     stars_num = len(cat.fwhm.value)
     if np.isnan(fwhm):
         return 'fail'
-    # return '~'.join([str(header['FOCUS']), str(fwhm), str(ell), str(stars_num), str(b)])
     return header['FOCUS'], fwhm, ell, stars_num, b
 
 
-def timer_loop():
-    now = datetime.datetime.utcnow()
-    if time_last_message is not None:
-        if (now - time_last_message).total_seconds() > time_wait_sec:
-            print('Donuts timeout, closing server')
-            server.close()
-
-
-def calc_don_shifts(data):
-    donuts = Donuts(refimage=data[1], image_ext=0, overscan_width=24, prescan_width=24,
+def calc_don_shifts(path_start, path_end):
+    donuts = Donuts(refimage=path_start, image_ext=0, overscan_width=24, prescan_width=24,
                     border=50, normalise=True, exposure='EXPTIME', subtract_bkg=True, ntiles=32)
-    hlist = fits.open(data[1])
+    hlist = fits.open(path_start)
     h = hlist[0].header
-    shift_result = donuts.measure_shift(data[2])
+    shift_result = donuts.measure_shift(path_end)
     dx = - shift_result.x.value
     dy = - shift_result.y.value
 
@@ -171,68 +155,49 @@ def calc_don_shifts(data):
     dalpha = (cRa - bRa)*60*60
     ddelta = (cDec - bDec)*60*60
 
-    ans = f'{np.round(dx, 2)}~{np.round(dy, 2)}~{np.round(dalpha, 2)}~{np.round(ddelta, 2)}'
-    print('ans = ' + ans)
-    return ans
+    return np.round(dx, 2), np.round(dy, 2), np.round(dalpha, 2), np.round(ddelta, 2)
 
 
-def pars_req(req: str) -> str:
-    data = req.split('~')
-    if len(data) < 2:
-        return 'fail while split'
-    if "\n" in data[-1]:
-        data[-1] = data[-1][:-1]
-
-    if 'don' in data[0]:
+if __name__ == "__main__":
+    if len(sys.argv) >= 3 and sys.argv[1] == "fwhm":
         try:
-            return calc_don_shifts(data)
+            image_path = sys.argv[2]
+            if not os.path.exists(image_path):
+                print(f"ERR~Файл не найден: {image_path}", file=sys.stderr)
+                sys.exit(1)
+            focus, fwhm, ell, stars_num, b = calc_source_catalog(image_path)
+            write_to_fits(image_path, fwhm, ell, stars_num, b)
+            response = {
+                "focus": focus,
+                "fwhm": fwhm,
+                "ell": ell,
+                "stars": stars_num,
+                "bkg": b
+            }
+            print(json.dumps(response))
         except Exception as e:
-            print(e)
-            print('fail don')
-            return f'fail: {e}'
-    if 'fwhm' in data[0]:
+            print(json.dumps({"error": str(e)}), file=sys.stderr)
+            traceback.print_exc(file=sys.stderr)
+            sys.exit(1)
+    elif len(sys.argv) >= 4 and sys.argv[1] == "don":
+        ref_path = sys.argv[2]
+        new_path = sys.argv[3]
         try:
-            print(data)
-            focus, fwhm, ell, stars_num, b = calc_source_catalog(data[1])
-            write_to_fits(data[1], fwhm, ell, stars_num, b)
+            if not os.path.exists(ref_path) or not os.path.exists(new_path):
+                print(json.dumps({"error": "Один или оба FITS-файла не найдены"}), file=sys.stderr)
+                sys.exit(1)
+            don = calc_don_shifts(ref_path, new_path)
+            response = {
+                "dx": don[0],
+                "dy": don[1],
+                "dalpha": don[2],
+                "ddelta": don[3]
+            }
+            print(json.dumps(response))
         except Exception as e:
-            print(e)
-            print('fail fwhm')
-            return f'fail: {e}'
-        return '~'.join([str(focus), str(fwhm), str(ell), str(stars_num), str(b)])
-
-
-def handle_client(reader, writer):
-    t = threading.Timer(time_wait_sec, timer_loop)
-    t.start()
-    while True:
-        request = reader.readline()
-        time_last_message = datetime.datetime.utcnow()
-        if 'quit' in request:
-            break
-        if (request is not None) and (request != '') and ('\ufeff' not in request):
-            response = pars_req(request) + '\n'
-            # if 'pong' in response:
-            #     continue
-            writer.writelines(response)
-            writer.flush()
-    writer.close()
-
-
-def run_server():
-    # server.bind((socket.gethostname(), 3030))
-    server.bind(('127.0.0.1', 3030))
-    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  # реюз порта
-    server.listen(1)
-    # while True:
-    client_socket, _ = server.accept()
-    # client_socket.settimeout(60)
-    try:
-        with client_socket:
-            handle_client(client_socket.makefile('r'), client_socket.makefile('w'))
-    except ConnectionAbortedError:
-        pass
-
-
-if __name__ == '__main__':
-    run_server()
+            print(json.dumps({"error": str(e)}), file=sys.stderr)
+            traceback.print_exc(file=sys.stderr)
+            sys.exit(1)
+    else:
+        print("Usage: python DONUTS.py fwhm [don] <path_to_fits> [<path_to_fits>]", file=sys.stderr)
+        sys.exit(1)

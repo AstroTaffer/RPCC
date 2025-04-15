@@ -69,15 +69,7 @@ public static class Head
                 return;
             }
         }
-        if (!DonutsSocket.IsConnected)
-        {
-            if (!DonutsSocket.Connect())
-            {
-                Logger.AddLogEntry("WARNING: Can't thinking, no connection to Donuts");
-                IsThinking = false;
-                return;
-            }
-        }
+
         if (!SiTechExeSocket.IsConnected)
         {
             if (!SiTechExeSocket.Connect().Result)
@@ -663,18 +655,20 @@ public static class Head
                 _oldErrRa = 0;
                 return;
             }
-            if (!DonutsSocket.IsConnected)
-            {
-                Logger.AddLogEntry("WARNING: can't guide, no connection to donuts");
-                return;
-            } //Если нет конекта или нет матрицы, то выходим
-            var correction = DonutsSocket.GetGuideCorrection(_firstFrame, 
+            // if (!DonutsSocket.IsConnected)
+            // {
+            //     Logger.AddLogEntry("WARNING: can't guide, no connection to donuts");
+            //     return;
+            // } //Если нет конекта или нет матрицы, то выходим
+            // var correction = DonutsSocket.GetGuideCorrection(_firstFrame, CameraControl.cams.Last().LatestImageFilename); //Получаем коррекцию
+            var correction = DonutsRunner.GetImageShift(_firstFrame, 
                 CameraControl.cams.Last().LatestImageFilename); //Получаем коррекцию
+            
             var one = _firstFrameLookingEast ? 1 : -1;
-            var dx = one * correction[0];
-            var dy = one * correction[1];
-            var dRa = one * correction[2];
-            var dDec = one * correction[3];
+            var dx = one * correction.Dx;
+            var dy = one * correction.Dy;
+            var dRa = one * correction.Dalpha;
+            var dDec = one * correction.Ddelta;
             if (Math.Abs(dx) > 50 | Math.Abs(dy) > 50)
             {
                 Logger.AddLogEntry($"WARNING: guiding correction: dx = {dx} px, dy = {dy} px, " +
