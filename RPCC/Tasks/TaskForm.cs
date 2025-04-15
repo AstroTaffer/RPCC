@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
@@ -37,7 +38,9 @@ public partial class TaskForm : Form
         {
             try
             {
-                _task = Tasker.GetTaskByRowIndex(_rowIndex);
+                var row = Tasker.DataGridViewTasker.Rows[rowIndex];
+                // _task = Tasker.GetTaskByRowIndex(_rowIndex);
+                _task = DbCommunicate.GetTaskFromDb(Convert.ToInt32(row.Cells["N"].Value));
             }
             catch (Exception e)
             {
@@ -57,28 +60,32 @@ public partial class TaskForm : Form
     private void SetLabels()
     {
         textBoxCoords.Text = _task.RaDec;
-        textBoxObject.Text = _task.Object;
-        textBoxObserver.Text = _task.Observer;
-        // numericUpDown_xbin.Value = _task.Xbin;
-        // numericUpDown_ybin.Value = _task.Ybin;
+        textBoxObject.Text = _task.Object ?? "";
+        textBoxObserver.Text = _task.Observer ?? "";
         textBoxDateTime.Text = _task.TimeStart.ToString(CultureInfo.CurrentCulture);
         textBoxExpN.Text = _task.AllFrames.ToString(CultureInfo.CurrentCulture);
-
         comboBoxExp.Text = _task.Exp.ToString(CultureInfo.CurrentCulture);
         textBoxDuration.Text = _task.Duration.ToString(CultureInfo.CurrentCulture);
-        comboBoxFrameType.Text = _task.FrameType;
-        comboBoxObjectType.Text = _task.ObjectType;
+        comboBoxFrameType.Text = _task.FrameType ?? "";
+        comboBoxObjectType.Text = _task.ObjectType ?? "";
 
-        textBoxDateTimeSSObjects.Text = string.Join("\n", from t in _task.RepointTimes 
-            select t.ToString(CultureInfo.CurrentCulture));
-        textBoxCoordsSSObjects.Text = string.Join("\n", _task.RepointCoords);
-        
-        var s = _task.Filters.Split(' ');
-        if (s.Contains(StringHolder.FilG)) checkBoxFilg.Checked = true;
-        if (s.Contains(StringHolder.FilV)) checkBoxFilV.Checked = true;
-        if (s.Contains(StringHolder.FilR)) checkBoxFilr.Checked = true;
-        if (s.Contains(StringHolder.FilI)) checkBoxFili.Checked = true;
+        // Безопасное отображение координат и времён повторных точек
+        textBoxCoordsSSObjects.Text = string.Join("\n",
+            (_task.RepointCoords ?? new List<string>())
+            .Select(c => string.IsNullOrWhiteSpace(c) ? "" : c));
+
+        textBoxDateTimeSSObjects.Text = string.Join("\n",
+            (_task.RepointTimes ?? new List<DateTime>())
+            .Select(t => t.ToString(CultureInfo.CurrentCulture)));
+
+        // Парсинг фильтров
+        var s = (_task.Filters ?? "").Split(' ');
+        checkBoxFilg.Checked = s.Contains(StringHolder.FilG);
+        checkBoxFilV.Checked = s.Contains(StringHolder.FilV);
+        checkBoxFilr.Checked = s.Contains(StringHolder.FilR);
+        checkBoxFili.Checked = s.Contains(StringHolder.FilI);
     }
+
 
     private void buttonAdd_Click(object sender, EventArgs e)
     {
@@ -97,10 +104,6 @@ public partial class TaskForm : Form
     {
         _task.FrameType = comboBoxFrameType.Text;
         var fil = $"{StringHolder.FilG} {StringHolder.FilV} {StringHolder.FilR} {StringHolder.FilI}";
-        // if (checkBoxFilg.Checked) fil += $"{StringHolder.FilG} ";
-        // if (checkBoxFilV.Checked) fil += $"{StringHolder.FilV} ";
-        // if (checkBoxFilr.Checked) fil += $"{StringHolder.FilR} ";
-        // if (checkBoxFili.Checked) fil += StringHolder.FilI;
 
         string[] validFrameTypes =
         [StringHolder.Light, StringHolder.Dark, 
@@ -133,14 +136,37 @@ public partial class TaskForm : Form
                     return;
                 }
 
-                var times = textBoxDateTimeSSObjects.Text.Split('\n');
-                var coors = textBoxCoordsSSObjects.Text.Split('\n').ToList();
-                if (times.Length > 0 & !string.IsNullOrEmpty(times[0]))
+                var times = textBoxDateTimeSSObjects.Text
+                    .Replace("\r\n", "\n")
+                    .Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(s => s.Trim())
+                    .ToList();
+
+                var coors = textBoxCoordsSSObjects.Text
+                    .Replace("\r\n", "\n")
+                    .Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(s => s.Trim())
+                    .ToList();
+
+                if (times.Count > 0 && !string.IsNullOrWhiteSpace(times[0]))
                 {
-                    if (times.Length == coors.Count)
+                    if (times.Count == coors.Count)
                     {
                         _task.RepointCoords = coors;
-                        _task.RepointTimes = (from t in times select DateTime.Parse(t)).ToList(); 
+                        var parsedTimes = new List<DateTime>();
+                        for (int i = 0; i < times.Count; i++)
+                        {
+                            if (!DateTime.TryParse(times[i], out var dt))
+                            {
+                                MessageBox.Show(
+                                    $"Ошибка в строке {i + 1} списка времён:\n\"{times[i]}\"\n\nУбедитесь, что формат корректный (например: 2025-04-12 18:30)",
+                                    "Неверный формат времени", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                return;
+                            }
+                            parsedTimes.Add(dt);
+                        }
+                        _task.RepointTimes = parsedTimes;
+
                     }
                     else
                     {
@@ -148,7 +174,6 @@ public partial class TaskForm : Form
                             @"OK", MessageBoxButtons.OK);
                         return;
                     }
-                        
                 }
             }
                 
@@ -243,6 +268,8 @@ public partial class TaskForm : Form
         taskForm.textBoxObject.Text = textBoxObject.Text;
         taskForm.comboBoxExp.Text = comboBoxExp.Text;
         taskForm.comboBoxFrameType.Text = comboBoxFrameType.Text;
+        
+
 
         // taskForm.numericUpDown_xbin.Value = (int)numericUpDown_xbin.Value;
         // taskForm.numericUpDown_ybin.Value = (int)numericUpDown_ybin.Value;

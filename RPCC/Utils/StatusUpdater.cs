@@ -1,54 +1,61 @@
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Threading;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using RPCC.Utils;
+
+namespace RPCC.Utils;
 
 public static class StatusUpdater
 {
-    private static readonly string statusPath = @"C:\Users\Администратор\RiderProjects\telescope-backend\status\status.json";
+    private static readonly string StatusPath = @"C:\Users\Администратор\RiderProjects\telescope-backend\status\status.json";
+    // private static readonly string StatusPath = Path.Combine(Settings.MainOutFolder, "status", "status.json");
     private const string GlobalMutexName = "Global\\RoboPhotStatusFileLock";
 
+    /// <summary>
+    /// Обновляет значение по вложенному пути, например ["dome", "south_shutter", "position"]
+    /// </summary>
     public static void UpdateNestedField(string[] path, JToken value)
     {
-        using (var mutex = new Mutex(false, GlobalMutexName))
+        using var mutex = new Mutex(false, GlobalMutexName);
+        try
         {
-            if (!mutex.WaitOne(5000))  // ждём до 5 секунд
-                throw new IOException("Не удалось получить доступ к status.json (mutex timeout)");
+            mutex.WaitOne();
 
-            try
+            var root = JsonHelper.LoadJsonSafely(StatusPath);
+            if (root == null)
             {
-                JObject root = File.Exists(statusPath)
-                    ? JObject.Parse(File.ReadAllText(statusPath))
-                    : new JObject();
-
-                JObject current = root;
-                for (int i = 0; i < path.Length - 1; i++)
-                {
-                    if (current[path[i]] == null || current[path[i]].Type != JTokenType.Object)
-                        current[path[i]] = new JObject();
-
-                    current = (JObject)current[path[i]];
-                }
-
-                current[path[path.Length - 1]] = value;
-                root["last_update"] = DateTime.UtcNow.ToString("s");
-
-                using (var fs = new FileStream(statusPath, FileMode.Create, FileAccess.Write, FileShare.Read))
-                using (var writer = new StreamWriter(fs))
-                {
-                    writer.Write(root.ToString(Formatting.Indented));
-                }
+                Logger.AddLogEntry("[StatusUpdater] Пропущено обновление JSON — не удалось загрузить.");
+                return;
             }
-            finally
+
+            JToken current = root;
+            for (int i = 0; i < path.Length - 1; i++)
             {
-                mutex.ReleaseMutex();
+                if (current[path[i]] == null)
+                    current[path[i]] = new JObject();
+
+                current = current[path[i]];
             }
+
+            string lastKey = path[path.Length - 1];
+            current[lastKey] = value;
+
+            JsonHelper.SaveJsonToFile(StatusPath, root);
+        }
+        finally
+        {
+            mutex.ReleaseMutex();
         }
     }
-    
+
+    /// <summary>
+    /// Обновляет поле верхнего уровня, например "mount"
+    /// </summary>
+    public static void UpdateRootField(string field, JToken value)
+    {
+        UpdateNestedField(new[] { field }, value);
+    }
+   
 
     public static void RunPreviewGenerator()
     {

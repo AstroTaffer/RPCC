@@ -40,7 +40,7 @@ namespace RPCC.Focus
             Logger.AddLogEntry("FOCUS: phase 1: defocusing");
             IsFocusing = true;
             _taskForFocus = Head.CurrentTask.Copy();
-            _taskForFocus.TaskNumber = -1;
+            // _taskForFocus.TaskNumber = -1;
             _taskForFocus.FrameType = StringHolder.Focus;
             if (Head.CurrentTask.Exp > FocusExp)
             {
@@ -50,7 +50,7 @@ namespace RPCC.Focus
             _focBadFrames = 0; //
             Frames.Clear();
             _startFocusPos = SerialFocus.CurrentPosition;
-            _shift = -50;
+            _shift = -20;
             _sumShift = 0;
             _phase = 0;
             // _frameCounter = 0;
@@ -152,11 +152,8 @@ namespace RPCC.Focus
                     // _focBadFrames = 0;
                     // _focCycles = 0;
                 }
-                else
-                {
-                    Logger.AddLogEntry("FOCUS: Bad frames, another cycle");
-                }
-                GetImForFocus(_shift); //еще раз к началу цикла
+                Logger.AddLogEntry("FOCUS: Bad frames, another cycle");
+                GetImForFocus(0); //еще раз к началу цикла
                 return;
             }
             

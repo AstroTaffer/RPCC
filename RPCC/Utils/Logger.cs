@@ -1,8 +1,10 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 using RPCC.Cams;
 using RPCC.Focus;
+using RPCC.Tasks;
 
 namespace RPCC.Utils
 {   
@@ -11,6 +13,33 @@ namespace RPCC.Utils
         internal static ListBox LogBox;
         public static bool DebugMode = false;
 
+        public static void LogTaskSummary(ObservationTask task, string operation)
+        {
+            string coords = task.RepointCoords != null && task.RepointCoords.Any()
+                ? string.Join(" | ", task.RepointCoords)
+                : "—";
+
+            string times = task.RepointTimes != null && task.RepointTimes.Any()
+                ? string.Join(" | ", task.RepointTimes.Select(t => t.ToString("yyyy-MM-dd HH:mm:ss")))
+                : "—";
+
+            string message =
+                $"[DB] Task {task.TaskNumber} {operation}:\n" +
+                $"  📡 RA/DEC: {task.RaDec} | RA: {task.Ra}, Dec: {task.Dec}\n" +
+                $"  🔭 Object: \"{task.Object}\" ({task.ObjectType})\n" +
+                $"  👤 Observer: \"{task.Observer}\" | Status: {task.Status}\n" +
+                $"  ⏱ Duration: {task.Duration} sec | Exp: {task.Exp} x {task.AllFrames} (Done: {task.DoneFrames})\n" +
+                $"  🕒 Start: {task.TimeStart:yyyy-MM-dd HH:mm:ss} | End: {task.TimeEnd:yyyy-MM-dd HH:mm:ss}\n" +
+                $"  🔃 LastExp: {task.TimeLastExp:yyyy-MM-dd HH:mm:ss}\n" +
+                $"  🧪 FrameType: {task.FrameType} | Filters: {task.Filters} | Bin: {task.Xbin}x{task.Ybin}\n" +
+                $"  📍 Repoint Coords: {coords}\n" +
+                $"  ⏳ Repoint Times: {times}";
+
+            AddDebugLogEntry(message);
+        }
+
+
+        
         internal static void AddDebugLogEntry(string entry)
         {
             if (DebugMode) 

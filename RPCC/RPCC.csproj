@@ -337,6 +337,7 @@
     </Compile>
     <Compile Include="Test.cs" />
     <Compile Include="Utils\CoordinatesManager.cs" />
+    <Compile Include="Utils\JsonHelper.cs" />
     <Compile Include="Utils\Logger.cs" />
     <Compile Include="Utils\Settings.cs" />
     <Compile Include="Utils\StatusUpdater.cs" />

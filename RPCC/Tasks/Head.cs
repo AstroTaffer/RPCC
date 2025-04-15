@@ -28,9 +28,9 @@ public static class Head
     
     public static readonly Timer ThinkingTimer = new();
     public static ObservationTask CurrentTask;
-    private static bool _isObserve;
-    private static bool _isDoFlats;
-    private static bool _isDoDarks;
+    public static bool IsObserve;
+    public static bool IsDoFlats;
+    public static bool IsDoDarks;
     public static bool IsOnPause;
     private static string _firstFrame;
     private static bool _firstFrameLookingEast;
@@ -56,7 +56,8 @@ public static class Head
         ThinkingTimer.Stop();
         if (CurrentTask != null)
         {
-            DbCommunicate.UpdateTaskFromDb(ref CurrentTask);
+            CurrentTask = DbCommunicate.GetTaskFromDb(CurrentTask.TaskNumber);
+            // DbCommunicate.UpdateTaskFromDb(ref CurrentTask);
         }
         DbCommunicate.LoadDbTable();
         if (!CameraControl.isConnected)
@@ -106,9 +107,9 @@ public static class Head
 
         if (IsOnPause & CurrentTask is not null)
         {
-            if (_isObserve & WeatherDataCollector.Obs |
-                _isDoDarks & !WeatherDataCollector.Obs |
-                _isDoFlats & WeatherDataCollector.Flat)
+            if (IsObserve & WeatherDataCollector.Obs |
+                IsDoDarks & !WeatherDataCollector.Obs |
+                IsDoFlats & WeatherDataCollector.Flat)
             {
                 Logger.AddLogEntry($"Head: Unpause task #{CurrentTask.TaskNumber}");
                 if (UnparkAndGoTo())
@@ -127,9 +128,9 @@ public static class Head
         //     Logger.AddLogEntry($"Head: Pause task #{CurrentTask.TaskNumber}");
         // }
 
-        if (string.IsNullOrEmpty(_firstFrame) & CurrentTask is not null & _isObserve)
+        if (string.IsNullOrEmpty(_firstFrame) & CurrentTask is not null & IsObserve)
         {
-            if (CurrentTask.RepointTimes is null){
+            if (CurrentTask.RepointTimes is null || CurrentTask.RepointTimes?.Count == 0){
                 // if (currentTask.RepointTimes.Count == 0) //Корректировать положение монтировки
                 //                                          //можно только тогда, когда не надо делать репоинты 
                 // {
@@ -177,8 +178,7 @@ public static class Head
 
         foreach (DataRow row in tab)
         {
-            var bufTask = new ObservationTask();
-            Tasker.GetTaskFromRow(row, ref bufTask);
+            var bufTask = DbCommunicate.GetTaskFromDb(Convert.ToInt32(row["task_id"]));
             // если время конца таски уже прошло, но она все еще не начата, или тип кадра не указан
             // то ставим статус пролюблена
             if (bufTask.TimeEnd < DateTime.UtcNow)
@@ -229,6 +229,9 @@ public static class Head
                                         CurrentTask = bufTask;
                                     }
                                     break;
+                                case StringHolder.Test:
+                                    CurrentTask = bufTask;
+                                    break;
                                 case StringHolder.Dark:
                                     if (!WeatherDataCollector.Flat & !WeatherDataCollector.Obs)
                                     {
@@ -243,7 +246,7 @@ public static class Head
             }
                 
             if (bufTask.Status > 0) continue; // если не ждет наблюдения, то идем дальше
-            if (_isObserve || _isDoDarks || _isDoFlats) continue; // если уже идет задание, то ждем минуту
+            if (IsObserve || IsDoDarks || IsDoFlats) continue; // если уже идет задание, то ждем минуту
             if (CurrentTask is null)
             {
                 switch (bufTask.FrameType)
@@ -260,6 +263,9 @@ public static class Head
                             CurrentTask = bufTask;
                         }
                         break;
+                    case StringHolder.Test:
+                        CurrentTask = bufTask;
+                        break;
                     case StringHolder.Dark:
                         if (!WeatherDataCollector.Flat & !WeatherDataCollector.Obs)
                         {
@@ -273,7 +279,7 @@ public static class Head
         //а если нашлась и время до начала менее 5 минут, то стартуем 
         if (CurrentTask is null)
         {
-            if (CameraControl.isConnected & !_isObserve & !_isDoDarks & !_isDoFlats)
+            if (CameraControl.isConnected & !IsObserve & !IsDoDarks & !IsDoFlats)
             {
                 if (WeatherDataCollector.Flat)
                 {
@@ -305,7 +311,7 @@ public static class Head
             //вышло время, но оно на паузе и
             //не вызовет коллбек,
             //то нужно его завершить иначе
-            if (!_isObserve & !_isDoDarks & !_isDoFlats & (IsThinking | CurrentTask.FrameType == StringHolder.Test) &
+            if (!IsObserve & !IsDoDarks & !IsDoFlats & (IsThinking | CurrentTask.FrameType == StringHolder.Test) &
                 (CurrentTask.TimeStart - DateTime.UtcNow).TotalMinutes < TotalMinutes2StartTask &
                 CameraControl.isConnected)
             {
@@ -352,12 +358,14 @@ public static class Head
 
     private static void StartDoTest()
     {
-        _isObserve = true;
+        IsObserve = true;
         CurrentTask.Status = 1;
-        Logger.AddLogEntry($"Start task #{CurrentTask.TaskNumber}, type: {CurrentTask.FrameType}, exp: {CurrentTask.Exp}");
-        if (!UnparkAndGoTo()) return;
+        Logger.AddLogEntry($"Start task #{CurrentTask.TaskNumber}, type: {CurrentTask.FrameType}");
+        _cd11 = 100;   
+        _cd12 = 100;
+        _firstFrame = null;
+        if (!UnparkAndGoTo()) return; //проверять доехал ли
         CurrentTask.Filters = CheckFil();
-        
         StartExpAndCheckFuckup();
     }
     
@@ -389,15 +397,14 @@ public static class Head
     {
         Logger.AddLogEntry($"End task №{CurrentTask.TaskNumber}, status {endStatus}");
         CurrentTask.Status = endStatus;
-        if (CurrentTask.TaskNumber > 0) 
+        if (!CameraFocus.IsFocusing & CurrentTask.TaskNumber > 0) 
         {
             DbCommunicate.UpdateTaskInDb(CurrentTask);
         }
 
-        CameraControl.loadedTask = null;
-        _isObserve = false;
-        _isDoDarks = false;
-        _isDoFlats = false;
+        IsObserve = false;
+        IsDoDarks = false;
+        IsDoFlats = false;
         IsOnPause = false;
         CurrentTask = null;
         _firstFrame = null;
@@ -412,9 +419,9 @@ public static class Head
 
     private static void StartDoLight()
     {   
-        _isObserve = true;
+        IsObserve = true;
         CurrentTask.Status = 1;
-        Logger.AddLogEntry($"Start task# {CurrentTask.TaskNumber}, type: {CurrentTask.FrameType}");
+        Logger.AddLogEntry($"Start task #{CurrentTask.TaskNumber}, type: {CurrentTask.FrameType}");
         _cd11 = 100;   
         _cd12 = 100;
         _firstFrame = null;
@@ -425,7 +432,8 @@ public static class Head
 
     public static void CamCallback()
     {
-        DbCommunicate.UpdateTaskFromDb(ref CurrentTask);
+        // DbCommunicate.UpdateTaskFromDb(ref CurrentTask);
+        CurrentTask = DbCommunicate.GetTaskFromDb(CurrentTask.TaskNumber);
         GetDataFromFits fitsAnalysis = null;
         CurrentTask.DoneFrames++;
         CurrentTask.TimeLastExp = DateTime.UtcNow;
@@ -460,21 +468,23 @@ public static class Head
                         return;
                     }
 
-                    if (CurrentTask.RepointTimes is not null)
+                    if (CurrentTask.RepointTimes?.Count > 0)
                     {
-                        if (CurrentTask.RepointTimes.Count > 0)  //репоинт для объектов СС
-                        {
-                            if (CurrentTask.RepointTimes[0] < DateTime.UtcNow)
-                            {   
-                                CurrentTask.ComputeRaDec(CurrentTask.RepointCoords[0]);
-                                if (SiTechExeSocket.GoTo(CurrentTask.Ra, CurrentTask.Dec, true))
-                                {
-                                    CurrentTask.RepointTimes.RemoveAt(0);
-                                    CurrentTask.RepointCoords.RemoveAt(0);
-                                    DbCommunicate.UpdateTaskInDb(CurrentTask);
-                                }
+                         //репоинт для объектов СС
+                        Logger.AddDebugLogEntry($"HEAD: Next repoint at {CurrentTask.RepointTimes[0]} to {CurrentTask.RepointCoords[0]}");
+                        if (CurrentTask.RepointTimes[0] < DateTime.UtcNow)
+                        {   
+                            Logger.AddDebugLogEntry($"HEAD: Repointing");
+                            CurrentTask.ComputeRaDec(CurrentTask.RepointCoords[0]);
+                            if (SiTechExeSocket.GoTo(CurrentTask.Ra, CurrentTask.Dec, true))
+                            {
+                                Logger.AddDebugLogEntry($"HEAD: Repointing done, remove point");
+                                CurrentTask.RepointTimes.RemoveAt(0);
+                                CurrentTask.RepointCoords.RemoveAt(0);
+                                DbCommunicate.UpdateTaskInDb(CurrentTask);
                             }
                         }
+                        
                     }
                     else Guiding();
                     if (!WeatherDataCollector.Obs)
@@ -513,7 +523,25 @@ public static class Head
             {
                 if (CurrentTask.DoneFrames < CurrentTask.AllFrames)
                 {
-                    Guiding();
+                    if (CurrentTask.RepointTimes?.Count > 0)
+                    {
+                        //репоинт для объектов СС
+                        Logger.AddDebugLogEntry($"HEAD: Next repoint at {CurrentTask.RepointTimes[0]} to {CurrentTask.RepointCoords[0]}");
+                        if (CurrentTask.RepointTimes[0] < DateTime.UtcNow)
+                        {   
+                            Logger.AddDebugLogEntry($"HEAD: Repointing");
+                            CurrentTask.ComputeRaDec(CurrentTask.RepointCoords[0]);
+                            if (SiTechExeSocket.GoTo(CurrentTask.Ra, CurrentTask.Dec, true))
+                            {
+                                Logger.AddDebugLogEntry($"HEAD: Repointing done, remove point");
+                                CurrentTask.RepointTimes.RemoveAt(0);
+                                CurrentTask.RepointCoords.RemoveAt(0);
+                                DbCommunicate.UpdateTaskInDb(CurrentTask);
+                            }
+                        }
+                        
+                    }
+                    else Guiding();
                     foreach (var cam in CameraControl.cams)
                     {
                         if (!string.IsNullOrEmpty(cam.LatestImageFilename))
@@ -714,7 +742,7 @@ public static class Head
             EndTask(4);
             return;
         }
-        _isDoFlats = true;
+        IsDoFlats = true;
         Logger.AddLogEntry($"Start task# {CurrentTask.TaskNumber}, type: {CurrentTask.FrameType}");
         if (!UnparkAndGoTo()) return;
         CurrentTask.Status = 1;
@@ -748,7 +776,7 @@ public static class Head
     {
         if (!WeatherDataCollector.Obs & !WeatherDataCollector.Flat)
         {
-            _isDoDarks = true;
+            IsDoDarks = true;
             Logger.AddLogEntry($"Start task #{CurrentTask.TaskNumber}, type: {CurrentTask.FrameType}, exp: {CurrentTask.Exp}");
 
             CurrentTask.Status = 1;
@@ -783,7 +811,7 @@ public static class Head
                 return;
             }
         }
-        else if (task.TaskNumber != -1)
+        else if (!CameraFocus.IsFocusing)
         {
             DbCommunicate.UpdateTaskInDb(task);
         }

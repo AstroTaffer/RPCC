@@ -12,8 +12,8 @@ namespace RPCC.Focus
 {
     public class GetDataFromFits
     {
-        private const float MaxEll = 0.3f;
-        private const int MinStars = 1;
+        private const float MaxEll = 0.5f;
+        private const int MinStars = 4;
         private const float FwhmFocused = 3.3f;
 
         

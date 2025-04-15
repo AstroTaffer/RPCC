@@ -88,39 +88,92 @@ public static class DbCommunicate
             return dt;
         }
     }
-                
-    public static void UpdateTaskFromDb(ref ObservationTask observationTask)   
+    
+   public static ObservationTask GetTaskFromDb(int taskId)
     {
-        try
+        using var conn = ConnectToDb();
+        string query = "SELECT * FROM robophot_tasks WHERE task_id = @task_id";
+        using var cmd = new NpgsqlCommand(query, conn);
+        cmd.Parameters.AddWithValue("task_id", taskId);
+
+        using var reader = cmd.ExecuteReader();
+        if (!reader.Read())
+            throw new Exception($"Задание с task_id = {taskId} не найдено в БД");
+
+        var spoint = reader.Get<Spoint>("start_coord2000");
+
+        var task = new ObservationTask
         {
-            lock (Loc)
+            TaskNumber = taskId,
+            Ra = spoint.TargetRa * 24 / 360,
+            Dec = spoint.TargetDec,
+            RaDec = $"{ASCOM.Tools.Utilities.HoursToHMS(spoint.TargetRa * 24 / 360)} {ASCOM.Tools.Utilities.DegreesToDMS(spoint.TargetDec)}",
+
+            TimeAdd = reader.Get<DateTime>("time_add"),
+            TimeStart = reader.Get<DateTime>("time_start"),
+            TimeEnd = reader.Get<DateTime>("time_end"),
+            TimeLastExp = reader.Get<DateTime>("time_last_exp"),
+
+            Duration = reader.Get<float>("duration"),
+            Exp = reader.Get<short>("exp_time"),
+            DoneFrames = reader.Get<short>("done_frames"),
+            AllFrames = reader.Get<short>("all_frames"),
+
+            Object = reader.Get<string>("object_name"),
+            Observer = reader.Get<string>("observer"),
+            FrameType = reader.Get<string>("frame_type"),
+            ObjectType = reader.Get<string>("object_type"),
+            Status = reader.Get<short>("status"),
+            Xbin = reader.Get<short>("x_bin"),
+            Ybin = reader.Get<short>("y_bin"),
+
+            Filters = string.Join(" ", new[]
             {
-                var query = "SELECT task_id, get_hms_dms(start_coord2000) as coord2000, " +
-                            "time_add, time_start, time_end, " +
-                            "duration, exp_time, done_frames, all_frames, time_last_exp, " +
-                            "is_filter_g, is_filter_r, is_filter_i, object_name, object_type, " +
-                            "status, observer, frame_type, x_bin, y_bin, repoint_coords, repoint_times, is_filter_v " +
-                            $"FROM robophot_tasks WHERE task_id = {observationTask.TaskNumber}";
-                using var con = ConnectToDb();
-                var com = new NpgsqlCommand(query, con);
-                using var reader = com.ExecuteReader();
-                var dt = new DataTable();
-                if (reader.HasRows)
-                {
-                    dt.Load(reader);
-                }
-                Tasker.GetTaskFromRow(dt.Rows[0], ref observationTask);
-            }
-        }
-        catch (Exception e)
-        {
-            Logger.AddError("UpdateTaskFromDb", e);
-        }
+                reader.Get<bool>("is_filter_g") ? StringHolder.FilG : null,
+                reader.Get<bool>("is_filter_v") ? StringHolder.FilV : null,
+                reader.Get<bool>("is_filter_r") ? StringHolder.FilR : null,
+                reader.Get<bool>("is_filter_i") ? StringHolder.FilI : null
+            }.Where(f => f != null)),
+
+            RepointCoords = reader.Get<string[]>("repoint_coords")?.ToList() ?? new(),
+            RepointTimes = reader.Get<DateTime[]>("repoint_times")?.ToList() ?? new()
+        };
+
+        return task;
     }
+   
+    // public static void UpdateTaskFromDb(ref ObservationTask observationTask)   
+    // {
+    //     try
+    //     {
+    //         lock (Loc)
+    //         {
+    //             var query = "SELECT task_id, get_hms_dms(start_coord2000) as coord2000, " +
+    //                         "time_add, time_start, time_end, " +
+    //                         "duration, exp_time, done_frames, all_frames, time_last_exp, " +
+    //                         "is_filter_g, is_filter_r, is_filter_i, object_name, object_type, " +
+    //                         "status, observer, frame_type, x_bin, y_bin, repoint_coords, repoint_times, is_filter_v " +
+    //                         $"FROM robophot_tasks WHERE task_id = {observationTask.TaskNumber}";
+    //             using var con = ConnectToDb();
+    //             var com = new NpgsqlCommand(query, con);
+    //             using var reader = com.ExecuteReader();
+    //             var dt = new DataTable();
+    //             if (reader.HasRows)
+    //             {
+    //                 dt.Load(reader);
+    //             }
+    //             Tasker.GetTaskFromRow(dt.Rows[0], ref observationTask);
+    //         }
+    //     }
+    //     catch (Exception e)
+    //     {
+    //         Logger.AddError("UpdateTaskFromDb", e);
+    //     }
+    // }
 
     public static bool AddTaskToDb(ObservationTask observationTask)
     {
-        // if(observationTask.TimeAdd.ToUniversalTime())
+
         try
         {
             lock (Loc)
@@ -164,11 +217,9 @@ public static class DbCommunicate
                         new NpgsqlParameter { Value = observationTask.FrameType, NpgsqlDbType = NpgsqlDbType.Text },
                         new NpgsqlParameter { Value = observationTask.Xbin, NpgsqlDbType = NpgsqlDbType.Smallint },
                         new NpgsqlParameter { Value = observationTask.Ybin, NpgsqlDbType = NpgsqlDbType.Smallint },
-                        new NpgsqlParameter { Value = observationTask.RepointCoords?.Count > 0 ? 
-                                observationTask.RepointCoords : DBNull.Value, 
-                            NpgsqlDbType = NpgsqlDbType.Array | NpgsqlDbType.Text },
-                        new NpgsqlParameter { Value = observationTask.RepointTimes?.Count > 0 ? 
-                                observationTask.RepointTimes : DBNull.Value,
+                        new NpgsqlParameter { Value = observationTask.RepointCoords?.ToArray() ?? Array.Empty<string>(), 
+                            NpgsqlDbType = NpgsqlDbType.Array | NpgsqlDbType.Text }, 
+                        new NpgsqlParameter { Value = observationTask.RepointTimes?.ToArray() ?? Array.Empty<DateTime>(),
                             NpgsqlDbType = NpgsqlDbType.Array | NpgsqlDbType.Timestamp
                         },
                         new NpgsqlParameter { Value = observationTask.Filters.Contains(StringHolder.FilV) }
@@ -176,6 +227,7 @@ public static class DbCommunicate
                 };
                 using var reader = com.ExecuteReader();
                 while (reader.Read()) observationTask.TaskNumber = Convert.ToInt32(reader[0]);
+                Logger.LogTaskSummary(observationTask, "added");
             }
         }
         catch (Exception e)
@@ -233,17 +285,16 @@ public static class DbCommunicate
                         new NpgsqlParameter { Value = observationTask.FrameType, NpgsqlDbType = NpgsqlDbType.Text },
                         new NpgsqlParameter { Value = observationTask.Xbin, NpgsqlDbType = NpgsqlDbType.Smallint },
                         new NpgsqlParameter { Value = observationTask.Ybin, NpgsqlDbType = NpgsqlDbType.Smallint },
-                        new NpgsqlParameter { Value = observationTask.RepointCoords?.Count > 0 ? 
-                                observationTask.RepointCoords : DBNull.Value, 
+                        new NpgsqlParameter { Value = observationTask.RepointCoords?.ToArray() ?? Array.Empty<string>(), 
                             NpgsqlDbType = NpgsqlDbType.Array | NpgsqlDbType.Text },
-                        new NpgsqlParameter { Value = observationTask.RepointTimes?.Count > 0 ? 
-                                observationTask.RepointTimes : DBNull.Value,
+                        new NpgsqlParameter { Value = observationTask.RepointTimes?.ToArray() ?? Array.Empty<DateTime>(),
                             NpgsqlDbType = NpgsqlDbType.Array | NpgsqlDbType.Timestamp
                         },
                         new NpgsqlParameter { Value = observationTask.Filters.Contains(StringHolder.FilV) }
                     }
                 };
                 com.ExecuteReader();
+                Logger.LogTaskSummary(observationTask, "updated");
             }
         }
         catch (Exception e)
@@ -381,3 +432,23 @@ public class Spoint
     public double TargetRa { get; set; }
     public double TargetDec { get; set; }
 }
+
+public static class NpgsqlReaderHelper
+{
+    public static T Get<T>(this NpgsqlDataReader reader, string columnName)
+    {
+        try
+        {
+            int ordinal = reader.GetOrdinal(columnName);
+            if (reader.IsDBNull(ordinal))
+                return default!;
+            return reader.GetFieldValue<T>(ordinal);
+        }
+        catch (Exception ex)
+        {
+            Logger.AddLogEntry($"[ERROR] Ошибка чтения поля '{columnName}': {ex.Message}");
+            return default!;
+        }
+    }
+}
+

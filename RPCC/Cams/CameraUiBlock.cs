@@ -1,6 +1,7 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using RPCC.Tasks;
 
 namespace RPCC.Cams
 {
@@ -50,7 +51,7 @@ namespace RPCC.Cams
         {
             if (ExposureProgressBar is null)
                 return;
-            if (CameraControl.loadedTask is null)
+            if (!(Head.IsObserve | Head.IsDoDarks | Head.IsDoFlats) | CameraControl.loadedTask is null)
             {
                 ExposureProgressBar.Value = 0;
                 return;
