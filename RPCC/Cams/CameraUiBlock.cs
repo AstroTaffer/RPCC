@@ -19,7 +19,8 @@ namespace RPCC.Cams
         public Label LabelFilter;
         public Label LabelModel;
         public Label LabelSerial;
-
+        private readonly object _bitmapLock = new();
+        
         public void Update(double ccdTemp, double baseTemp, double coolerPwr, string status, 
             int remTime, string model, string sn, string filter)
         {
@@ -40,11 +41,14 @@ namespace RPCC.Cams
 
         public void UpdatePreview(Bitmap preview)
         {
-            PictureBoxPreview?.Invoke((MethodInvoker)delegate
+            lock (_bitmapLock)
             {
-                PictureBoxPreview.Image?.Dispose();
-                PictureBoxPreview.Image = (Bitmap)preview.Clone();
-            });
+               PictureBoxPreview?.Invoke((MethodInvoker)delegate
+               {
+                   PictureBoxPreview.Image?.Dispose();
+                   PictureBoxPreview.Image = (Bitmap)preview.Clone();
+               }); 
+            }
         }
 
         public void UpdateProgressBar(DateTime startTime)

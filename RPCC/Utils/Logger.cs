@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using RPCC.Cams;
 using RPCC.Focus;
@@ -48,21 +49,21 @@ namespace RPCC.Utils
         
         internal static void AddLogEntry(string entry)
         {
-            if (LogBox.Items.Count >= 1024)
+            if (LogBox == null) return;
+            void LogAction()
             {
-                SaveLogs();
-                ClearLogs();
-                LogBox.Items.Insert(0, $"{DateTime.UtcNow:G} Logs have been saved and cleaned");
-            }
-
-            try
-            {
+                // проверяем и сохраняем
+                if (LogBox.Items.Count >= 1024)
+                {
+                    // делаем асинхронно, чтобы не блокировать UI
+                    Task.Run(SaveLogs);
+                    LogBox.Items.Clear();
+                    LogBox.Items.Insert(0, $"{DateTime.UtcNow:G} Logs have been saved and cleaned");
+                }
                 LogBox.Items.Insert(0, $"{DateTime.UtcNow:G} {entry}");
             }
-            catch
-            {
-                LogBox.Invoke((MethodInvoker) delegate { LogBox.Items.Insert(0, $"{DateTime.UtcNow:G} {entry}"); });
-            }
+            if (LogBox.InvokeRequired) LogBox.Invoke((Action)LogAction);
+            else LogAction();
         }
 
         public static void LogFrameInfo(GetDataFromFits fitsAnalysis, string fil)
@@ -77,23 +78,21 @@ namespace RPCC.Utils
 
         internal static void SaveLogs()
         {
-            var logsDir = $"{Settings.MainOutFolder}\\LOGS\\RPCC_LOGS";
-            if (!Directory.Exists(logsDir)) Directory.CreateDirectory(logsDir);
-            var logsFileName = $"Logs {DateTime.UtcNow:yyyy-MM-ddTHH-mm-ss}.txt";
+            if (LogBox == null) return;
+            var logs = LogBox.Items.Cast<string>().ToArray();
+            var dir = Path.Combine(Settings.MainOutFolder, "LOGS", "RPCC_LOGS");
+            Directory.CreateDirectory(dir);
+            var file = Path.Combine(dir, $"Logs {DateTime.UtcNow:yyyy-MM-ddTHH-mm-ss}.txt");
             try
             {
-                using var sw = new StreamWriter($"{logsDir}\\{logsFileName}");
-                foreach (string item in LogBox.Items) sw.WriteLine(item);
+                File.WriteAllLines(file, logs);
             }
-            catch (NullReferenceException e)
-            {
-                AddLogEntry($"Logger warning: {e}");
-            }
-            
+            catch { /* пусть молча пройдёт */ }
         }
 
         internal static void AddError(string proc, Exception e, ICameraDevice cam)
         { 
+            
             AddLogEntry($"ERROR WHILE {proc}: {e}");
             AddLogEntry($"ERROR WHILE {proc}: filter {cam.Filter}, SN {cam.SerialNumber}, model {cam.ModelName}, file {cam.FileName}");
         }
@@ -105,11 +104,12 @@ namespace RPCC.Utils
         
         internal static void ClearLogs()
         {
-            LogBox.Items.Clear();
+            LogBox?.Items.Clear();
         }
 
         internal static void CopyLogItem()
         {
+            if (LogBox == null) return;
             if (LogBox.SelectedItems.Count > 0) Clipboard.SetText(LogBox.SelectedItem.ToString());
         }
     }

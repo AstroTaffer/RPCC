@@ -257,8 +257,6 @@ internal static class CameraControl
                             Head.CamCallback();
                         }
                         
-
-                        ReadyImagesProcessList.Clear();
                         foreach (var cam in cams)
                         {
                             if (!string.IsNullOrEmpty(cam.LatestImageFilename))
@@ -278,14 +276,6 @@ internal static class CameraControl
                     ReadyImagesProcessList.Clear();
                 }
             }
-            // else
-            // {
-            //     foreach (var cam in cams)
-            //     {
-            //         cam.UpdateProgressBar(loadedTask.Exp);
-            //     }
-            //     
-            // }
         }
 
         if (isConnected) CamsTimer.Start();
@@ -307,14 +297,6 @@ internal static class CameraControl
     #endregion
 
     #region Expose Frames
-
-    // internal static bool PrepareToObs(ObservationTask task, bool isCheck = false)
-    // {
-    //     
-    //
-    //
-    //     return isAllGood;
-    // }
 
     internal static bool StartExposure(ObservationTask task)
     {
@@ -406,7 +388,7 @@ internal static class CameraControl
             cams.Remove(cam);
             return null;
         }
-
+        Logger.AddDebugLogEntry($"End reading image from {cam.Filter}");
         return imageFits;
     }
 

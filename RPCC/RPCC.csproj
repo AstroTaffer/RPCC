@@ -334,7 +334,6 @@
     <Compile Include="Tasks\TaskForm.Designer.cs">
       <DependentUpon>TaskForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Test.cs" />
     <Compile Include="Utils\CoordinatesManager.cs" />
     <Compile Include="Utils\DonutsRunner.cs" />
     <Compile Include="Utils\JsonHelper.cs" />

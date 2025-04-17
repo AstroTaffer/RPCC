@@ -59,31 +59,42 @@ public partial class TaskForm : Form
 
     private void SetLabels()
     {
-        textBoxCoords.Text = _task.RaDec;
-        textBoxObject.Text = _task.Object ?? "";
-        textBoxObserver.Text = _task.Observer ?? "";
-        textBoxDateTime.Text = _task.TimeStart.ToString(CultureInfo.CurrentCulture);
-        textBoxExpN.Text = _task.AllFrames.ToString(CultureInfo.CurrentCulture);
-        comboBoxExp.Text = _task.Exp.ToString(CultureInfo.CurrentCulture);
-        textBoxDuration.Text = _task.Duration.ToString(CultureInfo.CurrentCulture);
-        comboBoxFrameType.Text = _task.FrameType ?? "";
-        comboBoxObjectType.Text = _task.ObjectType ?? "";
+        try
+        {
+            textBoxCoords.Text = _task.RaDec;
+            textBoxObject.Text = _task.Object ?? "";
+            textBoxObserver.Text = _task.Observer ?? "";
+            textBoxDateTime.Text = _task.TimeStart.ToString(CultureInfo.CurrentCulture);
+            textBoxExpN.Text = _task.AllFrames.ToString(CultureInfo.CurrentCulture);
+            comboBoxExp.Text = _task.Exp.ToString(CultureInfo.CurrentCulture);
+            textBoxDuration.Text = _task.Duration.ToString(CultureInfo.CurrentCulture);
+            comboBoxFrameType.Text = _task.FrameType ?? "";
+            comboBoxObjectType.Text = _task.ObjectType ?? "";
 
-        // Безопасное отображение координат и времён повторных точек
-        textBoxCoordsSSObjects.Text = string.Join("\n",
-            (_task.RepointCoords ?? new List<string>())
-            .Select(c => string.IsNullOrWhiteSpace(c) ? "" : c));
+            // Безопасно выводим координаты репоинтов
+            textBoxCoordsSSObjects.Text = string.Join("\n",
+                (_task.RepointCoords ?? new List<string>())
+                .Select(c => string.IsNullOrWhiteSpace(c) ? "" : c));
 
-        textBoxDateTimeSSObjects.Text = string.Join("\n",
-            (_task.RepointTimes ?? new List<DateTime>())
-            .Select(t => t.ToString(CultureInfo.CurrentCulture)));
+            // Безопасно выводим временные метки репоинтов
+            textBoxDateTimeSSObjects.Text = string.Join("\n",
+                (_task.RepointTimes ?? new List<DateTime>())
+                .Select(t => t.ToString(CultureInfo.CurrentCulture)));
 
-        // Парсинг фильтров
-        var s = (_task.Filters ?? "").Split(' ');
-        checkBoxFilg.Checked = s.Contains(StringHolder.FilG);
-        checkBoxFilV.Checked = s.Contains(StringHolder.FilV);
-        checkBoxFilr.Checked = s.Contains(StringHolder.FilR);
-        checkBoxFili.Checked = s.Contains(StringHolder.FilI);
+            // Добавьте аналогичные защиты для других текстовых полей
+
+
+            // Парсинг фильтров
+            var s = (_task.Filters ?? "").Split(' ');
+            checkBoxFilg.Checked = s.Contains(StringHolder.FilG);
+            checkBoxFilV.Checked = s.Contains(StringHolder.FilV);
+            checkBoxFilr.Checked = s.Contains(StringHolder.FilR);
+            checkBoxFili.Checked = s.Contains(StringHolder.FilI);
+        }
+        catch (Exception ex)
+        {
+            Logger.AddLogEntry($"[SetLabels] ❌ Ошибка при заполнении полей: {ex.Message}");
+        }
     }
 
 
@@ -238,7 +249,7 @@ public partial class TaskForm : Form
     protected override void OnClosed(EventArgs e)
     {
             
-        MainForm.isTaskFormOpen = false;
+        MainForm.IsTaskFormOpen = false;
         base.OnClosed(e);
     }
 

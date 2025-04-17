@@ -21,8 +21,9 @@ public partial class MainForm : Form
 
     private static readonly System.Timers.Timer FocusTimer = new();
     public static MainForm Instance { get; private set; }
-    public static bool isTaskFormOpen;
-
+    public static bool IsTaskFormOpen;
+    private bool _uiUpdating;
+    private bool _focusUpdating;
     #region General
     [Obsolete("Obsolete")]
     public MainForm()
@@ -63,7 +64,7 @@ public partial class MainForm : Form
         Tasker.ContextMenuStripTasker = contextMenuStripTasker;
         Tasker.SetHeader();
             
-        Fli.SetDebugLevel($"{Settings.MainOutFolder}\\LOGS\\RPCC_LOGS\\FLIdebug.log", Fli.DEBUG.ALL);
+        // Fli.SetDebugLevel($"{Settings.MainOutFolder}\\LOGS\\RPCC_LOGS\\FLIdebug.log", Fli.DEBUG.ALL);
             
         // Donuts connect
         // DonutsSocket.Connect();
@@ -113,17 +114,23 @@ public partial class MainForm : Form
 
     private void TimerUiUpdate(object sender, EventArgs e)
     {
+        if (_uiUpdating)
+        {
+            Logger.AddDebugLogEntry($"[STACK] {Environment.StackTrace}");
+            return;
+        }
+        _uiUpdating = true;
         tSStatusClock.Text = @"UTC: " + DateTime.UtcNow.ToString("yyyy-MM-ddTHH-mm-ss");
         checkBoxHead.Checked = Head.IsThinking;
         checkBoxGuiding.Checked = Head.IsGuid;
         checkBoxAutoFocus.Checked = CameraFocus.IsAutoFocus;
         foreach (var cam in CameraControl.cams)
         {
-
             cam.UpdateProgressBar();
-            // cam.UpdatePreview();
             cam.UpdateUi();
         }
+
+        _uiUpdating = false;
     }
 
     private void ButtonSurveyStop_Click(object sender, EventArgs e)
@@ -206,43 +213,6 @@ public partial class MainForm : Form
     }
     #endregion
 
-    #region Camera Images
-    // private void RefreshImages(ICameraDevice camera)    
-    // {   
-    //     switch (camera.Filter)
-    //     {
-    //         case StringHolder.FilI:
-    //             pictureBoxImage3.Image = null;
-    //             if (camera.LatestImageBitmap != null)
-    //                 groupBoxCam3.Invoke((MethodInvoker)delegate
-    //                 {
-    //                     pictureBoxImage3.Image = camera.LatestImageBitmap;
-    //                 });
-    //             break;
-    //         // goto case 2;
-    //         case StringHolder.FilR:
-    //             pictureBoxImage2.Image = null;
-    //             if (camera.LatestImageBitmap != null)
-    //                 groupBoxCam2.Invoke((MethodInvoker)delegate
-    //                 {
-    //                     pictureBoxImage2.Image = camera.LatestImageBitmap;
-    //                 });
-    //             break;
-    //         // goto case 1;
-    //         case StringHolder.FilG :
-    //         case  StringHolder.FilV:
-    //             pictureBoxImage1.Image = null;
-    //             if (camera.LatestImageBitmap != null)
-    //                 groupBoxCam1.Invoke((MethodInvoker)delegate
-    //                 {
-    //                     pictureBoxImage1.Image = camera.LatestImageBitmap;
-    //                 });
-    //             break;
-    //     }
-    // }
-        
-    #endregion
-
     #region Options
 
     private void RegenerateConfigToolStripMenuItem_Click(object sender, EventArgs e)
@@ -254,9 +224,14 @@ public partial class MainForm : Form
     #region Focus
     private void OnTimedEvent_Clock(object sender, ElapsedEventArgs e)
     {
+        if (_focusUpdating)
+        {
+            Logger.AddDebugLogEntry($"[STACK] {Environment.StackTrace}");
+            return;
+        }
+        _focusUpdating = true;
         GetData();
-        // var getFocus = new Thread(GetData);
-        // getFocus.Start();
+        _focusUpdating = false;
     }
         
     private void GetData()
@@ -329,9 +304,9 @@ public partial class MainForm : Form
     private void AddToolStripMenuItem_Click(object sender, EventArgs e)
     {
         // Logger.AddLogEntry("Add Task click");
-        if (!isTaskFormOpen)
+        if (!IsTaskFormOpen)
         {
-            isTaskFormOpen = true;
+            IsTaskFormOpen = true;
             var taskForm = new TaskForm(true);
             taskForm.Show(); 
         }

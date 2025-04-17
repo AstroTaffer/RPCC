@@ -24,6 +24,7 @@ public class RpccFits
     
     internal void SaveFitsFile(ICameraDevice cam)
     {
+        Logger.AddDebugLogEntry($"Start saving .fits from {cam.Filter}");
         short[][] convertedData = new short[Data.GetLength(1)][];
         for (var i = 0; i < convertedData.GetLength(0); i++)
         {
@@ -99,7 +100,9 @@ public class RpccFits
         // If encountered again, remove the next two lines.
         outStream.Flush();
         outStream.Close();
-
+        
+        Logger.AddDebugLogEntry($"End saving .fits from {cam.Filter}");
+        
         cam.LastImageId = DbCommunicate.AddFrameToDb(CameraControl.loadedTask, outFilePath, 
             MountDataCollector.RightAsc, MountDataCollector.Declination,
             cam.Filter, cam.ExpStartDt, WeatherDataCollector.Extinction, cam.CcdTemp, cam.SerialNumber);
@@ -296,5 +299,6 @@ public class RpccFits
                 break;
         }
         #endregion
+        
     }
 }

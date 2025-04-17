@@ -59,6 +59,7 @@ public static class StatusUpdater
 
     public static void RunPreviewGenerator()
     {
+        Logger.AddDebugLogEntry("Web previews updating...");
         var psi = new ProcessStartInfo
         {
             FileName = "python",

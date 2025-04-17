@@ -94,7 +94,7 @@ namespace RPCC.Utils
         {
             try
             {
-                var output = RunDonuts($"shift \"{refPath}\" \"{newPath}\"");
+                var output = RunDonuts($"don \"{refPath}\" \"{newPath}\"");
                 return JsonSerializer.Deserialize<DonutsShift>(output) ?? new DonutsShift { Error = "No data" };
             }
             catch (Exception ex)

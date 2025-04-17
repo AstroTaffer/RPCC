@@ -39,6 +39,7 @@ def calc_fwhm(header, image):
     bkg_estimator = MedianBackground()
     bkg = Background2D(image, (32, 32), filter_size=(3, 3),
                        sigma_clip=sigma_clip, bkg_estimator=bkg_estimator)
+    b = np.round(bkg.background_median, 2)
     # apply filters
     f_image = ndimage.median_filter(image, 9, mode='reflect')
     f_image = ndimage.gaussian_filter(f_image, 3, 0, mode='reflect')
@@ -57,8 +58,9 @@ def calc_fwhm(header, image):
     labeled_im[labeled_im > 0] = 100
     # redetect features
     labeled_im, nb_labels = ndimage.label(labeled_im)
+    if nb_labels == 0:
+        return header['FOCUS'], 0, 0, 0, b
     slices = ndimage.find_objects(labeled_im)
-
     FWHM = []
     ELL = []
     for Slice in slices:
@@ -94,7 +96,6 @@ def calc_fwhm(header, image):
     fwhm = np.round((np.nanmedian(np.asarray(FWHM))) * 0.65 * header['XBINNING'], 2) # fwhm-2.2
     ell = np.round(np.nanmedian(np.asarray(ELL)), 2)
     stars_num = len(FWHM)
-    b = np.round(bkg.background_median, 2)
     if np.isnan(fwhm):
         return 'fail'
     return header['FOCUS'], fwhm, ell, stars_num, b
@@ -124,7 +125,7 @@ def calc_source_catalog(path):
     kernel = Gaussian2DKernel(sigma, x_size=3, y_size=3)
     kernel.normalize()
     segm = detect_sources(convolve(Data_without_background, kernel), 50 * s_sky,
-                          npixels=np.round(50/header['XBINNING']))
+                          npixels=np.round(10/header['XBINNING']))
     if not segm:
         return calc_fwhm(header, image)
         # return header['FOCUS'], 0, 0, 0, b

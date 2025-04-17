@@ -441,6 +441,7 @@ public static class Head
         {
             case StringHolder.Light:
             {
+                
                 if (CurrentTask.TimeEnd > DateTime.UtcNow) //Если время задания еще не вышло
                 {
                     foreach (var cam in CameraControl.cams) //перебираем камеры и выводим информацию
@@ -448,6 +449,7 @@ public static class Head
                     {
                         if (!string.IsNullOrEmpty(cam.LatestImageFilename))
                         {
+                            
                             fitsAnalysis = new GetDataFromFits(cam); 
                             Logger.LogFrameInfo(fitsAnalysis, cam.Filter);
                         }
@@ -515,6 +517,7 @@ public static class Head
             {
                 if (CurrentTask.DoneFrames < CurrentTask.AllFrames)
                 {
+                    
                     if (CurrentTask.RepointTimes?.Count > 0)
                     {
                         //репоинт для объектов СС
@@ -536,6 +539,7 @@ public static class Head
                     else Guiding();
                     foreach (var cam in CameraControl.cams)
                     {
+                        
                         if (!string.IsNullOrEmpty(cam.LatestImageFilename))
                         {
                             fitsAnalysis = new GetDataFromFits(cam); 
@@ -630,7 +634,6 @@ public static class Head
     {
         if (_firstFrame is null)
         {
-            // _firstFrame = CameraControl.cams.Last().LatestImageFilename;
             _idec = 0;
             _ira = 0;
             _oldErrDec = 0;
@@ -655,12 +658,6 @@ public static class Head
                 _oldErrRa = 0;
                 return;
             }
-            // if (!DonutsSocket.IsConnected)
-            // {
-            //     Logger.AddLogEntry("WARNING: can't guide, no connection to donuts");
-            //     return;
-            // } //Если нет конекта или нет матрицы, то выходим
-            // var correction = DonutsSocket.GetGuideCorrection(_firstFrame, CameraControl.cams.Last().LatestImageFilename); //Получаем коррекцию
             var correction = DonutsRunner.GetImageShift(_firstFrame, 
                 CameraControl.cams.Last().LatestImageFilename); //Получаем коррекцию
             
@@ -691,9 +688,18 @@ public static class Head
             int pulseN = (int)(Math.Abs(outDec)*1e3/PulseGuideVelocityDec);
             int pulseE =  (int)(Math.Abs(outRa)*1e3/PulseGuideVelocityRa);
                 
-            const int bound = 20000;
-            if (pulseN > bound) pulseN = bound;
-            if (pulseE > bound) pulseE = bound;
+            // const int bound = 20000;
+            const int bound = 1000;
+            if (pulseN > bound)
+            {
+                Logger.AddDebugLogEntry($"WARNING Guiding: pulseN > {bound}");
+                pulseN = bound;
+            }
+            if (pulseE > bound)
+            {
+                Logger.AddDebugLogEntry($"WARNING Guiding: pulseE > {bound}");
+                pulseE = bound;
+            }
                 
             Logger.AddLogEntry($"Guiding correction: dx = {dx} px, dDec = {dDec} arcsec, " +
                                $"outDec = {outDec} arcsec, Pdec = {Math.Round(_kP*dDec, 2 )}, " +
