@@ -22,9 +22,12 @@ public static class Head
     private static readonly short[] DarkExps = {2, 5, 10, 15, 20, 30, 50, 80, 120, 180}; //TODO add in .cfg
     private const double PulseGuideVelocityRa = 6; //sec in sec TODO add in .cfg
     private const double PulseGuideVelocityDec = 2; //sec in sec TODO add in .cfg
-    private static double _kP = 1.2; // //TODO add in .cfg
-    private static double _kI = 0.00005; //0.28 //TODO add in .cfg
-    private static double _kD = 25; //2.9 //TODO add in .cfg
+    private static double _kPA = 1.2; // //TODO add in .cfg
+    private static double _kIA = 0.00005; //0.28 //TODO add in .cfg
+    private static double _kDA = 25; //2.9 //TODO add in .cfg
+    private static double _kPD = 1; // //TODO add in .cfg
+    private static double _kID = 0.001; //0.28 //TODO add in .cfg
+    private static double _kDD = 10; //2.9 //TODO add in .cfg
     
     public static readonly Timer ThinkingTimer = new();
     public static ObservationTask CurrentTask;
@@ -111,14 +114,6 @@ public static class Head
                 }
             }
         }
-            
-
-        // if (!(WeatherDataCollector.Obs | WeatherDataCollector.Flat) & 
-        //      (CurrentTask != null) & !IsOnPause)
-        // {
-        //     IsOnPause = true;
-        //     Logger.AddLogEntry($"Head: Pause task #{CurrentTask.TaskNumber}");
-        // }
 
         if (string.IsNullOrEmpty(_firstFrame) & CurrentTask is not null & IsObserve)
         {
@@ -154,8 +149,9 @@ public static class Head
                     }
                     else
                     {
-                        Logger.AddLogEntry($"Head: new CD11, CD12 = [{_cd11}, {_cd12}], " +
-                                           $"kP = {_kP}, kI = {_kI}, kD = {_kD}");
+                        Logger.AddLogEntry($"Head: new CD11, CD12 = [{_cd11}, {_cd12}],\n" +
+                                           $"kP_alpha = {_kPA}, kI_alpha = {_kIA}, kD_alpha = {_kDD},\n" +
+                                           $"kP_alpha = {_kPA}, kI_alpha = {_kIA}, kD_alpha = {_kDD}");
                     }
                     fits.Close();
                 }
@@ -178,12 +174,12 @@ public static class Head
                 if ((bufTask.FrameType == StringHolder.Light) | 
                     ((bufTask.FrameType == StringHolder.Dark | 
                       bufTask.FrameType == StringHolder.Flat |
-                      bufTask.FrameType == StringHolder.Test) & 
-                     (DateTime.UtcNow - bufTask.TimeEnd).TotalMinutes > 5))
+                      bufTask.FrameType == StringHolder.Test | 
+                      bufTask.FrameType == StringHolder.Focus) & 
+                     (DateTime.UtcNow - bufTask.TimeEnd).TotalMinutes > 1))
                 {
                     switch (bufTask.Status)
                     {
-                            
                         case 0:
                         { // Если не отнаблюдали ни одного кадра, значит пронаблюдать не удалось
                             bufTask.Status = 4;
@@ -288,7 +284,6 @@ public static class Head
                         PrepareAndStartDoDark(exp);
                         break;
                     }
-                        
                 }
             }
         } else 
@@ -679,8 +674,8 @@ public static class Head
             var dra = (dRa - _oldErrRa) / CurrentTask.Exp;
                 
                 
-            var outDec = Math.Round(_kP*dDec + _kI*_idec + _kD*ddec, 2);
-            var outRa = Math.Round(_kP*dRa + _kI*_ira + _kD*dra, 2);
+            var outDec = Math.Round(_kPD*dDec + _kID*_idec + _kDD*ddec, 2);
+            var outRa = Math.Round(_kPA*dRa + _kIA*_ira + _kDA*dra, 2);
                 
             _oldErrDec = dDec;
             _oldErrRa = dRa;
@@ -688,8 +683,8 @@ public static class Head
             int pulseN = (int)(Math.Abs(outDec)*1e3/PulseGuideVelocityDec);
             int pulseE =  (int)(Math.Abs(outRa)*1e3/PulseGuideVelocityRa);
                 
-            // const int bound = 20000;
-            const int bound = 1000;
+            const int bound = 20000;
+            // const int bound = 10000;
             if (pulseN > bound)
             {
                 Logger.AddDebugLogEntry($"WARNING Guiding: pulseN > {bound}");
@@ -702,11 +697,11 @@ public static class Head
             }
                 
             Logger.AddLogEntry($"Guiding correction: dx = {dx} px, dDec = {dDec} arcsec, " +
-                               $"outDec = {outDec} arcsec, Pdec = {Math.Round(_kP*dDec, 2 )}, " +
-                               $"Idec = {Math.Round(_kI*_idec, 2)}, Ddec = {Math.Round(_kD*ddec, 2)}");
+                               $"outDec = {outDec} arcsec, Pdec = {Math.Round(_kPD*dDec, 2 )}, " +
+                               $"Idec = {Math.Round(_kID*_idec, 2)}, Ddec = {Math.Round(_kDD*ddec, 2)}");
             Logger.AddLogEntry($"Guiding correction: dy = {dy} px; dRa = {dRa} arcsec, " +
-                               $"outRa = {outRa} arcsec, Pra = {Math.Round(_kP*dRa, 2)}, " +
-                               $"Ira = {Math.Round(_kI*_ira, 2)}, Dra = {Math.Round(_kD*dra, 2)}");
+                               $"outRa = {outRa} arcsec, Pra = {Math.Round(_kPA*dRa, 2)}, " +
+                               $"Ira = {Math.Round(_kIA*_ira, 2)}, Dra = {Math.Round(_kDA*dra, 2)}");
             Logger.AddDebugLogEntry($"IsLookingEast = {MountDataCollector.IsLookingEast}");
             if (!IsGuid) return;
             SiTechExeSocket.PulseGuide(outDec > 0 ? SiTechExeSocket.PulseGuideDirection.N : SiTechExeSocket.PulseGuideDirection.S, pulseN);

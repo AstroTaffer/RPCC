@@ -218,6 +218,7 @@ namespace RPCC.Comms
 
     internal static class WeatherDataCollector
     {
+        public static double Amb { get; set; }
         public static double Sky { get; set; }
         public static double SkyStd { get; set; }
         public static double Extinction { get; set; }

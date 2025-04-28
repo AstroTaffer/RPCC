@@ -40,7 +40,7 @@ namespace RPCC.Focus
             Logger.AddLogEntry("FOCUS: phase 1: defocusing");
             IsFocusing = true;
             _taskForFocus = Head.CurrentTask.Copy();
-            // _taskForFocus.TaskNumber = -1;
+            _taskForFocus.TaskNumber = -1;
             _taskForFocus.FrameType = StringHolder.Focus;
             if (Head.CurrentTask.Exp > FocusExp)
             {
@@ -404,13 +404,14 @@ namespace RPCC.Focus
         private static void ReturnFocusAndExit()
         {
             GoFocus(_startFocusPos - SerialFocus.CurrentPosition);
-            IsAutoFocus = false;
+            // IsAutoFocus = false;
             _sumShift = 0;
             FocusingDone(1);
         }
 
         private static void FocusingDone(double see)
         {
+            IsFocusing = false;
             Seeing = see;
             Logger.AddLogEntry($"FOCUS: Set seeing for autofocus = {see}");
             if (DeFocus != 0)
@@ -418,7 +419,6 @@ namespace RPCC.Focus
                 Logger.AddLogEntry("FOCUS: defocus to " + DeFocus);
                 GoFocus(DeFocus);
             }
-            IsFocusing = false;
             // CameraControl.PrepareToObs(Head.currentTask);
             if (!Head.IsOnPause)
             {

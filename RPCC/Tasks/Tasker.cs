@@ -175,59 +175,5 @@ namespace RPCC.Tasks
                 [] : row.Cells[21].Value as List<DateTime>;
             return task;
         }
-
-        // public static void GetTaskFromRow(DataRow row, ref ObservationTask task)
-        // {
-        //     task.TaskNumber = Convert.ToInt32(row.ItemArray[0]);
-        //     if (!string.IsNullOrEmpty(row.ItemArray[1].ToString()))
-        //     {
-        //         task.ComputeRaDec(row.ItemArray[1].ToString());
-        //     }
-        //     task.TimeAdd = DateTime.Parse(row.ItemArray[2].ToString());
-        //     task.TimeStart = DateTime.Parse(row.ItemArray[3].ToString());
-        //     task.TimeEnd = DateTime.Parse(row.ItemArray[4].ToString());
-        //     task.Duration = float.Parse(row.ItemArray[5].ToString());
-        //     task.Exp = Convert.ToInt16(row.ItemArray[6]);
-        //     task.DoneFrames = Convert.ToInt16(row.ItemArray[7]);
-        //     task.AllFrames = Convert.ToInt16(row.ItemArray[8]);
-        //     task.TimeLastExp = row["time_last_exp"] != DBNull.Value
-        //         ? (DateTime)row["time_last_exp"]
-        //         : DateTime.MinValue;
-        //
-        //     var f = "";
-        //     if ((bool)row.ItemArray[10])
-        //     {
-        //         f += $"{StringHolder.FilG} ";
-        //     }
-        //     if ((bool)row.ItemArray[22])
-        //     {
-        //         f += $"{StringHolder.FilV} ";
-        //     }
-        //     if ((bool)row.ItemArray[11])
-        //     {
-        //         f += $"{StringHolder.FilR} ";
-        //     }
-        //     if ((bool)row.ItemArray[12])
-        //     {
-        //         f += StringHolder.FilI;
-        //     }
-        //     task.Filters = f;
-        //     task.Object = row.ItemArray[13].ToString();
-        //     task.ObjectType = row.ItemArray[14].ToString();
-        //     task.Status = Convert.ToInt16(row.ItemArray[15]);
-        //     task.Observer = row.ItemArray[16].ToString();
-        //     task.FrameType = row.ItemArray[17].ToString();
-        //     task.Xbin = Convert.ToInt16(row.ItemArray[18]);
-        //     task.Ybin = Convert.ToInt16(row.ItemArray[19]);
-        //
-        //     task.RepointCoords = row["repoint_coords"] is string[] coords
-        //         ? coords.ToList()
-        //         : new List<string>();
-        //
-        //     task.RepointTimes = row["repoint_times"] is DateTime[] times
-        //         ? times.ToList()
-        //         : new List<DateTime>();
-        //
-        // }
     }
 }

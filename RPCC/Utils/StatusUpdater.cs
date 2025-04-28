@@ -28,6 +28,7 @@ public static class StatusUpdater
                 return;
             }
 
+            // Спускаемся по дереву до нужного узла
             JToken current = root;
             for (int i = 0; i < path.Length - 1; i++)
             {
@@ -37,9 +38,14 @@ public static class StatusUpdater
                 current = current[path[i]];
             }
 
+            // Обновляем целевое поле
             string lastKey = path[path.Length - 1];
             current[lastKey] = value;
 
+            // Обновляем время последнего изменения
+            root["last_update"] = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss");
+
+            // Сохраняем обратно в файл
             JsonHelper.SaveJsonToFile(StatusPath, root);
         }
         finally
@@ -47,6 +53,7 @@ public static class StatusUpdater
             mutex.ReleaseMutex();
         }
     }
+
 
     /// <summary>
     /// Обновляет поле верхнего уровня, например "mount"

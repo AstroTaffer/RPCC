@@ -366,7 +366,6 @@ public partial class MainForm : Form
     {
         Logger.DebugMode = checkBoxDebugMode.Checked;
     }
-
 }
 
 public static class StringHolder

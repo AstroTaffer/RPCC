@@ -1,6 +1,4 @@
-﻿using System;
-using RPCC.Cams;
-using RPCC.Comms;
+﻿using RPCC.Cams;
 using RPCC.Tasks;
 using RPCC.Utils;
 
@@ -72,7 +70,7 @@ namespace RPCC.Focus
         {
             if (CameraFocus.DeFocus != 0)
             {
-                return Fwhm < FwhmFocused + 1 || Fwhm < CameraFocus.Seeing + 1;
+                return Fwhm < FwhmFocused || Fwhm < CameraFocus.Seeing + 1;
             }
 
             // if (Fwhm < FwhmFocused || Fwhm < CameraFocus.Seeing)

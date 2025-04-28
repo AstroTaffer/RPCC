@@ -484,8 +484,9 @@ namespace RPCC.Comms
             //     Logger.AddLogEntry("Can't PulseGuide while slewing");
             //     return;
             // }
-            string request = $"PulseGuide {direction} {time}";
-            string[] response = null;
+            string request = $"PulseGuide {(int)direction} {time}";
+            Logger.AddDebugLogEntry($"SiTechExe PulseGuide req: {request}");
+            string[] response;
             response = ExchangeMessages(request);
             //response = await ExchangeMessagesAsync(request);
             if (CheckResponse(response, request))
