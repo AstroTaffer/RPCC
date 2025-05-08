@@ -214,8 +214,6 @@ namespace RPCC.Utils
         #region XmlIO
         internal static void LoadXmlConfig()
         {
-            bool isConfigBad = false;
-            DialogResult isResetRequested = DialogResult.No;
             cameraSettings.Clear();
 
             try
@@ -268,64 +266,26 @@ namespace RPCC.Utils
                 DbPassword = (string)baseElem.Element("DbPassword");
                 Database = (string)baseElem.Element("Database");
 
+                Logger.AddLogEntry("Config file loaded successfully");
             }
-            catch (FileNotFoundException)
+            catch
             {
-                isConfigBad = true;
-                isResetRequested = MessageBox.Show("Config file not found.\n"
-                    + "Would you like to recreate it (\"YES\")\n"
-                    + "or just close the application (\"NO\")?",
-                    "Config not found",
+                var isResetRequested = MessageBox.Show("Unable to parse config file.\n"
+                    + "Would you like to reset it\n"
+                    + "and try again?",
+                    "Invalid config file",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Error,
                     MessageBoxDefaultButton.Button1);
-                Logger.AddLogEntry($"WARNING Config file not found");
-            }
-            catch (Exception ex) when (ex is System.Xml.XmlException
-                                    || ex is NullReferenceException)
-            {
-                isConfigBad = true;
-                isResetRequested = MessageBox.Show("Config file has invalid structure.\n"
-                    + "Would you like to reset it (\"YES\")\n"
-                    + "or just close the application (\"NO\")?",
-                    "Invalid config structure",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Error,
-                    MessageBoxDefaultButton.Button1);
-                Logger.AddLogEntry($"WARNING Config file has invalid structure");
-            }
-            catch (Exception ex) when (ex is ArgumentNullException
-                                    || ex is FormatException
-                                    || ex is ArgumentException)
-            {
-                isConfigBad = true;
-                isResetRequested = MessageBox.Show("Config file has invalid parameters:\n"
-                    + $"{ex.Message}.\n"
-                    + "Would you like to reset it (\"YES\")\n"
-                    + "or just close the application (\"NO\")?",
-                    "Invalid config parameters",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Error,
-                    MessageBoxDefaultButton.Button1);
-                Logger.AddLogEntry($"WARNING Config file has invalid parameters");
-            }
-            finally
-            {
-                if (isConfigBad)
+                Logger.AddLogEntry($"WARNING Invalid config file");
+
+                if (isResetRequested == DialogResult.Yes)
                 {
-                    switch (isResetRequested)
-                    {
-                        case DialogResult.Yes:
-                            ResetXmlConfig();
-                            LoadXmlConfig();
-                            break;
-                        default:
-                            Environment.Exit(1);
-                            break;
-                    }
+                    ResetXmlConfig();
+                    LoadXmlConfig();
                 }
                 else
-                    Logger.AddLogEntry("Config file loaded successfully");
+                    throw;
             }
         }
 
