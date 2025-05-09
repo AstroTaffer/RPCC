@@ -80,7 +80,7 @@ namespace RPCC.Utils
         {
             if (LogBox == null) return;
             var logs = LogBox.Items.Cast<string>().ToArray();
-            var dir = Path.Combine(Settings.MainOutFolder, "LOGS", "RPCC_LOGS");
+            var dir = Path.Combine(Settings.MainOutputFolder, "LOGS", "RPCC_LOGS");
             Directory.CreateDirectory(dir);
             var file = Path.Combine(dir, $"Logs {DateTime.UtcNow:yyyy-MM-ddTHH-mm-ss}.txt");
             try

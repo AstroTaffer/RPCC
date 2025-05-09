@@ -11,6 +11,10 @@ namespace RPCC.Cams;
 
 public class RpccFits
 {
+    /* TODO:
+         * - Настройка CamTemp теперь является частью CameraSettingsCollector
+    */
+
     internal ushort[,] Data;
     // internal Header header;
 
@@ -41,7 +45,7 @@ public class RpccFits
         FillInHeader(cam, newHeader);
 
         DateTime outDateTime = DateTime.Now.AddHours(-12);
-        string outDir = $"{Settings.MainOutFolder}\\{outDateTime.Year}\\{outDateTime:yyyy-MM-dd}\\" +
+        string outDir = $"{Settings.MainOutputFolder}\\{outDateTime.Year}\\{outDateTime:yyyy-MM-dd}\\" +
                         $"{(string.IsNullOrEmpty(CameraControl.loadedTask.Object) ? "UNKNOWN" : CameraControl.loadedTask.Object)}\\";
         switch (CameraControl.loadedTask.FrameType)
         {

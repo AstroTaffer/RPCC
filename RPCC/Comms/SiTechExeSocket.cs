@@ -269,7 +269,7 @@ namespace RPCC.Comms
                 else
                 {
                     Logger.AddLogEntry($"WARNING Unable to read scope status: {message}");
-                    // TODO: Do stuff if bad
+                    // Do stuff if bad
                 }
             }
         }
@@ -283,12 +283,12 @@ namespace RPCC.Comms
                 var message = response[response.Length - 1];
                 if (message == "_Abort Command Successful")
                 {
-                    // TODO: Do stuff if good
+                    // Do stuff if good
                 }
                 else
                 {
                     Logger.AddLogEntry($"WARNING Unable to abort scope movement: {message}");
-                    // TODO: Do stuff if bad
+                    // Do stuff if bad
                 }
             }
         }
@@ -302,12 +302,12 @@ namespace RPCC.Comms
                 var message = response[response.Length - 1];
                 if (message == "_ToBlinky")
                 {
-                    // TODO: Do stuff if good
+                    // Do stuff if good
                 }
                 else
                 {
                     Logger.AddLogEntry($"WARNING Unable to force the motors to blinky mode: {message}");
-                    // TODO: Do stuff if bad
+                    // Do stuff if bad
                 }
             }
         }
@@ -321,12 +321,12 @@ namespace RPCC.Comms
                 var message = response[response.Length - 1];
                 if (message == "_ToAuto")
                 {
-                    // TODO: Do stuff if good
+                    // Do stuff if good
                 }
                 else
                 {
                     Logger.AddLogEntry($"WARNING Unable to force the motors to auto mode: {message}");
-                    // TODO: Do stuff if bad
+                    // Do stuff if bad
                 }
             }
         }
@@ -340,12 +340,12 @@ namespace RPCC.Comms
                 var message = response[response.Length - 1];
                 if (message == "_Park Command Successful")
                 {
-                    // TODO: Do stuff if good
+                    // Do stuff if good
                 }
                 else
                 {
                     Logger.AddLogEntry($"WARNING Unable to park scope: {message}");
-                    // TODO: Do stuff if bad
+                    // Do stuff if bad
                 }
             }
         }
@@ -365,12 +365,12 @@ namespace RPCC.Comms
                     {
                         System.Threading.Thread.Sleep(1000);
                     }
-                    // TODO: Do stuff if good
+                    // Do stuff if good
                 }
                 else
                 {
                     Logger.AddLogEntry($"WARNING Unable to unpark scope: {message}");
-                    // TODO: Do stuff if bad
+                    // Do stuff if bad
                 }
             }
         }
@@ -386,12 +386,12 @@ namespace RPCC.Comms
                 var message = response[response.Length - 1];
                 if (message == $"_{request} Command Successful")
                 {
-                    // TODO: Do stuff if good
+                    // Do stuff if good
                 }
                 else
                 {
                     Logger.AddLogEntry($"WARNING Unable to go to park {parkLocNum} location: {message}");
-                    // TODO: Do stuff if bad
+                    // Do stuff if bad
                 }
             }
         }
@@ -417,7 +417,7 @@ namespace RPCC.Comms
                 var message = response[response.Length - 1];
                 if (message == "_GoTo Accepted")
                 {
-                    // TODO: Do stuff if good
+                    // Do stuff if good
                     while (MountDataCollector.IsSlewing)
                     {
                         System.Threading.Thread.Sleep(1000);
@@ -428,7 +428,7 @@ namespace RPCC.Comms
                 else
                 {
                     Logger.AddLogEntry($"WARNING Unable to go to {ra} {dec}{(isJ2K ? " J2K" : "")}: {message}");
-                    // TODO: Do stuff if bad
+                    // Do stuff if bad
                     
                     // return false;
                 }
@@ -451,12 +451,12 @@ namespace RPCC.Comms
                     var message = response[response.Length - 1];
                     if (message == "__JogArcSeconds Accepted")
                     {
-                        // TODO: Do stuff if good
+                        // Do stuff if good
                     }
                     else
                     {
                         Logger.AddLogEntry($"WARNING Unable to jog {direction} {distance}: {message}");
-                        // TODO: Do stuff if bad
+                        // Do stuff if bad
                     }
                 }
             }
@@ -494,13 +494,13 @@ namespace RPCC.Comms
                 var message = response[response.Length - 1];
                 if (message == "_PulseGuide Accepted")
                 {
-                    // TODO: Do stuff if good
+                    // Do stuff if good
                     Logger.AddLogEntry($"PulseGuide {direction} {time} ms is ok");
                 }
                 else
                 {
                     Logger.AddLogEntry($"WARNING Unable to pulse guide {direction} {time} ms: {message}");
-                    // TODO: Do stuff if bad
+                    // Do stuff if bad
                 }
             }
         }
@@ -516,13 +516,13 @@ namespace RPCC.Comms
                 var message = response[response.Length - 1];
                 if (message == "_SetTrackMode Command Successful")
                 {
-                    // TODO: Do stuff if good
+                    // Do stuff if good
                 }
                 else
                 {
                     Logger.AddLogEntry(
                         $"WARNING Unable to set track mode {(shouldTrack ? 1 : 0)} {(raRate == 0.0 && decRate == 0.0 ? 0 : 1)} {raRate} {decRate}: {message}");
-                    // TODO: Do stuff if bad
+                    // Do stuff if bad
                 }
             }
         }

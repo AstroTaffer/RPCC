@@ -15,20 +15,7 @@ using Timer = System.Timers.Timer;
 namespace RPCC.Tasks;
 
 public static class Head
-{
-    private const short TotalMinutes2StartTask = 5; //TODO add in .cfg
-    private const short FlatExp = 2; // in s  TODO add in .cfg
-    private const short FlatDarkQuantity = 10; //TODO add in .cfg
-    private static readonly short[] DarkExps = {2, 5, 10, 15, 20, 30, 50, 80, 120, 180}; //TODO add in .cfg
-    private const double PulseGuideVelocityRa = 6; //sec in sec TODO add in .cfg
-    private const double PulseGuideVelocityDec = 2; //sec in sec TODO add in .cfg
-    private static double _kPA = 1.2; // //TODO add in .cfg
-    private static double _kIA = 0.00005; //0.28 //TODO add in .cfg
-    private static double _kDA = 25; //2.9 //TODO add in .cfg
-    private static double _kPD = 1; // //TODO add in .cfg
-    private static double _kID = 0.001; //0.28 //TODO add in .cfg
-    private static double _kDD = 10; //2.9 //TODO add in .cfg
-    
+{    
     public static readonly Timer ThinkingTimer = new();
     public static ObservationTask CurrentTask;
     public static bool IsObserve;
@@ -150,8 +137,8 @@ public static class Head
                     else
                     {
                         Logger.AddLogEntry($"Head: new CD11, CD12 = [{_cd11}, {_cd12}],\n" +
-                                           $"kP_alpha = {_kPA}, kI_alpha = {_kIA}, kD_alpha = {_kDD},\n" +
-                                           $"kP_alpha = {_kPA}, kI_alpha = {_kIA}, kD_alpha = {_kDD}");
+                                           $"kP_alpha = {Settings.Kpa}, kI_alpha = {Settings.Kia}, kD_alpha = {Settings.Kda},\n" +
+                                           $"kP_delta = {Settings.Kpd}, kI_delta = {Settings.Kid}, kD_delta = {Settings.Kdd}");
                     }
                     fits.Close();
                 }
@@ -271,17 +258,19 @@ public static class Head
             {
                 if (WeatherDataCollector.Flat)
                 {
-                    if (DbCommunicate.CanDoDarkFlat(false, FlatExp))
+                    foreach (var exp in Settings.FlatExps)
                     {
-                        PrepareAndStartDoFlats();  
+                        if (!DbCommunicate.CanDoDarkFlat(false, exp)) continue;
+                        PrepareAndStartDoFlats(exp);
+                        break;
                     }
                 }
                 if (!WeatherDataCollector.Obs & !WeatherDataCollector.Flat)
                 {
-                    foreach (var exp in DarkExps)
+                    foreach (var exp in Settings.DarkExps)
                     {
                         if (!DbCommunicate.CanDoDarkFlat(true, exp)) continue;
-                        PrepareAndStartDoDark(exp);
+                        PrepareAndStartDoDarks(exp);
                         break;
                     }
                 }
@@ -299,7 +288,7 @@ public static class Head
             //не вызовет коллбек,
             //то нужно его завершить иначе
             if (!IsObserve & !IsDoDarks & !IsDoFlats & (IsThinking | CurrentTask.FrameType == StringHolder.Test) &
-                (CurrentTask.TimeStart - DateTime.UtcNow).TotalMinutes < TotalMinutes2StartTask &
+                (CurrentTask.TimeStart - DateTime.UtcNow).TotalMinutes < Settings.TaskPrepDuration &
                 CameraControl.isConnected)
             {
 
@@ -323,7 +312,7 @@ public static class Head
                     {
                         if (!WeatherDataCollector.Obs)
                         {
-                            StartDoDark();
+                            StartDoDarks();
                         }
 
                         break;
@@ -674,14 +663,14 @@ public static class Head
             var dra = (dRa - _oldErrRa) / CurrentTask.Exp;
                 
                 
-            var outDec = Math.Round(_kPD*dDec + _kID*_idec + _kDD*ddec, 2);
-            var outRa = Math.Round(_kPA*dRa + _kIA*_ira + _kDA*dra, 2);
+            var outDec = Math.Round(Settings.Kpd*dDec + Settings.Kid*_idec + Settings.Kdd*ddec, 2);
+            var outRa = Math.Round(Settings.Kpa*dRa + Settings.Kia*_ira + Settings.Kda*dra, 2);
                 
             _oldErrDec = dDec;
             _oldErrRa = dRa;
                 
-            int pulseN = (int)(Math.Abs(outDec)*1e3/PulseGuideVelocityDec);
-            int pulseE =  (int)(Math.Abs(outRa)*1e3/PulseGuideVelocityRa);
+            int pulseN = (int)(Math.Abs(outDec)*1e3/Settings.PulseGuideVelocityDec);
+            int pulseE =  (int)(Math.Abs(outRa)*1e3/Settings.PulseGuideVelocityRa);
                 
             const int bound = 20000;
             // const int bound = 10000;
@@ -697,11 +686,11 @@ public static class Head
             }
                 
             Logger.AddLogEntry($"Guiding correction: dx = {dx} px, dDec = {dDec} arcsec, " +
-                               $"outDec = {outDec} arcsec, Pdec = {Math.Round(_kPD*dDec, 2 )}, " +
-                               $"Idec = {Math.Round(_kID*_idec, 2)}, Ddec = {Math.Round(_kDD*ddec, 2)}");
+                               $"outDec = {outDec} arcsec, Pdec = {Math.Round(Settings.Kpd*dDec, 2 )}, " +
+                               $"Idec = {Math.Round(Settings.Kid*_idec, 2)}, Ddec = {Math.Round(Settings.Kdd*ddec, 2)}");
             Logger.AddLogEntry($"Guiding correction: dy = {dy} px; dRa = {dRa} arcsec, " +
-                               $"outRa = {outRa} arcsec, Pra = {Math.Round(_kPA*dRa, 2)}, " +
-                               $"Ira = {Math.Round(_kIA*_ira, 2)}, Dra = {Math.Round(_kDA*dra, 2)}");
+                               $"outRa = {outRa} arcsec, Pra = {Math.Round(Settings.Kpa*dRa, 2)}, " +
+                               $"Ira = {Math.Round(Settings.Kia*_ira, 2)}, Dra = {Math.Round(Settings.Kda*dra, 2)}");
             Logger.AddDebugLogEntry($"IsLookingEast = {MountDataCollector.IsLookingEast}");
             if (!IsGuid) return;
             SiTechExeSocket.PulseGuide(outDec > 0 ? SiTechExeSocket.PulseGuideDirection.N : SiTechExeSocket.PulseGuideDirection.S, pulseN);
@@ -711,13 +700,13 @@ public static class Head
     }
 
     #region Flats
-    private static void PrepareAndStartDoFlats()
+    private static void PrepareAndStartDoFlats(short exp)
     {
         var flatTask = new ObservationTask
         {
-            Exp = FlatExp,
+            Exp = exp,
             TimeAdd = DateTime.UtcNow,
-            AllFrames = FlatDarkQuantity,
+            AllFrames = Settings.ClbTasksFramesNum,
             Status = 0,
             FrameType = StringHolder.Flat,
             Observer = StringHolder.AutoFlat
@@ -743,7 +732,7 @@ public static class Head
         CurrentTask.Status = 1;
         CurrentTask.Filters = CheckFil();
         CurrentTask.TimeStart = DateTime.UtcNow;
-        CurrentTask.TimeEnd = DateTime.UtcNow.AddSeconds((short) (FlatDarkQuantity*CurrentTask.Exp + 180));
+        CurrentTask.TimeEnd = DateTime.UtcNow.AddSeconds((short) (Settings.ClbTasksFramesNum*CurrentTask.Exp + 180));
         CurrentTask.Duration = (float) Math.Round((CurrentTask.TimeEnd - CurrentTask.TimeStart).TotalHours, 2);
         StartExpAndCheckFuckup();
     }
@@ -752,22 +741,22 @@ public static class Head
 
     #region Dark
 
-    private static void PrepareAndStartDoDark(short exp)
+    private static void PrepareAndStartDoDarks(short exp)
     {
         var darkTask = new ObservationTask
         {
             FrameType = StringHolder.Dark,
             Exp = exp,
             Status = 0,
-            AllFrames = FlatDarkQuantity,
+            AllFrames = Settings.ClbTasksFramesNum,
             TimeAdd = DateTime.UtcNow,
             Observer = StringHolder.AutoDark
         };
         CurrentTask = darkTask;
-        StartDoDark();
+        StartDoDarks();
     }
 
-    private static void StartDoDark()
+    private static void StartDoDarks()
     {
         if (!WeatherDataCollector.Obs & !WeatherDataCollector.Flat)
         {
@@ -777,7 +766,7 @@ public static class Head
             CurrentTask.Status = 1;
             CurrentTask.Filters = CheckFil();
             CurrentTask.TimeStart = DateTime.UtcNow;
-            CurrentTask.TimeEnd = DateTime.UtcNow.AddSeconds((short) (FlatDarkQuantity*CurrentTask.Exp + 180));
+            CurrentTask.TimeEnd = DateTime.UtcNow.AddSeconds((short) (Settings.ClbTasksFramesNum*CurrentTask.Exp + 180));
             CurrentTask.Duration = (float) Math.Round((CurrentTask.TimeEnd - CurrentTask.TimeStart).TotalHours, 2);
             StartExpAndCheckFuckup();
             return;

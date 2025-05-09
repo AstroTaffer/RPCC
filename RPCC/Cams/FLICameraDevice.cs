@@ -63,6 +63,12 @@ internal class FliCameraDevice : ICameraDevice
     
     public FliCameraDevice(Fli.DeviceName name)
     {
+        /* TODO:
+             * - Настройка подключаемой камеры через функцию GetCameraSettingsSet(string id)
+             * - Настройка CamTemp теперь является частью CameraSettingsCollector
+             * - Удалить if-else на SnCamG/R/I/V
+         */
+
         FileName = name.FileName;
         ModelName = name.ModelName;
         try

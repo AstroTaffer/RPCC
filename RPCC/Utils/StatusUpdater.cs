@@ -8,7 +8,7 @@ namespace RPCC.Utils;
 public static class StatusUpdater
 {
     private static readonly string StatusPath = @"C:\Users\Администратор\RiderProjects\telescope-backend\status\status.json";
-    // private static readonly string StatusPath = Path.Combine(Settings.MainOutFolder, "status", "status.json");
+    // private static readonly string StatusPath = Path.Combine(Settings.MainOutputFolder, "status", "status.json");
     private const string GlobalMutexName = "Global\\RoboPhotStatusFileLock";
 
     /// <summary>

@@ -58,13 +58,13 @@ public partial class MainForm : Form
             MessageBox.Show(@"Can't open Focus serial port", @"OK", MessageBoxButtons.OK);
             Logger.AddLogEntry(@"Can't open Focus serial port");
         }
-        groupBoxFocusSettings.Text = $@"Focus Settings (COMPORT {Settings.FocusComId})";
+        groupBoxFocusSettings.Text = $@"Focus Settings (COMPORT {Settings.FocusComPort})";
             
         Tasker.DataGridViewTasker = dataGridViewTasker;
         Tasker.ContextMenuStripTasker = contextMenuStripTasker;
         Tasker.SetHeader();
             
-        // Fli.SetDebugLevel($"{Settings.MainOutFolder}\\LOGS\\RPCC_LOGS\\FLIdebug.log", Fli.DEBUG.ALL);
+        // Fli.SetDebugLevel($"{Settings.MainOutputFolder}\\LOGS\\RPCC_LOGS\\FLIdebug.log", Fli.DEBUG.ALL);
             
         // Donuts connect
         // DonutsSocket.Connect();

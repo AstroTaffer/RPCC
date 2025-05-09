@@ -13,10 +13,6 @@ namespace RPCC.Tasks;
 
 public static class DbCommunicate
 {
-    private const string Port = "5432";
-    private const string UserId = "remote_user";
-    private const string Password = "remote_user";
-    private const string Database = "postgres";
     private static readonly object Loc = new();
         
     private static NpgsqlConnection ConnectToDb()
@@ -26,7 +22,8 @@ public static class DbCommunicate
             lock (Loc)  
             {
                 var connString =
-                    $"Server=127.0.0.1;Port={Port};User Id={UserId};Password={Password}; Database={Database};";
+                    $"Server=127.0.0.1;Port={Settings.DbPort};User Id={Settings.DbUserId};" +
+                    $"Password={Settings.DbPassword}; Database={Settings.Database};";
                 var con = new NpgsqlConnection(connString);
                 con.Open();
                 
@@ -404,7 +401,7 @@ public static class DbCommunicate
                     while (reader.Read()) time = Convert.ToDouble(reader[0]);
                 }
             }
-            return isDark ? time > 24 : time > 8;
+            return isDark ? time > Settings.DarkTasksTimeout : time > Settings.FlatTasksTimeout;
         }
     }
 

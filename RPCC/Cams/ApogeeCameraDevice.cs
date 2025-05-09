@@ -37,6 +37,12 @@ internal class ApogeeCameraDevice : ICameraDevice
 
     public ApogeeCameraDevice(int camIdOne)
     {
+        /* TODO:
+             * - Настройка подключаемой камеры через функцию GetCameraSettingsSet(string id)
+             * - Настройка CamTemp теперь является частью CameraSettingsCollector
+             * - Удалить if-else на SnCamG/R/I/V
+         */
+
         _cam = new Camera2();
         
         try

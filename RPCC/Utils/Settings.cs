@@ -55,8 +55,11 @@ namespace RPCC.Utils
             }
         }
 
-        private static int _taskPrepDuration;
-        public static int TaskPrepDuration /// [min]
+        private static short _taskPrepDuration;
+        /// <summary>
+        /// [min]
+        /// </summary>
+        public static short TaskPrepDuration
         {
             get => _taskPrepDuration;
             set
@@ -66,19 +69,36 @@ namespace RPCC.Utils
             }
         }
 
-        private static int _clbTasksTimeout;
-        public static int ClbTasksTimeout /// [d]
+        private static int _darkTasksTimeout;
+        /// <summary>
+        /// [h]
+        /// </summary>
+        public static int DarkTasksTimeout
         {
-            get => _clbTasksTimeout;
+            get => _darkTasksTimeout;
             set
             {
-                if (value > 0) _clbTasksTimeout = value;
-                else throw new ArgumentException($"Invalid calibration tasks timeout: {value}");
+                if (value > 0) _darkTasksTimeout = value;
+                else throw new ArgumentException($"Invalid dark tasks timeout: {value}");
             }
         }
 
-        private static int _clbTasksFramesNum;
-        public static int ClbTasksFramesNum
+        private static int _flatTasksTimeout;
+        /// <summary>
+        /// [h]
+        /// </summary>
+        public static int FlatTasksTimeout
+        {
+            get => _flatTasksTimeout;
+            set
+            {
+                if (value > 0) _flatTasksTimeout = value;
+                else throw new ArgumentException($"Invalid flat tasks timeout: {value}");
+            }
+        }
+
+        private static short _clbTasksFramesNum;
+        public static short ClbTasksFramesNum
         {
             get => _clbTasksFramesNum;
             set
@@ -88,9 +108,15 @@ namespace RPCC.Utils
             }
         }
 
-        public static int[] DarkExps { get; set; } /// [sec]
+        /// <summary>
+        /// [sec]
+        /// </summary>
+        public static short[] DarkExps { get; set; }
 
-        public static int[] FlatExps { get; set; } /// [sec]
+        /// <summary>
+        /// [sec]
+        /// </summary>
+        public static short[] FlatExps { get; set; }
         #endregion
 
         #region Guide
@@ -99,7 +125,10 @@ namespace RPCC.Utils
         /// </summary>
 
         private static double _pulseGuideVelocityRa;
-        public static double PulseGuideVelocityRa /// [arcsec/sec]
+        /// <summary>
+        /// [arcsec/sec]
+        /// </summary>
+        public static double PulseGuideVelocityRa
         {
             get => _pulseGuideVelocityRa;
             set
@@ -110,7 +139,10 @@ namespace RPCC.Utils
         }
 
         private static double _pulseGuideVelocityDec;
-        public static double PulseGuideVelocityDec /// [arcsec/sec]
+        /// <summary>
+        /// [arcsec/sec]
+        /// </summary>
+        public static double PulseGuideVelocityDec
         {
             get => _pulseGuideVelocityDec;
             set
@@ -120,11 +152,17 @@ namespace RPCC.Utils
             }
         }
 
-        public static double Kp { get; set; }
-        
-        public static double Ki { get; set; }
-        
-        public static double Kd { get; set; }
+        public static double Kpa { get; set; }
+
+        public static double Kia { get; set; }
+
+        public static double Kda { get; set; }
+
+        public static double Kpd { get; set; }
+
+        public static double Kid { get; set; }
+
+        public static double Kdd { get; set; }
         #endregion
 
         #region Comms
@@ -242,19 +280,23 @@ namespace RPCC.Utils
                 // Read <Survey> settings
                 baseElem = config.Root.Element("Survey");
                 MainOutputFolder = (string)baseElem.Element("MainOutputFolder");
-                TaskPrepDuration = (int)baseElem.Element("TaskPrepDuration");
-                ClbTasksTimeout = (int)baseElem.Element("ClbTasksTimeout");
-                ClbTasksFramesNum = (int)baseElem.Element("ClbTasksFramesNum");
-                DarkExps = baseElem.Element("DarkExps").Elements("Exp").Select(e => (int)e).ToArray();
-                FlatExps = baseElem.Element("FlatExps").Elements("Exp").Select(e => (int)e).ToArray();
+                TaskPrepDuration = (short)baseElem.Element("TaskPrepDuration");
+                DarkTasksTimeout = (int)baseElem.Element("DarkTasksTimeout");
+                FlatTasksTimeout = (int)baseElem.Element("FlatTasksTimeout");
+                ClbTasksFramesNum = (short)baseElem.Element("ClbTasksFramesNum");
+                DarkExps = baseElem.Element("DarkExps").Elements("Exp").Select(e => (short)e).ToArray();
+                FlatExps = baseElem.Element("FlatExps").Elements("Exp").Select(e => (short)e).ToArray();
 
                 // Read <Guide> settings
                 baseElem = config.Root.Element("Guide");
                 PulseGuideVelocityRa = (double)baseElem.Element("PulseGuideVelocityRa");
                 PulseGuideVelocityDec = (double)baseElem.Element("PulseGuideVelocityDec");
-                Kp = (double)baseElem.Element("Kp");
-                Ki = (double)baseElem.Element("Ki");
-                Kd = (double)baseElem.Element("Kd");
+                Kpa = (double)baseElem.Element("Kpa");
+                Kia = (double)baseElem.Element("Kia");
+                Kda = (double)baseElem.Element("Kda");
+                Kpd = (double)baseElem.Element("Kpd");
+                Kid = (double)baseElem.Element("Kid");
+                Kdd = (double)baseElem.Element("Kdd");
 
                 // Read <Comms> settings
                 baseElem = config.Root.Element("Comms");
@@ -308,10 +350,11 @@ namespace RPCC.Utils
                         )
                     ),
                 new XElement("Survey",
-                    new XComment(" [TaskPrepDuration] = min, [ClbTasksTimeout] = d, [Exp] = sec "),
+                    new XComment(" [TaskPrepDuration] = min, [{Dark/Flat}TasksTimeout] = h, [Exp] = sec "),
                     new XElement("MainOutputFolder", Directory.GetCurrentDirectory()),
                     new XElement("TaskPrepDuration", 5),
-                    new XElement("ClbTasksTimeout", 1),
+                    new XElement("DarkTasksTimeout", 24),
+                    new XElement("FlatTasksTimeout", 3),
                     new XElement("ClbTasksFramesNum", 10),
                     new XElement("DarkExps",
                         new XElement("Exp", 2),
@@ -333,9 +376,12 @@ namespace RPCC.Utils
                     new XComment(" [PulseGuideVelocity] = arcsec/sec "),
                     new XElement("PulseGuideVelocityRa", 6.0),
                     new XElement("PulseGuideVelocityDec", 2.0),
-                    new XElement("Kp", 1.2),
-                    new XElement("Ki", 0.00005),
-                    new XElement("Kd", 25)
+                    new XElement("Kpa", 1.2),
+                    new XElement("Kia", 0.00005),
+                    new XElement("Kda", 25),
+                    new XElement("Kpd", 1),
+                    new XElement("Kid", 0.001),
+                    new XElement("Kdd", 10)
                     ),
                 new XElement("Comms",
                     new XElement("FocusComPort", 4),
@@ -431,7 +477,10 @@ namespace RPCC.Utils
         }
 
         private double _gain;
-        public double Gain /// [e/ADU]
+        /// <summary>
+        /// [e/ADU]
+        /// </summary>
+        public double Gain
         {
             get => _gain;
             set
@@ -442,7 +491,10 @@ namespace RPCC.Utils
         }
 
         private double _rate;
-        public double Rate /// [kPix/sec]
+        /// <summary>
+        /// [kPix/sec]
+        /// </summary>
+        public double Rate
         {
             get => _rate;
             set
@@ -453,7 +505,10 @@ namespace RPCC.Utils
         }
 
         private double _rdNoise;
-        public double RdNoise /// [e]
+        /// <summary>
+        /// [e]
+        /// </summary>
+        public double RdNoise
         {
             get => _rdNoise;
             set

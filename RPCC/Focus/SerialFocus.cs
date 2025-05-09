@@ -146,7 +146,7 @@ namespace RPCC.Focus
 
         private static void Open_Port()
         {
-            SerialPort.PortName = "COM" + Settings.FocusComId;
+            SerialPort.PortName = "COM" + Settings.FocusComPort;
             SerialPort.BaudRate = 9600;
             SerialPort.DataBits = 8;
             try
