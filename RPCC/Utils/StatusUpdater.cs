@@ -69,7 +69,7 @@ public static class StatusUpdater
         Logger.AddDebugLogEntry("Web previews updating...");
         var psi = new ProcessStartInfo
         {
-            FileName = "python",
+            FileName = "C:\\Program Files\\Python311\\python.exe",
             Arguments = "C:\\Users\\Администратор\\RiderProjects\\telescope-backend\\generate_latest_previews.py",
             UseShellExecute = false,
             RedirectStandardOutput = true,

@@ -21,6 +21,7 @@ internal class ApogeeCameraDevice : ICameraDevice
     public double PixelSizeX { get; set; }
     public double PixelSizeY { get; set; }
     public string Filter { get; set; }
+    public CameraSettingsCollector SettingsCollector { get; set; }
     public double CcdTemp { get; set; }
     public double BaseTemp { get; set; }
     public double CoolerPwr { get; set; }
@@ -57,6 +58,9 @@ internal class ApogeeCameraDevice : ICameraDevice
 
         ModelName = _cam.CameraModel;
         
+        SettingsCollector = Settings.GetCameraSettingsSet(ModelName);
+        Filter = SettingsCollector.Filter;
+        
         LatestImageData = null;
         LatestImageFilename = null;
         LatestImageBitmap = null;
@@ -65,36 +69,14 @@ internal class ApogeeCameraDevice : ICameraDevice
         {
             // SerialNumber = _cam.CameraSerialNumber; не то, что надо
             SerialNumber = StringHolder.Unknown;
-        
-            if (ModelName == Settings.SnCamG)
-            {
-                Filter = StringHolder.FilG;
-            }
-            else if (ModelName == Settings.SnCamR)
-            {
-                Filter = StringHolder.FilR;
-            }
-            else if (ModelName == Settings.SnCamI)
-            {
-                Filter = StringHolder.FilI;
-            }
-            else if (ModelName == Settings.SnCamV)
-            {
-                Filter = StringHolder.FilV;
-            }
-            else
-            {
-                Logger.AddLogEntry("WARNING Unable to identify apogee camera filter");
-                Filter = StringHolder.Unknown;
-            }
-            
+            SetBin(SettingsCollector.Bin, SettingsCollector.Bin);
             PixelSizeX = _cam.PixelSizeX;
             PixelSizeY = _cam.PixelSizeY;
 
             _cam.DigitizationSpeed = 0; // 0 - 16 bit, 1 - 12 bit
             _cam.CoolerEnable = true;
             _cam.PreFlashEnable = true;
-            _cam.CoolerSetPoint = Settings.CamTemp;
+            _cam.CoolerSetPoint = SettingsCollector.TempSetpoint;
         }
         catch (Exception e)
         {

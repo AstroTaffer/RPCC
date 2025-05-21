@@ -10,11 +10,9 @@ from astropy.stats import sigma_clipped_stats
 from donuts import Donuts
 from photutils.background import MedianBackground, Background2D
 from scipy import ndimage
-from astropy.stats import gaussian_fwhm_to_sigma, gaussian_sigma_to_fwhm
-from astropy.convolution import Gaussian2DKernel, convolve
-from photutils.segmentation import detect_sources, SourceCatalog
+from astropy.stats import gaussian_sigma_to_fwhm
 from astropy import wcs
-from astropy.stats import SigmaClip, mad_std, sigma_clip
+from astropy.stats import SigmaClip
 
 
 def write_to_fits(path, fwhm, ell, stars_num, b):
@@ -34,74 +32,149 @@ def write_to_fits(path, fwhm, ell, stars_num, b):
         return 'fail'
 
 
-def calc_fwhm(header, image):
-    sigma_clip = SigmaClip(sigma=3.0)
-    bkg_estimator = MedianBackground()
-    bkg = Background2D(image, (32, 32), filter_size=(3, 3),
-                       sigma_clip=sigma_clip, bkg_estimator=bkg_estimator)
-    b = np.round(bkg.background_median, 2)
-    # apply filters
-    f_image = ndimage.median_filter(image, 9, mode='reflect')
-    f_image = ndimage.gaussian_filter(f_image, 3, 0, mode='reflect')
-    # calc noise etc.
-    mean, median, stddev = sigma_clipped_stats(f_image, sigma=3, maxiters=3,
-                                               cenfunc='median', stdfunc='mad_std')
-    # detect peaks
-    Peaks = f_image - (median + 5 * stddev)
-    detected_peaks = Peaks > 0
-    labeled_im, nb_labels = ndimage.label(detected_peaks)
-    # check labels size
-    sizes = ndimage.sum(detected_peaks, labeled_im, range(nb_labels + 1))
-    mask_size = sizes < 5
-    remove_pixel = mask_size[labeled_im]
-    labeled_im[remove_pixel] = 0
-    labeled_im[labeled_im > 0] = 100
-    # redetect features
-    labeled_im, nb_labels = ndimage.label(labeled_im)
-    if nb_labels == 0:
-        return header['FOCUS'], 0, 0, 0, b
-    slices = ndimage.find_objects(labeled_im)
-    FWHM = []
-    ELL = []
-    for Slice in slices:
-        # check roundness
-        X2Y = (Slice[0].stop - Slice[0].start) / (Slice[1].stop - Slice[1].start)
-        if (X2Y > 1.2) or (X2Y < 0.8):
-            continue
-            # copy small area of the image
-        Slice = image[Slice] - median
-        # index_array
-        Y_index = np.arange(0, Slice.shape[0], 1)
-        X_index = np.arange(0, Slice.shape[1], 1)
-        # calc centroid
-        My = np.sum(Slice * Y_index[:, None]) / np.sum(Slice)
-        Mx = np.sum(Slice * X_index[None, :]) / np.sum(Slice)
-
-        # calc second order moments
-        Y_index = Y_index - My
-        X_index = X_index - Mx
-        Myy = np.sum(Slice * Y_index[:, None] * Y_index[:, None]) / np.sum(Slice)
-        Mxx = np.sum(Slice * X_index[None, :] * X_index[None, :]) / np.sum(Slice)
-        # calc FWHM
-        M = Mxx + Myy
-        _fwhm = np.sqrt(M) * gaussian_sigma_to_fwhm
-
-        # sigmax = np.sqrt(Mxx)
-        # sigmay = np.sqrt(Myy)
-        ell = 1 - np.sqrt(min([Mxx, Myy]) / max([Mxx, Myy]))
-
-        #     print('Centriod: ', Mx, My, '\t FWHM: ', _fwhm)
-        FWHM.append(_fwhm)
-        ELL.append(ell)
-    fwhm = np.round((np.nanmedian(np.asarray(FWHM))) * 0.65 * header['XBINNING'], 2) # fwhm-2.2
-    ell = np.round(np.nanmedian(np.asarray(ELL)), 2)
-    stars_num = len(FWHM)
-    if np.isnan(fwhm):
+def star_hoover(path):
+    try:
+        with FileLock(f"{path}.lock").acquire(timeout=5):
+            # print("Файл успешно захвачен")
+            with fits.open(path, memmap=False) as hdulist:
+                header = hdulist[0].header.copy()
+                image = hdulist[0].data.copy()
+    except Timeout:
+        print("Файл не освободился за 5 секунды — пропускаем")
         return 'fail'
-    return header['FOCUS'], fwhm, ell, stars_num, b
+    SN = 3
+    # median filter for supressing of hot pixels
+    Data = ndimage.median_filter(image, size=3)
+
+    # delete background
+    mean, median, stddev = sigma_clipped_stats(Data)
+    Data = Data - median
+
+    NStars, FWHM, Ell = donuts_fwhm(Data, SN, stddev)
+
+    if FWHM < 20:
+        NStars, FWHM, Ell = buns(Data, SN)
+    return header['FOCUS'], FWHM, Ell, NStars, median
 
 
-def calc_source_catalog(path):
+def donuts_fwhm(Data, SN, stddev):
+    # set threshold
+    Image = Data - SN * stddev
+
+    # low-pass filtering
+    Image = ndimage.gaussian_filter(Image, 10)
+    Image[Image < 0] = 0
+
+    # edge detection
+    Image = ndimage.gaussian_gradient_magnitude(Image, sigma=4)
+
+    # detect objects
+    XY_coo = []
+    detected_peaks = Image > 0
+    labeled, num_objects = ndimage.label(detected_peaks)
+    slices = ndimage.find_objects(labeled)
+    for dy, dx in slices:
+        x_center = (dx.start + dx.stop - 1) / 2
+        x_size = dx.stop - dx.start
+        y_center = (dy.start + dy.stop - 1) / 2
+        y_size = dy.stop - dy.start
+
+        # check minsize and roundness
+        if (x_size > 10 and y_size > 10) and (abs(1 - (x_size / y_size)) < 0.2):
+            XY_coo.append([x_center, y_center, (x_size + y_size) / 2])
+
+    XY_coo = np.asarray(XY_coo)
+    if len(XY_coo) > 0:
+        NStars, FWHM, Ell = get_FWHM(Data, XY_coo)
+    else:
+        NStars, FWHM, Ell = 0, np.nan, np.nan
+
+    return NStars, FWHM, Ell
+
+
+def buns(Data, SN):
+    # low-pass filtering
+    Image = ndimage.gaussian_filter(Data, 10)
+    # calc simple statistics
+    mean, median, stddev = sigma_clipped_stats(Image)
+
+    # set threshold
+    Image[Image < (median + SN * stddev)] = 0
+
+    # detect objects
+    XY_coo = []
+    detected_peaks = Image > 0
+    labeled, num_objects = ndimage.label(detected_peaks)
+    slices = ndimage.find_objects(labeled)
+    for dy, dx in slices:
+        x_center = (dx.start + dx.stop - 1) / 2
+        x_size = dx.stop - dx.start
+        y_center = (dy.start + dy.stop - 1) / 2
+        y_size = dy.stop - dy.start
+
+        # check minsize and roundness
+        if (x_size > 10 and y_size > 10) and (abs(1 - (x_size / y_size)) < 0.2):
+            XY_coo.append([x_center, y_center, (x_size + y_size) / 2])
+
+    XY_coo = np.asarray(XY_coo)
+    if len(XY_coo) > 0:
+        NStars, FWHM, Ell = get_FWHM(Data, XY_coo)
+    else:
+        NStars, FWHM, Ell = 0, np.nan, np.nan
+
+    return NStars, FWHM, Ell
+
+
+def get_moments(arr):
+    y, x = np.mgrid[:arr.shape[0], :arr.shape[1]]
+    #     arr = arr-np.min(arr)
+
+    # https://www.jstor.org/stable/pdf/10.1086/506972.pdf?refreqid=excelsior%3A4d186793abd043f8fe0021eda2d7c5a1
+    M00 = np.sum(arr)
+    M01 = np.sum(arr * x)
+    M10 = np.sum(arr * y)
+    Xc = M01 / M00
+    Yc = M10 / M00
+
+    # central moments
+    x = x - Xc
+    y = y - Yc
+
+    M11 = np.sum(arr * y * x) / M00
+    M02 = np.sum(arr * x * x) / M00
+    M20 = np.sum(arr * y * y) / M00
+
+    Msum = M20 + M02
+    Mdiff = M02 - M20
+    fwhm = np.sqrt(Msum / 2)
+    ell = np.sqrt(Mdiff ** 2 + 4.0 * M11 ** 2) / Msum
+
+    return fwhm, ell
+
+
+def get_FWHM(Data, XY_coo):
+    FWHM = []
+    Ell = []
+    #  set size of subarray
+    R = np.ceil(np.median(XY_coo[:, 2]) / 2)
+
+    for Star in XY_coo:  # for every star from coo file
+
+        if R < Star[0] < (Data.shape[1] - R) and R < Star[1] < (Data.shape[0] - R):  # check edge of frame
+            ROI = np.copy(Data[int(Star[1] - R):int(Star[1] + R), int(Star[0] - R):int(Star[0] + R)])  # copy small area
+
+            _fwhm, _ell = get_moments(ROI)  # search centroid, Gauss sigma and mean sky
+            FWHM.append(_fwhm)
+            Ell.append(_ell)
+
+        else:
+            FWHM.append(np.nan)
+            Ell.append(np.nan)
+
+    return np.count_nonzero(~np.isnan(Ell)), np.nanmedian(FWHM).round(2), np.nanmedian(Ell).round(2)
+
+
+def calc_fwhm(path):
     try:
         with FileLock(f"{path}.lock").acquire(timeout=5):
             # print("Файл успешно захвачен")
@@ -112,30 +185,131 @@ def calc_source_catalog(path):
         print("Файл не освободился за 5 секунды — пропускаем")
         return 'fail'
 
-    sigmaclip = SigmaClip(sigma=3.)
+    sigma_clip = SigmaClip(sigma=3.0)
     bkg_estimator = MedianBackground()
-    # delete background
-    bkg = Background2D(image, (32, 32), filter_size=(9, 9),
-                       sigma_clip=sigmaclip, bkg_estimator=bkg_estimator)
-    Data_without_background = image - bkg.background
+    bkg = Background2D(image, (32, 32), filter_size=(5, 5),
+                       sigma_clip=sigma_clip, bkg_estimator=bkg_estimator)
     b = np.round(bkg.background_median, 2)
-    s_sky = sigma_clip(Data_without_background, stdfunc=mad_std).filled(np.nan)
-    s_sky = np.nanstd(s_sky)
-    sigma = 9.0 * gaussian_fwhm_to_sigma  # FWHM = 3.
-    kernel = Gaussian2DKernel(sigma, x_size=3, y_size=3)
-    kernel.normalize()
-    segm = detect_sources(convolve(Data_without_background, kernel), 50 * s_sky,
-                          npixels=np.round(10/header['XBINNING']))
-    if not segm:
-        return calc_fwhm(header, image)
-        # return header['FOCUS'], 0, 0, 0, b
-    cat = SourceCatalog(Data_without_background, segm)
-    fwhm = np.round(np.median(cat.fwhm.value) * 0.65 * header['XBINNING'], 2)
-    ell = np.round(np.median(cat.ellipticity.value), 2)
-    stars_num = len(cat.fwhm.value)
+
+    # фильтрация
+    f_image = ndimage.median_filter(image, 3, mode='reflect')
+    f_image = ndimage.gaussian_filter(f_image, 3, 0, mode='reflect')
+
+    mean, median, stddev = sigma_clipped_stats(f_image, sigma=3, maxiters=3,
+                                               cenfunc='median', stdfunc='mad_std')
+
+    Peaks = f_image - (median + 5 * stddev)
+    detected_peaks = Peaks > 0
+    labeled_im, nb_labels = ndimage.label(detected_peaks)
+
+    sizes = ndimage.sum(detected_peaks, labeled_im, range(nb_labels + 1))
+    mask_size = sizes < 5
+    remove_pixel = mask_size[labeled_im]
+    labeled_im[remove_pixel] = 0
+    labeled_im[labeled_im > 0] = 100
+
+    labeled_im, nb_labels = ndimage.label(labeled_im)
+    if nb_labels == 0:
+        return header['FOCUS'], 0, 0, 0, b
+
+    slices = ndimage.find_objects(labeled_im)
+    FWHM = []
+    ELL = []
+
+    width, height = image.shape[1], image.shape[0]
+    xbin = header['BINNING']
+    for s in slices:
+        y0, y1 = s[0].start, s[0].stop
+        x0, x1 = s[1].start, s[1].stop
+        cx = (x0 + x1) / 2
+        cy = (y0 + y1) / 2
+
+        # фильтр: объект в центре
+        if abs(cx - width / 2) > width / 4 or abs(cy - height / 2) > height / 4:
+            continue
+
+        sx = x1 - x0
+        sy = y1 - y0
+        x2y = sy / sx
+        if x2y > 1.2 or x2y < 0.8:
+            continue
+
+        sub = image[s] - median
+        if np.sum(sub) <= 0:
+            continue
+
+        Y_index = np.arange(0, sub.shape[0], dtype=np.float64)
+        X_index = np.arange(0, sub.shape[1], dtype=np.float64)
+        try:
+            My = np.sum(sub * Y_index[:, None]) / np.sum(sub)
+            Mx = np.sum(sub * X_index[None, :]) / np.sum(sub)
+        except ZeroDivisionError:
+            continue
+
+        Y_index -= My
+        X_index -= Mx
+        Myy = np.sum(sub * Y_index[:, None] * Y_index[:, None]) / np.sum(sub)
+        Mxx = np.sum(sub * X_index[None, :] * X_index[None, :]) / np.sum(sub)
+
+        if Mxx <= 0 or Myy <= 0:
+            continue
+
+        _fwhm = np.round(np.sqrt(Mxx + Myy) * gaussian_sigma_to_fwhm * 0.65 * xbin - 4, 2)
+        sn = np.sum(sub) / (np.sqrt(np.sum(sub)) + bkg.background_rms_median * np.sqrt(sub.size))
+
+        if _fwhm < 1.6 or sn < 15 or sn > 1000:
+            continue
+
+        ell = 1 - np.sqrt(min(Mxx, Myy) / max(Mxx, Myy))
+        FWHM.append(_fwhm)
+        ELL.append(ell)
+    if not FWHM:
+        return header['FOCUS'], 0, 0, 0, b
+
+    fwhm = np.round((np.nanmedian(FWHM)), 2)
+    ell = np.round(np.nanmedian(ELL), 2)
+    stars_num = len(FWHM)
+
     if np.isnan(fwhm):
         return 'fail'
     return header['FOCUS'], fwhm, ell, stars_num, b
+
+
+# def calc_source_catalog(path):
+#     try:
+#         with FileLock(f"{path}.lock").acquire(timeout=5):
+#             # print("Файл успешно захвачен")
+#             with fits.open(path, memmap=False) as hdulist:
+#                 header = hdulist[0].header.copy()
+#                 image = hdulist[0].data.copy()
+#     except Timeout:
+#         print("Файл не освободился за 5 секунды — пропускаем")
+#         return 'fail'
+# 
+#     sigmaclip = SigmaClip(sigma=3.)
+#     bkg_estimator = MedianBackground()
+#     # delete background
+#     bkg = Background2D(image, (32, 32), filter_size=(9, 9),
+#                        sigma_clip=sigmaclip, bkg_estimator=bkg_estimator)
+#     Data_without_background = image - bkg.background
+#     b = np.round(bkg.background_median, 2)
+#     s_sky = sigma_clip(Data_without_background, stdfunc=mad_std).filled(np.nan)
+#     s_sky = np.nanstd(s_sky)
+#     sigma = 9.0 * gaussian_fwhm_to_sigma  # FWHM = 3.
+#     kernel = Gaussian2DKernel(sigma, x_size=3, y_size=3)
+#     kernel.normalize()
+#     segm = detect_sources(convolve(Data_without_background, kernel), 50 * s_sky,
+#                           npixels=np.round(10/header['BINNING']))
+#     if not segm:
+#         return calc_fwhm(header, image)
+#         # return header['FOCUS'], 0, 0, 0, b
+#     cat = SourceCatalog(Data_without_background, segm)
+#     fwhm = np.round(np.median(cat.fwhm.value) * 0.65 * header['BINNING'], 2)
+#     ell = np.round(np.median(cat.ellipticity.value), 2)
+#     stars_num = len(cat.fwhm.value)
+#     if np.isnan(fwhm):
+#         return 'fail'
+#     return header['FOCUS'], fwhm, ell, stars_num, b
 
 
 def calc_don_shifts(path_start, path_end):
@@ -153,8 +327,8 @@ def calc_don_shifts(path_start, path_end):
     w = wcs.WCS(h)
     bRa, bDec = w.all_pix2world(x_m, y_m, 0)
     cRa, cDec = w.all_pix2world(h['CRPIX1'], h['CRPIX2'], 0)
-    dalpha = (cRa - bRa)*60*60
-    ddelta = (cDec - bDec)*60*60
+    dalpha = (cRa - bRa) * 60 * 60
+    ddelta = (cDec - bDec) * 60 * 60
 
     return np.round(dx, 2), np.round(dy, 2), np.round(dalpha, 2), np.round(ddelta, 2)
 
@@ -166,7 +340,7 @@ if __name__ == "__main__":
             if not os.path.exists(image_path):
                 print(f"ERR~Файл не найден: {image_path}", file=sys.stderr)
                 sys.exit(1)
-            focus, fwhm, ell, stars_num, b = calc_source_catalog(image_path)
+            focus, fwhm, ell, stars_num, b = star_hoover(image_path)
             write_to_fits(image_path, fwhm, ell, stars_num, b)
             response = {
                 "focus": focus,

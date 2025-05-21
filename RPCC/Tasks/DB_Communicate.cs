@@ -302,6 +302,34 @@ public static class DbCommunicate
         LoadDbTable();
         return true;
     }
+    
+    public static double GetActualAmbientTemp()
+    {   
+        const string query = @"
+                SELECT amb_temp
+                FROM robophot_weather
+                WHERE time_utc > now() AT TIME ZONE 'UTC' - interval '10 minutes'
+                ORDER BY time_utc DESC
+                LIMIT 1;
+            ";
+        double amb = 100;
+
+        try
+        {
+            using var con = ConnectToDb();
+            using var com = new NpgsqlCommand(query, con);
+            using var reader = com.ExecuteReader();
+            while (reader.Read()) amb = Convert.ToDouble(reader[0]);
+            return amb;
+        }
+        catch (Exception ex)
+        {
+            // Логировать ошибку при необходимости
+            Console.WriteLine($"Ошибка при получении температуры: {ex.Message}");
+        }
+
+        return 100f; // Возврат 100 по умолчанию
+    }
             
     public static int AddFrameToDb(ObservationTask observationTask, string path, double ra, double dec, 
         string fil, DateTime date, double ext, double temp, string sn) 

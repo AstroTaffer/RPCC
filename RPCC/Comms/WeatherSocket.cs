@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
+using RPCC.Tasks;
 using RPCC.Utils;
 
 namespace RPCC.Comms
@@ -203,6 +204,7 @@ namespace RPCC.Comms
                 // _collector.ParseFullData(response);
                 WeatherDataCollector.ParseFullData(response);
                 // Logger.AddLogEntry(response);
+                //
             }
         }
 
@@ -247,6 +249,9 @@ namespace RPCC.Comms
             Sun = double.Parse(buffData[7]);
             Obs = bool.Parse(buffData[8]);
             Flat = bool.Parse(buffData[9]);
+
+            Amb = Math.Round(DbCommunicate.GetActualAmbientTemp(), 2);
+            // Logger.AddLogEntry($"Amb {Amb}");
         }
     }
 }

@@ -47,30 +47,17 @@ public class RpccFits
         DateTime outDateTime = DateTime.Now.AddHours(-12);
         string outDir = $"{Settings.MainOutputFolder}\\{outDateTime.Year}\\{outDateTime:yyyy-MM-dd}\\" +
                         $"{(string.IsNullOrEmpty(CameraControl.loadedTask.Object) ? "UNKNOWN" : CameraControl.loadedTask.Object)}\\";
-        switch (CameraControl.loadedTask.FrameType)
+        outDir += CameraControl.loadedTask.FrameType switch
         {
-            case "Object":
-                outDir += $"RAW\\{(cam.Filter == "UNKNOWN" ? "UNKNOWN_" + cam.SerialNumber : cam.Filter)}";
-                break;
-            case "Bias":
-                outDir += $"BIAS\\{(cam.Filter == "UNKNOWN" ? "UNKNOWN_" + cam.SerialNumber : cam.Filter)}";
-                break;
-            case "Dark":
-                outDir += $"DARK\\{(cam.Filter == "UNKNOWN" ? "UNKNOWN_" + cam.SerialNumber : cam.Filter)}";
-                break;
-            case "Flat":
-                outDir += $"FLAT\\{(cam.Filter == "UNKNOWN" ? "UNKNOWN_" + cam.SerialNumber : cam.Filter)}";
-                break;
-            case "Test":
-                outDir += "TEST";
-                break;
-            case "Focus":
-                outDir += "FOCUS";
-                break;
-            default:
-                outDir += "EXTRA";
-                break;
-        }
+            "Object" => "RAW",
+            "Bias" => "BIAS",
+            "Dark" => "DARK",
+            "Flat" => "FLAT",
+            "Test" => "TEST",
+            "Focus" => "FOCUS",
+            _ => "EXTRA"
+        };
+        outDir += $"\\{(cam.Filter == "UNKNOWN" ? "UNKNOWN_" + cam.SerialNumber : cam.Filter)}";
         if (!Directory.Exists(outDir)) Directory.CreateDirectory(outDir);
 
         string outName;
@@ -88,7 +75,7 @@ public class RpccFits
                 // If you'll need more precise output for CamTemp, make sure to set decimal separator (use Culture?)
                 outName = $"{CameraControl.loadedTask.FrameType}_{cam.ExpStartDt:yyyy-MM-ddTHH-mm-ss}_" +
                           $"XB={CameraControl.loadedTask.Xbin}_YB={CameraControl.loadedTask.Ybin}" +
-                          $"_F={cam.Filter}_E={CameraControl.loadedTask.Exp}_T={Settings.CamTemp:F0}.fits";
+                          $"_F={cam.Filter}_E={CameraControl.loadedTask.Exp}_T={cam.SettingsCollector.TempSetpoint:F0}.fits";
                 break;
             default:
                 outName = $"{CameraControl.loadedTask.FrameType}_{cam.Filter}_" +
@@ -107,7 +94,8 @@ public class RpccFits
         
         Logger.AddDebugLogEntry($"End saving .fits from {cam.Filter}");
         
-        cam.LastImageId = DbCommunicate.AddFrameToDb(CameraControl.loadedTask, outFilePath, 
+        cam.LastImageId = DbCommunicate.AddFrameToDb(CameraFocus.IsFocusing ? 
+                CameraFocus.TaskForFocus : CameraControl.loadedTask, outFilePath, 
             MountDataCollector.RightAsc, MountDataCollector.Declination,
             cam.Filter, cam.ExpStartDt, WeatherDataCollector.Extinction, cam.CcdTemp, cam.SerialNumber);
         cam.LatestImageFilename = outFilePath;
@@ -141,14 +129,8 @@ public class RpccFits
             CameraControl.loadedTask.Exp, "actual integration time [sec]"));
         cursor.Add(new HeaderCard("IMAGETYP",
             CameraControl.loadedTask.FrameType, "Object, Flat, Dark, Bias, Focus, Test"));
-        cursor.Add(new HeaderCard("XBINNING",
-            CameraControl.loadedTask.Xbin, "binning factor in width"));
-        cursor.Add(new HeaderCard("XPIXSZ",
-            13.5 * CameraControl.loadedTask.Xbin, "pixel width (after binning) [micron]"));
-        cursor.Add(new HeaderCard("YBINNING",
-            CameraControl.loadedTask.Ybin, "binning factor in height"));
-        cursor.Add(new HeaderCard("YPIXSZ",
-            13.5 * CameraControl.loadedTask.Ybin, "pixel height (after binning) [micron]"));
+        cursor.Add(new HeaderCard("BINNING", cam.SettingsCollector.Bin, "binning factor"));
+        cursor.Add(new HeaderCard("PIXSZ", cam.PixelSizeX, "pixel size [micron]"));
         switch (CameraControl.loadedTask.FrameType)
         {
             case "Object":
@@ -176,30 +158,28 @@ public class RpccFits
         cursor.Add(new HeaderCard("ORIGIN", "URFU", "organization responsible for the data"));
         cursor.Add(new HeaderCard("TELESCOP", "APM-RoboPhot", "telescope"));
         cursor.Add(new HeaderCard("INSTRUME", "TRIP", "instrument"));
-        cursor.Add(new HeaderCard("CAMERA", "FLI ML4240 MB", "camera name"));
-        cursor.Add(new HeaderCard("DETECTOR", "E2V CCD42-40-1-368 MB", "CCD Detector"));
-        cursor.Add(new HeaderCard("SERNUM", cam.SerialNumber,
-            "serial number"));
+        cursor.Add(new HeaderCard("CAMERA", cam.SettingsCollector.Model, "camera name"));
+        cursor.Add(new HeaderCard("DETECTOR", cam.SettingsCollector.Detector, "CCD Detector"));
+        cursor.Add(new HeaderCard("SERNUM", cam.SerialNumber, "serial number"));
         cursor.Add(new HeaderCard("FILTER", cam.Filter, "SDSS filter"));
-        cursor.Add(new HeaderCard("CCD-TEMP", cam.CcdTemp,
-            "CCD temperature [C]"));
-        cursor.Add(new HeaderCard("SET-TEMP", Settings.CamTemp, "CCD temperature setpoint [C]"));
-        cursor.Add(new HeaderCard("HEATSINK", cam.BaseTemp,
-            "heatsink temperature [C]"));
-        cursor.Add(new HeaderCard("COOLPOWR", cam.CoolerPwr,
-            "cooler power [%]"));
-        switch (CameraControl.loadedTask.FrameType)
-        {
-            case "Focus":
-                cursor.Add(new HeaderCard("RATE", 2000.0, "horizontal readout rate [kPix/sec]"));
-                cursor.Add(new HeaderCard("RDNOISE", 14.0, "datasheet readnoise [e]"));
-                break;
-            default:
-                cursor.Add(new HeaderCard("RATE", 500.0, "horizontal readout rate [kPix/sec]"));
-                cursor.Add(new HeaderCard("RDNOISE", 9.0, "datasheet readnoise [e]"));
-                break;
-        }
-        cursor.Add(new HeaderCard("GAIN", 1.4, "typical gain [e/ADU]"));
+        cursor.Add(new HeaderCard("CCD-TEMP", cam.CcdTemp, "CCD temperature [C]"));
+        cursor.Add(new HeaderCard("SET-TEMP", cam.SettingsCollector.TempSetpoint, "CCD temperature setpoint [C]"));
+        cursor.Add(new HeaderCard("HEATSINK", cam.BaseTemp, "heatsink temperature [C]"));
+        cursor.Add(new HeaderCard("COOLPOWR", cam.CoolerPwr, "cooler power [%]"));
+        // switch (CameraControl.loadedTask.FrameType)
+        // {
+        //     case "Focus":
+        //         cursor.Add(new HeaderCard("RATE", 2000.0, "horizontal readout rate [kPix/sec]"));
+        //         cursor.Add(new HeaderCard("RDNOISE", 14.0, "datasheet readnoise [e]"));
+        //         break;
+        //     default:
+        //         cursor.Add(new HeaderCard("RATE", 500.0, "horizontal readout rate [kPix/sec]"));
+        //         cursor.Add(new HeaderCard("RDNOISE", 9.0, "datasheet readnoise [e]"));
+        //         break;
+        // }
+        cursor.Add(new HeaderCard("RATE", cam.SettingsCollector.Rate, "horizontal readout rate [kPix/sec]"));
+        cursor.Add(new HeaderCard("RDNOISE", cam.SettingsCollector.RdNoise, "datasheet readnoise [e]"));
+        cursor.Add(new HeaderCard("GAIN", cam.SettingsCollector.Gain, "typical gain [e/ADU]"));
         cursor.Add(new HeaderCard("BZERO", short.MaxValue + 1.0,
             "offset data range to that of unsigned short"));
         cursor.Add(new HeaderCard("BSCALE", 1.0, "default scaling factor"));
@@ -244,6 +224,18 @@ public class RpccFits
             default:
                 cursor.Add(new HeaderCard("SKY-TEMP", WeatherDataCollector.Sky,
                     "sky temperature from MLX-90614 sensor [C]"));
+                break;
+        }
+        switch (WeatherDataCollector.Amb)
+        {
+            case 100.0:
+                // Old data
+                cursor.Add(new HeaderCard("AMB-TEMP", "UNKNOWN",
+                    "ambient temperature [C]"));
+                break;
+            default:
+                cursor.Add(new HeaderCard("AMB-TEMP", WeatherDataCollector.Amb,
+                    "ambient temperature [C]"));
                 break;
         }
         switch (WeatherDataCollector.Extinction)

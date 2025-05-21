@@ -27,7 +27,7 @@ namespace RPCC.Focus
         // private const int N = 10; //количество точек для построения кривой фокусировки
         private static short _shift; //шаг по фокусу = -50
         private static short _sumShift;
-        private static ObservationTask _taskForFocus;
+        public static ObservationTask TaskForFocus;
         private static short _phase;
         private static double _oldFwhm; 
         private const short FocusExp = 20;
@@ -39,13 +39,14 @@ namespace RPCC.Focus
         {
             Logger.AddLogEntry("FOCUS: phase 1: defocusing");
             IsFocusing = true;
-            _taskForFocus = Head.CurrentTask.Copy();
-            _taskForFocus.TaskNumber = -1;
-            _taskForFocus.FrameType = StringHolder.Focus;
+            TaskForFocus = Head.CurrentTask.Copy();
+            TaskForFocus.FrameType = StringHolder.Focus;
             if (Head.CurrentTask.Exp > FocusExp)
             {
-                _taskForFocus.Exp = FocusExp;
+                TaskForFocus.Exp = FocusExp;
             }
+
+            DbCommunicate.AddTaskToDb(TaskForFocus);
             _focCycles = 0; //
             _focBadFrames = 0; //
             Frames.Clear();
@@ -71,7 +72,7 @@ namespace RPCC.Focus
 
             if (!WeatherDataCollector.Obs)
             {
-                Logger.AddLogEntry($"Weather is bad, pause task #{_taskForFocus.TaskNumber}");
+                Logger.AddLogEntry($"Weather is bad, pause task #{TaskForFocus.TaskNumber}");
                 Head.IsOnPause = true;
             }
 
@@ -284,7 +285,8 @@ namespace RPCC.Focus
             {
                 Logger.AddLogEntry("FOCUS: Math.Abs(Old_FWHM - FWHM)<0.2");
                 Logger.AddLogEntry("FOCUS: image is focused");
-                var s = (Frames[-1].Focus + Frames[-2].Focus) / 2;
+                var s = (Frames[Frames.Count-2].Focus - Frames[Frames.Count-1].Focus) / 2;
+                // Logger.AddLogEntry($"FOCUS: mid foc: {s}");
                 if (s > 0)
                 {
                     Logger.AddLogEntry($"FOCUS: Move focus {s}"); 
@@ -366,7 +368,7 @@ namespace RPCC.Focus
             }
             if (!Head.IsOnPause)
             {
-                Head.StartExpAndCheckFuckup(_taskForFocus);
+                Head.StartExpAndCheckFuckup(TaskForFocus);
             }
             else
             {
@@ -413,6 +415,9 @@ namespace RPCC.Focus
         {
             IsFocusing = false;
             Seeing = see;
+            TaskForFocus.Status = 2;
+            DbCommunicate.UpdateTaskInDb(TaskForFocus);
+            
             Logger.AddLogEntry($"FOCUS: Set seeing for autofocus = {see}");
             if (DeFocus != 0)
             {

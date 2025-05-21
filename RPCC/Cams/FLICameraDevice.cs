@@ -32,6 +32,7 @@ internal class FliCameraDevice : ICameraDevice
     public int LastImageId { get; set; }
     public ushort[,] LatestImageData { get; set; }
     public Bitmap LatestImageBitmap { get; set; }
+    public CameraSettingsCollector SettingsCollector { get; set; }
     
     // public bool GrabRow(ushort[] buff)
     // {
@@ -88,30 +89,11 @@ internal class FliCameraDevice : ICameraDevice
         try
         {
             SerialNumber = _cam.GetSerialString();
-        
-        
-            if (SerialNumber == Settings.SnCamG)
-            {
-                Filter = StringHolder.FilG;
-            }
-            else if (SerialNumber == Settings.SnCamR)
-            {
-                Filter = StringHolder.FilR;
-            }
-            else if (SerialNumber == Settings.SnCamI)
-            {
-                Filter = StringHolder.FilI;
-            }
-            else if (SerialNumber == Settings.SnCamV)
-            {
-                Filter = StringHolder.FilV;
-            }
-            else
-            {
-                Logger.AddLogEntry("WARNING Unable to identify fli camera filter");
-                Filter = StringHolder.Unknown;
-            }
+            SettingsCollector = Settings.GetCameraSettingsSet(SerialNumber);
+            Filter = SettingsCollector.Filter;
 
+            SetBin(SettingsCollector.Bin, SettingsCollector.Bin);
+            
             _cam.GetPixelSize(out var xbuf, out var ybuf);
             PixelSizeX = Math.Round(xbuf * 1e6, 2);
             PixelSizeY = Math.Round(ybuf * 1e6, 2);
@@ -120,7 +102,8 @@ internal class FliCameraDevice : ICameraDevice
             _cam.SetBitDepth(Fli.BIT_DEPTH.MODE_16BIT);
             _cam.ControlBackgroundFlush(Fli.BGFLUSH.START);
             // _cam.SetNFlushes(Settings.NumFlushes);
-            _cam.SetTemperature(Settings.CamTemp);
+            // _cam.SetTemperature(Settings.CamTemp);
+            _cam.SetTemperature(SettingsCollector.TempSetpoint);
         }
         catch (Exception e)
         {
@@ -139,6 +122,7 @@ internal class FliCameraDevice : ICameraDevice
     {
         try
         {
+            Logger.AddDebugLogEntry($"Close cam {SerialNumber}");
             _cam.CancelExposure();
             _cam.ControlBackgroundFlush(Fli.BGFLUSH.STOP);
             _cam.Close();

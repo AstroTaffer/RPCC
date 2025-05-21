@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using RPCC.Tasks;
+using RPCC.Utils;
 
 namespace RPCC.Cams;
 
@@ -18,6 +19,8 @@ public interface ICameraDevice
     internal double PixelSizeX { get; set; }
     internal double PixelSizeY { get; set; }
     internal string Filter { get; set; }
+
+    internal CameraSettingsCollector SettingsCollector { get; set; }
 
     // status
     internal double CcdTemp { get; set; }

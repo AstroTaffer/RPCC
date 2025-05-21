@@ -48,7 +48,7 @@ namespace RPCC.Utils
         {
             var psi = new ProcessStartInfo
             {
-                FileName = "python",
+                FileName = "C:\\Program Files\\Python311\\python.exe",
                 Arguments = $"DONUTS.py {arguments}",
                 WorkingDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Guid"),
                 RedirectStandardOutput = true,
