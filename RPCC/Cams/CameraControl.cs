@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Xml.Linq;
@@ -20,7 +21,7 @@ internal static class CameraControl
     private static readonly object CamsLocker = new();
 
     private static readonly Timer CamsTimer = new(1000);
-    private static readonly List<Task> ReadyImagesProcessList = [];
+    // private static readonly List<Task> ReadyImagesProcessList = [];
     internal static List<ICameraDevice> cams = [];
 
     internal static bool isConnected;
@@ -28,7 +29,8 @@ internal static class CameraControl
     private static int _readyCamNum;
     private static readonly string[] FilterOrder = [StringHolder.FilG, StringHolder.FilV, StringHolder.FilR, StringHolder.FilI];
     internal static ObservationTask loadedTask;
-
+    // Guards against re-entrancy of the timer tick (including slow ticks / overlapping invocations).
+    private static int _camsTickRunning = 0;
 
     #region Connect & Disconnect
 
@@ -195,90 +197,119 @@ internal static class CameraControl
     private static void CamsTimerTickAlt(object sender, ElapsedEventArgs e)
     {
         CamsTimer.Stop();
-        lock (CamsLocker)
+        
+        // Prevent overlapping ticks (System.Timers.Timer can re-enter if handler runs long).
+        if (Interlocked.Exchange(ref _camsTickRunning, 1) == 1)
         {
-            GetCamsStatusAlt();
-            // foreach (var cam in cams)
-            //     cam.UpdateUi();
-            
-            var allReady = true;
-            foreach (var unused in cams.Where(cam => cam.Status == StringHolder.Exposing))
-                allReady = false;
+            if (isConnected) CamsTimer.Start();
+            return;
+        }
 
-            if (cams.Count <= 0)
+        try
+        {
+            var processTasks = new List<Task>(capacity: 8);
+            var bitmapTasks = new List<Task>(capacity: 8);
+
+            bool allReady;
+            bool callbackRequired;
+            int readyCamNum;
+            int camsCountSnapshot;
+
+            // 1) Under lock: update statuses, decide what to do, and mutate shared state quickly.
+            lock (CamsLocker)
             {
-                DisconnectCameras();
-                return;
-            }
-            if (allReady)
-            {
-                _isCallbackRequired = false;
-                _readyCamNum = 0;
-                foreach (var cam in cams)
+                GetCamsStatusAlt();
+
+                if (cams.Count <= 0)
+                {
+                    DisconnectCameras();
+                    return;
+                }
+
+                // Fast readiness check (no LINQ allocations; also clearer).
+                allReady = true;
+                for (var i = 0; i < cams.Count; i++)
+                {
+                    if (cams[i].Status == StringHolder.Exposing) { allReady = false; break; }
+                }
+
+                if (!allReady) return;
+
+                callbackRequired = false;
+                readyCamNum = 0;
+
+                // IMPORTANT: do not modify 'cams' inside foreach; iterate backwards so removal is safe.
+                for (var i = cams.Count - 1; i >= 0; i--)
+                {
+                    var cam = cams[i];
                     switch (cam.Status)
                     {
                         case StringHolder.Idle:
                         {
-                            _readyCamNum++;
+                            readyCamNum++;
                             if (cam.IsExposing)
                             {
-                                // Image ready
-                                ReadyImagesProcessList.Add(Task.Run(() => ProcessCapturedImage(cam)));
+                                // Image ready: mark state under lock, heavy work outside lock.
                                 cam.IsExposing = false;
-                                _isCallbackRequired = true;
+                                callbackRequired = true;
+                                processTasks.Add(Task.Run(() => ProcessCapturedImage(cam)));
                             }
                             break;
                         }
                         case StringHolder.Error:
-                            cam.Close();
-                            cams.Remove(cam);
-                            if (cams.Count <= 0)
-                            {
-                                DisconnectCameras();
-                                return;
-                            }
-                            continue;
-                    }
-
-                if (ReadyImagesProcessList.Count > 0)
-                {
-                    Task.WaitAll(ReadyImagesProcessList.ToArray());
-
-                    if (_isCallbackRequired && _readyCamNum == cams.Count)
-                    {
-                        
-                        StatusUpdater.RunPreviewGenerator();
-                        if (CameraFocus.IsFocusing)
                         {
-                            CameraFocus.CamFocusCallback();
+                            cam.Close();
+                            cams.RemoveAt(i);
+                            break;
+                        }
+                    }
+                }
+
+                if (cams.Count <= 0)
+                {
+                    DisconnectCameras();
+                    return;
+                }
+
+                camsCountSnapshot = cams.Count;
+            }
+
+            // 2) Heavy IO/CPU outside the camera lock.
+            if (processTasks.Count > 0) Task.WaitAll(processTasks.ToArray());
+
+            // 3) Callback + preview generation can touch other subsystems; never do it under CamsLocker.
+            if (callbackRequired && readyCamNum == camsCountSnapshot)
+            {
+                StatusUpdater.RunPreviewGenerator();
+                if (CameraFocus.IsFocusing) CameraFocus.CamFocusCallback();
+                else Head.CamCallback();
+
+                // 4) Decide which bitmaps to build; remove broken cams safely under lock.
+                lock (CamsLocker)
+                {
+                    for (var i = cams.Count - 1; i >= 0; i--)
+                    {
+                        var cam = cams[i];
+                        if (!string.IsNullOrEmpty(cam.LatestImageFilename))
+                        {
+                            bitmapTasks.Add(Task.Run(() => ConstructBitmap(cam)));
                         }
                         else
                         {
-                            Head.CamCallback();
+                            cam.Close();
+                            cams.RemoveAt(i);
                         }
-                        
-                        foreach (var cam in cams)
-                        {
-                            if (!string.IsNullOrEmpty(cam.LatestImageFilename))
-                            {
-                                ReadyImagesProcessList.Add(Task.Run(() => ConstructBitmap(cam)));
-                            }
-                            else
-                            {
-                                cam.Close();
-                                cams.Remove(cam);
-                            }
-                        }
-                       
-                        Task.WaitAll(ReadyImagesProcessList.ToArray());
                     }
-
-                    ReadyImagesProcessList.Clear();
                 }
+
+                if (bitmapTasks.Count > 0) Task.WaitAll(bitmapTasks.ToArray());
             }
         }
-
-        if (isConnected) CamsTimer.Start();
+        finally
+        {
+            Interlocked.Exchange(ref _camsTickRunning, 0);
+            if (isConnected) CamsTimer.Start();
+        }
     }
 
     private static void GetCamsStatusAlt()
