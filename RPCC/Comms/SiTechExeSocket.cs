@@ -3,10 +3,11 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
 using Newtonsoft.Json.Linq;
 using RPCC.Utils;
+using Timer = System.Timers.Timer;
 
 namespace RPCC.Comms
 {
@@ -20,6 +21,15 @@ namespace RPCC.Comms
         private static NetworkStream _stream;
         private static StreamReader _streamReader;
         private static StreamWriter _streamWriter;
+        
+        // Serialize all access to _streamReader/_streamWriter (they are not thread-safe).
+        private static readonly SemaphoreSlim IoGate = new(1, 1);
+
+        // Prevent overlapping timer ticks (System.Timers.Timer can re-enter).
+        private static int _timerTickRunning = 0;
+
+        // Prevent infinite blocking on ReadLine/WriteLine when SiTechExe or network hangs.
+        private const int IoTimeoutMs = 3000;
 
         internal enum PulseGuideDirection
         {
@@ -53,7 +63,7 @@ namespace RPCC.Comms
 
             MountTimer = new Timer(1000);
             MountTimer.Elapsed += OnMountTimedEvent;
-
+            MountTimer.AutoReset = false; // restart manually to avoid re-entrancy
             IsConnected = false;
         }
 
@@ -75,14 +85,18 @@ namespace RPCC.Comms
                 if (_client.Connected)
                 {
                     _stream = _client.GetStream();
+                    
+                    _stream.ReadTimeout = IoTimeoutMs;
+                    _stream.WriteTimeout = IoTimeoutMs;
+                    
                     _streamReader = new StreamReader(_stream, Encoding.ASCII);
                     _streamWriter = new StreamWriter(_stream, Encoding.ASCII);
                     _streamWriter.AutoFlush = true;
                     IsConnected = true;
 
                     // The very first sent command will never be recognized, so we send some nonsense, literally
-                    ExchangeMessages("Nonsense");
-                    //await ExchangeMessagesAsync("Nonsense");
+                    // ExchangeMessages("Nonsense");
+                    await ExchangeMessagesAsync("Nonsense");
                     ReadScopeStatus();
                     MountTimer.Start();
 
@@ -112,16 +126,26 @@ namespace RPCC.Comms
 
             try
             {
-                MountTimer.Stop();
-                MountTimer.Close();
+                // MountTimer.Stop();
+                // MountTimer.Close();
 
-                _streamWriter.Close();
-                _streamReader.Close();
-                _stream.Close();
-                _client.Close();
-
-                Logger.AddLogEntry("Disconnected from SiTechExe");
+                // Mark disconnected first: prevents new IO from starting.
                 IsConnected = false;
+                try { MountTimer.Stop(); } catch { /* ignore */ }
+                
+                // _streamWriter.Close();
+                // _streamReader.Close();
+                // _stream.Close();
+                // _client.Close();
+
+                // Closing the underlying socket/stream should unblock any pending ReadLine().
+                try { _streamWriter?.Close(); } catch { /* ignore */ }
+                try { _streamReader?.Close(); } catch { /* ignore */ }
+                try { _stream?.Close(); } catch { /* ignore */ }
+                try { _client?.Close(); } catch { /* ignore */ }
+                
+                Logger.AddLogEntry("Disconnected from SiTechExe");
+                // IsConnected = false;
             }
             catch (Exception ex) when (ex is SocketException || ex is IOException)
             {
@@ -139,10 +163,25 @@ namespace RPCC.Comms
 
             try
             {
-                await _streamWriter.WriteLineAsync(request);
-                var response = (await _streamReader.ReadLineAsync()).Split(';');
-                MountDataCollector.ParseScopeStatus(response);
-                return response;
+                // await _streamWriter.WriteLineAsync(request);
+                // var response = (await _streamReader.ReadLineAsync()).Split(';');
+                // MountDataCollector.ParseScopeStatus(response);
+                // return response;
+                
+                await IoGate.WaitAsync().ConfigureAwait(false);
+                try
+                {
+                    await _streamWriter.WriteLineAsync(request).ConfigureAwait(false);
+                    var line = await _streamReader.ReadLineAsync().ConfigureAwait(false);
+                    var response = line?.Split(';');
+                    MountDataCollector.ParseScopeStatus(response);
+                    return response;
+                }
+                finally
+                {
+                    IoGate.Release();
+                }
+                
             }
             catch (Exception ex) when (ex is SocketException || ex is IOException)
             {
@@ -161,10 +200,24 @@ namespace RPCC.Comms
 
             try
             {
-                _streamWriter.WriteLine(request);
-                var response = _streamReader.ReadLine()?.Split(';');
-                MountDataCollector.ParseScopeStatus(response);
-                return response;
+                // _streamWriter.WriteLine(request);
+                // var response = _streamReader.ReadLine()?.Split(';');
+                // MountDataCollector.ParseScopeStatus(response);
+                // return response;
+                
+                IoGate.Wait();
+                try
+                {
+                    _streamWriter.WriteLine(request);
+                    var response = _streamReader.ReadLine()?.Split(';');
+                    MountDataCollector.ParseScopeStatus(response);
+                    return response;
+                }
+                finally
+                {
+                    IoGate.Release();
+                }
+                
             }
             catch (Exception ex) when (ex is SocketException || ex is IOException)
             {
@@ -193,10 +246,30 @@ namespace RPCC.Comms
 
         private static void OnMountTimedEvent(object sender, EventArgs e)
         {
-            if (!IsConnected)
-                MountTimer.Stop();
-            else
+            // if (!IsConnected)
+            //     MountTimer.Stop();
+            // else
+            //     ReadScopeStatus();
+            
+            // AutoReset=false, so we must restart manually.
+            // Guard against overlap if a previous tick is still running.
+            if (Interlocked.Exchange(ref _timerTickRunning, 1) == 1)
+            {
+                if (IsConnected) MountTimer.Start();
+                return;
+            }
+
+            try
+            {
+                if (!IsConnected) return;
                 ReadScopeStatus();
+            }
+            finally
+            {
+                Interlocked.Exchange(ref _timerTickRunning, 0);
+                if (IsConnected) MountTimer.Start();
+            }
+            
         }
 
         #endregion
