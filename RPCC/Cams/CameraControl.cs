@@ -21,6 +21,8 @@ internal static class CameraControl
     private static readonly object CamsLocker = new();
 
     private static readonly Timer CamsTimer = new(1000);
+    private const int CameraIoWaitTimeoutMs = 60000;
+    private const int CameraBitmapWaitTimeoutMs = 30000;
     // private static readonly List<Task> ReadyImagesProcessList = [];
     internal static List<ICameraDevice> cams = [];
 
@@ -275,7 +277,14 @@ internal static class CameraControl
             }
 
             // 2) Heavy IO/CPU outside the camera lock.
-            if (processTasks.Count > 0) Task.WaitAll(processTasks.ToArray());
+            if (processTasks.Count > 0)
+            {
+                if (!Task.WaitAll(processTasks.ToArray(), CameraIoWaitTimeoutMs))
+                {
+                    Logger.AddLogEntry($"CameraControl: ProcessCapturedImage timeout after {CameraIoWaitTimeoutMs} ms. Skipping callbacks this tick.");
+                    return;
+                }
+            }
 
             // 3) Callback + preview generation can touch other subsystems; never do it under CamsLocker.
             if (callbackRequired && readyCamNum == camsCountSnapshot)
@@ -303,7 +312,14 @@ internal static class CameraControl
                     }
                 }
 
-                if (bitmapTasks.Count > 0) Task.WaitAll(bitmapTasks.ToArray());
+                if (bitmapTasks.Count > 0)
+                {
+                    if (!Task.WaitAll(bitmapTasks.ToArray(), CameraBitmapWaitTimeoutMs))
+                    {
+                        Logger.AddLogEntry($"CameraControl: ConstructBitmap timeout after {CameraBitmapWaitTimeoutMs} ms. UI previews may be stale.");
+                        return;
+                    }
+                }
             }
         }
         finally

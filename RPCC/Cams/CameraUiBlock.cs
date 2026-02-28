@@ -2,6 +2,7 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 using RPCC.Tasks;
+using System.Threading;
 
 namespace RPCC.Cams
 {
@@ -13,7 +14,7 @@ namespace RPCC.Cams
         public Label LabelStatus;
         public Label LabelRemTime;
         public GroupBox GroupBoxCam;
-
+        private Bitmap _bmp;
         public PictureBox PictureBoxPreview;
         public ProgressBar ExposureProgressBar;
         public Label LabelFilter;
@@ -39,16 +40,28 @@ namespace RPCC.Cams
             if (LabelRemTime != null) LabelRemTime.Text = @$"Remaining: {remTime}";
         }
 
-        public void UpdatePreview(Bitmap preview)
+        public void UpdatePreview(Bitmap bmp)
         {
+            
+            Bitmap oldToDispose = null;
+            Bitmap newBmp = (Bitmap)bmp.Clone();
+
             lock (_bitmapLock)
             {
-               PictureBoxPreview?.Invoke((MethodInvoker)delegate
-               {
-                   PictureBoxPreview.Image?.Dispose();
-                   PictureBoxPreview.Image = (Bitmap)preview.Clone();
-               }); 
+                oldToDispose = _bmp;
+                _bmp = newBmp;
             }
+
+            // UI update must not happen under lock; use BeginInvoke to avoid sync deadlocks.
+            void Apply()
+            {
+                if (PictureBoxPreview.IsDisposed) return;
+                PictureBoxPreview.Image = newBmp;
+                oldToDispose?.Dispose();
+            }
+
+            if (PictureBoxPreview.InvokeRequired) PictureBoxPreview.BeginInvoke((Action)Apply);
+            else Apply();
         }
 
         public void UpdateProgressBar(DateTime startTime)
