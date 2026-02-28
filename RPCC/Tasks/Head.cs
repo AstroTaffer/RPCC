@@ -10,6 +10,7 @@ using RPCC.Cams;
 using RPCC.Comms;
 using RPCC.Focus;
 using RPCC.Utils;
+using RPCC.Comms;
 using Timer = System.Timers.Timer;
 
 namespace RPCC.Tasks;
@@ -35,6 +36,39 @@ public static class Head
     private static double _ira;
     private static double _oldErrDec;
     private static double _oldErrRa;
+    
+    
+    private static bool WaitForMountFlagToClear(
+        Func<bool> flagIsSet,
+        string flagName,
+        int pollMs,
+        int timeoutMs,
+        int staleStatusMs)
+    {
+        var deadline = DateTime.UtcNow.AddMilliseconds(timeoutMs);
+
+        while (flagIsSet())
+        {
+            // If mount status stops updating, do not wait indefinitely (even if the loop has a counter).
+            var ageMs = (int)(DateTime.UtcNow - MountDataCollector.LastScopeStatusUtc).TotalMilliseconds;
+            if (MountDataCollector.LastScopeStatusUtc != DateTime.MinValue && ageMs > staleStatusMs)
+            {
+                Logger.AddLogEntry(
+                    $"Head: wait for {flagName} aborted: mount status stale for {ageMs} ms (threshold {staleStatusMs} ms)");
+                return false;
+            }
+
+            if (DateTime.UtcNow >= deadline)
+            {
+                Logger.AddLogEntry($"Head: wait for {flagName} timeout after {timeoutMs} ms");
+                return false;
+            }
+
+            Thread.Sleep(pollMs);
+        }
+
+        return true;
+    }
     
     public static void StartThinking()
     {
@@ -349,19 +383,28 @@ public static class Head
     
     private static bool UnparkAndGoTo()
     {
-        int itt = 0;
-        if (CoordinatesManager.CalculateObjectDistance2Mount(CurrentTask) < 10) return true;
-        while (MountDataCollector.IsParking)
-        {
-            Logger.AddLogEntry("UnparkAndGoTo: mount is parking, sleep 5 sec");
-            itt++;
-            Thread.Sleep(5000);
-            if (itt == 5)
-            {
-                Logger.AddLogEntry("Head: UnparkAndGoTo: timeout");
-                break;
-            }
-        }
+        // int itt = 0;
+        // if (CoordinatesManager.CalculateObjectDistance2Mount(CurrentTask) < 10) return true;
+        // while (MountDataCollector.IsParking)
+        // {
+        //     Logger.AddLogEntry("UnparkAndGoTo: mount is parking, sleep 5 sec");
+        //     itt++;
+        //     Thread.Sleep(5000);
+        //     if (itt == 5)
+        //     {
+        //         Logger.AddLogEntry("Head: UnparkAndGoTo: timeout");
+        //         break;
+        //     }
+        // }
+        
+        // Wait up to 25s; abort earlier if mount status updates stop coming for > 5s.
+        WaitForMountFlagToClear(
+            () => MountDataCollector.IsParking,
+            "IsParking",
+            pollMs: 5000,
+            timeoutMs: 25000,
+            staleStatusMs: 5000);
+        
         if (MountDataCollector.IsParked)
         {
             Logger.AddLogEntry("UnparkAndGoTo: mount is parked, unparking");
@@ -632,18 +675,26 @@ public static class Head
 
     public static void CheckMountAndStartExp()
     {
-        int itt = 0;
-        while (MountDataCollector.IsSlewing)
-        {
-            Logger.AddDebugLogEntry("Scope is slewing, wait 1s");
-            itt++;
-            Thread.Sleep(1000);
-            if (itt == 10)
-            {
-                Logger.AddLogEntry("Head: CheckMountAndStartExp: timeout");
-                break;
-            }
-        }
+        // int itt = 0;
+        // while (MountDataCollector.IsSlewing)
+        // {
+        //     Logger.AddDebugLogEntry("Scope is slewing, wait 1s");
+        //     itt++;
+        //     Thread.Sleep(1000);
+        //     if (itt == 10)
+        //     {
+        //         Logger.AddLogEntry("Head: CheckMountAndStartExp: timeout");
+        //         break;
+        //     }
+        // }
+        
+        // Wait up to 10s; abort earlier if mount status updates stop coming for > 5s.
+        WaitForMountFlagToClear(
+            () => MountDataCollector.IsSlewing,
+            "IsSlewing",
+            pollMs: 1000,
+            timeoutMs: 10000,
+            staleStatusMs: 5000);
         StartExpAndCheckFuckup();
     }
 

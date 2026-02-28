@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Globalization;
 using Newtonsoft.Json.Linq;
 using RPCC.Utils;
 using Timer = System.Timers.Timer;
@@ -607,6 +608,8 @@ namespace RPCC.Comms
     {
         internal static bool ParseScopeStatus(string[] data)
         {
+            // Mark freshness early; even if parsing fails later, we know the link was alive.
+            LastScopeStatusUtc = DateTime.UtcNow;
             /* 0  - int    BoolParms
              * 1  - double RightAsc
              * 2  - double Declination
@@ -622,7 +625,13 @@ namespace RPCC.Comms
              *
              * Example: 128;3,2447519;0,024984;-32,938628;0,000614;0;0;15,24479;2460178,05422338;18,30121139;-1,86;_
              */
-
+            if (data == null || data.Length < 12)
+            {
+                // Keep LastScopeStatusUtc updated, but don't touch other fields on malformed packet.
+                return false;
+            }
+            
+            
             var buffBoolData = int.Parse(data[0]);
             IsInit = (buffBoolData & 1) > 0;
             IsTracking = (buffBoolData & 2) > 0;
@@ -651,6 +660,9 @@ namespace RPCC.Comms
             return true;
         }
 
+        // Used by automation to detect "stuck waits" when status updates stop coming.
+        public static DateTime LastScopeStatusUtc { get; private set; } = DateTime.MinValue;
+        
         #region Bool parameters
 
         public static bool IsInit { get; set; } // Scope is initialized
