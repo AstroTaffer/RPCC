@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
 namespace RPCC.Utils;
@@ -10,7 +11,7 @@ public static class StatusUpdater
     private static readonly string StatusPath = @"C:\Users\Администратор\RiderProjects\telescope-backend\status\status.json";
     // private static readonly string StatusPath = Path.Combine(Settings.MainOutputFolder, "status", "status.json");
     private const string GlobalMutexName = "Global\\RoboPhotStatusFileLock";
-
+    private static int _previewRunning = 0;
     /// <summary>
     /// Обновляет значение по вложенному пути, например ["dome", "south_shutter", "position"]
     /// </summary>
@@ -62,9 +63,32 @@ public static class StatusUpdater
     {
         UpdateNestedField(new[] { field }, value);
     }
-   
+    
+    internal static void RunPreviewGeneratorAsync()
+    {
+        // Prevent parallel preview generation (coalescing)
+        if (Interlocked.Exchange(ref _previewRunning, 1) == 1)
+            return;
 
-    public static void RunPreviewGenerator()
+        _ = Task.Run(() =>
+        {
+            try
+            {
+                RunPreviewGeneratorInternal();
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLogEntry($"Preview generator error: {ex}");
+            }
+            finally
+            {
+                Interlocked.Exchange(ref _previewRunning, 0);
+            }
+        });
+    }
+
+    // Старая логика перенесена сюда без изменений
+    private static void RunPreviewGeneratorInternal()
     {
         Logger.AddDebugLogEntry("Web previews updating...");
         var psi = new ProcessStartInfo
@@ -76,13 +100,13 @@ public static class StatusUpdater
             RedirectStandardError = true,
             CreateNoWindow = true
         };
-
+        
         using (var process = Process.Start(psi))
         {
             string output = process.StandardOutput.ReadToEnd();
             string error = process.StandardError.ReadToEnd();
             process.WaitForExit();
-
+        
             // (опционально) логировать
             Console.WriteLine(output);
             Console.Error.WriteLine(error);

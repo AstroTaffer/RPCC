@@ -280,7 +280,8 @@ internal static class CameraControl
             // 3) Callback + preview generation can touch other subsystems; never do it under CamsLocker.
             if (callbackRequired && readyCamNum == camsCountSnapshot)
             {
-                StatusUpdater.RunPreviewGenerator();
+                // StatusUpdater.RunPreviewGenerator();
+                StatusUpdater.RunPreviewGeneratorAsync();
                 if (CameraFocus.IsFocusing) CameraFocus.CamFocusCallback();
                 else Head.CamCallback();
 
