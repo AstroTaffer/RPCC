@@ -1,4 +1,5 @@
 ﻿using RPCC.Cams;
+using RPCC.Sex;
 using RPCC.Tasks;
 using RPCC.Utils;
 
@@ -10,31 +11,32 @@ namespace RPCC.Focus
 {
     public class GetDataFromFits
     {
-        private const float MaxEll = 0.6f;
+        private const double MaxEll = 0.6;
         private const int MinStars = 4;
-        private const float FwhmFocused = 3.3f;
+        private const double FwhmFocused = 3.3;
 
         
         public bool Status { get; }
         public int Focus { get; }
         public bool Focused { get; }
-        public float Fwhm { get; }
-        public float Ell { get; }
+        public double Fwhm { get; }
+        public double Ell { get; }
         public int StarsNum { get; }
-        public float Bkg { get; }
+        public double Bkg { get; }
         public bool Quality { get; }
 
         public GetDataFromFits(ICameraDevice cam)
         {
             // if (string.IsNullOrEmpty(path2Fits)) return;
-            var resp = DonutsRunner.GetImageMetrics(cam.LatestImageFilename);
+            // var resp = DonutsRunner.GetImageMetrics(cam.LatestImageFilename);
             // var resp = DonutsSocket.GetImageFwhm(cam.LatestImageFilename);
-            Focus = resp.Focus;
-            Fwhm = resp.Fwhm;
-            Ell = resp.Ell;
-            StarsNum = resp.Stars;
-            Bkg = resp.Bkg;
-            DbCommunicate.AddSexToDb(cam.LastImageId, Fwhm, Ell, Bkg);
+            // Focus = resp.Focus;
+            // Fwhm = resp.Fwhm;
+            // Ell = resp.Ell;
+            // StarsNum = resp.Stars;
+            // Bkg = resp.Bkg;
+            (Focus, Fwhm, Ell, StarsNum, Bkg) = SextractorRunner.Run(cam);
+            DbCommunicate.AddSexToDb(cam.LastImageId, Fwhm, Ell, Bkg, StarsNum);
             if (StarsNum == 0)
             {
                 Status = false;

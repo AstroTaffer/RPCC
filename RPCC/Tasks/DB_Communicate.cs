@@ -360,7 +360,7 @@ public static class DbCommunicate
         return id;
     }
     
-    public static bool AddSexToDb(int frameId, float fwhm, float ell, float bkg) 
+    public static bool AddSexToDb(int frameId, double fwhm, double ell, double bkg, int starsNum) 
     {       
         try
         {
@@ -368,8 +368,8 @@ public static class DbCommunicate
             {
                 var query =
                     $"""
-                    UPDATE robophot_frames SET (sex_fwhm, sex_ell, sex_background, 
-                    is_do_sex) = ({fwhm}, {ell}, {bkg}, true) WHERE frame_id = {frameId}
+                    UPDATE robophot_frames SET (sex_fwhm, sex_ell, sex_background, n_stars,
+                    is_do_sex) = ({fwhm}, {ell}, {bkg}, {starsNum}, true) WHERE frame_id = {frameId}
                     """;
                 using var con = ConnectToDb();
                 using var com = new NpgsqlCommand(query, con);

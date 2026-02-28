@@ -128,6 +128,7 @@ namespace RPCC.Tasks
             this.textBoxObserver.Name = "textBoxObserver";
             this.textBoxObserver.Size = new System.Drawing.Size(203, 26);
             this.textBoxObserver.TabIndex = 7;
+            this.textBoxObserver.Text = "Chazov.N";
             // 
             // labelObserver
             // 
@@ -217,6 +218,7 @@ namespace RPCC.Tasks
             this.textBoxDuration.Name = "textBoxDuration";
             this.textBoxDuration.Size = new System.Drawing.Size(93, 26);
             this.textBoxDuration.TabIndex = 30;
+            this.textBoxDuration.Text = "12";
             // 
             // labelDuration
             // 
@@ -247,12 +249,12 @@ namespace RPCC.Tasks
             // comboBoxExp
             // 
             this.comboBoxExp.FormattingEnabled = true;
-            this.comboBoxExp.Items.AddRange(new object[] { "2", "5", "10", "15", "20", "30", "50", "80", "120", "180" });
+            this.comboBoxExp.Items.AddRange(new object[] { "180", "120", "80", "50", "30", "20", "15", "10", "5", "2" });
             this.comboBoxExp.Location = new System.Drawing.Point(113, 49);
             this.comboBoxExp.Name = "comboBoxExp";
             this.comboBoxExp.Size = new System.Drawing.Size(107, 28);
             this.comboBoxExp.TabIndex = 15;
-            this.comboBoxExp.Text = "2";
+            this.comboBoxExp.Text = "180";
             // 
             // labelExp
             // 
@@ -268,7 +270,7 @@ namespace RPCC.Tasks
             this.textBoxExpN.Name = "textBoxExpN";
             this.textBoxExpN.Size = new System.Drawing.Size(93, 26);
             this.textBoxExpN.TabIndex = 13;
-            this.textBoxExpN.Text = "2";
+            this.textBoxExpN.Text = "2000";
             // 
             // labelExpN
             // 

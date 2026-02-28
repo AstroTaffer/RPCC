@@ -14,9 +14,9 @@ namespace RPCC.Focus
         /// <summary>
         ///     Функции фокусировки камеры.
         /// </summary>
-        private const int MaxFocCycles = 5;
+        private const int MaxFocCycles = 10;
         private const int MaxFocBadFrames = 3;
-        private const int MaxSumShifts = 500;
+        private const int MaxSumShifts = 5000;
         public static bool IsAutoFocus { get; set; }
         public static bool IsZenith { get; set; }
         public static int DeFocus { get; set; }
@@ -30,10 +30,10 @@ namespace RPCC.Focus
         public static ObservationTask TaskForFocus;
         private static short _phase;
         private static double _oldFwhm; 
-        private const short FocusExp = 20;
+        private const short FocusExp = 30;
         public static double Seeing = 1;
         public static bool IsFocusing;
-        private static readonly float DefocEpsilon = 3;
+        private static readonly float DefocEpsilon = 0.2f;
 
         public static void StartAutoFocus()
         {
@@ -51,7 +51,7 @@ namespace RPCC.Focus
             _focBadFrames = 0; //
             Frames.Clear();
             _startFocusPos = SerialFocus.CurrentPosition;
-            _shift = -20;
+            _shift = -150;
             _sumShift = 0;
             _phase = 0;
             // _frameCounter = 0;
@@ -341,15 +341,7 @@ namespace RPCC.Focus
 
         private static short BigShift(double fwhm, float shift)
         {   
-            // if (fwhm < 7)
-            // {
-            return (short) (Math.Sign(shift) * 55.4 * (fwhm - 1.5));
-            // }
-            // else
-            // {
-            //     return (short)(shift * 1.25);
-            // }
-            
+            return (short) (Math.Sign(shift) * 55.4 * (fwhm - 1.5)); 
         }   
         
         private static short SmallShift(double fwhm, float shift)

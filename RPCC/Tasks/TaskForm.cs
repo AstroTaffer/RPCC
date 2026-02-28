@@ -141,9 +141,10 @@ public partial class TaskForm : Form
             if (_task.FrameType is StringHolder.Light or StringHolder.Test)
             {
                 _task.ComputeRaDec(textBoxCoords.Text);
-                if (!CoordinatesManager.CheckElevateLimit(_task.Ra, _task.Dec, _task.TimeStart))
+                var el = CoordinatesManager.CheckElevateLimit(_task.Ra, _task.Dec, _task.TimeStart);
+                if (el<30)
                 {
-                    MessageBox.Show(@"Target under elevation limit", @"OK", MessageBoxButtons.OK);
+                    MessageBox.Show($@"Target under elevation limit ({el}<30)", @"OK", MessageBoxButtons.OK);
                     return;
                 }
 
@@ -210,7 +211,7 @@ public partial class TaskForm : Form
             }
 
             _task.TimeEnd = _task.TimeStart + TimeSpan.FromHours(_task.Duration);
-            _task.Object = textBoxObject.Text;
+            _task.Object = textBoxObject.Text.Replace(' ', '_');
             _task.Observer = textBoxObserver.Text;
             _task.ObjectType = comboBoxObjectType.Text;
             _task.Status = 0;

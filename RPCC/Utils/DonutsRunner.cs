@@ -53,8 +53,7 @@ namespace RPCC.Utils
                 WorkingDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Guid"),
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
+                UseShellExecute = false
             };
 
             using var proc = Process.Start(psi);

@@ -1,7 +1,9 @@
 import json
 import os
+import subprocess
 import sys
 import traceback
+import warnings
 
 from filelock import FileLock, Timeout
 import numpy as np
@@ -13,11 +15,13 @@ from scipy import ndimage
 from astropy.stats import gaussian_sigma_to_fwhm
 from astropy import wcs
 from astropy.stats import SigmaClip
+import astropy.io.ascii as ascii
+warnings.filterwarnings("ignore")
 
 
 def write_to_fits(path, fwhm, ell, stars_num, b):
     try:
-        with FileLock(f"{path}.lock").acquire(timeout=5):
+        with FileLock(f"{path}.lock").acquire(timeout=300):
             with fits.open(path, memmap=False, mode='update') as hdulist:
                 fwhm_card = fits.Card('FWHM', 'nan' if np.isnan(fwhm) else fwhm, 'Median FWHM [arcsec]')
                 ell_card = fits.Card('ELL', 'nan' if np.isnan(ell) else ell, 'Median ellipticity')
@@ -28,13 +32,66 @@ def write_to_fits(path, fwhm, ell, stars_num, b):
                 hdulist[0].header.append(stars_card)
                 hdulist[0].header.append(bkg_card)
     except Timeout:
-        print("Файл не освободился за 5 секунды, не удалось записать данные")
+        print("Файл не освободился за 60 секунд, не удалось записать данные")
         return 'fail'
+    except Exception as ex:
+        print(ex)
+        return f'fail, {ex}'
+
+
+def sex(input_file):
+    cwd = 'C:\\'
+    # cwd = os.getcwd() + '\\'
+    Sex = cwd + 'Sex\Extract.exe '
+    dSex = ' -c ' + cwd + 'Sex\pipeline.sex'
+    dPar = ' -PARAMETERS_NAME ' + cwd + 'Sex\pipeline.par'
+    dFilt = ' -FILTER_NAME ' + cwd + r'Sex\tophat_2.5_3x3.conv'
+    NNW = ' -STARNNW_NAME ' + cwd + 'Sex\default.nnw'
+
+    output_file = ".".join(input_file.split('.')[:-1]) + '.cat'
+    # output_file = input_file.replace('fits.gz', 'cat')
+
+    shell = Sex + "\"" + input_file + "\"" + dSex + dPar + dFilt + NNW + ' -CATALOG_NAME ' + "\"" + output_file + "\""
+    print(shell)
+    try:
+        with FileLock(f"{input_file}.lock").acquire(timeout=300):
+            with fits.open(input_file, memmap=False) as hdulist:
+                header = hdulist[0].header.copy()
+            # startupinfo = subprocess.STARTUPINFO()
+            # startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            # child = subprocess.run(shell, timeout=60, startupinfo=startupinfo)
+            child = subprocess.run(shell, timeout=60)
+
+            if child.returncode == 0 and os.path.isfile(output_file):
+                print('Ok')
+            else:
+                print('Error')
+                return -1, -1, -1, -1, -1
+    except Timeout:
+        print("Файл не освободился за 300 секунды — пропускаем")
+        return 'fail'
+    tbl = ascii.read(output_file)
+    os.remove(output_file)
+    # indx = np.where((tbl['FWHM_IMAGE'] < 50) & (tbl['FWHM_IMAGE'] > 1))[0]
+    indx = np.where((tbl['FWHM_IMAGE'] > 1) & (tbl['FLUX_ISOCOR']/tbl['FLUXERR_ISOCOR'] > 15) &
+                    (tbl['FLUX_ISOCOR']/tbl['FLUXERR_ISOCOR'] < 1000) & (tbl['FLAGS'] == 0))[0]
+    # & (tbl['FLAGS'] == 0) &
+    # (tbl['FLUX_ISOCOR']/tbl['FLUXERR_ISOCOR'] > 15) &
+    # (tbl['FLUX_ISOCOR']/tbl['FLUXERR_ISOCOR'] < 1000)
+    if len(indx) < 10:
+        print('Can\'t find stars')
+        return 0, 0, 0, 0, 0
+    med_fwhm = np.round(np.median(tbl['FWHM_IMAGE'][indx]), 2)
+    med_ell = np.round(np.median(tbl['ELLIPTICITY'][indx]), 2)
+    med_bkg = np.round(np.median(tbl['BACKGROUND'][indx]), 2)
+    # med_zeropoi = np.round(np.median(tbl['ZEROPOI']), 2)
+
+    return header['FOCUS'], med_fwhm, med_ell, len(indx), med_bkg, header['BINNING']
 
 
 def star_hoover(path):
     try:
-        with FileLock(f"{path}.lock").acquire(timeout=5):
+        with FileLock(f"{path}.lock").acquire(timeout=60):
             # print("Файл успешно захвачен")
             with fits.open(path, memmap=False) as hdulist:
                 header = hdulist[0].header.copy()
@@ -52,7 +109,7 @@ def star_hoover(path):
 
     NStars, FWHM, Ell = donuts_fwhm(Data, SN, stddev)
 
-    if FWHM < 20:
+    if FWHM < 10:
         NStars, FWHM, Ell = buns(Data, SN)
     return header['FOCUS'], FWHM, Ell, NStars, median
 
@@ -217,7 +274,6 @@ def calc_fwhm(path):
     ELL = []
 
     width, height = image.shape[1], image.shape[0]
-    xbin = header['BINNING']
     for s in slices:
         y0, y1 = s[0].start, s[0].stop
         x0, x1 = s[1].start, s[1].stop
@@ -254,7 +310,7 @@ def calc_fwhm(path):
         if Mxx <= 0 or Myy <= 0:
             continue
 
-        _fwhm = np.round(np.sqrt(Mxx + Myy) * gaussian_sigma_to_fwhm * 0.65 * xbin - 4, 2)
+        _fwhm = np.round(np.sqrt(Mxx + Myy) * gaussian_sigma_to_fwhm - 4, 2)
         sn = np.sum(sub) / (np.sqrt(np.sum(sub)) + bkg.background_rms_median * np.sqrt(sub.size))
 
         if _fwhm < 1.6 or sn < 15 or sn > 1000:
@@ -272,7 +328,7 @@ def calc_fwhm(path):
 
     if np.isnan(fwhm):
         return 'fail'
-    return header['FOCUS'], fwhm, ell, stars_num, b
+    return header['FOCUS'], fwhm, ell, stars_num, b, header['BINNING']
 
 
 # def calc_source_catalog(path):
@@ -334,13 +390,18 @@ def calc_don_shifts(path_start, path_end):
 
 
 if __name__ == "__main__":
+    # print(sys.argv)
     if len(sys.argv) >= 3 and sys.argv[1] == "fwhm":
         try:
             image_path = sys.argv[2]
+            # print(image_path)
             if not os.path.exists(image_path):
                 print(f"ERR~Файл не найден: {image_path}", file=sys.stderr)
                 sys.exit(1)
-            focus, fwhm, ell, stars_num, b = star_hoover(image_path)
+            focus, fwhm, ell, stars_num, b, _bin = calc_fwhm(image_path)
+
+            fwhm = np.round(fwhm * 0.65*_bin, 2)
+
             write_to_fits(image_path, fwhm, ell, stars_num, b)
             response = {
                 "focus": focus,

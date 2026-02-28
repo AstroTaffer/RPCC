@@ -302,37 +302,6 @@ internal static class CameraControl
     {
 
         loadedTask = task;
-
-        // var selCamsNum = 0;
-        // var selFilters = Head.currentTask.Filters.Split(' ');
-        //
-        // lock (CamsLocker)
-        // {
-        //     foreach (var t in cams)
-        //     {
-                // if (!Array.Exists(selFilters, element => element == t.Filter))
-                // {
-                //     t.IsSelected = false;
-                //     continue;
-                // }
-                //
-                // t.IsSelected = true;
-                // selCamsNum++;
-
-                // // VBin, HBin and corresponding VisibleArea
-                // if (cams[i].SetBin(task.Xbin, task.Ybin))
-                // {
-                //     Logger.AddLogEntry($"WARNING Unable to set camera {i + 1} bin");
-                //     isAllGood = false;
-                // } TODO put in settings
-            // }
-
-            // if (selCamsNum == 0)
-            // {
-            //     Logger.AddLogEntry($"WARNING No cameras with specified filters {Head.currentTask.Filters}");
-            //     return false;
-            // }
-        // }
         
         lock (CamsLocker)
         {

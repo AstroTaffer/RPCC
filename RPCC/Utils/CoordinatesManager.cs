@@ -57,15 +57,15 @@ namespace RPCC.Utils
             //                  Math.Cos(tarDec)*Math.Cos(moonDec) * Math.Cos(moonRa-tarRa))*180/Math.PI;
         }
 
-        public static bool CheckElevateLimit(double ra, double dec, DateTime time)
+        public static double CheckElevateLimit(double ra, double dec, DateTime time)
         {
             Trans.SetJ2000(ra, dec);
             // Trans.JulianDateUTC = Novas.JulianDate((short) time.Year, 
             //     (short) time.Month, (short) time.Day, time.Hour+time.Minute/60d + time.Second/3600d);
             Trans.JulianDateUTC = AstroUtilities.JulianDateFromDateTime(time);
             // Trans.JulianDateUTC = Utilities.JulianDateFromDateTime(time);
-            var el = Trans.ElevationTopocentric;
-            return el >= 30;
+            var el = Math.Round(Trans.ElevationTopocentric, 2);
+            return el;
         }
             
         public static double CalculateObjectDistance2Mount(ObservationTask task)

@@ -57,6 +57,8 @@
             this.tabControlMain = new System.Windows.Forms.TabControl();
             this.tabPageInfo = new System.Windows.Forms.TabPage();
             this.groupBoxSurvey = new System.Windows.Forms.GroupBox();
+            this.buttonOneShot = new System.Windows.Forms.Button();
+            this.checkBoxManualControl = new System.Windows.Forms.CheckBox();
             this.checkBoxDebugMode = new System.Windows.Forms.CheckBox();
             this.checkBoxGuiding = new System.Windows.Forms.CheckBox();
             this.checkBoxHead = new System.Windows.Forms.CheckBox();
@@ -176,15 +178,14 @@
             dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             this.dataGridViewTasker.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
             this.dataGridViewTasker.RowHeadersVisible = false;
-            this.dataGridViewTasker.Size = new System.Drawing.Size(1230, 510);
+            this.dataGridViewTasker.Size = new System.Drawing.Size(1230, 507);
             this.dataGridViewTasker.TabIndex = 1;
             this.dataGridViewTasker.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.DataGridViewTasker_CellMouseDoubleClick);
             // 
             // statusStrip
             // 
-            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tSStatusClock});
-            this.statusStrip.Location = new System.Drawing.Point(0, 566);
+            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.tSStatusClock });
+            this.statusStrip.Location = new System.Drawing.Point(0, 563);
             this.statusStrip.Name = "statusStrip";
             this.statusStrip.Size = new System.Drawing.Size(1244, 22);
             this.statusStrip.SizingGrip = false;
@@ -199,8 +200,7 @@
             // 
             // menuStrip
             // 
-            this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.launchToolStripMenuItem});
+            this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.launchToolStripMenuItem });
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
             this.menuStrip.Size = new System.Drawing.Size(1244, 24);
@@ -209,10 +209,7 @@
             // 
             // launchToolStripMenuItem
             // 
-            this.launchToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.findCamerasToolStripMenuItem,
-            this.findFocusToolStripMenuItem,
-            this.reconnectSocketToolStripMenuItem});
+            this.launchToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { this.findCamerasToolStripMenuItem, this.findFocusToolStripMenuItem, this.reconnectSocketToolStripMenuItem });
             this.launchToolStripMenuItem.Name = "launchToolStripMenuItem";
             this.launchToolStripMenuItem.Size = new System.Drawing.Size(58, 20);
             this.launchToolStripMenuItem.Text = "Launch";
@@ -220,27 +217,22 @@
             // findCamerasToolStripMenuItem
             // 
             this.findCamerasToolStripMenuItem.Name = "findCamerasToolStripMenuItem";
-            this.findCamerasToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.findCamerasToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
             this.findCamerasToolStripMenuItem.Text = "Find cameras";
             this.findCamerasToolStripMenuItem.Click += new System.EventHandler(this.FindCamerasToolStripMenuItem_Click);
             // 
             // findFocusToolStripMenuItem
             // 
             this.findFocusToolStripMenuItem.Name = "findFocusToolStripMenuItem";
-            this.findFocusToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.findFocusToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
             this.findFocusToolStripMenuItem.Text = "Find focus";
             this.findFocusToolStripMenuItem.Click += new System.EventHandler(this.FindFocusToolStripMenuItem_Click);
             // 
             // reconnectSocketToolStripMenuItem
             // 
-            this.reconnectSocketToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.reconnectMeteoDomeToolStripMenuItem,
-            this.reconnectDonutsToolStripMenuItem,
-            this.reconnectSiTechExeToolStripMenuItem,
-            this.toolStripSeparator1,
-            this.reconnectAllToolStripMenuItem});
+            this.reconnectSocketToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { this.reconnectMeteoDomeToolStripMenuItem, this.reconnectDonutsToolStripMenuItem, this.reconnectSiTechExeToolStripMenuItem, this.toolStripSeparator1, this.reconnectAllToolStripMenuItem });
             this.reconnectSocketToolStripMenuItem.Name = "reconnectSocketToolStripMenuItem";
-            this.reconnectSocketToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.reconnectSocketToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
             this.reconnectSocketToolStripMenuItem.Text = "Reconnect socket";
             // 
             // reconnectMeteoDomeToolStripMenuItem
@@ -278,11 +270,11 @@
             // 
             // groupBoxLogs
             // 
-            this.groupBoxLogs.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.groupBoxLogs.Controls.Add(this.listBoxLogs);
-            this.groupBoxLogs.Location = new System.Drawing.Point(6, 3);
+            this.groupBoxLogs.Dock = System.Windows.Forms.DockStyle.Left;
+            this.groupBoxLogs.Location = new System.Drawing.Point(3, 3);
             this.groupBoxLogs.Name = "groupBoxLogs";
-            this.groupBoxLogs.Size = new System.Drawing.Size(510, 506);
+            this.groupBoxLogs.Size = new System.Drawing.Size(510, 507);
             this.groupBoxLogs.TabIndex = 2;
             this.groupBoxLogs.TabStop = false;
             this.groupBoxLogs.Text = "Logs";
@@ -298,15 +290,13 @@
             this.listBoxLogs.Location = new System.Drawing.Point(3, 16);
             this.listBoxLogs.Name = "listBoxLogs";
             this.listBoxLogs.ScrollAlwaysVisible = true;
-            this.listBoxLogs.Size = new System.Drawing.Size(504, 487);
+            this.listBoxLogs.Size = new System.Drawing.Size(504, 488);
             this.listBoxLogs.TabIndex = 0;
             this.listBoxLogs.DoubleClick += new System.EventHandler(this.ListBoxLogs_DoubleClick);
             // 
             // contextMenuStripLogs
             // 
-            this.contextMenuStripLogs.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.clearToolStripMenuItem,
-            this.saveToolStripMenuItem});
+            this.contextMenuStripLogs.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.clearToolStripMenuItem, this.saveToolStripMenuItem });
             this.contextMenuStripLogs.Name = "contextMenuStrip1";
             this.contextMenuStripLogs.Size = new System.Drawing.Size(102, 48);
             // 
@@ -350,7 +340,7 @@
             this.tabControlMain.Location = new System.Drawing.Point(0, 24);
             this.tabControlMain.Name = "tabControlMain";
             this.tabControlMain.SelectedIndex = 0;
-            this.tabControlMain.Size = new System.Drawing.Size(1244, 542);
+            this.tabControlMain.Size = new System.Drawing.Size(1244, 539);
             this.tabControlMain.TabIndex = 3;
             // 
             // tabPageInfo
@@ -364,7 +354,7 @@
             this.tabPageInfo.Location = new System.Drawing.Point(4, 22);
             this.tabPageInfo.Name = "tabPageInfo";
             this.tabPageInfo.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageInfo.Size = new System.Drawing.Size(1236, 516);
+            this.tabPageInfo.Size = new System.Drawing.Size(1236, 513);
             this.tabPageInfo.TabIndex = 0;
             this.tabPageInfo.Text = "Main";
             this.tabPageInfo.UseVisualStyleBackColor = true;
@@ -372,6 +362,8 @@
             // groupBoxSurvey
             // 
             this.groupBoxSurvey.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBoxSurvey.Controls.Add(this.buttonOneShot);
+            this.groupBoxSurvey.Controls.Add(this.checkBoxManualControl);
             this.groupBoxSurvey.Controls.Add(this.checkBoxDebugMode);
             this.groupBoxSurvey.Controls.Add(this.checkBoxGuiding);
             this.groupBoxSurvey.Controls.Add(this.checkBoxHead);
@@ -383,10 +375,28 @@
             this.groupBoxSurvey.TabStop = false;
             this.groupBoxSurvey.Text = "Survey";
             // 
+            // buttonOneShot
+            // 
+            this.buttonOneShot.Location = new System.Drawing.Point(220, 57);
+            this.buttonOneShot.Name = "buttonOneShot";
+            this.buttonOneShot.Size = new System.Drawing.Size(120, 30);
+            this.buttonOneShot.TabIndex = 0;
+            this.buttonOneShot.Text = "Continue sequence ";
+            this.buttonOneShot.UseVisualStyleBackColor = true;
+            this.buttonOneShot.Click += new System.EventHandler(this.buttonOneShot_Click);
+            // 
+            // checkBoxManualControl
+            // 
+            this.checkBoxManualControl.Location = new System.Drawing.Point(108, 65);
+            this.checkBoxManualControl.Name = "checkBoxManualControl";
+            this.checkBoxManualControl.Size = new System.Drawing.Size(98, 25);
+            this.checkBoxManualControl.TabIndex = 31;
+            this.checkBoxManualControl.Text = "Manual control";
+            this.checkBoxManualControl.UseVisualStyleBackColor = true;
+            this.checkBoxManualControl.CheckedChanged += new System.EventHandler(this.checkBoxManualControl_CheckedChanged);
+            // 
             // checkBoxDebugMode
             // 
-            this.checkBoxDebugMode.Checked = true;
-            this.checkBoxDebugMode.CheckState = System.Windows.Forms.CheckState.Checked;
             this.checkBoxDebugMode.Location = new System.Drawing.Point(6, 65);
             this.checkBoxDebugMode.Name = "checkBoxDebugMode";
             this.checkBoxDebugMode.Size = new System.Drawing.Size(93, 25);
@@ -422,9 +432,9 @@
             // buttonSurveyStop
             // 
             this.buttonSurveyStop.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonSurveyStop.Location = new System.Drawing.Point(240, 21);
+            this.buttonSurveyStop.Location = new System.Drawing.Point(220, 21);
             this.buttonSurveyStop.Name = "buttonSurveyStop";
-            this.buttonSurveyStop.Size = new System.Drawing.Size(100, 30);
+            this.buttonSurveyStop.Size = new System.Drawing.Size(120, 30);
             this.buttonSurveyStop.TabIndex = 7;
             this.buttonSurveyStop.Text = "Stop";
             this.buttonSurveyStop.UseVisualStyleBackColor = true;
@@ -495,11 +505,7 @@
             // numericUpDownSetDefoc
             // 
             this.numericUpDownSetDefoc.Location = new System.Drawing.Point(150, 51);
-            this.numericUpDownSetDefoc.Minimum = new decimal(new int[] {
-            100,
-            0,
-            0,
-            -2147483648});
+            this.numericUpDownSetDefoc.Minimum = new decimal(new int[] { 100, 0, 0, -2147483648 });
             this.numericUpDownSetDefoc.Name = "numericUpDownSetDefoc";
             this.numericUpDownSetDefoc.Size = new System.Drawing.Size(75, 20);
             this.numericUpDownSetDefoc.TabIndex = 15;
@@ -575,22 +581,10 @@
             // numericUpDownRun
             // 
             this.numericUpDownRun.Enabled = false;
-            this.numericUpDownRun.Increment = new decimal(new int[] {
-            100,
-            0,
-            0,
-            0});
+            this.numericUpDownRun.Increment = new decimal(new int[] { 100, 0, 0, 0 });
             this.numericUpDownRun.Location = new System.Drawing.Point(150, 16);
-            this.numericUpDownRun.Maximum = new decimal(new int[] {
-            5000,
-            0,
-            0,
-            0});
-            this.numericUpDownRun.Minimum = new decimal(new int[] {
-            5000,
-            0,
-            0,
-            -2147483648});
+            this.numericUpDownRun.Maximum = new decimal(new int[] { 5000, 0, 0, 0 });
+            this.numericUpDownRun.Minimum = new decimal(new int[] { 5000, 0, 0, -2147483648 });
             this.numericUpDownRun.Name = "numericUpDownRun";
             this.numericUpDownRun.Size = new System.Drawing.Size(75, 20);
             this.numericUpDownRun.TabIndex = 1;
@@ -963,7 +957,7 @@
             this.tabPageTasks.Location = new System.Drawing.Point(4, 22);
             this.tabPageTasks.Name = "tabPageTasks";
             this.tabPageTasks.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageTasks.Size = new System.Drawing.Size(1236, 516);
+            this.tabPageTasks.Size = new System.Drawing.Size(1236, 513);
             this.tabPageTasks.TabIndex = 1;
             this.tabPageTasks.Text = "Tasks";
             this.tabPageTasks.UseVisualStyleBackColor = true;
@@ -975,13 +969,12 @@
             this.dataGridTasks.HeaderForeColor = System.Drawing.SystemColors.ControlText;
             this.dataGridTasks.Location = new System.Drawing.Point(3, 3);
             this.dataGridTasks.Name = "dataGridTasks";
-            this.dataGridTasks.Size = new System.Drawing.Size(1230, 510);
+            this.dataGridTasks.Size = new System.Drawing.Size(1230, 507);
             this.dataGridTasks.TabIndex = 0;
             // 
             // contextMenuStripTasker
             // 
-            this.contextMenuStripTasker.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.addToolStripMenuItem});
+            this.contextMenuStripTasker.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.addToolStripMenuItem });
             this.contextMenuStripTasker.Name = "contextMenuStripTasker";
             this.contextMenuStripTasker.Size = new System.Drawing.Size(97, 26);
             // 
@@ -1006,18 +999,17 @@
             // 
             // labelStatusInfo
             // 
-            this.labelStatusInfo.Location = new System.Drawing.Point(672, 569);
+            this.labelStatusInfo.Location = new System.Drawing.Point(664, 566);
             this.labelStatusInfo.Name = "labelStatusInfo";
             this.labelStatusInfo.Size = new System.Drawing.Size(568, 19);
             this.labelStatusInfo.TabIndex = 4;
-            this.labelStatusInfo.Text = "0 = Wait, 1 = In progress,2 = Ended complete, 3 = Rejected by observer, 4 = Not o" +
-    "bserved, 5 = Ended not complete";
+            this.labelStatusInfo.Text = "0 = Wait, 1 = In progress,2 = Ended complete, 3 = Rejected by observer, 4 = Not o" + "bserved, 5 = Ended not complete";
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1244, 588);
+            this.ClientSize = new System.Drawing.Size(1244, 585);
             this.Controls.Add(this.labelStatusInfo);
             this.Controls.Add(this.tabControlMain);
             this.Controls.Add(this.statusStrip);
@@ -1059,8 +1051,11 @@
             this.contextMenuStripTasker.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
+
+        private System.Windows.Forms.CheckBox checkBoxManualControl;
+
+        private System.Windows.Forms.Button buttonOneShot;
 
         private System.Windows.Forms.Label labelStatusInfo;
 

@@ -81,16 +81,10 @@ public partial class MainForm : Form
             Head.IsThinking = true;
             Head.ThinkingTimer.Start();
         }
-        if (checkBoxAutoFocus.Checked)
-        {
-            CameraFocus.IsAutoFocus = true;
-        }
 
-        if (checkBoxDebugMode.Checked)
-        {
-            Logger.DebugMode = true;
-        }
-
+        CameraFocus.IsAutoFocus = checkBoxAutoFocus.Checked;
+        Logger.DebugMode = checkBoxDebugMode.Checked;
+        buttonOneShot.Enabled = checkBoxManualControl.Checked;
         NpgsqlConnection.GlobalTypeMapper.MapComposite<Spoint>("public.spoint");
     }
 
@@ -340,36 +334,23 @@ public partial class MainForm : Form
         Head.IsGuid = checkBoxGuiding.Checked;
     }
 
-    // private void SetProgress(int indx)
-    // {
-    //     var value = 0;
-    //     if (CameraControl.cams[indx].IsExposing)
-    //     {
-    //         if (Head.CurrentTask is null) return;
-    //         value = 100 - CameraControl.cams[indx].RemTime * 100 / Head.CurrentTask.Exp;
-    //         if (value < 0)
-    //         {
-    //             value = 0;
-    //         }
-    //     }
-    //     switch (CameraControl.cams[indx].Filter)
-    //     {
-    //         case StringHolder.FilG:
-    //         case StringHolder.FilV:
-    //             progressBarG.Value = value;
-    //             break;
-    //         case StringHolder.FilR:
-    //             progressBarR.Value = value;
-    //             break;
-    //         case StringHolder.FilI:
-    //             progressBarI.Value = value;
-    //             break;
-    //     }
-    // }
+   
 
     private void checkBoxDebugMode_CheckedChanged(object sender, EventArgs e)
     {
         Logger.DebugMode = checkBoxDebugMode.Checked;
+    }
+
+    private void checkBoxManualControl_CheckedChanged(object sender, EventArgs e)
+    {
+        Head.IsManualControl = checkBoxManualControl.Checked;
+        buttonOneShot.Enabled = checkBoxManualControl.Checked;
+        CameraFocus.IsAutoFocus = !checkBoxManualControl.Checked;
+    }
+
+    private void buttonOneShot_Click(object sender, EventArgs e)
+    {
+        Head.ContinueSequence();
     }
 }
 
