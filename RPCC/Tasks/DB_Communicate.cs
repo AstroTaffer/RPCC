@@ -13,13 +13,13 @@ namespace RPCC.Tasks;
 
 public static class DbCommunicate
 {
-    private static readonly object Loc = new();
+    private static readonly object DbLoc = new();
         
     private static NpgsqlConnection ConnectToDb()
     {
         try
         {
-            lock (Loc)  
+            lock (DbLoc)  
             {
                 var connString =
                     $"Server=127.0.0.1;Port={Settings.DbPort};User Id={Settings.DbUserId};" +
@@ -40,27 +40,63 @@ public static class DbCommunicate
 
     public static void LoadDbTable()
     {
-        lock (Loc)
-        {   
-             const string queryForLoadDbTable = "SELECT task_id, get_hms_dms(start_coord2000) as coord2000, " +
-                                                "time_add, time_start, time_end, " +
-                                                "duration, exp_time, done_frames, all_frames, time_last_exp, " +
-                                                "is_filter_g, is_filter_r, is_filter_i, object_name, object_type, " +
-                                                "status, observer, frame_type, x_bin, y_bin, " +
-                                                "repoint_coords, repoint_times, is_filter_v " + 
-                                                "FROM robophot_tasks ORDER BY time_start DESC LIMIT 50";
+        // lock (Loc)
+        // {   
+        //      const string queryForLoadDbTable = "SELECT task_id, get_hms_dms(start_coord2000) as coord2000, " +
+        //                                         "time_add, time_start, time_end, " +
+        //                                         "duration, exp_time, done_frames, all_frames, time_last_exp, " +
+        //                                         "is_filter_g, is_filter_r, is_filter_i, object_name, object_type, " +
+        //                                         "status, observer, frame_type, x_bin, y_bin, " +
+        //                                         "repoint_coords, repoint_times, is_filter_v " + 
+        //                                         "FROM robophot_tasks ORDER BY time_start DESC LIMIT 50";
+        //     using var con = ConnectToDb();
+        //     var com = new NpgsqlCommand(queryForLoadDbTable, con);
+        //     using var reader = com.ExecuteReader();
+        //     if (!reader.HasRows) return;
+        //     var dt = new DataTable();
+        //     dt.Load(reader);
+        //     Tasker.DataGridViewTasker.Invoke((MethodInvoker)delegate
+        //     {
+        //         Tasker.DataGridViewTasker.DataSource = dt;
+        //         Tasker.PaintTable();
+        //     });
+        // }
+        
+        DataTable dt;
+
+        // DB work is serialized by Loc, but UI updates must not happen under this lock:
+        // otherwise UI-thread can be waiting for Loc while this thread is waiting for UI via Invoke => deadlock.
+        lock (DbLoc)
+        {
             using var con = ConnectToDb();
+            const string queryForLoadDbTable = "SELECT task_id, get_hms_dms(start_coord2000) as coord2000, " +
+                                               "time_add, time_start, time_end, " +
+                                               "duration, exp_time, done_frames, all_frames, time_last_exp, " +
+                                               "is_filter_g, is_filter_r, is_filter_i, object_name, object_type, " +
+                                               "status, observer, frame_type, x_bin, y_bin, " +
+                                               "repoint_coords, repoint_times, is_filter_v " + 
+                                               "FROM robophot_tasks ORDER BY time_start DESC LIMIT 50";
             var com = new NpgsqlCommand(queryForLoadDbTable, con);
             using var reader = com.ExecuteReader();
             if (!reader.HasRows) return;
-            var dt = new DataTable();
+
+            dt = new DataTable();
             dt.Load(reader);
-            Tasker.DataGridViewTasker.Invoke((MethodInvoker)delegate
-            {
-                Tasker.DataGridViewTasker.DataSource = dt;
-                Tasker.PaintTable();
-            });
         }
+
+        void Apply()
+        {
+            // Defensive: during shutdown the control can be disposed.
+            if (Tasker.DataGridViewTasker.IsDisposed) return;
+            Tasker.DataGridViewTasker.DataSource = dt;
+            Tasker.PaintTable();
+        }
+
+        // Prefer BeginInvoke to avoid blocking the caller thread and reduce risk of secondary deadlocks.
+        if (Tasker.DataGridViewTasker.InvokeRequired)
+            Tasker.DataGridViewTasker.BeginInvoke((MethodInvoker)Apply);
+        else
+            Apply();
     }
 
     public static DataTable GetTableForThinking()
@@ -72,7 +108,7 @@ public static class DbCommunicate
                                                 "status, observer, frame_type, x_bin, y_bin, " +
                                                 "repoint_coords, repoint_times, is_filter_v " +
                                                 "FROM robophot_tasks WHERE status < 2 order by time_start";
-        lock (Loc)
+        lock (DbLoc)
         {
             using var con = ConnectToDb();
             var com = new NpgsqlCommand(queryGetTableForThinking, con);
@@ -173,7 +209,7 @@ public static class DbCommunicate
 
         try
         {
-            lock (Loc)
+            lock (DbLoc)
             {
                 const string query = "INSERT INTO robophot_tasks " +
                                      "(start_coord2000, " +
@@ -240,7 +276,7 @@ public static class DbCommunicate
     {   
         try
         {
-            lock (Loc)
+            lock (DbLoc)
             {
                 // var sus = TaskQueryBuilder(observationTask);
                 var query = "UPDATE robophot_tasks " +
@@ -337,7 +373,7 @@ public static class DbCommunicate
         int id = 0;
         try
         {
-            lock (Loc)
+            lock (DbLoc)
             {
                 
                 var query = "INSERT INTO robophot_frames (fk_task_id, " +
@@ -364,7 +400,7 @@ public static class DbCommunicate
     {       
         try
         {
-            lock (Loc)
+            lock (DbLoc)
             {
                 var query =
                     $"""
@@ -386,7 +422,7 @@ public static class DbCommunicate
 
     public static bool AddMFrameToBd(ObservationTask observationTask)
     {
-        lock (Loc)
+        lock (DbLoc)
         {
             try
             {
@@ -415,7 +451,7 @@ public static class DbCommunicate
 
     public static bool CanDoDarkFlat(bool isDark, int exp)
     {
-        lock (Loc)
+        lock (DbLoc)
         {
             double time = 0;
             var query = "SELECT EXTRACT(EPOCH FROM (NOW() - time_start)::INTERVAL)/3600 " +
@@ -436,7 +472,7 @@ public static class DbCommunicate
     public static string GetPath2FirstAssFrame(int task)
     {
         string path = null;
-        lock (Loc)
+        lock (DbLoc)
         {
             var query = "SELECT robophot_frames.calibration_frame_path " +
                         $"FROM robophot_frames WHERE fk_task_id = {task} AND is_do_astrometry " +
