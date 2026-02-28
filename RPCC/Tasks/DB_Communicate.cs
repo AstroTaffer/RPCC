@@ -34,7 +34,7 @@ namespace RPCC.Tasks
                                                         "repoint_coords, repoint_times " +
                                                         "FROM robophot_tasks WHERE status < 2 order by time_start ASC";
         // public static NpgsqlConnection Con;
-        private static readonly object Loc = new();
+        private static readonly object DbLoc = new();
 
 
         
@@ -42,7 +42,7 @@ namespace RPCC.Tasks
         {
             try
             {
-                lock (Loc)  
+                lock (DbLoc)  
                 {
                     var connString =
                         $"Server={RoboPhotServer};Port={Port};User Id={UserId};Password={Password}; Database={Database};";
@@ -66,25 +66,54 @@ namespace RPCC.Tasks
 
         public static void LoadDbTable()
         {
-            lock (Loc)
+            
+            // lock (Loc)
+            // {
+            //     using var con = ConnectToDb();
+            //     var com = new NpgsqlCommand(QueryForLoadDbTable, con);
+            //     using var reader = com.ExecuteReader();
+            //     if (!reader.HasRows) return;
+            //     var dt = new DataTable();
+            //     dt.Load(reader);
+            //     Tasker.DataGridViewTasker.Invoke((MethodInvoker)delegate
+            //     {
+            //         Tasker.DataGridViewTasker.DataSource = dt;
+            //         Tasker.PaintTable();
+            //     });
+            // }
+            DataTable dt;
+
+            // DB work is serialized by Loc, but UI updates must not happen under this lock:
+            // otherwise UI-thread can be waiting for Loc while this thread is waiting for UI via Invoke => deadlock.
+            lock (DbLoc)
             {
                 using var con = ConnectToDb();
                 var com = new NpgsqlCommand(QueryForLoadDbTable, con);
                 using var reader = com.ExecuteReader();
                 if (!reader.HasRows) return;
-                var dt = new DataTable();
+
+                dt = new DataTable();
                 dt.Load(reader);
-                Tasker.DataGridViewTasker.Invoke((MethodInvoker)delegate
-                {
-                    Tasker.DataGridViewTasker.DataSource = dt;
-                    Tasker.PaintTable();
-                });
             }
+
+            void Apply()
+            {
+                // Defensive: during shutdown the control can be disposed.
+                if (Tasker.DataGridViewTasker.IsDisposed) return;
+                Tasker.DataGridViewTasker.DataSource = dt;
+                Tasker.PaintTable();
+            }
+
+            // Prefer BeginInvoke to avoid blocking the caller thread and reduce risk of secondary deadlocks.
+            if (Tasker.DataGridViewTasker.InvokeRequired)
+                Tasker.DataGridViewTasker.BeginInvoke((MethodInvoker)Apply);
+            else
+                Apply();
         }
 
         public static DataTable GetTableForThinking()
         {
-            lock (Loc)
+            lock (DbLoc)
             {
                 using var con = ConnectToDb();
                 var com = new NpgsqlCommand(QueryGetTableForThinking, con);
@@ -100,7 +129,7 @@ namespace RPCC.Tasks
                 
         public static void UpdateTaskFromDb(ref ObservationTask observationTask)   
         {
-            lock (Loc)
+            lock (DbLoc)
             {
                 var query = "SELECT task_id, get_hms_dms(start_coord2000) as coord2000, " +
                             "time_add, time_start, time_end, " +
@@ -144,7 +173,7 @@ namespace RPCC.Tasks
         {
             try
             {
-                lock (Loc)
+                lock (DbLoc)
                 {
                     var query = "INSERT INTO robophot_tasks " +
                                     "(start_coord2000, " +
@@ -212,7 +241,7 @@ namespace RPCC.Tasks
         {   
             try
             {
-                lock (Loc)
+                lock (DbLoc)
                 {
                     var sus = TaskQueryBuilder(observationTask);
                     var query = "UPDATE robophot_tasks " +
@@ -244,7 +273,7 @@ namespace RPCC.Tasks
         {       
             try
             {
-                lock (Loc)
+                lock (DbLoc)
                 {
                     var query = "INSERT INTO robophot_frames (fk_task_id, " +
                                 "frame_path, coord2000, frame_filter, " +
@@ -268,7 +297,7 @@ namespace RPCC.Tasks
 
         public static bool AddMFrameToBd(ObservationTask observationTask)
         {
-            lock (Loc)
+            lock (DbLoc)
             {
                 try
                 {
@@ -297,7 +326,7 @@ namespace RPCC.Tasks
 
         public static bool CanDoDarkFlat(bool isDark, int exp)
         {
-            lock (Loc)
+            lock (DbLoc)
             {
                 double time = 0;
                 var query = "SELECT EXTRACT(EPOCH FROM (NOW() - time_start)::INTERVAL)/3600 " +
@@ -318,7 +347,7 @@ namespace RPCC.Tasks
         public static string GetPath2FirstAssFrame(int task)
         {
             string path = null;
-            lock (Loc)
+            lock (DbLoc)
             {
                 var query = "SELECT robophot_frames.calibration_frame_path " +
                             $"FROM robophot_frames WHERE fk_task_id = {task} AND is_do_astrometry " +
