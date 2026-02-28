@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Threading;
 using System.Windows.Forms;
 using RPCC.Cams;
 using RPCC.Focus;
@@ -55,8 +56,10 @@ namespace RPCC.Utils
                 // проверяем и сохраняем
                 if (LogBox.Items.Count >= 1024)
                 {
-                    // делаем асинхронно, чтобы не блокировать UI
-                    Task.Run(SaveLogs);
+                    // IMPORTANT: snapshot must be taken on UI thread (LogBox is a WinForms control).
+                    // Writing to disk can be done in background using this snapshot.
+                    var snapshot = LogBox.Items.Cast<string>().ToArray();
+                    Task.Run(() => SaveLogs(snapshot));
                     LogBox.Items.Clear();
                     LogBox.Items.Insert(0, $"{DateTime.UtcNow:G} Logs have been saved and cleaned");
                 }
@@ -79,7 +82,23 @@ namespace RPCC.Utils
         internal static void SaveLogs()
         {
             if (LogBox == null) return;
-            var logs = LogBox.Items.Cast<string>().ToArray();
+            // Keep API for callers, but do UI-safe snapshotting.
+            string[] snapshot = null;
+
+            void TakeSnapshot()
+            {
+                snapshot = LogBox.Items.Cast<string>().ToArray();
+            }
+
+            if (LogBox.InvokeRequired) LogBox.Invoke((Action)TakeSnapshot);
+            else TakeSnapshot();
+
+            SaveLogs(snapshot);
+        }
+
+        private static void SaveLogs(string[] logs)
+        {
+            if (logs == null || logs.Length == 0) return;
             var dir = Path.Combine(Settings.MainOutputFolder, "LOGS", "RPCC_LOGS");
             Directory.CreateDirectory(dir);
             var file = Path.Combine(dir, $"Logs {DateTime.UtcNow:yyyy-MM-ddTHH-mm-ss}.txt");
