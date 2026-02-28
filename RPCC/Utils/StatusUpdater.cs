@@ -157,8 +157,10 @@ public static class StatusUpdater
         {
             // Ensure reads complete even if the process exited quickly.
             Task.WaitAll(new Task[] { stdoutTask, stderrTask }, 2000);
-            if (stdoutTask.IsCompletedSuccessfully) output = stdoutTask.Result;
-            if (stderrTask.IsCompletedSuccessfully) error = stderrTask.Result;
+            if (stdoutTask.Status == TaskStatus.RanToCompletion)
+                output = stdoutTask.Result;
+            if (stderrTask.Status == TaskStatus.RanToCompletion)
+                error = stderrTask.Result;
         }
         catch
         {

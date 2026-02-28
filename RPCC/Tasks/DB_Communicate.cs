@@ -40,27 +40,6 @@ public static class DbCommunicate
 
     public static void LoadDbTable()
     {
-        // lock (Loc)
-        // {   
-        //      const string queryForLoadDbTable = "SELECT task_id, get_hms_dms(start_coord2000) as coord2000, " +
-        //                                         "time_add, time_start, time_end, " +
-        //                                         "duration, exp_time, done_frames, all_frames, time_last_exp, " +
-        //                                         "is_filter_g, is_filter_r, is_filter_i, object_name, object_type, " +
-        //                                         "status, observer, frame_type, x_bin, y_bin, " +
-        //                                         "repoint_coords, repoint_times, is_filter_v " + 
-        //                                         "FROM robophot_tasks ORDER BY time_start DESC LIMIT 50";
-        //     using var con = ConnectToDb();
-        //     var com = new NpgsqlCommand(queryForLoadDbTable, con);
-        //     using var reader = com.ExecuteReader();
-        //     if (!reader.HasRows) return;
-        //     var dt = new DataTable();
-        //     dt.Load(reader);
-        //     Tasker.DataGridViewTasker.Invoke((MethodInvoker)delegate
-        //     {
-        //         Tasker.DataGridViewTasker.DataSource = dt;
-        //         Tasker.PaintTable();
-        //     });
-        // }
         
         DataTable dt;
 
