@@ -29,6 +29,9 @@ namespace RPCC.Focus
         private const int NoReplyLimit = 3;      // после N таймаутов считаем, что связи нет
         private const int IoFailLimit = 2;       // после N I/O ошибок сразу в дисконнект
         private const int ReconnectIntervalMs = 2000;
+        
+        private const int SerialReadTimeoutMs = 500;
+        private const int SerialWriteTimeoutMs = 500;
 
         static SerialFocus()
         {
@@ -84,7 +87,9 @@ namespace RPCC.Focus
                         return;
                 }
 
-                // ReadLine с NewLine = "\0" оставляем (как у тебя), но ошибки не глотаем молча
+                // ReadLine с NewLine = "\0"; с таймаутом он не должен висеть вечно
+                // (настройки таймаута выставляются до открытия порта в Init/Open_Port).
+                if (!SerialPort.IsOpen) return;
                 indata = SerialPort.ReadLine();
 
                 lock (Sync)
@@ -255,6 +260,7 @@ namespace RPCC.Focus
                     SerialPort.ReadTimeout = 500;
                     SerialPort.NewLine = "\0";
                     SerialPort.ReceivedBytesThreshold = 6;
+                    SerialPort.WriteTimeout = SerialWriteTimeoutMs;
 
                     if (!SerialPort.IsOpen)
                         SerialPort.Open();
@@ -368,7 +374,14 @@ namespace RPCC.Focus
 
                 // события порта
                 SerialPort.DataReceived += SerialPort_DataReceived;
-
+                // Важно: выставить таймауты/параметры чтения ДО открытия порта.
+                // Иначе DataReceived может сработать сразу после Open(), а ReadLine() окажется без таймаута.
+                SerialPort.ReadTimeout = SerialReadTimeoutMs;
+                SerialPort.WriteTimeout = SerialWriteTimeoutMs;
+                SerialPort.NewLine = "\0";
+                SerialPort.ReceivedBytesThreshold = 6;
+                
+                
                 Open_Port();
 
                 if (!_connected)
