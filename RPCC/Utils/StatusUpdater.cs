@@ -12,16 +12,25 @@ public static class StatusUpdater
     // private static readonly string StatusPath = Path.Combine(Settings.MainOutputFolder, "status", "status.json");
     private const string GlobalMutexName = "Global\\RoboPhotStatusFileLock";
     private static int _previewRunning = 0;
+    private const int MutexWaitTimeoutMs = 2000;
+    private const int PreviewProcessTimeoutMs = 20000;
     /// <summary>
     /// Обновляет значение по вложенному пути, например ["dome", "south_shutter", "position"]
     /// </summary>
     public static void UpdateNestedField(string[] path, JToken value)
     {
         using var mutex = new Mutex(false, GlobalMutexName);
+        var hasMutex = false;
         try
         {
-            mutex.WaitOne();
-
+            // mutex.WaitOne();
+            hasMutex = mutex.WaitOne(MutexWaitTimeoutMs);
+            if (!hasMutex)
+            {
+                Logger.AddLogEntry($"[StatusUpdater] Mutex timeout ({MutexWaitTimeoutMs} ms). Пропущено обновление JSON.");
+                return;
+            }
+            
             var root = JsonHelper.LoadJsonSafely(StatusPath);
             if (root == null)
             {
@@ -51,7 +60,11 @@ public static class StatusUpdater
         }
         finally
         {
-            mutex.ReleaseMutex();
+            // mutex.ReleaseMutex();
+            if (hasMutex)
+            {
+                try { mutex.ReleaseMutex(); } catch { /* ignore */ }
+            }
         }
     }
 
@@ -101,16 +114,61 @@ public static class StatusUpdater
             CreateNoWindow = true
         };
         
-        using (var process = Process.Start(psi))
-        {
-            string output = process.StandardOutput.ReadToEnd();
-            string error = process.StandardError.ReadToEnd();
-            process.WaitForExit();
+        // using (var process = Process.Start(psi))
+        // {
+        //     string output = process.StandardOutput.ReadToEnd();
+        //     string error = process.StandardError.ReadToEnd();
+        //     process.WaitForExit();
+        //
+        //     // (опционально) логировать
+        //     Console.WriteLine(output);
+        //     Console.Error.WriteLine(error);
+        // }
         
-            // (опционально) логировать
-            Console.WriteLine(output);
-            Console.Error.WriteLine(error);
+        using var process = Process.Start(psi);
+        if (process == null)
+        {
+            Logger.AddLogEntry("[StatusUpdater] Preview generator: Process.Start returned null.");
+            return;
         }
+
+        // Read stdout/stderr concurrently; avoid pipe deadlocks.
+        Task<string> stdoutTask = process.StandardOutput.ReadToEndAsync();
+        Task<string> stderrTask = process.StandardError.ReadToEndAsync();
+
+        // Enforce an upper bound on how long we wait.
+        var exited = process.WaitForExit(PreviewProcessTimeoutMs);
+        if (!exited)
+        {
+            try
+            {
+                Logger.AddLogEntry($"[StatusUpdater] Preview generator timeout ({PreviewProcessTimeoutMs} ms). Killing process.");
+                process.Kill();
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLogEntry($"[StatusUpdater] Preview generator Kill() failed: {ex.Message}");
+            }
+        }
+
+        string output = "";
+        string error = "";
+        try
+        {
+            // Ensure reads complete even if the process exited quickly.
+            Task.WaitAll(new Task[] { stdoutTask, stderrTask }, 2000);
+            if (stdoutTask.IsCompletedSuccessfully) output = stdoutTask.Result;
+            if (stderrTask.IsCompletedSuccessfully) error = stderrTask.Result;
+        }
+        catch
+        {
+            // ignore read aggregation issues; process may have been killed mid-stream
+        }
+
+        if (!string.IsNullOrWhiteSpace(output))
+            Logger.AddDebugLogEntry($"[StatusUpdater] Preview generator stdout:\n{output}");
+        if (!string.IsNullOrWhiteSpace(error))
+            Logger.AddLogEntry($"[StatusUpdater] Preview generator stderr:\n{error}");
         Logger.AddDebugLogEntry("Web previews updated");
     }
 }
