@@ -3,10 +3,12 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using RPCC.Tasks;
 using RPCC.Utils;
+using Timer = System.Timers.Timer;
 
 namespace RPCC.Comms
 {
@@ -20,6 +22,15 @@ namespace RPCC.Comms
         private static NetworkStream _stream;
         private static StreamReader _streamReader;
         private static StreamWriter _streamWriter;
+        
+        // StreamReader/Writer are not thread-safe; serialize all IO through this gate.
+        private static readonly SemaphoreSlim IoGate = new(1, 1);
+
+        // Prevent overlapping timer ticks (System.Timers.Timer can re-enter).
+        private static int _meteoTickRunning = 0;
+
+        // Avoid infinite blocking on network IO.
+        private const int IoTimeoutMs = 3000;
 
         /**
          * Valid messages:
@@ -39,16 +50,20 @@ namespace RPCC.Comms
         static WeatherSocket()
         {
             MeteoTimer = new Timer(1000);
-            MeteoTimer.Elapsed += OnMeteoTimedEventAsync;
+            // MeteoTimer.Elapsed += OnMeteoTimedEventAsync;
+            MeteoTimer.AutoReset = false; // restart manually to avoid re-entrancy
+            MeteoTimer.Elapsed += OnMeteoTimedEvent;
+            
             IsConnected = false;
         }
 
-        internal static async void Connect()
+        // internal static async void Connect()
+        internal static async Task<bool> ConnectAsync()
         {
             if (IsConnected)
             {
                 Logger.AddLogEntry("WARNING Already connected to MeteoDome");
-                return;
+                return true;
             }
 
             _client = new TcpClient();
@@ -59,20 +74,24 @@ namespace RPCC.Comms
                 if (_client.Connected)
                 {
                     _stream = _client.GetStream();
+                    
+                    _stream.ReadTimeout = IoTimeoutMs;
+                    _stream.WriteTimeout = IoTimeoutMs;
                     _streamReader = new StreamReader(_stream, Encoding.UTF8);
                     _streamWriter = new StreamWriter(_stream, Encoding.UTF8);
                     _streamWriter.AutoFlush = true;
                     IsConnected = true;
-
-                    GetFullData();
-                    // GetFullDataAsync();
+                    
+                    await GetFullDataAsync().ConfigureAwait(false);
                     MeteoTimer.Start();
 
                     Logger.AddLogEntry($"Connected to MeteoDome {_endPoint}");
+                    return true;
                 }
                 else
                 {
                     MeteoTimer.Stop();
+                    return false;
                 }
             }
             catch (Exception ex) when (ex is SocketException || ex is IOException)
@@ -80,6 +99,7 @@ namespace RPCC.Comms
                 // In case of bugs check "catch" block in Disconnect() function
                 MeteoTimer.Stop();
                 Logger.AddLogEntry($"WARNING Unable to connect to MeteoDome: {ex.Message}");
+                return false;
             }
         }
 
@@ -93,16 +113,26 @@ namespace RPCC.Comms
 
             try
             {
-                MeteoTimer.Stop();
-                MeteoTimer.Close();
-
-                _streamWriter.Close();
-                _streamReader.Close();
-                _stream.Close();
-                _client.Close();
+                // MeteoTimer.Stop();
+                // MeteoTimer.Close();
+                
+                // Mark disconnected first to prevent new IO.
+                IsConnected = false;
+                try { MeteoTimer.Stop(); } catch { /* ignore */ }
+                
+                // _streamWriter.Close();
+                // _streamReader.Close();
+                // _stream.Close();
+                // _client.Close();
+                
+                // Closing the underlying socket/stream should unblock any pending ReadLine().
+                try { _streamWriter?.Close(); } catch { /* ignore */ }
+                try { _streamReader?.Close(); } catch { /* ignore */ }
+                try { _stream?.Close(); } catch { /* ignore */ }
+                try { _client?.Close(); } catch { /* ignore */ }
 
                 Logger.AddLogEntry("Disconnected from MeteoDome");
-                IsConnected = false;
+                // IsConnected = false;
             }
             catch (Exception ex) when (ex is SocketException || ex is IOException)
             {
@@ -124,9 +154,20 @@ namespace RPCC.Comms
 
             try
             {
-                await _streamWriter.WriteLineAsync(request);
-                var response = await _streamReader.ReadLineAsync();
-                return response;
+                // await _streamWriter.WriteLineAsync(request);
+                // var response = await _streamReader.ReadLineAsync();
+                // return response;
+                
+                await IoGate.WaitAsync().ConfigureAwait(false);
+                try
+                {
+                    await _streamWriter.WriteLineAsync(request).ConfigureAwait(false);
+                    return await _streamReader.ReadLineAsync().ConfigureAwait(false);
+                }
+                finally
+                {
+                    IoGate.Release();
+                }
             }
             catch (Exception ex) when (ex is SocketException || ex is IOException)
             {
@@ -141,9 +182,10 @@ namespace RPCC.Comms
             }
         }
 
-        internal static async void GetFullDataAsync()
+        internal static async Task GetFullDataAsync()
         {
-            var response = "";
+            // var response = "";
+            string response;
             try
             {
                 response = await ExchangeMessagesAsync("full");
@@ -169,6 +211,7 @@ namespace RPCC.Comms
             }
         }
 
+        // Keep sync API for existing callers, but make it serialized too.
         internal static string ExchangeMessages(string request)
         {
             if (!IsConnected)
@@ -179,9 +222,20 @@ namespace RPCC.Comms
 
             try
             {
-                _streamWriter.WriteLine(request);
-                var response = _streamReader.ReadLine();
-                return response;
+                // _streamWriter.WriteLine(request);
+                // var response = _streamReader.ReadLine();
+                // return response;
+                
+                IoGate.Wait();
+                try
+                {
+                    _streamWriter.WriteLine(request);
+                    return _streamReader.ReadLine();
+                }
+                finally
+                {
+                    IoGate.Release();
+                }
             }
             catch (Exception ex) when (ex is SocketException || ex is IOException)
             {
@@ -208,13 +262,33 @@ namespace RPCC.Comms
             }
         }
 
-        private static void OnMeteoTimedEventAsync(object sender, ElapsedEventArgs e)
+        private static void OnMeteoTimedEvent(object sender, ElapsedEventArgs e)
         {
-            if (!IsConnected)
-                MeteoTimer.Stop();
-            else
-                GetFullData();
-                // GetFullDataAsync();
+            // if (!IsConnected)
+            //     MeteoTimer.Stop();
+            // else
+            //     GetFullData();
+            //     // GetFullDataAsync();
+            
+            // AutoReset=false: restart manually.
+            if (Interlocked.Exchange(ref _meteoTickRunning, 1) == 1)
+            {
+                if (IsConnected) MeteoTimer.Start();
+                return;
+            }
+
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    if (IsConnected) await GetFullDataAsync().ConfigureAwait(false);
+                }
+                finally
+                {
+                    Interlocked.Exchange(ref _meteoTickRunning, 0);
+                    if (IsConnected) MeteoTimer.Start();
+                }
+            });
         }
     }
 

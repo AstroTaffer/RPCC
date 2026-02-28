@@ -41,7 +41,7 @@ public partial class MainForm : Form
         // CameraControl.resetUi = ResetCamsUi;
             
         // MeteoDome connect
-        WeatherSocket.Connect();
+        _ = WeatherSocket.ConnectAsync();
 
         // SiTechExe connect
         SiTechExeSocket.Connect();
@@ -162,7 +162,7 @@ public partial class MainForm : Form
     private void ReconnectMeteoDomeToolStripMenuItem_Click(object sender, EventArgs e)
     {
         if (WeatherSocket.IsConnected) WeatherSocket.Disconnect();
-        WeatherSocket.Connect();
+        _ = WeatherSocket.ConnectAsync();
     }
 
     private void ReconnectDonutsToolStripMenuItem_Click(object sender, EventArgs e)
