@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Timers;
 using Newtonsoft.Json.Linq;
@@ -24,6 +25,8 @@ public partial class MainForm : Form
     public static bool IsTaskFormOpen;
     private bool _uiUpdating;
     private bool _focusUpdating;
+    private volatile bool _isShuttingDown;
+    
     #region General
     [Obsolete("Obsolete")]
     public MainForm()
@@ -88,24 +91,45 @@ public partial class MainForm : Form
         NpgsqlConnection.GlobalTypeMapper.MapComposite<Spoint>("public.spoint");
     }
 
-    private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+    private async void MainForm_FormClosing(object sender, FormClosingEventArgs e)
     {
-        Logger.SaveLogs();
-        timerUi.Stop();
-            
-        WeatherSocket.Disconnect();
-        // DonutsSocket.Disconnect();
-        SiTechExeSocket.Disconnect();
+        if (_isShuttingDown) return;
 
-        CameraControl.DisconnectCameras();
+        _isShuttingDown = true;
+        e.Cancel = true;
 
-        SerialFocus.Close_Port();
-        CameraFocus.DeFocus = 0;
-        CameraFocus.IsZenith = false;
-        labelFocusPos.Dispose();
-        FocusTimer.Dispose();
+        Logger.AddLogEntry("MainForm: shutdown started");
+
+        await Task.Run(() => Shutdown());
+
+        Logger.AddLogEntry("MainForm: shutdown finished");
+
+        BeginInvoke(new Action(() =>
+        {
+            _isShuttingDown = false;
+            Close();
+        }));
     }
 
+    private void Shutdown()
+    {
+        try
+        {
+            timerUi.Stop();
+
+            WeatherSocket.Disconnect();
+            SiTechExeSocket.Disconnect();
+            CameraControl.DisconnectCameras();
+            SerialFocus.Close_Port();
+
+            Logger.SaveLogs();
+        }
+        catch (Exception ex)
+        {
+            Logger.AddLogEntry($"ERROR during shutdown: {ex}");
+        }
+    }
+    
     private void TimerUiUpdate(object sender, EventArgs e)
     {
         if (_uiUpdating)
