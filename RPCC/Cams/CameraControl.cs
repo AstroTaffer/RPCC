@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -20,9 +21,18 @@ internal static class CameraControl
 {
     private static readonly object CamsLocker = new();
 
+    // Active background jobs started by camera pipeline.
+    // We do not try to abort them forcibly; we stop launching new ones and wait bounded time on shutdown.
+    private static readonly ConcurrentDictionary<int, Task> ActiveCameraTasks = new();
+    private static int _cameraTaskId;
+
+    // 0 = normal work, 1 = shutdown/disconnect in progress
+    private static int _shutdownRequested;
+    
     private static readonly Timer CamsTimer = new(1000);
     private const int CameraIoWaitTimeoutMs = 60000;
     private const int CameraBitmapWaitTimeoutMs = 30000;
+    private const int CameraShutdownWaitTimeoutMs = 10000;
     // private static readonly List<Task> ReadyImagesProcessList = [];
     internal static List<ICameraDevice> cams = [];
 
@@ -36,10 +46,51 @@ internal static class CameraControl
 
     #region Connect & Disconnect
 
+    private static bool IsShutdownRequested => Volatile.Read(ref _shutdownRequested) == 1;
+
+    private static Task RunTrackedCameraTask(string name, Action action)
+    {
+        if (IsShutdownRequested)
+        {
+            Logger.AddDebugLogEntry($"CameraControl: skip task '{name}' because shutdown is requested");
+            return Task.CompletedTask;
+        }
+
+        var id = Interlocked.Increment(ref _cameraTaskId);
+
+        var task = Task.Run(() =>
+        {
+            try
+            {
+                if (IsShutdownRequested)
+                    return;
+
+                Logger.AddDebugLogEntry($"CameraControl: task START [{id}] {name}");
+                action();
+                Logger.AddDebugLogEntry($"CameraControl: task END   [{id}] {name}");
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLogEntry($"CameraControl: task FAIL  [{id}] {name}: {ex}");
+                throw;
+            }
+            finally
+            {
+                ActiveCameraTasks.TryRemove(id, out _);
+            }
+        });
+
+        if (!ActiveCameraTasks.TryAdd(id, task))
+            Logger.AddLogEntry($"CameraControl: failed to register active task [{id}] {name}");
+
+        return task;
+    }
+
+    
     internal static bool ReconnectCameras()
     {
         var isAllGood = true;
-
+        Interlocked.Exchange(ref _shutdownRequested, 0);
         if (isConnected) isAllGood = DisconnectCameras();
 
         lock (CamsLocker)
@@ -174,19 +225,69 @@ internal static class CameraControl
 
     internal static bool DisconnectCameras()
     {
+        // Stop launching any new work as early as possible.
+        Interlocked.Exchange(ref _shutdownRequested, 1);
         var isAllGood = true;
-
-        lock (CamsLocker)
+        
+        try
         {
             CamsTimer.Stop();
             CamsTimer.Elapsed -= CamsTimerTickAlt;
+        }
+        catch
+        {
+            // ignore
+        }
+
+        Task[] activeTasks;
+        try
+        {
+            activeTasks = ActiveCameraTasks.Values.ToArray();
+        }
+        catch
+        {
+            activeTasks = Array.Empty<Task>();
+        }
+        
+        if (activeTasks.Length > 0)
+        {
+            Logger.AddLogEntry($"CameraControl: waiting for {activeTasks.Length} active camera task(s) before shutdown");
+            try
+            {
+                if (!Task.WaitAll(activeTasks, CameraShutdownWaitTimeoutMs))
+                {
+                    Logger.AddLogEntry(
+                        $"CameraControl: shutdown wait timeout after {CameraShutdownWaitTimeoutMs} ms; " +
+                        $"some camera task(s) are still running in background");
+                }
+            }
+            catch (AggregateException ex)
+            {
+                Logger.AddLogEntry($"CameraControl: active camera task failed during shutdown: {ex.Flatten()}");
+            }
+        }
+        
+        // One more pass: catch tasks that were registered right around shutdown.
+        try
+        {
+            activeTasks = ActiveCameraTasks.Values.ToArray();
+            if (activeTasks.Length > 0)
+                Task.WaitAll(activeTasks, CameraShutdownWaitTimeoutMs);
+        }
+        catch
+        {
+            // ignore
+        }
+        
+        lock (CamsLocker)
+        {
             isConnected = false;
             foreach (var cam in cams)
                 isAllGood &= cam.Close();
 
             cams = [];
         }
-
+        Logger.AddLogEntry("CameraControl: cameras disconnected");
         return isAllGood;
     }
 
@@ -199,6 +300,9 @@ internal static class CameraControl
     private static void CamsTimerTickAlt(object sender, ElapsedEventArgs e)
     {
         CamsTimer.Stop();
+        
+        if (IsShutdownRequested)
+            return;
         
         // Prevent overlapping ticks (System.Timers.Timer can re-enter if handler runs long).
         if (Interlocked.Exchange(ref _camsTickRunning, 1) == 1)
@@ -220,6 +324,8 @@ internal static class CameraControl
             // 1) Under lock: update statuses, decide what to do, and mutate shared state quickly.
             lock (CamsLocker)
             {
+                if (IsShutdownRequested)
+                    return;
                 GetCamsStatusAlt();
 
                 if (cams.Count <= 0)
@@ -254,7 +360,13 @@ internal static class CameraControl
                                 // Image ready: mark state under lock, heavy work outside lock.
                                 cam.IsExposing = false;
                                 callbackRequired = true;
-                                processTasks.Add(Task.Run(() => ProcessCapturedImage(cam)));
+                                // processTasks.Add(Task.Run(() => ProcessCapturedImage(cam)));
+                                
+                                var filter = cam.Filter;
+                                processTasks.Add(
+                                    RunTrackedCameraTask(
+                                        $"ProcessCapturedImage[{filter}]",
+                                        () => ProcessCapturedImage(cam)));
                             }
                             break;
                         }
@@ -279,6 +391,8 @@ internal static class CameraControl
             // 2) Heavy IO/CPU outside the camera lock.
             if (processTasks.Count > 0)
             {
+                if (IsShutdownRequested)
+                    return;
                 if (!Task.WaitAll(processTasks.ToArray(), CameraIoWaitTimeoutMs))
                 {
                     Logger.AddLogEntry($"CameraControl: ProcessCapturedImage timeout after {CameraIoWaitTimeoutMs} ms. Skipping callbacks this tick.");
@@ -289,6 +403,8 @@ internal static class CameraControl
             // 3) Callback + preview generation can touch other subsystems; never do it under CamsLocker.
             if (callbackRequired && readyCamNum == camsCountSnapshot)
             {
+                if (IsShutdownRequested)
+                    return;
                 // StatusUpdater.RunPreviewGenerator();
                 StatusUpdater.RunPreviewGeneratorAsync();
                 if (CameraFocus.IsFocusing) CameraFocus.CamFocusCallback();
@@ -299,10 +415,17 @@ internal static class CameraControl
                 {
                     for (var i = cams.Count - 1; i >= 0; i--)
                     {
+                        if (IsShutdownRequested)
+                            return;
                         var cam = cams[i];
                         if (!string.IsNullOrEmpty(cam.LatestImageFilename))
                         {
-                            bitmapTasks.Add(Task.Run(() => ConstructBitmap(cam)));
+                            // bitmapTasks.Add(Task.Run(() => ConstructBitmap(cam)));
+                            var filter = cam.Filter;
+                            bitmapTasks.Add(
+                                RunTrackedCameraTask(
+                                    $"ConstructBitmap[{filter}]",
+                                    () => ConstructBitmap(cam)));
                         }
                         else
                         {
@@ -314,6 +437,8 @@ internal static class CameraControl
 
                 if (bitmapTasks.Count > 0)
                 {
+                    if (IsShutdownRequested)
+                        return;
                     if (!Task.WaitAll(bitmapTasks.ToArray(), CameraBitmapWaitTimeoutMs))
                     {
                         Logger.AddLogEntry($"CameraControl: ConstructBitmap timeout after {CameraBitmapWaitTimeoutMs} ms. UI previews may be stale.");
@@ -325,7 +450,8 @@ internal static class CameraControl
         finally
         {
             Interlocked.Exchange(ref _camsTickRunning, 0);
-            if (isConnected) CamsTimer.Start();
+            // if (isConnected) CamsTimer.Start();
+            if (isConnected && !IsShutdownRequested) CamsTimer.Start();
         }
     }
 
