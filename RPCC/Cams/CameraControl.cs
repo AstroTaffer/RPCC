@@ -283,8 +283,21 @@ internal static class CameraControl
         {
             isConnected = false;
             foreach (var cam in cams)
-                isAllGood &= cam.Close();
-
+            {
+                // isAllGood &= cam.Close();
+                try
+                {
+                    Logger.AddLogEntry($"CameraControl: cam.Close START {cam.Filter}");
+                    var res = cam.Close();
+                    Logger.AddLogEntry($"CameraControl: cam.Close END {cam.Filter}");
+                    isAllGood &= res;
+                }
+                catch (Exception ex)
+                {
+                    Logger.AddLogEntry($"CameraControl: cam.Close FAIL {cam.Filter}: {ex}");
+                    isAllGood = false;
+                }
+            }
             cams = [];
         }
         Logger.AddLogEntry("CameraControl: cameras disconnected");
@@ -508,27 +521,42 @@ internal static class CameraControl
 
     private static void ProcessCapturedImage(ICameraDevice cam)
     {
+        Logger.AddDebugLogEntry($"ProcessCapturedImage START cam={cam.Filter}");
+        
         var latestImage = ReadImage(cam);
         if (latestImage is null)
         {
             cam.LatestImageData = null;
             cam.LatestImageFilename = null;
+            Logger.AddDebugLogEntry($"ProcessCapturedImage END cam={cam.Filter} (no image)");
             return;
         }
         cam.LatestImageData = latestImage.Data;
+        Logger.AddDebugLogEntry($"SaveFitsFile START cam={cam.Filter}");
+
         latestImage.SaveFitsFile(cam);
+        Logger.AddDebugLogEntry($"SaveFitsFile END cam={cam.Filter}");
+        Logger.AddDebugLogEntry($"ProcessCapturedImage END cam={cam.Filter}");
     }
 
     private static RpccFits ReadImage(ICameraDevice cam)
     {
-        Logger.AddDebugLogEntry($"Start read image from {cam.Filter}");
+        Logger.AddDebugLogEntry($"GetRpccFits START cam={cam.Filter}");
 
         var imageFits = cam.GetRpccFits();
+        
+        Logger.AddDebugLogEntry($"GetRpccFits END cam={cam.Filter}");
         if (imageFits is null)
         {
             Logger.AddLogEntry($"ERROR while read image, return null and close cam {cam.Filter}");
             cam.Close();
-            cams.Remove(cam);
+            // cams.Remove(cam);
+            lock (CamsLocker)
+            {
+                cams.Remove(cam);
+            }
+
+            
             return null;
         }
         Logger.AddDebugLogEntry($"End reading image from {cam.Filter}");
