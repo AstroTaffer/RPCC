@@ -26,6 +26,7 @@ public partial class MainForm : Form
     private bool _uiUpdating;
     private bool _focusUpdating;
     private volatile bool _isShuttingDown;
+    private bool _forceClose;
     
     #region General
     [Obsolete("Obsolete")]
@@ -93,22 +94,52 @@ public partial class MainForm : Form
 
     private async void MainForm_FormClosing(object sender, FormClosingEventArgs e)
     {
-        if (_isShuttingDown) return;
+        if (_forceClose)
+            return;
+
+        if (_isShuttingDown)
+        {
+            e.Cancel = true;
+            return;
+        }
 
         _isShuttingDown = true;
         e.Cancel = true;
 
-        Logger.AddLogEntry("MainForm: shutdown started");
+        Logger.AddLogEntry("MainForm: shutdown requested");
 
-        await Task.Run(() => Shutdown());
-
-        Logger.AddLogEntry("MainForm: shutdown finished");
-
-        BeginInvoke(new Action(() =>
+        Task.Run(() =>
         {
-            _isShuttingDown = false;
-            Close();
-        }));
+            try
+            {
+                Logger.SaveLogs();
+
+                timerUi?.Stop();
+
+                try { WeatherSocket.Disconnect(); }
+                catch (Exception ex) { Logger.AddLogEntry($"WeatherSocket disconnect error: {ex}"); }
+
+                try { SiTechExeSocket.Disconnect(); }
+                catch (Exception ex) { Logger.AddLogEntry($"SiTech disconnect error: {ex}"); }
+
+                try { CameraControl.DisconnectCameras(); }
+                catch (Exception ex) { Logger.AddLogEntry($"Camera disconnect error: {ex}"); }
+
+                try { SerialFocus.Close_Port(); }
+                catch (Exception ex) { Logger.AddLogEntry($"SerialFocus close error: {ex}"); }
+
+                Logger.SaveLogs();
+            }
+            finally
+            {
+                BeginInvoke(new Action(() =>
+                {
+                    _forceClose = true;
+                    Close();
+                }));
+            }
+        });
+
     }
 
     private void Shutdown()
