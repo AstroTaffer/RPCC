@@ -292,6 +292,21 @@ namespace RPCC.Cams
         /// tracks what the minimum row size that must be passed to accept TDI data
         /// </summary>
         int VisibleWidth = int.MinValue;
+        
+        private int EnsureVisibleWidth()
+        {
+            if (int.MinValue == VisibleWidth)
+            {
+                int ul_x, ul_y, lr_x, lr_y;
+                GetVisibleArea(out ul_x, out ul_y, out lr_x, out lr_y);
+                VisibleWidth = lr_x - ul_x;
+            }
+
+            if (VisibleWidth <= 0)
+                throw new InvalidOperationException("VisibleWidth was not initialized correctly.");
+
+            return VisibleWidth;
+        }
 
         #endregion
 
@@ -641,11 +656,20 @@ namespace RPCC.Cams
         public void GrabRow(byte[] buff)
         {
             GCHandle BuffGch = GCHandle.Alloc(buff, GCHandleType.Pinned);
+            
+            int visibleWidth = EnsureVisibleWidth();
+
+            if (buff.Length < visibleWidth)
+                throw new ArgumentException("buff too small for visible area: " + visibleWidth);
+
+            
             IntPtr BuffPtr = BuffGch.AddrOfPinnedObject();
 
             try
             {
-                int status = FLIGrabRow(dev, BuffPtr, buff.Length);
+                // int status = FLIGrabRow(dev, BuffPtr, buff.Length);
+                
+                int status = FLIGrabRow(dev, BuffPtr, visibleWidth);
                 if (0 != status)
                     throw new Win32Exception(-status);
             }
@@ -663,12 +687,20 @@ namespace RPCC.Cams
         public void GrabRow(byte[,] buff, int row)
         {
             GCHandle BuffGch = GCHandle.Alloc(buff, GCHandleType.Pinned);
+            
+            int visibleWidth = EnsureVisibleWidth();
+            if (buff.GetLength(1) < visibleWidth)
+                throw new ArgumentException("buff row too small for visible area: " + visibleWidth);
+
+            
             IntPtr BuffPtr = BuffGch.AddrOfPinnedObject();
             int rowwidth = buff.GetLength(1) * sizeof(byte);
 
             try
             {
-                int status = FLIGrabRow(dev, BuffPtr + (row * rowwidth), buff.GetLength(1));
+                // int status = FLIGrabRow(dev, BuffPtr + (row * rowwidth), buff.GetLength(1));
+                int status = FLIGrabRow(dev, BuffPtr + (row * rowwidth), visibleWidth);
+                
                 if (0 != status)
                     throw new Win32Exception(-status);
             }
@@ -685,27 +717,34 @@ namespace RPCC.Cams
         public void GrabRow(ushort[] buff)
         {
             GCHandle BuffGch = GCHandle.Alloc(buff, GCHandleType.Pinned);
+            
+            int visibleWidth = EnsureVisibleWidth();
+            if (buff.Length < visibleWidth)
+                throw new ArgumentException("buff too small for visible area: " + visibleWidth);
+
+            
             IntPtr BuffPtr = BuffGch.AddrOfPinnedObject();
 
-            //
-            // Ensure buff is large enough to accept the row without corrupting memory
-            // 
-            // first make sure we've initialized the size constraint
-            if (int.MinValue == this.VisibleWidth)
-            {
-                int ul_x, ul_y, lr_x, lr_y;
-                GetVisibleArea(out ul_x, out ul_y, out lr_x, out lr_y);
-                VisibleWidth = lr_x - ul_x;
-            }
-            if (buff.Length < VisibleWidth)
-                throw new ArgumentException("buff too small for visible area: " + VisibleWidth);
+            // //
+            // // Ensure buff is large enough to accept the row without corrupting memory
+            // // 
+            // // first make sure we've initialized the size constraint
+            // if (int.MinValue == this.VisibleWidth)
+            // {
+            //     int ul_x, ul_y, lr_x, lr_y;
+            //     GetVisibleArea(out ul_x, out ul_y, out lr_x, out lr_y);
+            //     VisibleWidth = lr_x - ul_x;
+            // }
+            // if (buff.Length < VisibleWidth)
+            //     throw new ArgumentException("buff too small for visible area: " + VisibleWidth);
 
             try
             {
                 //
                 // Download the row from the camera!
                 //
-                int status = FLIGrabRow(dev, BuffPtr, buff.Length);
+                // int status = FLIGrabRow(dev, BuffPtr, buff.Length);
+                int status = FLIGrabRow(dev, BuffPtr, visibleWidth);
                 // check whether FLI says the operation succeeded or not
                 if (0 != status)
                     throw new Win32Exception(-status);
@@ -724,12 +763,20 @@ namespace RPCC.Cams
         public void GrabRow(ushort[,] buff, int row)
         {
             GCHandle BuffGch = GCHandle.Alloc(buff, GCHandleType.Pinned);
+            
+            int visibleWidth = EnsureVisibleWidth();
+            if (buff.GetLength(1) < visibleWidth)
+                throw new ArgumentException("buff row too small for visible area: " + visibleWidth);
+
+            
             IntPtr BuffPtr = BuffGch.AddrOfPinnedObject();
             int rowwidth = buff.GetLength(1) * sizeof(ushort);
 
             try
             {
-                int status = FLIGrabRow(dev, BuffPtr + (row * rowwidth), buff.GetLength(1));
+                // int status = FLIGrabRow(dev, BuffPtr + (row * rowwidth), buff.GetLength(1));
+                
+                int status = FLIGrabRow(dev, BuffPtr + (row * rowwidth), visibleWidth);
                 // check whether FLI says the operation succeeded or not
                 if (0 != status)
                     throw new Win32Exception(-status);
