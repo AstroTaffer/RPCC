@@ -84,27 +84,19 @@ internal class FliCameraDevice : ICameraDevice
         {
             ExecuteWithDeviceLock("grab frame", () =>
             {
-                _cam.GrabFrame(buff);
+                for (var i = 0; i < imageHeight; i++)
+                {
+                    _cam.GrabRow(buff, i);
+
+                    if (i == 0 || i % 100 == 0 || i == imageHeight - 1)
+                        Logger.AddDebugLogEntry($"GrabRow cam={Filter} row={i}/{imageHeight - 1}");
+                }
             });
         }
         catch (Exception e)
         {
-            Logger.AddError("grab frame", e, this);
-            // return null;
-            try
-            {
-                Thread.Sleep(100);
-                ExecuteWithDeviceLock("grab frame retry", () =>
-                {
-                    _cam.GrabFrame(buff);
-                });
-                Logger.AddDebugLogEntry($"grab frame retry success: {Filter}");
-            }
-            catch (Exception e2)
-            {
-                Logger.AddError("grab frame retry", e2, this);
-                return null;
-            }
+            Logger.AddError("grab rows", e, this);
+            return null;
         }
         return new RpccFits{Data = buff};
     }
@@ -231,34 +223,47 @@ internal class FliCameraDevice : ICameraDevice
                         RemTime = _cam.GetExposureStatus() / 1000;
                 });
                 
-                // FLI status is a bit mask, not a single enum value.
-                if ((deviceStatus & Fli.STATUS.CAMERA_STATUS_EXPOSING) != 0)
+                var rawStatus = (int)_cam.GetDeviceStatus();
+                Logger.AddDebugLogEntry($"FLI raw status: 0x{rawStatus:X}");
+
+                var baseStatus = rawStatus & 0x03;
+                var hasReadyBit = (rawStatus & unchecked((int)0x80000000)) != 0;
+
+                // читать можно только когда младшие биты == IDLE и при этом стоит ready-bit
+                var canReadFrame = baseStatus == 0x00 && hasReadyBit;
+
+                switch (baseStatus)
                 {
-                    Status = StringHolder.Exposing;
-                    IsExposing = false;
-                }
-                else if ((deviceStatus & Fli.STATUS.CAMERA_STATUS_READING_CCD) != 0)
-                {
-                    Status = StringHolder.Exposing;
-                    IsExposing = false;
-                }
-                else if ((deviceStatus & Fli.STATUS.CAMERA_DATA_READY) != 0)
-                {
-                    Status = StringHolder.Idle;
-                    IsExposing = true;
-                    RemTime = 0;
-                }
-                else if ((deviceStatus & Fli.STATUS.CAMERA_STATUS_IDLE) != 0)
-                {
-                    Status = StringHolder.Idle;
-                    IsExposing = false;
-                    RemTime = 0;
-                }
-                else
-                {
-                    Status = StringHolder.Error;
-                    IsExposing = false;
-                    Logger.AddLogEntry($"Unknown FLI camera status: {deviceStatus} ({Filter})");
+                    case 0x00: // IDLE
+                        Status = StringHolder.Idle;
+                        IsExposing = canReadFrame;
+                        RemTime = 0;
+                        break;
+
+                    case 0x01: // WAITING_FOR_TRIGGER
+                        Status = StringHolder.Wft;
+                        IsExposing = false;
+                        RemTime = 0;
+                        break;
+
+                    case 0x02: // EXPOSING
+                        Status = StringHolder.Exposing;
+                        IsExposing = false;
+                        RemTime = _cam.GetExposureStatus() / 1000;
+                        break;
+
+                    case 0x03: // READING_CCD
+                        Status = StringHolder.Reading;
+                        IsExposing = false;
+                        RemTime = 0;
+                        break;
+
+                    default:
+                        Status = StringHolder.Unknown;
+                        IsExposing = false;
+                        RemTime = 0;
+                        Logger.AddLogEntry($"Unknown FLI raw status: 0x{rawStatus:X} ({Filter})");
+                        break;
                 }
             }
             catch (Exception e)

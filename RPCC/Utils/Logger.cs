@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Threading;
 using System.Windows.Forms;
 using RPCC.Cams;
 using RPCC.Focus;

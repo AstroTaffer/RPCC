@@ -158,6 +158,7 @@ public partial class MainForm : Form
         catch (Exception ex)
         {
             Logger.AddLogEntry($"ERROR during shutdown: {ex}");
+            Logger.SaveLogs();
         }
     }
     
