@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Threading;
 using RPCC.Tasks;
 using RPCC.Utils;
 
@@ -78,6 +79,7 @@ internal class FliCameraDevice : ICameraDevice
         var imageWidth = ImageArea[2] - ImageArea[0];
         var imageHeight = ImageArea[3] - ImageArea[1];
         var buff = new ushort[imageHeight, imageWidth];
+        
         try
         {
             ExecuteWithDeviceLock("grab frame", () =>
@@ -88,7 +90,21 @@ internal class FliCameraDevice : ICameraDevice
         catch (Exception e)
         {
             Logger.AddError("grab frame", e, this);
-            return null;
+            // return null;
+            try
+            {
+                Thread.Sleep(100);
+                ExecuteWithDeviceLock("grab frame retry", () =>
+                {
+                    _cam.GrabFrame(buff);
+                });
+                Logger.AddDebugLogEntry($"grab frame retry success: {Filter}");
+            }
+            catch (Exception e2)
+            {
+                Logger.AddError("grab frame retry", e2, this);
+                return null;
+            }
         }
         return new RpccFits{Data = buff};
     }
@@ -217,44 +233,59 @@ internal class FliCameraDevice : ICameraDevice
                 
                 switch (deviceStatus)
                 {
-                    // 0x00 = FLI_CAMERA_STATUS_IDLE
+                    // // 0x00 = FLI_CAMERA_STATUS_IDLE
+                    // case Fli.STATUS.CAMERA_DATA_READY:
+                    // case Fli.STATUS.CAMERA_STATUS_IDLE:
+                    //     Status = StringHolder.Idle;
+                    // Data are ready and can be read safely
                     case Fli.STATUS.CAMERA_DATA_READY:
-                    case Fli.STATUS.CAMERA_STATUS_IDLE:
                         Status = StringHolder.Idle;
+                        IsExposing = true;
+                        RemTime = 0;
                         break;
                     // 0x01 = FLI_CAMERA_STATUS_WAITING_FOR_TRIGGER
                     case Fli.STATUS.CAMERA_STATUS_WAITING_FOR_TRIGGER:
                         Status = StringHolder.Wft;
                         break;
                     // 0x02 = FLI_CAMERA_STATUS_EXPOSING
+                    // Exposure still in progress
                     case Fli.STATUS.CAMERA_STATUS_EXPOSING:
                         Status = StringHolder.Exposing;
-                        // int buff;
-                        // errorStatus += NativeMethods.FLIGetExposureStatus(Handle, out buff);
-                        // RemTime = _cam.GetExposureStatus() / 1000;
-                        
+                        IsExposing = false;                        
                         break;
                     // 0x03 = FLI_CAMERA_STATUS_READING_CCD
+                    // Camera is still shifting/reading CCD, frame is NOT ready yet
                     case Fli.STATUS.CAMERA_STATUS_READING_CCD:
-                        Status = StringHolder.Reading;
+                        Status = StringHolder.Exposing;
+                        IsExposing = false;
                         break;
-                    case Fli.STATUS.CAMERA_STATUS_UNKNOWN:
-                    case Fli.STATUS.FOCUSER_STATUS_HOMING:
-                    case Fli.STATUS.FOCUSER_STATUS_MOVING_MASK:
-                    case Fli.STATUS.FOCUSER_STATUS_HOME:
-                    case Fli.STATUS.FOCUSER_STATUS_LIMIT:
-                    case Fli.STATUS.FOCUSER_STATUS_LEGACY:
-                    case Fli.STATUS.FILTER_WHEEL_PHYSICAL:
-                    case Fli.STATUS.FILTER_WHEEL_RIGHT:
-                    case Fli.STATUS.FILTER_POSITION_UNKNOWN:
-                    case Fli.STATUS.FILTER_POSITION_CURRENT:
-                    case Fli.STATUS.FILTER_STATUS_HOME_SUCCEEDED:
-                        Status = StringHolder.Unknown;
+                    
+                    // Idle means no active exposure, but it does NOT guarantee a frame is ready
+                    case Fli.STATUS.CAMERA_STATUS_IDLE:
+                        Status = StringHolder.Idle;
+                        IsExposing = false;
+                        RemTime = 0;
                         break;
-                    // default:
-                    //     // Logger.AddLogEntry($"WARNING Unknown status {deviceStatus}");
+                        
+                    // case Fli.STATUS.CAMERA_STATUS_UNKNOWN:
+                    // case Fli.STATUS.FOCUSER_STATUS_HOMING:
+                    // case Fli.STATUS.FOCUSER_STATUS_MOVING_MASK:
+                    // case Fli.STATUS.FOCUSER_STATUS_HOME:
+                    // case Fli.STATUS.FOCUSER_STATUS_LIMIT:
+                    // case Fli.STATUS.FOCUSER_STATUS_LEGACY:
+                    // case Fli.STATUS.FILTER_WHEEL_PHYSICAL:
+                    // case Fli.STATUS.FILTER_WHEEL_RIGHT:
+                    // case Fli.STATUS.FILTER_POSITION_UNKNOWN:
+                    // case Fli.STATUS.FILTER_POSITION_CURRENT:
+                    // case Fli.STATUS.FILTER_STATUS_HOME_SUCCEEDED:
                     //     Status = StringHolder.Unknown;
                     //     break;
+                    default:
+                        // Logger.AddLogEntry($"WARNING Unknown status {deviceStatus}");
+                        Status = StringHolder.Error;
+                        IsExposing = false;
+                        Logger.AddLogEntry($"Unknown FLI camera status: {deviceStatus} ({Filter})");
+                        break;
                 }
             }
             catch (Exception e)
