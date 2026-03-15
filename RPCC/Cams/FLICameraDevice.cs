@@ -227,65 +227,38 @@ internal class FliCameraDevice : ICameraDevice
                     BaseTemp = _cam.ReadTemperature(Fli.CHANNEL.BASE);
                     CoolerPwr = _cam.GetCoolerPower();
                     deviceStatus = _cam.GetDeviceStatus();
-                    if (deviceStatus == Fli.STATUS.CAMERA_STATUS_EXPOSING)
+                    if ((deviceStatus & Fli.STATUS.CAMERA_STATUS_EXPOSING) != 0)
                         RemTime = _cam.GetExposureStatus() / 1000;
                 });
                 
-                switch (deviceStatus)
+                // FLI status is a bit mask, not a single enum value.
+                if ((deviceStatus & Fli.STATUS.CAMERA_STATUS_EXPOSING) != 0)
                 {
-                    // // 0x00 = FLI_CAMERA_STATUS_IDLE
-                    // case Fli.STATUS.CAMERA_DATA_READY:
-                    // case Fli.STATUS.CAMERA_STATUS_IDLE:
-                    //     Status = StringHolder.Idle;
-                    // Data are ready and can be read safely
-                    case Fli.STATUS.CAMERA_DATA_READY:
-                        Status = StringHolder.Idle;
-                        IsExposing = true;
-                        RemTime = 0;
-                        break;
-                    // 0x01 = FLI_CAMERA_STATUS_WAITING_FOR_TRIGGER
-                    case Fli.STATUS.CAMERA_STATUS_WAITING_FOR_TRIGGER:
-                        Status = StringHolder.Wft;
-                        break;
-                    // 0x02 = FLI_CAMERA_STATUS_EXPOSING
-                    // Exposure still in progress
-                    case Fli.STATUS.CAMERA_STATUS_EXPOSING:
-                        Status = StringHolder.Exposing;
-                        IsExposing = false;                        
-                        break;
-                    // 0x03 = FLI_CAMERA_STATUS_READING_CCD
-                    // Camera is still shifting/reading CCD, frame is NOT ready yet
-                    case Fli.STATUS.CAMERA_STATUS_READING_CCD:
-                        Status = StringHolder.Exposing;
-                        IsExposing = false;
-                        break;
-                    
-                    // Idle means no active exposure, but it does NOT guarantee a frame is ready
-                    case Fli.STATUS.CAMERA_STATUS_IDLE:
-                        Status = StringHolder.Idle;
-                        IsExposing = false;
-                        RemTime = 0;
-                        break;
-                        
-                    // case Fli.STATUS.CAMERA_STATUS_UNKNOWN:
-                    // case Fli.STATUS.FOCUSER_STATUS_HOMING:
-                    // case Fli.STATUS.FOCUSER_STATUS_MOVING_MASK:
-                    // case Fli.STATUS.FOCUSER_STATUS_HOME:
-                    // case Fli.STATUS.FOCUSER_STATUS_LIMIT:
-                    // case Fli.STATUS.FOCUSER_STATUS_LEGACY:
-                    // case Fli.STATUS.FILTER_WHEEL_PHYSICAL:
-                    // case Fli.STATUS.FILTER_WHEEL_RIGHT:
-                    // case Fli.STATUS.FILTER_POSITION_UNKNOWN:
-                    // case Fli.STATUS.FILTER_POSITION_CURRENT:
-                    // case Fli.STATUS.FILTER_STATUS_HOME_SUCCEEDED:
-                    //     Status = StringHolder.Unknown;
-                    //     break;
-                    default:
-                        // Logger.AddLogEntry($"WARNING Unknown status {deviceStatus}");
-                        Status = StringHolder.Error;
-                        IsExposing = false;
-                        Logger.AddLogEntry($"Unknown FLI camera status: {deviceStatus} ({Filter})");
-                        break;
+                    Status = StringHolder.Exposing;
+                    IsExposing = false;
+                }
+                else if ((deviceStatus & Fli.STATUS.CAMERA_STATUS_READING_CCD) != 0)
+                {
+                    Status = StringHolder.Exposing;
+                    IsExposing = false;
+                }
+                else if ((deviceStatus & Fli.STATUS.CAMERA_DATA_READY) != 0)
+                {
+                    Status = StringHolder.Idle;
+                    IsExposing = true;
+                    RemTime = 0;
+                }
+                else if ((deviceStatus & Fli.STATUS.CAMERA_STATUS_IDLE) != 0)
+                {
+                    Status = StringHolder.Idle;
+                    IsExposing = false;
+                    RemTime = 0;
+                }
+                else
+                {
+                    Status = StringHolder.Error;
+                    IsExposing = false;
+                    Logger.AddLogEntry($"Unknown FLI camera status: {deviceStatus} ({Filter})");
                 }
             }
             catch (Exception e)
