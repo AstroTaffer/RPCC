@@ -13,9 +13,6 @@ namespace RPCC.Cams
 {
     internal class Fli : IDisposable
     {   
-        
-        // libfli thread-safety is unclear in practice; serialize all native calls globally.
-        private static readonly object LibFliGlobalSync = new();
         //
         #region Constants
         //RPCC/Cams/dll/libfli.dll
@@ -295,6 +292,21 @@ namespace RPCC.Cams
         /// tracks what the minimum row size that must be passed to accept TDI data
         /// </summary>
         int VisibleWidth = int.MinValue;
+        
+        private int EnsureVisibleWidth()
+        {
+            if (int.MinValue == VisibleWidth)
+            {
+                int ul_x, ul_y, lr_x, lr_y;
+                GetVisibleArea(out ul_x, out ul_y, out lr_x, out lr_y);
+                VisibleWidth = lr_x - ul_x;
+            }
+
+            if (VisibleWidth <= 0)
+                throw new InvalidOperationException("VisibleWidth was not initialized correctly.");
+
+            return VisibleWidth;
+        }
 
         #endregion
 
@@ -433,12 +445,9 @@ namespace RPCC.Cams
         private static extern int FLIOpen(out IntPtr dev, string name, DOMAIN domain);
         public Fli(string name, DOMAIN domain)
         {
-            lock (LibFliGlobalSync)
-            {
-                int status = FLIOpen(out dev, name, domain);
-                if (0 != status)
-                    throw new Win32Exception(-status);
-            }
+            int status = FLIOpen(out dev, name, domain);
+            if (0 != status)
+                throw new Win32Exception(-status);
         }
 
         [DllImport(DllPath)]
@@ -449,12 +458,9 @@ namespace RPCC.Cams
             if ((IntPtr)INVALID_DEVICE == dev)
                 return;
 
-            lock (LibFliGlobalSync)
-            {
-                int status = FLIClose(dev);
-                if (0 != status)
-                    throw new Win32Exception(-status);
-            }
+            int status = FLIClose(dev);
+            if (0 != status)
+                throw new Win32Exception(-status);
             // "null" out the handle
             dev = (IntPtr)INVALID_DEVICE;
         }
@@ -499,12 +505,9 @@ namespace RPCC.Cams
         private static extern int FLIGetPixelSize(IntPtr dev, out double pixel_x, out double pixel_y);
         public void GetPixelSize(out double pixel_x, out double pixel_y)
         {
-            lock (LibFliGlobalSync)
-            {
-                int status = FLIGetPixelSize(dev, out pixel_x, out pixel_y);
-                if (0 != status)
-                    throw new Win32Exception(-status);
-            }
+            int status = FLIGetPixelSize(dev, out pixel_x, out pixel_y);
+            if (0 != status)
+                throw new Win32Exception(-status);
         }
 
         [DllImport(DllPath)]
@@ -569,48 +572,36 @@ namespace RPCC.Cams
         private static extern int FLISetHBin(IntPtr dev, int hbin);
         public void SetHBin(int hbin)
         {
-            lock (LibFliGlobalSync)
-            {
-                int status = FLISetHBin(dev, hbin);
-                if (0 != status)
-                    throw new Win32Exception(-status);
-            }
+            int status = FLISetHBin(dev, hbin);
+            if (0 != status)
+                throw new Win32Exception(-status);
         }
 
         [DllImport(DllPath)]
         private static extern int FLISetVBin(IntPtr dev, int vbin);
         public void SetVBin(int vbin)
         {
-            lock (LibFliGlobalSync)
-            {
-                int status = FLISetVBin(dev, vbin);
-                if (0 != status)
-                    throw new Win32Exception(-status);
-            }
+            int status = FLISetVBin(dev, vbin);
+            if (0 != status)
+                throw new Win32Exception(-status);
         }
 
         [DllImport(DllPath)]
         private static extern int FLISetFrameType(IntPtr dev, FRAME_TYPE frametype);
         public void SetFrameType(FRAME_TYPE frametype)
         {
-            lock (LibFliGlobalSync)
-            {
-                int status = FLISetFrameType(dev, frametype);
-                if (0 != status)
-                    throw new Win32Exception(-status);
-            }
+            int status = FLISetFrameType(dev, frametype);
+            if (0 != status)
+                throw new Win32Exception(-status);
         }
 
         [DllImport(DllPath)]
         private static extern int FLICancelExposure(IntPtr dev);
         public void CancelExposure()
         {
-            lock (LibFliGlobalSync)
-            {
-                int status = FLICancelExposure(dev);
-                if (0 != status)
-                    throw new Win32Exception(-status);
-            }
+            int status = FLICancelExposure(dev);
+            if (0 != status)
+                throw new Win32Exception(-status);
         }
 
         [DllImport(DllPath)]
@@ -618,25 +609,19 @@ namespace RPCC.Cams
         public int GetExposureStatus()
         {
             int timeleft;
-            lock (LibFliGlobalSync)
-            {
-                int status = FLIGetExposureStatus(dev, out timeleft);
-                if (0 != status)
-                    throw new Win32Exception(-status);
-                return timeleft;
-            }
+            int status = FLIGetExposureStatus(dev, out timeleft);
+            if (0 != status)
+                throw new Win32Exception(-status);
+            return timeleft;
         }
 
         [DllImport(DllPath)]
         private static extern int FLISetTemperature(IntPtr dev, double temperature);
         public void SetTemperature(double temperature)
         {
-            lock (LibFliGlobalSync)
-            {
-                int status = FLISetTemperature(dev, temperature);
-                if (0 != status)
-                    throw new Win32Exception(-status);
-            }
+            int status = FLISetTemperature(dev, temperature);
+            if (0 != status)
+                throw new Win32Exception(-status);
         }
 
         [DllImport(DllPath)]
@@ -644,13 +629,10 @@ namespace RPCC.Cams
         public double GetTemperature()
         {
             double temperature;
-            lock (LibFliGlobalSync)
-            {
-                int status = FLIGetTemperature(dev, out temperature);
-                if (0 != status)
-                    throw new Win32Exception(-status);
-                return temperature;
-            }
+            int status = FLIGetTemperature(dev, out temperature);
+            if (0 != status)
+                throw new Win32Exception(-status);
+            return temperature;
         }
 
         [DllImport(DllPath)]
@@ -658,13 +640,10 @@ namespace RPCC.Cams
         public double GetCoolerPower()
         {
             double power;
-            lock (LibFliGlobalSync)
-            {
-                int status = FLIGetCoolerPower(dev, out power);
-                if (0 != status)
-                    throw new Win32Exception(-status);
-                return power;
-            }
+            int status = FLIGetCoolerPower(dev, out power);
+            if (0 != status)
+                throw new Win32Exception(-status);
+            return power;
         }
 
         [DllImport(DllPath)]
@@ -677,16 +656,22 @@ namespace RPCC.Cams
         public void GrabRow(byte[] buff)
         {
             GCHandle BuffGch = GCHandle.Alloc(buff, GCHandleType.Pinned);
+            
+            int visibleWidth = EnsureVisibleWidth();
+
+            if (buff.Length < visibleWidth)
+                throw new ArgumentException("buff too small for visible area: " + visibleWidth);
+
+            
             IntPtr BuffPtr = BuffGch.AddrOfPinnedObject();
 
             try
             {
-                lock (LibFliGlobalSync)
-                {
-                    int status = FLIGrabRow(dev, BuffPtr, buff.Length);
-                    if (0 != status)
-                        throw new Win32Exception(-status);
-                }
+                // int status = FLIGrabRow(dev, BuffPtr, buff.Length);
+                
+                int status = FLIGrabRow(dev, BuffPtr, visibleWidth);
+                if (0 != status)
+                    throw new Win32Exception(-status);
             }
             finally
             {
@@ -702,17 +687,22 @@ namespace RPCC.Cams
         public void GrabRow(byte[,] buff, int row)
         {
             GCHandle BuffGch = GCHandle.Alloc(buff, GCHandleType.Pinned);
+            
+            int visibleWidth = EnsureVisibleWidth();
+            if (buff.GetLength(1) < visibleWidth)
+                throw new ArgumentException("buff row too small for visible area: " + visibleWidth);
+
+            
             IntPtr BuffPtr = BuffGch.AddrOfPinnedObject();
             int rowwidth = buff.GetLength(1) * sizeof(byte);
 
             try
             {
-                lock (LibFliGlobalSync)
-                {
-                    int status = FLIGrabRow(dev, BuffPtr + (row * rowwidth), buff.GetLength(1));
-                    if (0 != status)
-                        throw new Win32Exception(-status);
-                }
+                // int status = FLIGrabRow(dev, BuffPtr + (row * rowwidth), buff.GetLength(1));
+                int status = FLIGrabRow(dev, BuffPtr + (row * rowwidth), visibleWidth);
+                
+                if (0 != status)
+                    throw new Win32Exception(-status);
             }
             finally
             {
@@ -727,27 +717,34 @@ namespace RPCC.Cams
         public void GrabRow(ushort[] buff)
         {
             GCHandle BuffGch = GCHandle.Alloc(buff, GCHandleType.Pinned);
+            
+            int visibleWidth = EnsureVisibleWidth();
+            if (buff.Length < visibleWidth)
+                throw new ArgumentException("buff too small for visible area: " + visibleWidth);
+
+            
             IntPtr BuffPtr = BuffGch.AddrOfPinnedObject();
 
-            //
-            // Ensure buff is large enough to accept the row without corrupting memory
-            // 
-            // first make sure we've initialized the size constraint
-            if (int.MinValue == this.VisibleWidth)
-            {
-                int ul_x, ul_y, lr_x, lr_y;
-                GetVisibleArea(out ul_x, out ul_y, out lr_x, out lr_y);
-                VisibleWidth = lr_x - ul_x;
-            }
-            if (buff.Length < VisibleWidth)
-                throw new ArgumentException("buff too small for visible area: " + VisibleWidth);
+            // //
+            // // Ensure buff is large enough to accept the row without corrupting memory
+            // // 
+            // // first make sure we've initialized the size constraint
+            // if (int.MinValue == this.VisibleWidth)
+            // {
+            //     int ul_x, ul_y, lr_x, lr_y;
+            //     GetVisibleArea(out ul_x, out ul_y, out lr_x, out lr_y);
+            //     VisibleWidth = lr_x - ul_x;
+            // }
+            // if (buff.Length < VisibleWidth)
+            //     throw new ArgumentException("buff too small for visible area: " + VisibleWidth);
 
             try
             {
                 //
                 // Download the row from the camera!
                 //
-                int status = FLIGrabRow(dev, BuffPtr, buff.Length);
+                // int status = FLIGrabRow(dev, BuffPtr, buff.Length);
+                int status = FLIGrabRow(dev, BuffPtr, visibleWidth);
                 // check whether FLI says the operation succeeded or not
                 if (0 != status)
                     throw new Win32Exception(-status);
@@ -766,18 +763,23 @@ namespace RPCC.Cams
         public void GrabRow(ushort[,] buff, int row)
         {
             GCHandle BuffGch = GCHandle.Alloc(buff, GCHandleType.Pinned);
+            
+            int visibleWidth = EnsureVisibleWidth();
+            if (buff.GetLength(1) < visibleWidth)
+                throw new ArgumentException("buff row too small for visible area: " + visibleWidth);
+
+            
             IntPtr BuffPtr = BuffGch.AddrOfPinnedObject();
             int rowwidth = buff.GetLength(1) * sizeof(ushort);
 
             try
             {
-                lock (LibFliGlobalSync)
-                {
-                    int status = FLIGrabRow(dev, BuffPtr + (row * rowwidth), buff.GetLength(1));
-                    // check whether FLI says the operation succeeded or not
-                    if (0 != status)
-                        throw new Win32Exception(-status);
-                }
+                // int status = FLIGrabRow(dev, BuffPtr + (row * rowwidth), buff.GetLength(1));
+                
+                int status = FLIGrabRow(dev, BuffPtr + (row * rowwidth), visibleWidth);
+                // check whether FLI says the operation succeeded or not
+                if (0 != status)
+                    throw new Win32Exception(-status);
             }
             finally
             {
@@ -789,12 +791,9 @@ namespace RPCC.Cams
         private static extern int FLIExposeFrame(IntPtr dev);
         public void ExposeFrame()
         {
-            lock (LibFliGlobalSync)
-            {
-                int status = FLIExposeFrame(dev);
-                if (0 != status)
-                    throw new Win32Exception(-status);
-            }
+            int status = FLIExposeFrame(dev);
+            if (0 != status)
+                throw new Win32Exception(-status);
         }
 
         [DllImport(DllPath)]
@@ -810,24 +809,18 @@ namespace RPCC.Cams
         private static extern int FLISetNFlushes(IntPtr dev, int nflushes);
         public void SetNFlushes(int nflushes)
         {
-            lock (LibFliGlobalSync)
-            {
-                int status = FLISetNFlushes(dev, nflushes);
-                if (0 != status)
-                    throw new Win32Exception(-status);
-            }
+            int status = FLISetNFlushes(dev, nflushes);
+            if (0 != status)
+                throw new Win32Exception(-status);
         }
 
         [DllImport(DllPath)]
         private static extern int FLISetBitDepth(IntPtr dev, BIT_DEPTH bitdepth);
         public void SetBitDepth(BIT_DEPTH bitdepth)
         {
-            lock (LibFliGlobalSync)
-            {
-                int status = FLISetBitDepth(dev, bitdepth);
-                if (0 != status)
-                    throw new Win32Exception(-status);
-            }
+            int status = FLISetBitDepth(dev, bitdepth);
+            if (0 != status)
+                throw new Win32Exception(-status);
         }
 
         [DllImport(DllPath)]
@@ -890,12 +883,9 @@ namespace RPCC.Cams
         private static extern int FLIControlBackgroundFlush(IntPtr dev, BGFLUSH bgflush);
         public void ControlBackgroundFlush(BGFLUSH bgflush)
         {
-            lock (LibFliGlobalSync)
-            {
-                int status = FLIControlBackgroundFlush(dev, bgflush);
-                if (0 != status)
-                    throw new Win32Exception(-status);
-            }
+            int status = FLIControlBackgroundFlush(dev, bgflush);
+            if (0 != status)
+                throw new Win32Exception(-status);
         }
 
         [DllImport(DllPath)]
@@ -1025,13 +1015,10 @@ namespace RPCC.Cams
         public double ReadTemperature(CHANNEL channel)
         {
             double temperature;
-            lock (LibFliGlobalSync)
-            {
-                int status = FLIReadTemperature(dev, channel, out temperature);
-                if (0 != status)
-                    throw new Win32Exception(-status);
-                return temperature;
-            }
+            int status = FLIReadTemperature(dev, channel, out temperature);
+            if (0 != status)
+                throw new Win32Exception(-status);
+            return temperature;
         }
 
         [DllImport(DllPath)]
@@ -1081,13 +1068,10 @@ namespace RPCC.Cams
         public STATUS GetDeviceStatus()
         {
             int status;
-            lock (LibFliGlobalSync)
-            {
-                int Status = FLIGetDeviceStatus(dev, out status);
-                if (0 != Status)
-                    throw new Win32Exception(-Status);
-                return (STATUS)status;
-            }
+            int Status = FLIGetDeviceStatus(dev, out status);
+            if (0 != Status)
+                throw new Win32Exception(-Status);
+            return (STATUS)status;
         }
 
         /// <summary>
@@ -1150,12 +1134,9 @@ namespace RPCC.Cams
         private static extern int FLISetCameraMode(IntPtr dev, int mode_index);
         public void SetCameraMode(int mode_index)
         {
-            lock (LibFliGlobalSync)
-            {
-                int status = FLISetCameraMode(dev, mode_index);
-                if (0 != status)
-                    throw new Win32Exception(-status);
-            }
+            int status = FLISetCameraMode(dev, mode_index);
+            if (0 != status)
+                throw new Win32Exception(-status);
         }
 
         [DllImport(DllPath)]
@@ -1279,13 +1260,10 @@ namespace RPCC.Cams
         public string GetSerialString()
         {
             StringBuilder sb = new StringBuilder(MAX_STRING_LEN);
-            lock (LibFliGlobalSync)
-            {
-                int status = FLIGetSerialString(dev, sb, sb.MaxCapacity);
-                if (0 != status)
-                    throw new Win32Exception(-status);
-                return sb.ToString();
-            }
+            int status = FLIGetSerialString(dev, sb, sb.MaxCapacity);
+            if (0 != status)
+                throw new Win32Exception(-status);
+            return sb.ToString();
         }
 
         [DllImport(DllPath)]
